@@ -337,56 +337,62 @@ async function loadProfile() {
 }
 
 window.saveProfile = async function () {
-  const saveBtn = document.getElementById("saveBtn");
-  const loader = document.getElementById("loader");
-  const saveMessage = document.getElementById("saveMessage");
+  try {
+    const saveBtn = document.getElementById("saveBtn");
+    const loader = document.getElementById("loader");
+    const saveMessage = document.getElementById("saveMessage");
 
-  saveBtn.disabled = true;
-  loader.style.display = "block";
+    saveBtn.disabled = true;
+    loader.style.display = "block";
 
-  const name = document.getElementById("name").value;
-  const age = document.getElementById("age").value;
-  const bio = document.getElementById("bio").value;
-  const school = document.getElementById("school").value;
-  const program = document.getElementById("program").value;
+    const name = document.getElementById("name").value;
+    const age = document.getElementById("age").value;
+    const bio = document.getElementById("bio").value;
+    const school = document.getElementById("school").value;
+    const program = document.getElementById("program").value;
 
-  const snapshot = await get(ref(db, "users/" + currentUser.uid));
-  const existingData = snapshot.exists() ? snapshot.val() : {};
-  let pictures = existingData.pictures || [];
+    const snapshot = await get(ref(db, "users/" + currentUser.uid));
+    const existingData = snapshot.exists() ? snapshot.val() : {};
+    let pictures = existingData.pictures || [];
 
-  // Loop through 3 profile pictures
-  for (let i = 0; i < 3; i++) {
-    const fileInput = document.getElementById("pic" + i);
-    const file = fileInput.files[0];
+    for (let i = 0; i < 3; i++) {
+      const fileInput = document.getElementById("pic" + i);
+      const file = fileInput.files[0];
 
-    if (file) {
-      const picRef = storageRef(storage, `profilePics/${currentUser.uid}_${i}`);
-      await uploadBytes(picRef, file);
-      const downloadURL = await getDownloadURL(picRef);
-      pictures[i] = downloadURL;
+      if (file) {
+        const picRef = storageRef(storage, `profilePics/${currentUser.uid}_${i}`);
+        await uploadBytes(picRef, file);
+        const downloadURL = await getDownloadURL(picRef);
+        pictures[i] = downloadURL;
+      }
     }
+
+    await set(ref(db, "users/" + currentUser.uid), {
+      ...existingData,
+      name,
+      age,
+      bio,
+      school,
+      program,
+      pictures
+    });
+
+    loader.style.display = "none";
+    saveBtn.disabled = false;
+
+    saveMessage.style.display = "block";
+    setTimeout(() => {
+      saveMessage.style.display = "none";
+    }, 3000);
+
+    loadProfile();
+
+  } catch (error) {
+    console.error("SAVE ERROR:", error);
+    alert(error.message);
   }
+};
 
-  await set(ref(db, "users/" + currentUser.uid), {
-    ...existingData,
-    name,
-    age,
-    bio,
-    school,
-    program,
-    pictures
-  });
-
-  loader.style.display = "none";
-  saveBtn.disabled = false;
-
-  saveMessage.style.display = "block";
-  setTimeout(() => {
-    saveMessage.style.display = "none";
-  }, 3000);
-
-  loadProfile();
-}
 
 </script>
 
