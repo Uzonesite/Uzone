@@ -154,30 +154,60 @@
     const auth = getAuth(app);
 
     window.signUp = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const errorEl = document.getElementById("error");
 
-      createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          window.location.href = "Uhub.html";
-        })
-        .catch((error) => {
-          document.getElementById("error").innerText = error.message;
-        });
-    }
+  errorEl.innerText = "";
 
-    window.signIn = function () {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      window.location.href = "Uhub.html";
+    })
+    .catch((error) => {
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          errorEl.innerText = "An account with this email already exists.";
+          break;
+        case "auth/invalid-email":
+          errorEl.innerText = "Invalid email format.";
+          break;
+        case "auth/weak-password":
+          errorEl.innerText = "Password must be at least 6 characters.";
+          break;
+        default:
+          errorEl.innerText = "Unable to sign up. Please try again.";
+      }
+    });
+}
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          window.location.href = "Uhub.html";
-        })
-        .catch((error) => {
-          document.getElementById("error").innerText = error.message;
-        });
-    }
+  window.signIn = function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const errorEl = document.getElementById("error");
+
+  errorEl.innerText = "";
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      window.location.href = "Uhub.html";
+    })
+    .catch((error) => {
+      switch (error.code) {
+        case "auth/user-not-found":
+        case "auth/wrong-password":
+        case "auth/invalid-credential":
+          errorEl.innerText = "Invalid email or password.";
+          break;
+        case "auth/invalid-email":
+          errorEl.innerText = "Invalid email format.";
+          break;
+        default:
+          errorEl.innerText = "Login failed. Please try again.";
+      }
+    });
+}
+
   </script>
 
 </body>
