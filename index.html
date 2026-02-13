@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uzone</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #b00b55, #1a0010);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background: white;
+      width: 350px;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    h1 {
+      color: #b00b55;
+      margin-bottom: 10px;
+      font-weight: 700;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #b00b55;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .primary-btn {
+      background-color: #b00b55;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .primary-btn:hover {
+      background-color: #920946;
+    }
+
+    .secondary-btn {
+      background-color: #f4f4f4;
+      color: #b00b55;
+    }
+
+    .secondary-btn:hover {
+      background-color: #e8e8e8;
+    }
+
+    .toggle {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #777;
+      cursor: pointer;
+    }
+
+    .toggle span {
+      color: #b00b55;
+      font-weight: 600;
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Uzone</h1>
+    <div class="subtitle">Dating × Party Finder</div>
+
+    <div id="error" class="error"></div>
+
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+
+    <button class="primary-btn" onclick="signIn()">Sign In</button>
+    <button class="secondary-btn" onclick="signUp()">Sign Up</button>
+
+    <div class="toggle">
+      By continuing you agree to Uzone's vibe.
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+
+    window.signUp = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          window.location.href = "hub.html";
+        })
+        .catch((error) => {
+          document.getElementById("error").innerText = error.message;
+        });
+    }
+
+    window.signIn = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          window.location.href = "hub.html";
+        })
+        .catch((error) => {
+          document.getElementById("error").innerText = error.message;
+        });
+    }
+  </script>
+
+</body>
+</html>
