@@ -159,6 +159,14 @@ textarea {
   background: #3a2f10;
   color: #facc15;
 }
+
+.save-message {
+  display: none;
+  text-align: center;
+  margin-top: 10px;
+  color: #4ade80;
+  font-weight: 600;
+}
 </style>
 </head>
 
@@ -206,14 +214,16 @@ textarea {
 <div class="verify-section">
   <h3 style="margin-bottom:10px;">Student Verification</h3>
   <div id="verifyContent">
-    <label class="upload-btn" id="studentUpload">
+    <label class="upload-btn">
       Upload Student Card
       <input type="file" id="studentCard" accept="image/*">
     </label>
+    <img id="studentPreview" class="preview-img">
   </div>
 </div>
 
 <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Profile</button>
+<div class="save-message" id="saveMessage">✔ Saved</div>
 
 <div class="loader" id="loader">
   <div class="spinner"></div>
@@ -226,19 +236,19 @@ textarea {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, set, get, remove } 
+import { getDatabase, ref, set, get } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app",
-  messagingSenderId: "88783701381",
-  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+  apiKey: "YOUR_CONFIG",
+  authDomain: "YOUR_CONFIG",
+  databaseURL: "YOUR_CONFIG",
+  projectId: "YOUR_CONFIG",
+  storageBucket: "YOUR_CONFIG",
+  messagingSenderId: "YOUR_CONFIG",
+  appId: "YOUR_CONFIG"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -257,7 +267,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Live previews
+// Image previews (profile pics)
 for (let i = 0; i < 3; i++) {
   const input = document.getElementById("pic" + i);
   const preview = document.getElementById("preview" + i);
@@ -275,9 +285,25 @@ for (let i = 0; i < 3; i++) {
   });
 }
 
+// Student card preview
+const studentInput = document.getElementById("studentCard");
+const studentPreview = document.getElementById("studentPreview");
+
+studentInput.addEventListener("change", function () {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      studentPreview.src = e.target.result;
+      studentPreview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
 async function loadProfile() {
   const snapshot = await get(ref(db, "users/" + currentUser.uid));
-  const verifyContent = document.getElementById("verifyContent");
+  const verifySection = document.querySelector(".verify-section");
   const statusDiv = document.getElementById("verificationStatus");
 
   if (snapshot.exists()) {
@@ -291,7 +317,7 @@ async function loadProfile() {
 
     if (data.verified === true) {
       statusDiv.innerHTML = `<div class="verify-badge verified">✔ Verified Student</div>`;
-      verifyContent.innerHTML = "";
+      verifySection.style.display = "none";
     } else if (data.studentCard) {
       statusDiv.innerHTML = `<div class="verify-badge pending">Pending Verification</div>`;
     } else {
@@ -311,9 +337,9 @@ async function loadProfile() {
 }
 
 window.saveProfile = async function () {
-
   const saveBtn = document.getElementById("saveBtn");
   const loader = document.getElementById("loader");
+  const saveMessage = document.getElementById("saveMessage");
 
   saveBtn.disabled = true;
   loader.style.display = "block";
@@ -324,57 +350,26 @@ window.saveProfile = async function () {
   const school = document.getElementById("school").value;
   const program = document.getElementById("program").value;
 
-  let pictures = {};
-  let studentCardURL = null;
-
-  for (let i = 0; i < 3; i++) {
-    const fileInput = document.getElementById("pic" + i);
-    if (fileInput.files[0]) {
-      const file = fileInput.files[0];
-      const imgRef = storageRef(storage, "users/" + currentUser.uid + "/pic" + i);
-      await uploadBytes(imgRef, file);
-      const url = await getDownloadURL(imgRef);
-      pictures[i] = url;
-    }
-  }
-
-  const studentCardFile = document.getElementById("studentCard")?.files[0];
-
-  if (studentCardFile) {
-    const cardRef = storageRef(storage, "users/" + currentUser.uid + "/studentCard");
-    await uploadBytes(cardRef, studentCardFile);
-    studentCardURL = await getDownloadURL(cardRef);
-
-    // 🔥 ADD TO PENDING LIST
-    await set(ref(db, "pendingVerifications/" + currentUser.uid), {
-      uid: currentUser.uid,
-      name,
-      school,
-      studentCard: studentCardURL,
-      submittedAt: Date.now()
-    });
-  }
-
   const existing = await get(ref(db, "users/" + currentUser.uid));
   const existingData = existing.exists() ? existing.val() : {};
 
-  const finalPics = { ...(existingData.pictures || {}), ...pictures };
-
   await set(ref(db, "users/" + currentUser.uid), {
+    ...existingData,
     name,
     age,
     bio,
     school,
-    program,
-    pictures: finalPics,
-    studentCard: studentCardURL || existingData.studentCard || null,
-    verified: existingData.verified || false
+    program
   });
 
   loader.style.display = "none";
   saveBtn.disabled = false;
 
-  alert("Profile Saved!");
+  saveMessage.style.display = "block";
+  setTimeout(() => {
+    saveMessage.style.display = "none";
+  }, 3000);
+
   loadProfile();
 }
 </script>
