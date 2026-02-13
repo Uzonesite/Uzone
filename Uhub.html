@@ -141,63 +141,68 @@
 
   <!-- Firebase -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } 
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+  import { 
+    getDatabase, 
+    ref, 
+    get 
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    import { getDatabase, ref, get } 
-    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+    authDomain: "uzone-6148d.firebaseapp.com",
+    databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+    projectId: "uzone-6148d",
+    storageBucket: "uzone-6148d.firebasestorage.app",
+    messagingSenderId: "88783701381",
+    appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+    measurementId: "G-HKL5246YMC"
+  };
 
-    const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-      authDomain: "uzone-6148d.firebaseapp.com",
-      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-      projectId: "uzone-6148d",
-      storageBucket: "uzone-6148d.firebasestorage.app",
-      messagingSenderId: "88783701381",
-      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
-      measurementId: "G-HKL5246YMC"
-    };
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+    } else {
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
+      const snapshot = await get(ref(db, "users/" + user.uid));
 
-    onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
+      let displayName = user.email; // fallback
 
-    const snapshot = await get(ref(db, "users/" + user.uid));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
 
-    let displayName = user.email; // default fallback
-
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-
-      if (data.name && data.name.trim() !== "") {
-        displayName = data.name;
+        if (data.name && data.name.trim() !== "") {
+          displayName = data.name;
+        }
       }
+
+      document.getElementById("welcomeText").innerText =
+        "Welcome, " + displayName;
     }
+  });
 
-    document.getElementById("welcomeText").innerText =
-      "Welcome, " + displayName;
-  }
-});
+  window.logout = function () {
+    signOut(auth).then(() => {
+      window.location.href = "index.html";
+    });
+  };
 
-    window.logout = function () {
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
-    };
+  window.goTo = function (page) {
+    window.location.href = page;
+  };
+</script>
 
-    window.goTo = function (page) {
-      window.location.href = page;
-    };
-  </script>
 
 </body>
 </html>
