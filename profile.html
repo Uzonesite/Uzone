@@ -1,89 +1,161 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Uzone Profile</title>
-  <link rel="icon" type="image/png" href="logo3.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzone Profile</title>
+<link rel="icon" type="image/png" href="logo3.png">
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
 
-    body {
-      background: #0f0f14;
-      color: white;
-      padding: 30px;
-    }
+body {
+  background: #0f0f14;
+  color: white;
+  padding: 30px;
+}
 
-    .back {
-      color: #b00b55;
-      margin-bottom: 20px;
-      cursor: pointer;
-      font-weight: 600;
-    }
+.back {
+  color: #b00b55;
+  margin-bottom: 20px;
+  cursor: pointer;
+  font-weight: 600;
+}
 
-    .container {
-      max-width: 500px;
-      margin: auto;
-      background: #1b1b25;
-      padding: 30px;
-      border-radius: 20px;
-    }
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: #1b1b25;
+  padding: 30px;
+  border-radius: 20px;
+}
 
-    h2 {
-      color: #b00b55;
-      margin-bottom: 20px;
-      text-align: center;
-    }
+h2 {
+  color: #b00b55;
+  margin-bottom: 20px;
+  text-align: center;
+}
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      border: none;
-      background: #2a2a35;
-      color: white;
-    }
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: none;
+  background: #2a2a35;
+  color: white;
+}
 
-    textarea {
-      resize: none;
-      height: 80px;
-    }
+textarea {
+  resize: none;
+  height: 80px;
+}
 
-    .pictures input {
-      margin-bottom: 10px;
-    }
+.upload-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #2a2a35;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 1px solid #333;
+}
 
-    .save-btn {
-      width: 100%;
-      padding: 12px;
-      background: #b00b55;
-      border: none;
-      border-radius: 10px;
-      font-weight: 600;
-      color: white;
-      cursor: pointer;
-    }
+.upload-btn:hover {
+  border: 1px solid #b00b55;
+}
 
-    .save-btn:hover {
-      background: #920946;
-    }
+.upload-btn input {
+  display: none;
+}
 
-    .preview img {
-      width: 100%;
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
+.preview img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
 
-  </style>
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  background: #b00b55;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.save-btn:hover {
+  background: #920946;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loader {
+  display: none;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.spinner {
+  border: 3px solid #333;
+  border-top: 3px solid #b00b55;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+.verify-section {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+}
+
+.verify-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.verified {
+  background: #0f5132;
+  color: #4ade80;
+}
+
+.not-verified {
+  background: #3a1a1f;
+  color: #ff4d6d;
+}
+
+.pending {
+  background: #3a2f10;
+  color: #facc15;
+}
+</style>
 </head>
 
 <body>
@@ -91,23 +163,51 @@
 <div class="back" onclick="window.location.href='hub.html'">← Back</div>
 
 <div class="container">
-  <h2>Your Profile</h2>
+<h2>Your Profile</h2>
 
-  <input type="text" id="name" placeholder="Name">
-  <input type="number" id="age" placeholder="Age">
-  <textarea id="bio" placeholder="Bio"></textarea>
-  <input type="text" id="school" placeholder="School">
-  <input type="text" id="program" placeholder="Program">
+<div id="verificationStatus"></div>
 
-  <div class="pictures">
-    <input type="file" id="pic0" accept="image/*">
-    <input type="file" id="pic1" accept="image/*">
-    <input type="file" id="pic2" accept="image/*">
-  </div>
+<input type="text" id="name" placeholder="Name">
+<input type="number" id="age" placeholder="Age">
+<textarea id="bio" placeholder="Bio"></textarea>
+<input type="text" id="school" placeholder="School">
+<input type="text" id="program" placeholder="Program">
 
-  <div class="preview" id="preview"></div>
+<h3 style="margin-bottom:10px;">Profile Pictures</h3>
 
-  <button class="save-btn" onclick="saveProfile()">Save Profile</button>
+<label class="upload-btn">
+  Upload Picture 1
+  <input type="file" id="pic0" accept="image/*">
+</label>
+
+<label class="upload-btn">
+  Upload Picture 2
+  <input type="file" id="pic1" accept="image/*">
+</label>
+
+<label class="upload-btn">
+  Upload Picture 3
+  <input type="file" id="pic2" accept="image/*">
+</label>
+
+<div class="preview" id="preview"></div>
+
+<div class="verify-section">
+  <h3 style="margin-bottom:10px;">Student Verification</h3>
+
+  <label class="upload-btn">
+    Upload Student Card
+    <input type="file" id="studentCard" accept="image/*">
+  </label>
+</div>
+
+<button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Profile</button>
+
+<div class="loader" id="loader">
+  <div class="spinner"></div>
+  <p style="margin-top:8px;">Saving...</p>
+</div>
+
 </div>
 
 <script type="module">
@@ -120,13 +220,13 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app",
-  messagingSenderId: "88783701381",
-  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_MSG_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -147,14 +247,27 @@ onAuthStateChanged(auth, async (user) => {
 
 async function loadProfile() {
   const snapshot = await get(ref(db, "users/" + currentUser.uid));
+  const statusDiv = document.getElementById("verificationStatus");
+
   if (snapshot.exists()) {
     const data = snapshot.val();
+
     document.getElementById("name").value = data.name || "";
     document.getElementById("age").value = data.age || "";
     document.getElementById("bio").value = data.bio || "";
     document.getElementById("school").value = data.school || "";
     document.getElementById("program").value = data.program || "";
 
+    // Verification badge
+    if (data.verified === true) {
+      statusDiv.innerHTML = `<div class="verify-badge verified">✔ Verified</div>`;
+    } else if (data.studentCard) {
+      statusDiv.innerHTML = `<div class="verify-badge pending">Pending Verification</div>`;
+    } else {
+      statusDiv.innerHTML = `<div class="verify-badge not-verified">Not Verified</div>`;
+    }
+
+    // Pictures
     if (data.pictures) {
       const preview = document.getElementById("preview");
       preview.innerHTML = "";
@@ -169,6 +282,12 @@ async function loadProfile() {
 
 window.saveProfile = async function () {
 
+  const saveBtn = document.getElementById("saveBtn");
+  const loader = document.getElementById("loader");
+
+  saveBtn.disabled = true;
+  loader.style.display = "block";
+
   const name = document.getElementById("name").value;
   const age = document.getElementById("age").value;
   const bio = document.getElementById("bio").value;
@@ -176,6 +295,7 @@ window.saveProfile = async function () {
   const program = document.getElementById("program").value;
 
   let pictures = {};
+  let studentCardURL = null;
 
   for (let i = 0; i < 3; i++) {
     const fileInput = document.getElementById("pic" + i);
@@ -188,10 +308,17 @@ window.saveProfile = async function () {
     }
   }
 
-  const existing = await get(ref(db, "users/" + currentUser.uid));
-  let existingPics = existing.exists() && existing.val().pictures ? existing.val().pictures : {};
+  const studentCardFile = document.getElementById("studentCard").files[0];
+  if (studentCardFile) {
+    const cardRef = storageRef(storage, "users/" + currentUser.uid + "/studentCard");
+    await uploadBytes(cardRef, studentCardFile);
+    studentCardURL = await getDownloadURL(cardRef);
+  }
 
-  const finalPics = { ...existingPics, ...pictures };
+  const existing = await get(ref(db, "users/" + currentUser.uid));
+  const existingData = existing.exists() ? existing.val() : {};
+
+  const finalPics = { ...(existingData.pictures || {}), ...pictures };
 
   await set(ref(db, "users/" + currentUser.uid), {
     name,
@@ -199,8 +326,13 @@ window.saveProfile = async function () {
     bio,
     school,
     program,
-    pictures: finalPics
+    pictures: finalPics,
+    studentCard: studentCardURL || existingData.studentCard || null,
+    verified: existingData.verified || false
   });
+
+  loader.style.display = "none";
+  saveBtn.disabled = false;
 
   alert("Profile Saved!");
   loadProfile();
