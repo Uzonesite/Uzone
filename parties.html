@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzone Parties</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #0f0f14;
+  color: white;
+  padding: 30px;
+}
+
+.back {
+  color: #b00b55;
+  margin-bottom: 20px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+}
+
+.card {
+  background: #1b1b25;
+  padding: 25px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+}
+
+h2 {
+  color: #b00b55;
+  margin-bottom: 15px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #2a2a35;
+  color: white;
+}
+
+textarea {
+  resize: none;
+  height: 80px;
+}
+
+label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+label input {
+  margin-right: 8px;
+}
+
+button {
+  background: #b00b55;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.party-item {
+  border-top: 1px solid #333;
+  padding-top: 15px;
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="back" onclick="window.location.href='hub.html'">← Back</div>
+
+<div class="container">
+
+  <!-- CREATE PARTY -->
+  <div class="card">
+    <h2>Post a Party</h2>
+
+    <input type="text" id="location" placeholder="Location">
+    <label><input type="checkbox" id="locationPrivate"> Hide location (invite only)</label>
+
+    <input type="datetime-local" id="time">
+    <label><input type="checkbox" id="timePrivate"> Hide time (invite only)</label>
+
+    <input type="text" id="vibes" placeholder="Vibes (e.g. House, Chill, Wild)">
+    <textarea id="description" placeholder="Description"></textarea>
+    <input type="text" id="ratio" placeholder="Ratio girls:boys (e.g. 5:3)">
+
+    <button onclick="postParty()">Post Party</button>
+  </div>
+
+  <!-- VIEW PARTIES -->
+  <div class="card">
+    <h2>Explore Parties</h2>
+    <div id="partyList"></div>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, push, set, onValue, get } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+  projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.firebasestorage.app",
+  messagingSenderId: "88783701381",
+  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let currentUser;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    currentUser = user;
+    loadParties();
+  }
+});
+
+window.postParty = async function() {
+  const location = document.getElementById("location").value;
+  const locationPrivate = document.getElementById("locationPrivate").checked;
+  const time = document.getElementById("time").value;
+  const timePrivate = document.getElementById("timePrivate").checked;
+  const vibes = document.getElementById("vibes").value;
+  const description = document.getElementById("description").value;
+  const ratio = document.getElementById("ratio").value;
+
+  const userSnap = await get(ref(db, "users/" + currentUser.uid));
+  const hostName = userSnap.exists() ? userSnap.val().name : "Host";
+
+  const newPartyRef = push(ref(db, "parties"));
+
+  await set(newPartyRef, {
+    hostUID: currentUser.uid,
+    hostName,
+    location,
+    locationPrivate,
+    time,
+    timePrivate,
+    vibes,
+    description,
+    ratio,
+    attendees: {}
+  });
+
+  alert("Party Posted!");
+};
+
+function loadParties() {
+  onValue(ref(db, "parties"), (snapshot) => {
+    const container = document.getElementById("partyList");
+    container.innerHTML = "";
+
+    if (!snapshot.exists()) return;
+
+    Object.entries(snapshot.val()).forEach(([partyId, data]) => {
+      const div = document.createElement("div");
+      div.className = "party-item";
+
+      div.innerHTML = `
+        <strong>${data.hostName}</strong><br>
+        ${data.locationPrivate ? "Location: Invite Only" : "Location: " + data.location}<br>
+        ${data.timePrivate ? "Time: Invite Only" : "Time: " + data.time}<br>
+        Vibes: ${data.vibes}<br>
+        Ratio: ${data.ratio}<br>
+        <button onclick="apply('${partyId}')">Apply to Attend</button>
+      `;
+
+      container.appendChild(div);
+    });
+  });
+}
+
+window.apply = async function(partyId) {
+  await set(ref(db, "parties/" + partyId + "/attendees/" + currentUser.uid), "pending");
+  alert("Applied! Waiting for host approval.");
+};
+</script>
+
+</body>
+</html>
