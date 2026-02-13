@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uzone Profile</title>
 <link rel="icon" type="image/png" href="logo3.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -62,7 +61,7 @@ textarea {
   display: block;
   width: 100%;
   padding: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   background: #2a2a35;
   border-radius: 10px;
   text-align: center;
@@ -79,10 +78,15 @@ textarea {
   display: none;
 }
 
-.preview img {
+.pic-group {
+  margin-bottom: 15px;
+}
+
+.preview-img {
   width: 100%;
   border-radius: 10px;
   margin-bottom: 10px;
+  display: none;
 }
 
 .save-btn {
@@ -175,30 +179,38 @@ textarea {
 
 <h3 style="margin-bottom:10px;">Profile Pictures</h3>
 
-<label class="upload-btn">
-  Upload Picture 1
-  <input type="file" id="pic0" accept="image/*">
-</label>
+<div class="pic-group">
+  <label class="upload-btn">
+    Upload Picture 1
+    <input type="file" id="pic0" accept="image/*">
+  </label>
+  <img id="preview0" class="preview-img">
+</div>
 
-<label class="upload-btn">
-  Upload Picture 2
-  <input type="file" id="pic1" accept="image/*">
-</label>
+<div class="pic-group">
+  <label class="upload-btn">
+    Upload Picture 2
+    <input type="file" id="pic1" accept="image/*">
+  </label>
+  <img id="preview1" class="preview-img">
+</div>
 
-<label class="upload-btn">
-  Upload Picture 3
-  <input type="file" id="pic2" accept="image/*">
-</label>
-
-<div class="preview" id="preview"></div>
+<div class="pic-group">
+  <label class="upload-btn">
+    Upload Picture 3
+    <input type="file" id="pic2" accept="image/*">
+  </label>
+  <img id="preview2" class="preview-img">
+</div>
 
 <div class="verify-section">
   <h3 style="margin-bottom:10px;">Student Verification</h3>
-
-  <label class="upload-btn">
-    Upload Student Card
-    <input type="file" id="studentCard" accept="image/*">
-  </label>
+  <div id="verifyContent">
+    <label class="upload-btn" id="studentUpload">
+      Upload Student Card
+      <input type="file" id="studentCard" accept="image/*">
+    </label>
+  </div>
 </div>
 
 <button class="save-btn" id="saveBtn" onclick="saveProfile()">Save Profile</button>
@@ -220,13 +232,13 @@ import { getStorage, ref as storageRef, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app",
-  messagingSenderId: "88783701381",
-  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_DOMAIN",
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MSG_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -245,8 +257,27 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+// Live previews before saving
+for (let i = 0; i < 3; i++) {
+  const input = document.getElementById("pic" + i);
+  const preview = document.getElementById("preview" + i);
+
+  input.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
 async function loadProfile() {
   const snapshot = await get(ref(db, "users/" + currentUser.uid));
+  const verifyContent = document.getElementById("verifyContent");
   const statusDiv = document.getElementById("verificationStatus");
 
   if (snapshot.exists()) {
@@ -258,24 +289,23 @@ async function loadProfile() {
     document.getElementById("school").value = data.school || "";
     document.getElementById("program").value = data.program || "";
 
-    // Verification badge
     if (data.verified === true) {
-      statusDiv.innerHTML = `<div class="verify-badge verified">✔ Verified</div>`;
+      statusDiv.innerHTML = `<div class="verify-badge verified">✔ Verified Student</div>`;
+      verifyContent.innerHTML = "";
     } else if (data.studentCard) {
       statusDiv.innerHTML = `<div class="verify-badge pending">Pending Verification</div>`;
     } else {
       statusDiv.innerHTML = `<div class="verify-badge not-verified">Not Verified</div>`;
     }
 
-    // Pictures
     if (data.pictures) {
-      const preview = document.getElementById("preview");
-      preview.innerHTML = "";
-      Object.values(data.pictures).forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        preview.appendChild(img);
-      });
+      for (let i = 0; i < 3; i++) {
+        if (data.pictures[i]) {
+          const preview = document.getElementById("preview" + i);
+          preview.src = data.pictures[i];
+          preview.style.display = "block";
+        }
+      }
     }
   }
 }
@@ -308,7 +338,7 @@ window.saveProfile = async function () {
     }
   }
 
-  const studentCardFile = document.getElementById("studentCard").files[0];
+  const studentCardFile = document.getElementById("studentCard")?.files[0];
   if (studentCardFile) {
     const cardRef = storageRef(storage, "users/" + currentUser.uid + "/studentCard");
     await uploadBytes(cardRef, studentCardFile);
