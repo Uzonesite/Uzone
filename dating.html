@@ -1,121 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Uzone Dating</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzone Dating</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
 
-    body {
-      background: #0f0f14;
-      color: white;
-      padding: 30px;
-    }
+body {
+  background: #0f0f14;
+  color: white;
+  padding: 30px;
+}
 
-    .back {
-      color: #b00b55;
-      font-weight: 600;
-      margin-bottom: 20px;
-      cursor: pointer;
-    }
+.back {
+  color: #b00b55;
+  font-weight: 600;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
 
-    .card {
-      max-width: 400px;
-      margin: auto;
-      background: #1b1b25;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
+.card {
+  max-width: 400px;
+  margin: auto;
+  background: #1b1b25;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 
-    .images {
-      position: relative;
-      height: 400px;
-      overflow: hidden;
-    }
+.images {
+  position: relative;
+  height: 400px;
+  overflow: hidden;
+}
 
-    .images img {
-      width: 100%;
-      height: 400px;
-      object-fit: cover;
-      display: none;
-    }
+.images img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  display: none;
+}
 
-    .images img.active {
-      display: block;
-    }
+.images img.active {
+  display: block;
+}
 
-    .image-nav {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 12px;
-      background: rgba(0,0,0,0.5);
-      padding: 5px 10px;
-      border-radius: 10px;
-    }
+.image-nav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 12px;
+  background: rgba(0,0,0,0.5);
+  padding: 5px 10px;
+  border-radius: 10px;
+}
 
-    .info {
-      padding: 20px;
-    }
+.info {
+  padding: 20px;
+}
 
-    .info h2 {
-      color: #b00b55;
-      margin-bottom: 5px;
-    }
+.info h2 {
+  color: #b00b55;
+  margin-bottom: 5px;
+}
 
-    .info p {
-      font-size: 14px;
-      color: #ccc;
-      margin-bottom: 6px;
-    }
+.info p {
+  font-size: 14px;
+  color: #ccc;
+  margin-bottom: 6px;
+}
 
-    .buttons {
-      display: flex;
-      justify-content: space-around;
-      padding: 20px;
-    }
+.buttons {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+}
 
-    .btn {
-      padding: 10px 25px;
-      border-radius: 10px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-    }
+.btn {
+  padding: 10px 25px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-    .like {
-      background: #b00b55;
-      color: white;
-    }
+.like {
+  background: #b00b55;
+  color: white;
+}
 
-    .dislike {
-      background: #333;
-      color: white;
-    }
+.dislike {
+  background: #333;
+  color: white;
+}
 
-    .matches {
-      max-width: 400px;
-      margin: 40px auto;
-      background: #1b1b25;
-      padding: 20px;
-      border-radius: 20px;
-    }
+.matches {
+  max-width: 400px;
+  margin: 40px auto;
+  background: #1b1b25;
+  padding: 20px;
+  border-radius: 20px;
+}
 
-    .match-item {
-      padding: 10px 0;
-      border-bottom: 1px solid #333;
-    }
-  </style>
+.match-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #333;
+}
+
+.no-users {
+  text-align: center;
+  margin-top: 50px;
+}
+</style>
 </head>
 
 <body>
@@ -143,6 +148,11 @@
   </div>
 </div>
 
+<div id="noUsersMessage" class="no-users" style="display:none;">
+  <h2 style="color:#b00b55;">No more users</h2>
+  <p style="color:#aaa;">Check back later for new people.</p>
+</div>
+
 <div class="matches">
   <h3 style="color:#b00b55;">Your Matches</h3>
   <div id="matchList"></div>
@@ -156,13 +166,13 @@ import { getDatabase, ref, get, set, onValue }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app",
-  messagingSenderId: "88783701381",
-  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_MSG_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -187,23 +197,37 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+/* ---------------- LOAD USERS ---------------- */
+
 async function loadUsers() {
   const snapshot = await get(ref(db, "users"));
   if (!snapshot.exists()) return;
 
+  const likesSnap = await get(ref(db, "likes/" + currentUser.uid));
+  const dislikesSnap = await get(ref(db, "dislikes/" + currentUser.uid));
+
+  const liked = likesSnap.exists() ? likesSnap.val() : {};
+  const disliked = dislikesSnap.exists() ? dislikesSnap.val() : {};
+
   users = Object.entries(snapshot.val())
-    .filter(([uid]) => uid !== currentUser.uid)
+    .filter(([uid]) =>
+      uid !== currentUser.uid &&
+      !liked?.[uid] &&
+      !disliked?.[uid]
+    )
     .map(([uid, data]) => ({ uid, ...data }));
 
-  showUser();
+  if (users.length === 0) {
+    card.style.display = "none";
+    document.getElementById("noUsersMessage").style.display = "block";
+  } else {
+    showUser();
+  }
 }
 
-function showUser() {
-  if (users.length === 0) {
-    alert("No users available.");
-    return;
-  }
+/* ---------------- SHOW USER ---------------- */
 
+function showUser() {
   const user = users[currentIndex];
   currentPicIndex = 0;
 
@@ -216,13 +240,13 @@ function showUser() {
   document.getElementById("program").innerText = user.program || "";
 }
 
+/* ---------------- IMAGES ---------------- */
+
 function updateImages(user) {
   for (let i = 0; i < 3; i++) {
     const img = document.getElementById("pic" + i);
     img.classList.remove("active");
-    if (user.pictures && user.pictures[i]) {
-      img.src = user.pictures[i];
-    }
+    img.src = user.pictures?.[i] || "";
   }
 
   document.getElementById("pic0").classList.add("active");
@@ -260,59 +284,59 @@ imagesContainer.addEventListener("click", (e) => {
   const width = imagesContainer.clientWidth;
   const clickX = e.offsetX;
 
-  if (clickX > width / 2) {
-    nextImage();
-  } else {
-    prevImage();
-  }
+  if (clickX > width / 2) nextImage();
+  else prevImage();
 });
 
-/* ----------------- SWIPE PICTURE ----------------- */
+/* ---------------- SWIPE (NOT ON IMAGES) ---------------- */
 
 let startX = 0;
 let currentX = 0;
 let isDragging = false;
+let isSwipingCard = false;
 
 card.addEventListener("touchstart", (e) => {
+  if (e.target.closest(".images")) {
+    isSwipingCard = false;
+    return;
+  }
+
   startX = e.touches[0].clientX;
   isDragging = true;
+  isSwipingCard = true;
 });
 
 card.addEventListener("touchmove", (e) => {
-  if (!isDragging) return;
+  if (!isDragging || !isSwipingCard) return;
+
   currentX = e.touches[0].clientX;
   let diff = currentX - startX;
-  card.style.transform = `translateX(${diff}px) rotate(${diff * 0.05}deg)`;
+  card.style.transform =
+    `translateX(${diff}px) rotate(${diff * 0.05}deg)`;
 });
 
 card.addEventListener("touchend", async () => {
-  if (!isDragging) return;
+  if (!isDragging || !isSwipingCard) return;
+
   isDragging = false;
+  isSwipingCard = false;
 
   let diff = currentX - startX;
 
-  if (diff > 120) {
-    await like();
-  } else if (diff < -120) {
-    dislike();
-  }
+  if (diff > 120) await like();
+  else if (diff < -120) await dislike();
 
   card.style.transition = "0.3s";
   card.style.transform = "translateX(0px)";
-  setTimeout(() => {
-    card.style.transition = "0s";
-  }, 300);
+  setTimeout(() => card.style.transition = "0s", 300);
 });
 
-/* ----------------- LIKE / DISLIKE ----------------- */
+/* ---------------- LIKE / DISLIKE ---------------- */
 
 window.like = async function () {
   const likedUser = users[currentIndex];
 
-  await set(
-    ref(db, "likes/" + currentUser.uid + "/" + likedUser.uid),
-    true
-  );
+  await set(ref(db, "likes/" + currentUser.uid + "/" + likedUser.uid), true);
 
   const reciprocal = await get(
     ref(db, "likes/" + likedUser.uid + "/" + currentUser.uid)
@@ -327,20 +351,24 @@ window.like = async function () {
   nextUser();
 };
 
-window.dislike = function () {
+window.dislike = async function () {
+  const dislikedUser = users[currentIndex];
+
+  await set(ref(db, "dislikes/" + currentUser.uid + "/" + dislikedUser.uid), true);
   nextUser();
 };
 
 function nextUser() {
   currentIndex++;
   if (currentIndex >= users.length) {
-    alert("No more users.");
+    card.style.display = "none";
+    document.getElementById("noUsersMessage").style.display = "block";
     return;
   }
   showUser();
 }
 
-/* ----------------- MATCH LIST ----------------- */
+/* ---------------- MATCH LIST ---------------- */
 
 function loadMatches() {
   const matchesRef = ref(db, "matches/" + currentUser.uid);
@@ -363,7 +391,6 @@ function loadMatches() {
   });
 }
 </script>
-
 
 </body>
 </html>
