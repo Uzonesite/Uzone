@@ -146,6 +146,11 @@
       from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
+    import { getDatabase, ref, get } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const db = getDatabase(app);
+
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
       authDomain: "uzone-6148d.firebaseapp.com",
