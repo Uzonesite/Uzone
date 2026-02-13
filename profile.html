@@ -226,19 +226,19 @@ textarea {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, set, get } 
+import { getDatabase, ref, set, get, remove } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } 
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_DOMAIN",
-  databaseURL: "YOUR_DB_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MSG_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+  projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.firebasestorage.app",
+  messagingSenderId: "88783701381",
+  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -257,7 +257,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// Live previews before saving
+// Live previews
 for (let i = 0; i < 3; i++) {
   const input = document.getElementById("pic" + i);
   const preview = document.getElementById("preview" + i);
@@ -339,10 +339,20 @@ window.saveProfile = async function () {
   }
 
   const studentCardFile = document.getElementById("studentCard")?.files[0];
+
   if (studentCardFile) {
     const cardRef = storageRef(storage, "users/" + currentUser.uid + "/studentCard");
     await uploadBytes(cardRef, studentCardFile);
     studentCardURL = await getDownloadURL(cardRef);
+
+    // 🔥 ADD TO PENDING LIST
+    await set(ref(db, "pendingVerifications/" + currentUser.uid), {
+      uid: currentUser.uid,
+      name,
+      school,
+      studentCard: studentCardURL,
+      submittedAt: Date.now()
+    });
   }
 
   const existing = await get(ref(db, "users/" + currentUser.uid));
