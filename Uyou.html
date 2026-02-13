@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uzone Profile</title>
+<title>Uyou</title>
 <link rel="icon" type="image/png" href="logo3.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -350,8 +350,22 @@ window.saveProfile = async function () {
   const school = document.getElementById("school").value;
   const program = document.getElementById("program").value;
 
-  const existing = await get(ref(db, "users/" + currentUser.uid));
-  const existingData = existing.exists() ? existing.val() : {};
+  const snapshot = await get(ref(db, "users/" + currentUser.uid));
+  const existingData = snapshot.exists() ? snapshot.val() : {};
+  let pictures = existingData.pictures || [];
+
+  // Loop through 3 profile pictures
+  for (let i = 0; i < 3; i++) {
+    const fileInput = document.getElementById("pic" + i);
+    const file = fileInput.files[0];
+
+    if (file) {
+      const picRef = storageRef(storage, `profilePics/${currentUser.uid}_${i}`);
+      await uploadBytes(picRef, file);
+      const downloadURL = await getDownloadURL(picRef);
+      pictures[i] = downloadURL;
+    }
+  }
 
   await set(ref(db, "users/" + currentUser.uid), {
     ...existingData,
@@ -359,7 +373,8 @@ window.saveProfile = async function () {
     age,
     bio,
     school,
-    program
+    program,
+    pictures
   });
 
   loader.style.display = "none";
@@ -372,6 +387,7 @@ window.saveProfile = async function () {
 
   loadProfile();
 }
+
 </script>
 
 </body>
