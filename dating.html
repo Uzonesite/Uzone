@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uzone Dating</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: #0f0f14;
+      color: white;
+      min-height: 100vh;
+      padding: 30px;
+    }
+
+    .back {
+      color: #b00b55;
+      margin-bottom: 20px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .card {
+      max-width: 400px;
+      margin: auto;
+      background: #1b1b25;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .images {
+      position: relative;
+      height: 400px;
+      overflow: hidden;
+    }
+
+    .images img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      display: none;
+    }
+
+    .images img.active {
+      display: block;
+    }
+
+    .info {
+      padding: 20px;
+    }
+
+    .info h2 {
+      color: #b00b55;
+      margin-bottom: 5px;
+    }
+
+    .info p {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 8px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .like {
+      background: #b00b55;
+      color: white;
+    }
+
+    .dislike {
+      background: #333;
+      color: white;
+    }
+
+    .matches {
+      max-width: 400px;
+      margin: 40px auto;
+      background: #1b1b25;
+      padding: 20px;
+      border-radius: 20px;
+    }
+
+    .match-item {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="back" onclick="window.location.href='hub.html'">← Back</div>
+
+<div class="card">
+  <div class="images">
+    <img id="pic0">
+    <img id="pic1">
+    <img id="pic2">
+  </div>
+
+  <div class="info">
+    <h2 id="nameAge"></h2>
+    <p id="bio"></p>
+    <p id="school"></p>
+    <p id="program"></p>
+  </div>
+
+  <div class="buttons">
+    <button class="btn dislike" onclick="dislike()">Dislike</button>
+    <button class="btn like" onclick="like()">Like</button>
+  </div>
+</div>
+
+<div class="matches">
+  <h3 style="color:#b00b55;">Your Matches</h3>
+  <div id="matchList"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get, set, onValue } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+  projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.firebasestorage.app",
+  messagingSenderId: "88783701381",
+  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+let currentUser;
+let users = [];
+let currentIndex = 0;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    currentUser = user;
+    loadUsers();
+    loadMatches();
+  }
+});
+
+async function loadUsers() {
+  const snapshot = await get(ref(db, "users"));
+  if (snapshot.exists()) {
+    users = Object.entries(snapshot.val())
+      .filter(([uid]) => uid !== currentUser.uid)
+      .map(([uid, data]) => ({ uid, ...data }));
+    showUser();
+  }
+}
+
+function showUser() {
+  if (users.length === 0) return;
+
+  const user = users[currentIndex];
+
+  for (let i = 0; i < 3; i++) {
+    const img = document.getElementById("pic" + i);
+    if (user.pictures && user.pictures[i]) {
+      img.src = user.pictures[i];
+      img.classList.add("active");
+    } else {
+      img.style.display = "none";
+    }
+  }
+
+  document.getElementById("nameAge").innerText =
+    user.name + ", " + user.age;
+  document.getElementById("bio").innerText = user.bio;
+  document.getElementById("school").innerText = user.school;
+  document.getElementById("program").innerText = user.program;
+}
+
+window.like = async function () {
+  const likedUser = users[currentIndex];
+
+  await set(ref(db, "likes/" + currentUser.uid + "/" + likedUser.uid), true);
+
+  const reciprocal = await get(ref(db, "likes/" + likedUser.uid + "/" + currentUser.uid));
+
+  if (reciprocal.exists()) {
+    await set(ref(db, "matches/" + currentUser.uid + "/" + likedUser.uid), true);
+    await set(ref(db, "matches/" + likedUser.uid + "/" + currentUser.uid), true);
+    alert("It's a match!");
+  }
+
+  nextUser();
+};
+
+window.dislike = function () {
+  nextUser();
+};
+
+function nextUser() {
+  currentIndex++;
+  if (currentIndex >= users.length) {
+    alert("No more users.");
+    return;
+  }
+  showUser();
+}
+
+function loadMatches() {
+  const matchesRef = ref(db, "matches/" + currentUser.uid);
+  onValue(matchesRef, async (snapshot) => {
+    const container = document.getElementById("matchList");
+    container.innerHTML = "";
+
+    if (!snapshot.exists()) return;
+
+    const matchIds = Object.keys(snapshot.val());
+
+    for (let uid of matchIds) {
+      const userSnap = await get(ref(db, "users/" + uid));
+      if (userSnap.exists()) {
+        const data = userSnap.val();
+        const div = document.createElement("div");
+        div.className = "match-item";
+        div.innerText = data.name;
+        container.appendChild(div);
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>
