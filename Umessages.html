@@ -37,30 +37,30 @@ body {
   border-radius: 20px;
   display: flex;
   flex-direction: column;
-  height: 80vh;
+  height: 100vh; /* full viewport height on mobile */
   overflow: hidden;
 }
 
-/* Chat header */
 .chat-header {
   text-align: center;
   font-weight: 600;
   font-size: 18px;
   color: #b00b55;
-  padding: 15px 10px; /* allows wrapping on mobile */
+  padding: 15px 10px;
   border-bottom: 1px solid #333;
   word-break: break-word;
+  flex-shrink: 0; /* header never shrinks */
 }
 
-/* Messages scroll area */
 .messages {
-  flex: 1;
+  flex: 1 1 auto; /* takes remaining space */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 4px; /* compact spacing between messages */
+  padding: 10px 15px;
+  gap: 4px;
 }
+
 
 /* Each message row */
 .message-row {
@@ -151,13 +151,12 @@ body {
   padding: 10px;
   background: #1b1b25;
   position: sticky;
-  bottom: 0;
+  bottom: 0; 
   z-index: 10;
   border-top: 1px solid #333;
   width: 100%;
   box-sizing: border-box;
 }
-
 .input-area input {
   flex: 1;
   padding: 12px 16px;
@@ -167,7 +166,6 @@ body {
   font-size: 14px;
   min-width: 0;
 }
-
 .input-area button {
   background: #b00b55;
   border: none;
@@ -178,6 +176,7 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
+
 
 </style>
 </head>
@@ -302,6 +301,19 @@ function loadMessages(){
   });
 }
 
+function adjustChatHeight() {
+  const headerHeight = document.querySelector('.chat-header').offsetHeight;
+  const inputHeight = document.querySelector('.input-area').offsetHeight;
+  const container = document.querySelector('.messages');
+
+  container.style.height = `calc(100vh - ${headerHeight + inputHeight}px)`;
+}
+
+// Run on load and on window resize (including keyboard pop)
+window.addEventListener('load', adjustChatHeight);
+window.addEventListener('resize', adjustChatHeight);
+
+  
 // Inline editing
 function inlineEdit(bubble,key,oldText){
   bubble.innerHTML = "";
