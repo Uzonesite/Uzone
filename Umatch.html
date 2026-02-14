@@ -131,9 +131,41 @@ body {
 }
 
 .match-item {
-  padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
   border-bottom: 1px solid #333;
 }
+
+.match-name {
+  font-weight: 600;
+}
+
+.match-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.match-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.message-btn {
+  background: #b00b55;
+  color: white;
+}
+
+.remove-btn {
+  background: #333;
+  color: #ff4d6d;
+}
+
 
 .no-users {
   text-align: center;
@@ -354,19 +386,45 @@ function loadMatches() {
     const container = document.getElementById("matchList");
     container.innerHTML = "";
 
-    if (!snapshot.exists()) return;
+    if (!snapshot.exists()) {
+      container.innerHTML = "<p style='color:#aaa;'>No matches yet.</p>";
+      return;
+    }
 
     for (let uid of Object.keys(snapshot.val())) {
       const userSnap = await get(ref(db, "users/" + uid));
-      if (userSnap.exists()) {
-        const div = document.createElement("div");
-        div.className = "match-item";
-        div.innerText = userSnap.val().name;
-        container.appendChild(div);
-      }
+      if (!userSnap.exists()) continue;
+
+      const userData = userSnap.val();
+
+      const div = document.createElement("div");
+      div.className = "match-item";
+
+      div.innerHTML = `
+        <span class="match-name">${userData.name}</span>
+        <div class="match-actions">
+          <button class="match-btn message-btn"
+            onclick="window.location.href='Umessages.html?uid=${uid}'">
+            Message
+          </button>
+          <button class="match-btn remove-btn"
+            onclick="removeMatch('${uid}')">
+            Remove
+          </button>
+        </div>
+      `;
+
+      container.appendChild(div);
     }
   });
 }
+
+  window.removeMatch = async function(uid) {
+  await set(ref(db, "matches/" + currentUser.uid + "/" + uid), null);
+  await set(ref(db, "matches/" + uid + "/" + currentUser.uid), null);
+};
+
+
 </script>
 
 </body>
