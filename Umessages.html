@@ -7,103 +7,155 @@
 <link rel="icon" type="image/png" href="logo3.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{background:#0f0f14;color:white;padding:20px;}
-.back{color:#b00b55;font-weight:600;margin-bottom:20px;cursor:pointer;}
-
-.chat-container{
-  max-width:500px;
-  margin:auto;
-  background:#1b1b25;
-  border-radius:20px;
-  padding:0; /* remove previous padding */
-  display:flex;
-  flex-direction:column;
-  height:80vh;
-  overflow:hidden;
+/* Reset and base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
+body {
+  background: #0f0f14;
+  color: white;
+  padding: 0; /* handled inside container */
+}
+
+/* Back button */
+.back {
+  color: #b00b55;
+  font-weight: 600;
+  margin: 20px;
+  cursor: pointer;
+}
+
+/* Chat container */
+.chat-container {
+  max-width: 500px;
+  margin: auto;
+  background: #1b1b25;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  overflow: hidden;
+}
+
+/* Chat header */
 .chat-header {
   text-align: center;
   font-weight: 600;
   font-size: 18px;
   color: #b00b55;
-  margin: 0;
-  padding: 15px 10px; /* give horizontal padding for small screens */
+  padding: 15px 10px; /* allows wrapping on mobile */
   border-bottom: 1px solid #333;
-  word-break: break-word; /* allows long names to wrap instead of squish */
+  word-break: break-word;
 }
 
-
-.messages{
-  flex:1;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  padding:20px;
-  gap:4px; /* small gap between messages */
+/* Messages scroll area */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 4px; /* compact spacing between messages */
 }
 
-.message-row{
-  display:flex;width:100%;align-items:flex-end;margin-bottom:2px;
+/* Each message row */
+.message-row {
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
 }
 
-.message-wrapper .timestamp,
-.message-wrapper .action-button {
+/* Message wrapper holds bubble + time + buttons */
+.message-wrapper {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+/* Message bubble */
+.message {
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  word-wrap: break-word;
+  max-width: 70%;
+  flex-shrink: 1;
+}
+
+/* Sent / received bubble colors */
+.sent {
+  background: #b00b55;
+  border-bottom-right-radius: 6px;
+}
+
+.received {
+  background: #333;
+  border-bottom-left-radius: 6px;
+}
+
+/* Timestamp */
+.timestamp {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
+/* Edit/delete buttons */
+.action-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #2a2a35;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
+  opacity: 0;
+}
+
+.action-button:hover {
+  background: #3a3a45;
+}
+
+/* Show timestamp and buttons on tap (active class) */
 .message-wrapper.active .timestamp,
 .message-wrapper.active .action-button {
   opacity: 1;
 }
 
-
-.message{
-  padding:10px 14px;border-radius:18px;font-size:14px;word-wrap:break-word;
-  max-width:70%;
-  position: relative;
+/* Inline editing input */
+.edit-input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
 }
 
-.sent{background:#b00b55;border-bottom-right-radius:6px;}
-.received{background:#333;border-bottom-left-radius:6px;}
-
-.timestamp{
-  font-size:11px;color:#888;white-space:nowrap;
-  opacity:0;transition:opacity 0.2s ease;
-}
-
-.action-button{
-  width:28px;height:28px;border-radius:50%;border:none;
-  background:#2a2a35;color:white;font-size:12px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:0.2s ease;opacity:0;
-}
-.action-button:hover{background:#3a3a45;}
-
-.message-wrapper:hover .timestamp,
-.message-wrapper:hover .action-button,
-.message-wrapper.active .timestamp,
-.message-wrapper.active .action-button{
-  opacity:1;
-}
-
-.edit-input{
-  padding:8px 10px;border-radius:10px;border:none;outline:none;font-size:14px;width:100%;
-}
-
+/* Input area at bottom (sticky above keyboard) */
 .input-area {
   display: flex;
   gap: 10px;
-  padding: 10px; /* remove extra left/right padding */
+  padding: 10px;
   background: #1b1b25;
   position: sticky;
   bottom: 0;
   z-index: 10;
   border-top: 1px solid #333;
-  width: 100%; /* ensure it fills screen width */
-  box-sizing: border-box; /* include padding in width */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input-area input {
@@ -113,7 +165,7 @@ body{background:#0f0f14;color:white;padding:20px;}
   border: none;
   outline: none;
   font-size: 14px;
-  min-width: 0; /* crucial for mobile flex layouts */
+  min-width: 0;
 }
 
 .input-area button {
@@ -202,63 +254,53 @@ function loadMessages(){
       const bubble = document.createElement("div");
       bubble.className = "message";
       bubble.innerText = msg.text;
-      if(msg.sender===currentUser.uid) bubble.classList.add("sent");
-      else bubble.classList.add("received");
+      bubble.classList.add(msg.sender===currentUser.uid?"sent":"received");
 
-      // Timestamp
       const time = document.createElement("div");
       time.className = "timestamp";
       time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
-      wrapper.appendChild(time);
+      if(msg.sender === currentUser.uid){
+        // Own messages: [timestamp][edit][delete][bubble]
+        wrapper.appendChild(time);
 
-      if(msg.sender===currentUser.uid){
-        // Own message: edit/delete buttons
         const editBtn = document.createElement("button");
-        editBtn.className="action-button";
-        editBtn.innerHTML="✎";
-        editBtn.onclick = ()=>inlineEdit(bubble,key,msg.text);
+        editBtn.className = "action-button";
+        editBtn.innerHTML = "✎";
+        editBtn.onclick = () => inlineEdit(bubble,key,msg.text);
+        wrapper.appendChild(editBtn);
 
         const delBtn = document.createElement("button");
-        delBtn.className="action-button";
-        delBtn.innerHTML="🗑";
-        delBtn.onclick = ()=>remove(ref(db,"messages/"+chatId+"/"+key));
-
-        wrapper.appendChild(editBtn);
+        delBtn.className = "action-button";
+        delBtn.innerHTML = "🗑";
+        delBtn.onclick = () => remove(ref(db, "messages/" + chatId + "/" + key));
         wrapper.appendChild(delBtn);
 
-        wrapper.appendChild(bubble); // bubble last
-      }else{
-        // Other user's message: timestamp on right
+        wrapper.appendChild(bubble);
+      } else {
+        // Other messages: [bubble][timestamp]
         wrapper.appendChild(bubble);
         wrapper.appendChild(time);
       }
 
+      // Tap-to-toggle visibility
+      bubble.addEventListener("click", () => {
+        // Remove 'active' from other wrappers
+        document.querySelectorAll(".message-wrapper.active").forEach(w=>{
+          if(w !== wrapper) w.classList.remove("active");
+        });
+        wrapper.classList.toggle("active");
+      });
+
       row.appendChild(wrapper);
       container.appendChild(row);
-
-      // Tap toggle for mobile
-      bubble.addEventListener("click", () => {
-  // Remove 'active' from all other wrappers
-  document.querySelectorAll(".message-wrapper.active").forEach(w => {
-    if (w !== wrapper) w.classList.remove("active");
-  });
-
-  // Toggle active on this one
-  wrapper.classList.toggle("active");
-});
-
-      if(msg.sender!==currentUser.uid){
-        time.addEventListener("click", ()=>{
-          wrapper.classList.toggle("active");
-        });
-      }
     });
 
     container.scrollTop = container.scrollHeight;
   });
 }
 
+// Inline editing
 function inlineEdit(bubble,key,oldText){
   bubble.innerHTML = "";
   const input = document.createElement("input");
@@ -268,7 +310,7 @@ function inlineEdit(bubble,key,oldText){
   input.focus();
 
   input.onblur = ()=>saveEdit(key,input.value);
-  input.onkeydown = e => {if(e.key==="Enter") saveEdit(key,input.value)};
+  input.onkeydown = e => { if(e.key==="Enter") saveEdit(key,input.value); };
 }
 
 function saveEdit(key,newText){
@@ -276,6 +318,7 @@ function saveEdit(key,newText){
   update(ref(db,"messages/"+chatId+"/"+key), {text:newText});
 }
 
+// Send message
 window.sendMessage = function(){
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
@@ -290,10 +333,12 @@ window.sendMessage = function(){
   input.value="";
 };
 
+// Send on Enter
 document.getElementById("messageInput").addEventListener("keydown",e=>{
   if(e.key==="Enter") sendMessage();
 });
 </script>
+
 
 </body>
 </html>
