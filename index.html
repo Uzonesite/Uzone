@@ -140,8 +140,13 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, set } 
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { 
+  getDatabase, 
+  ref, 
+  set, 
+  get, 
+  runTransaction 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -157,10 +162,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-function generateAccountNumber() {
-  return "UZ" + Math.floor(10000000 + Math.random() * 90000000);
-}
-
 window.signUp = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -172,7 +173,15 @@ window.signUp = async function () {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const accountNumber = generateAccountNumber();
+    // 🔥 Atomic counter increment
+    const counterRef = ref(db, "meta/userCounter");
+
+    const result = await runTransaction(counterRef, (currentValue) => {
+      return (currentValue || 0) + 1;
+    });
+
+    const newUserNumber = result.snapshot.val();
+    const accountNumber = "U" + newUserNumber;
 
     await set(ref(db, "users/" + user.uid), {
       email: email,
@@ -214,7 +223,6 @@ window.signIn = async function () {
   }
 };
 </script>
-
 
 </body>
 </html>
