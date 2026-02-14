@@ -8,127 +8,176 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
 
-body { background:#0f0f14; color:white; padding:20px; }
+body {
+  background: #0f0f14;
+  color: white;
+  padding: 20px;
+}
 
-.back { color:#b00b55; font-weight:600; margin-bottom:20px; cursor:pointer; }
+.back {
+  color: #b00b55;
+  font-weight: 600;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
 
 .chat-container {
-  max-width:500px;
-  margin:auto;
-  background:#1b1b25;
-  border-radius:20px;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  height:80vh;
+  max-width: 500px;
+  margin: auto;
+  background: #1b1b25;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
 }
 
 .chat-header {
-  text-align:center;
-  font-weight:600;
-  font-size:18px;
-  color:#b00b55;
-  border-bottom:1px solid #333;
-  padding-bottom:10px;
-}
-
-.nickname-btn {
-  margin:10px auto 15px auto;
-  display:block;
-  background:#2a2a35;
-  border:none;
-  padding:6px 12px;
-  border-radius:8px;
-  color:white;
-  cursor:pointer;
-  font-size:12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 18px;
+  color: #b00b55;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
 }
 
 .messages {
-  flex:1;
-  overflow-y:auto;
-  margin-bottom:15px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.messages::-webkit-scrollbar{display:none;}
-.messages{-ms-overflow-style:none;scrollbar-width:none;}
+.messages::-webkit-scrollbar { display: none; }
+.messages { -ms-overflow-style: none; scrollbar-width: none; }
 
 .message-row {
-  display:flex;
-  align-items:flex-end;
-  width:100%;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
 }
 
 .message-wrapper {
-  display:flex;
-  flex-direction:column;
-  max-width:70%;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  max-width: 70%;
+  position: relative;
 }
 
 .message {
-  padding:10px 14px;
-  border-radius:18px;
-  font-size:14px;
-  word-wrap:break-word;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  word-wrap: break-word;
+  transition: transform 0.15s ease;
 }
 
-.sent { background:#b00b55; border-bottom-right-radius:6px; }
-.received { background:#333; border-bottom-left-radius:6px; }
+.message:hover {
+  transform: scale(1.02);
+}
+
+.sent {
+  background: #b00b55;
+  border-bottom-right-radius: 6px;
+}
+
+.received {
+  background: #333;
+  border-bottom-left-radius: 6px;
+}
 
 .timestamp {
-  font-size:11px;
-  color:#888;
-  margin-top:4px;
-  opacity:0;
-  transition:0.2s ease;
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.timestamp.show { opacity:1; }
+.timestamp.show {
+  opacity: 1;
+}
 
+.edited-label {
+  font-size: 10px;
+  color: #aaa;
+  margin-left: 6px;
+}
+
+/* Action buttons hidden until hover */
 .action-buttons {
-  display:flex;
-  gap:6px;
-  margin-right:6px;
-  opacity:0;
-  transition:0.2s ease;
+  display: flex;
+  gap: 6px;
+  margin-right: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.message-row:hover .action-buttons { opacity:1; }
+.message-row:hover .action-buttons {
+  opacity: 1;
+}
 
 .action-buttons button {
-  width:26px;
-  height:26px;
-  border-radius:50%;
-  border:none;
-  background:#2a2a35;
-  color:white;
-  cursor:pointer;
-  font-size:12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #2a2a35;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
 }
 
-.input-area { display:flex; gap:10px; }
+.action-buttons button:hover {
+  background: #3a3a45;
+}
+
+/* Inline editing input */
+.edit-input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
 
 .input-area input {
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  outline:none;
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
 }
 
 .input-area button {
-  background:#b00b55;
-  border:none;
-  padding:10px 20px;
-  border-radius:10px;
-  color:white;
-  font-weight:600;
-  cursor:pointer;
+  background: #b00b55;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>
 </head>
@@ -139,10 +188,7 @@ body { background:#0f0f14; color:white; padding:20px; }
 
 <div class="chat-container">
   <div class="chat-header" id="chatHeader">Loading...</div>
-  <button class="nickname-btn" id="setNickname">Set Nickname</button>
-
   <div class="messages" id="messages"></div>
-
   <div class="input-area">
     <input type="text" id="messageInput" placeholder="Type a message..." />
     <button onclick="sendMessage()">Send</button>
@@ -152,11 +198,11 @@ body { background:#0f0f14; color:white; padding:20px; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, onValue, get, set, update, remove }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, push, onValue, get, update, remove }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = { /* your config stays same */ 
+const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
   authDomain: "uzone-6148d.firebaseapp.com",
   databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
@@ -170,124 +216,121 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const otherUid = new URLSearchParams(window.location.search).get("uid");
-
-if (!otherUid) {
-  alert("Invalid chat.");
-  window.location.href = "Ucontacts.html";
-}
+const urlParams = new URLSearchParams(window.location.search);
+const otherUid = urlParams.get("uid");
 
 let currentUser;
 let chatId;
-let realName="";
-let accountNumber="";
 
-onAuthStateChanged(auth, async (user)=>{
-  if(!user) return window.location.href="index.html";
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return window.location.href = "index.html";
 
-  currentUser=user;
-  chatId=[currentUser.uid,otherUid].sort().join("_");
+  currentUser = user;
+  chatId = [currentUser.uid, otherUid].sort().join("_");
 
-  const snap=await get(ref(db,"users/"+otherUid));
-  if(snap.exists()){
-    const data=snap.val();
-    realName=data.name||data.email;
-    accountNumber=data.accountNumber||"";
+  const snap = await get(ref(db, "users/" + otherUid));
+  if (snap.exists()) {
+    document.getElementById("chatHeader").innerText = snap.val().name;
   }
 
-  loadHeader();
   loadMessages();
 });
 
-async function loadHeader(){
-  const nickSnap=await get(ref(db,"chatNicknames/"+chatId+"/"+currentUser.uid));
-  let displayName=nickSnap.exists()?nickSnap.val():realName;
+function loadMessages() {
+  onValue(ref(db, "messages/" + chatId), (snapshot) => {
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
 
-  document.getElementById("chatHeader").innerHTML=
-    displayName+(accountNumber?` <span style="font-size:13px;color:#aaa;">(${accountNumber})</span>`:"");
-}
+    if (!snapshot.exists()) return;
 
-document.getElementById("setNickname").onclick=async()=>{
-  const nickname=prompt("Enter nickname:");
-  if(!nickname||!nickname.trim())return;
+    snapshot.forEach((child) => {
+      const msg = child.val();
+      const key = child.key;
 
-  await set(ref(db,"chatNicknames/"+chatId+"/"+currentUser.uid),nickname.trim());
-  loadHeader();
-};
+      const row = document.createElement("div");
+      row.className = "message-row";
+      row.style.justifyContent =
+        msg.sender === currentUser.uid ? "flex-end" : "flex-start";
 
-function loadMessages(){
-  onValue(ref(db,"messages/"+chatId),(snapshot)=>{
-    const container=document.getElementById("messages");
-    container.innerHTML="";
-    if(!snapshot.exists())return;
+      const wrapper = document.createElement("div");
+      wrapper.className = "message-wrapper";
 
-    snapshot.forEach(child=>{
-      const msg=child.val();
-      const key=child.key;
+      const bubble = document.createElement("div");
+      bubble.className = "message " +
+        (msg.sender === currentUser.uid ? "sent" : "received");
 
-      const row=document.createElement("div");
-      row.className="message-row";
-      row.style.justifyContent=
-        msg.sender===currentUser.uid?"flex-end":"flex-start";
+      bubble.innerText = msg.text;
 
-      const wrapper=document.createElement("div");
-      wrapper.className="message-wrapper";
+      if (msg.edited) {
+        const edited = document.createElement("span");
+        edited.className = "edited-label";
+        edited.innerText = "(edited)";
+        bubble.appendChild(edited);
+      }
 
-      const bubble=document.createElement("div");
-      bubble.className="message "+
-        (msg.sender===currentUser.uid?"sent":"received");
-      bubble.innerText=msg.text;
+      const time = document.createElement("div");
+      time.className = "timestamp";
+      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
-      const time=document.createElement("div");
-      time.className="timestamp";
-      time.innerText=new Date(msg.timestamp)
-        .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      bubble.onclick=()=>time.classList.toggle("show");
+      bubble.onclick = () => time.classList.toggle("show");
 
       wrapper.appendChild(bubble);
       wrapper.appendChild(time);
 
-      if(msg.sender===currentUser.uid){
-        const actions=document.createElement("div");
-        actions.className="action-buttons";
+      if (msg.sender === currentUser.uid) {
+        const actions = document.createElement("div");
+        actions.className = "action-buttons";
 
-        const editBtn=document.createElement("button");
-        editBtn.innerHTML="✎";
-        editBtn.onclick=()=>{
-          const newText=prompt("Edit message:",msg.text);
-          if(newText&&newText.trim()){
-            update(ref(db,"messages/"+chatId+"/"+key),{
-              text:newText.trim(),
-              edited:true
-            });
-          }
-        };
+        const editBtn = document.createElement("button");
+        editBtn.innerHTML = "✎";
+        editBtn.onclick = () => inlineEdit(bubble, key, msg.text);
 
-        const delBtn=document.createElement("button");
-        delBtn.innerHTML="🗑";
-        delBtn.onclick=()=>{
-          remove(ref(db,"messages/"+chatId+"/"+key));
-        };
+        const delBtn = document.createElement("button");
+        delBtn.innerHTML = "🗑";
+        delBtn.onclick = () => remove(ref(db,"messages/"+chatId+"/"+key));
 
         actions.appendChild(editBtn);
         actions.appendChild(delBtn);
+
         row.appendChild(actions);
+        row.appendChild(wrapper);
+      } else {
+        row.appendChild(wrapper);
       }
 
-      row.appendChild(wrapper);
       container.appendChild(row);
     });
 
-    container.scrollTop=container.scrollHeight;
+    container.scrollTop = container.scrollHeight;
   });
 }
 
-window.sendMessage=function(){
-  if(!currentUser||!chatId)return;
+function inlineEdit(bubble, key, oldText) {
+  bubble.innerHTML = "";
+  const input = document.createElement("input");
+  input.className = "edit-input";
+  input.value = oldText;
+  bubble.appendChild(input);
+  input.focus();
 
-  const input=document.getElementById("messageInput");
-  const text=input.value.trim();
-  if(!text)return;
+  input.onblur = () => saveEdit(key, input.value);
+  input.onkeydown = (e) => {
+    if (e.key === "Enter") saveEdit(key, input.value);
+  };
+}
+
+function saveEdit(key, newText) {
+  if (!newText.trim()) return;
+  update(ref(db,"messages/"+chatId+"/"+key),{
+    text:newText,
+    edited:true
+  });
+}
+
+window.sendMessage = function() {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  if (!text) return;
 
   push(ref(db,"messages/"+chatId),{
     sender:currentUser.uid,
