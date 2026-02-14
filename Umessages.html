@@ -48,14 +48,9 @@ body {
   padding-bottom: 10px;
 }
 
-.nickname-actions {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin: 10px 0 15px 0;
-}
-
-.nickname-actions button {
+.nickname-btn {
+  margin: 10px auto 15px auto;
+  display: block;
   background: #2a2a35;
   border: none;
   padding: 6px 12px;
@@ -65,7 +60,7 @@ body {
   font-size: 12px;
 }
 
-.nickname-actions button:hover {
+.nickname-btn:hover {
   background: #3a3a45;
 }
 
@@ -123,35 +118,6 @@ body {
   opacity: 1;
 }
 
-.edited-label {
-  font-size: 10px;
-  color: #aaa;
-  margin-left: 6px;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 6px;
-  margin-right: 6px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.message-row:hover .action-buttons {
-  opacity: 1;
-}
-
-.action-buttons button {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: #2a2a35;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
-}
-
 .input-area {
   display: flex;
   gap: 10px;
@@ -183,11 +149,7 @@ body {
 
 <div class="chat-container">
   <div class="chat-header" id="chatHeader">Loading...</div>
-
-  <div class="nickname-actions">
-    <button id="setNickname">Set Nickname</button>
-    <button id="removeNickname">Remove Nickname</button>
-  </div>
+  <button class="nickname-btn" id="setNickname">Set Nickname</button>
 
   <div class="messages" id="messages"></div>
 
@@ -201,7 +163,7 @@ body {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, onValue, get, update, remove }
+import { getDatabase, ref, push, onValue, get, set }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -256,26 +218,21 @@ async function loadHeader() {
 
   document.getElementById("chatHeader").innerHTML =
     displayName +
-    (accountNumber ? ` <span style="font-size:13px;color:#aaa;">(${accountNumber})</span>` : "");
+    (accountNumber
+      ? ` <span style="font-size:13px;color:#aaa;">(${accountNumber})</span>`
+      : "");
 }
 
 document.getElementById("setNickname").onclick = async () => {
-  const nickname = prompt("Enter nickname:");
+  const nickname = prompt("Enter nickname for this chat:");
   if (!nickname || !nickname.trim()) return;
 
-  await update(
+  await set(
     ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid),
     nickname.trim()
   );
 
-  loadHeader();
-};
-
-document.getElementById("removeNickname").onclick = async () => {
-  await remove(
-    ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid)
-  );
-  loadHeader();
+  loadHeader(); // instant update
 };
 
 function loadMessages() {
@@ -287,7 +244,6 @@ function loadMessages() {
 
     snapshot.forEach((child) => {
       const msg = child.val();
-      const key = child.key;
 
       const row = document.createElement("div");
       row.className = "message-row";
@@ -312,7 +268,6 @@ function loadMessages() {
 
       wrapper.appendChild(bubble);
       wrapper.appendChild(time);
-
       row.appendChild(wrapper);
       container.appendChild(row);
     });
@@ -329,8 +284,7 @@ window.sendMessage = function() {
   push(ref(db,"messages/"+chatId),{
     sender:currentUser.uid,
     text:text,
-    timestamp:Date.now(),
-    edited:false
+    timestamp:Date.now()
   });
 
   input.value="";
