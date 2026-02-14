@@ -229,7 +229,9 @@ onAuthStateChanged(auth, async user => {
   const snap = await get(ref(db,"users/"+otherUid));
   if (!snap.exists()) return window.location.href="Uhub.html";
 
-  document.getElementById("chatHeader").innerText = snap.val().name;
+  const userData = snap.val();
+document.getElementById("chatHeader").innerText = `${userData.name} (#${userData.accountNumber || 'N/A'})`;
+
   loadMessages();
 });
 
