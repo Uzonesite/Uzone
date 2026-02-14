@@ -188,6 +188,10 @@ body {
 
 <div class="chat-container">
   <div class="chat-header" id="chatHeader">Loading...</div>
+  <button id="setNicknameBtn"
+  style="margin-bottom:10px;background:#2a2a35;border:none;padding:6px 12px;border-radius:8px;color:white;cursor:pointer;">
+  Set Nickname
+</button>
   <div class="messages" id="messages"></div>
   <div class="input-area">
     <input type="text" id="messageInput" placeholder="Type a message..." />
@@ -228,10 +232,30 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   chatId = [currentUser.uid, otherUid].sort().join("_");
 
-  const snap = await get(ref(db, "users/" + otherUid));
-  if (snap.exists()) {
-    document.getElementById("chatHeader").innerText = snap.val().name;
-  }
+  const userSnap = await get(ref(db, "users/" + otherUid));
+
+let displayName = "User";
+let accountNumber = "";
+
+if (userSnap.exists()) {
+  const data = userSnap.val();
+  displayName = data.name || data.email;
+  accountNumber = data.accountNumber || "";
+}
+
+// Check if nickname exists
+const nicknameSnap = await get(
+  ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid)
+);
+
+if (nicknameSnap.exists()) {
+  displayName = nicknameSnap.val();
+}
+
+document.getElementById("chatHeader").innerHTML =
+  displayName +
+  (accountNumber ? ` <span style="font-size:13px;color:#aaa;">(${accountNumber})</span>` : "");
+
 
   loadMessages();
 });
@@ -304,6 +328,19 @@ function loadMessages() {
     container.scrollTop = container.scrollHeight;
   });
 }
+
+document.getElementById("setNicknameBtn").onclick = async () => {
+  const nickname = prompt("Enter nickname for this chat:");
+
+  if (!nickname || !nickname.trim()) return;
+
+  await update(
+    ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid),
+    nickname.trim()
+  );
+
+  location.reload();
+};
 
 function inlineEdit(bubble, key, oldText) {
   bubble.innerHTML = "";
