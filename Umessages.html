@@ -12,8 +12,15 @@ body{background:#0f0f14;color:white;padding:20px;}
 .back{color:#b00b55;font-weight:600;margin-bottom:20px;cursor:pointer;}
 
 .chat-container{
-  max-width:500px;margin:auto;background:#1b1b25;
-  border-radius:20px;padding:20px;display:flex;flex-direction:column;height:80vh;
+  max-width:500px;
+  margin:auto;
+  background:#1b1b25;
+  border-radius:20px;
+  padding:0; /* remove previous padding */
+  display:flex;
+  flex-direction:column;
+  height:80vh;
+  overflow:hidden;
 }
 
 .chat-header{
@@ -22,8 +29,12 @@ body{background:#0f0f14;color:white;padding:20px;}
 }
 
 .messages{
-  flex:1;overflow-y:auto;margin-bottom:15px;
-  display:flex;flex-direction:column;
+  flex:1;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  gap:4px; /* small gap between messages */
 }
 
 .message-row{
@@ -67,10 +78,35 @@ body{background:#0f0f14;color:white;padding:20px;}
   padding:8px 10px;border-radius:10px;border:none;outline:none;font-size:14px;width:100%;
 }
 
-.input-area{display:flex;gap:10px;}
-.input-area input{flex:1;padding:10px;border-radius:10px;border:none;outline:none;}
+.input-area{
+  display:flex;
+  gap:10px;
+  padding:10px 20px;
+  background:#1b1b25;
+  position:sticky;
+  bottom:0;
+  z-index:10;
+  border-top:1px solid #333;
+}
+
+.input-area input{
+  flex:1;
+  padding:12px 16px;
+  border-radius:20px;
+  border:none;
+  outline:none;
+  font-size:14px;
+}
+
 .input-area button{
-  background:#b00b55;border:none;padding:10px 20px;border-radius:10px;color:white;font-weight:600;cursor:pointer;
+  background:#b00b55;
+  border:none;
+  padding:12px 20px;
+  border-radius:20px;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  flex-shrink:0;
 }
 </style>
 </head>
