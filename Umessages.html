@@ -10,40 +10,47 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:#0f0f14;color:white;padding:20px;}
 .back{color:#b00b55;font-weight:600;margin-bottom:20px;cursor:pointer;}
+
 .chat-container{
   max-width:500px;margin:auto;background:#1b1b25;
   border-radius:20px;padding:20px;display:flex;flex-direction:column;height:80vh;
 }
+
 .chat-header{
   text-align:center;font-weight:600;font-size:18px;color:#b00b55;
   margin-bottom:15px;border-bottom:1px solid #333;padding-bottom:10px;
 }
+
 .messages{
   flex:1;overflow-y:auto;margin-bottom:15px;
   display:flex;flex-direction:column;
 }
+
 .message-row{
-  display:flex;width:100%;
-  align-items:flex-end;margin-bottom:2px;
+  display:flex;width:100%;align-items:flex-end;margin-bottom:2px;
 }
+
 .message-wrapper{
   display:flex;flex-direction:column;max-width:70%;
 }
+
 .message{
   padding:10px 14px;border-radius:18px;font-size:14px;word-wrap:break-word;
 }
+
 .sent{background:#b00b55;border-bottom-right-radius:6px;}
 .received{background:#333;border-bottom-left-radius:6px;}
+
 .timestamp{
-  font-size:11px;color:#888;margin-top:2px;align-self:flex-end;
-  opacity:0;transition:opacity 0.2s ease;
+  font-size:11px;color:#888;margin-right:4px;
+  user-select:none;
 }
-.timestamp.show{opacity:1;}
+
 .action-buttons{
-  display:flex;gap:6px;margin-right:6px;opacity:0;
-  transition:opacity 0.2s ease;align-items:center;
+  display:flex;flex-direction:column;gap:4px;margin-right:6px;
+  align-items:center;
 }
-.message-row:hover .action-buttons{opacity:1;}
+
 .action-buttons button{
   width:28px;height:28px;border-radius:50%;border:none;
   background:#2a2a35;color:white;font-size:12px;
@@ -51,9 +58,11 @@ body{background:#0f0f14;color:white;padding:20px;}
   transition:0.2s ease;
 }
 .action-buttons button:hover{background:#3a3a45;}
+
 .edit-input{
   padding:8px 10px;border-radius:10px;border:none;outline:none;font-size:14px;width:100%;
 }
+
 .input-area{display:flex;gap:10px;}
 .input-area input{flex:1;padding:10px;border-radius:10px;border:none;outline:none;}
 .input-area button{
@@ -128,40 +137,39 @@ function loadMessages(){
       row.className = "message-row";
       row.style.justifyContent = msg.sender===currentUser.uid?"flex-end":"flex-start";
 
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-wrapper";
-
-      const bubble = document.createElement("div");
-      bubble.className = "message " + (msg.sender===currentUser.uid?"sent":"received");
-      bubble.innerText = msg.text;
-
-      const time = document.createElement("div");
-      time.className = "timestamp";
-      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-      bubble.onclick = ()=>time.classList.toggle("show");
-
-      wrapper.appendChild(bubble);
-      wrapper.appendChild(time);
-
       if(msg.sender === currentUser.uid){
+        // Own message: [actions+timestamp] | bubble
         const actions = document.createElement("div");
         actions.className = "action-buttons";
+
+        const time = document.createElement("div");
+        time.className = "timestamp";
+        time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+        actions.appendChild(time);
 
         const editBtn = document.createElement("button");
         editBtn.innerHTML = "✎";
         editBtn.onclick = ()=>inlineEdit(bubble,key,msg.text);
+        actions.appendChild(editBtn);
 
         const delBtn = document.createElement("button");
         delBtn.innerHTML = "🗑";
         delBtn.onclick = ()=>remove(ref(db,"messages/"+chatId+"/"+key));
-
-        actions.appendChild(editBtn);
         actions.appendChild(delBtn);
 
-        row.appendChild(wrapper);
-        row.appendChild(actions); // wrapper first, then buttons
+        const bubble = document.createElement("div");
+        bubble.className = "message sent";
+        bubble.innerText = msg.text;
+
+        row.appendChild(actions);
+        row.appendChild(bubble);
+
       }else{
-        row.appendChild(wrapper);
+        // Other's message: just bubble
+        const bubble = document.createElement("div");
+        bubble.className = "message received";
+        bubble.innerText = msg.text;
+        row.appendChild(bubble);
       }
 
       container.appendChild(row);
