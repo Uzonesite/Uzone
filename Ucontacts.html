@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzone Contacts</title>
+<link rel="icon" type="image/png" href="logo3.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #0f0f14;
+  color: white;
+  padding: 20px;
+}
+
+.back {
+  color: #b00b55;
+  font-weight: 600;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.contacts-container {
+  max-width: 600px;
+  margin: auto;
+}
+
+.header {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #b00b55;
+}
+
+.contact {
+  background: #1b1b25;
+  padding: 15px 20px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact:hover {
+  background: #242435;
+}
+
+.contact-name {
+  font-weight: 500;
+}
+
+.dm-btn {
+  background: #b00b55;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dm-btn:hover {
+  background: #920946;
+}
+
+.empty {
+  color: #888;
+  text-align: center;
+  margin-top: 40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="back" onclick="window.location.href='Uhub.html'">← Back</div>
+
+<div class="contacts-container">
+  <div class="header">Contacts</div>
+  <div id="contactsList"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+  projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.firebasestorage.app",
+  messagingSenderId: "88783701381",
+  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const contactsList = document.getElementById("contactsList");
+  const snapshot = await get(ref(db, "users"));
+
+  if (!snapshot.exists()) {
+    contactsList.innerHTML =
+      "<div class='empty'>No users found.</div>";
+    return;
+  }
+
+  snapshot.forEach((child) => {
+    const uid = child.key;
+    const data = child.val();
+
+    if (uid === user.uid) return;
+
+    const div = document.createElement("div");
+    div.className = "contact";
+
+    const name = document.createElement("div");
+    name.className = "contact-name";
+    name.innerText = data.name || data.email || "User";
+
+    const btn = document.createElement("button");
+    btn.className = "dm-btn";
+    btn.innerText = "Message";
+    btn.onclick = () => {
+      window.location.href = "Umessages.html?uid=" + uid;
+    };
+
+    div.appendChild(name);
+    div.appendChild(btn);
+
+    contactsList.appendChild(div);
+  });
+});
+</script>
+
+</body>
+</html>
