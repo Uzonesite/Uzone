@@ -26,28 +26,52 @@ body{background:#0f0f14;color:white;padding:20px;}
 
 .messages{
   flex:1;overflow-y:auto;margin-bottom:15px;
-  display:flex;flex-direction:column;gap:8px;
+  display:flex;flex-direction:column;
 }
 
-.message-row{display:flex;width:100%;}
-.message-wrapper{display:flex;flex-direction:column;max-width:70%;}
+.message-row{
+  display:flex;width:100%;align-items:flex-end;margin-bottom:4px;
+}
+
+.message-wrapper{
+  display:flex;flex-direction:column;max-width:70%;
+}
 
 .message{
-  padding:10px 14px;border-radius:18px;font-size:14px;
-  word-wrap:break-word;
+  padding:10px 14px;border-radius:18px;font-size:14px;word-wrap:break-word;
 }
 
 .sent{background:#b00b55;border-bottom-right-radius:6px;}
 .received{background:#333;border-bottom-left-radius:6px;}
 
 .timestamp{
-  font-size:11px;color:#888;margin-top:4px;
+  font-size:11px;color:#888;margin-top:2px;align-self:flex-end;
+  opacity:0;transition:opacity 0.2s ease;
+}
+
+.timestamp.show{opacity:1;}
+
+.action-buttons{
+  display:flex;gap:6px;margin-right:6px;opacity:0;
+  transition:opacity 0.2s ease;align-items:center;
+}
+
+.message-row:hover .action-buttons{opacity:1;}
+
+.action-buttons button{
+  width:28px;height:28px;border-radius:50%;border:none;
+  background:#2a2a35;color:white;font-size:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:0.2s ease;
+}
+.action-buttons button:hover{background:#3a3a45;}
+
+.edit-input{
+  padding:8px 10px;border-radius:10px;border:none;outline:none;font-size:14px;width:100%;
 }
 
 .input-area{display:flex;gap:10px;}
-.input-area input{
-  flex:1;padding:10px;border-radius:10px;border:none;outline:none;
-}
+.input-area input{flex:1;padding:10px;border-radius:10px;border:none;outline:none;}
 .input-area button{
   background:#b00b55;border:none;padding:10px 20px;
   border-radius:10px;color:white;font-weight:600;cursor:pointer;
@@ -70,109 +94,135 @@ body{background:#0f0f14;color:white;padding:20px;}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, onValue, get, query, orderByChild }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, push, onValue, get, update, remove, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app",
-  messagingSenderId: "88783701381",
-  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  databaseURL: "YOUR_DB_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_BUCKET",
+  messagingSenderId: "YOUR_MSG_ID",
+  appId: "YOUR_APP_ID"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const params=new URLSearchParams(window.location.search);
-const otherUid=params.get("uid");
+const params = new URLSearchParams(window.location.search);
+const otherUid = params.get("uid");
 
 let currentUser;
 let chatId;
 
-onAuthStateChanged(auth,async user=>{
-  if(!user)return window.location.href="index.html";
+onAuthStateChanged(auth, async user => {
+  if (!user) return window.location.href = "index.html";
+  if (!otherUid || otherUid === user.uid) return window.location.href = "Uhub.html";
 
-  if(!otherUid||otherUid===user.uid)
-    return window.location.href="Uhub.html";
+  currentUser = user;
+  chatId = [user.uid, otherUid].sort().join("_");
 
-  currentUser=user;
-  chatId=[user.uid,otherUid].sort().join("_");
+  const snap = await get(ref(db, "users/" + otherUid));
+  if (!snap.exists()) return window.location.href = "Uhub.html";
 
-  const snap=await get(ref(db,"users/"+otherUid));
-  if(!snap.exists())
-    return window.location.href="Uhub.html";
-
-  document.getElementById("chatHeader").innerText=snap.val().name;
-
+  document.getElementById("chatHeader").innerText = snap.val().name;
   loadMessages();
 });
 
-function loadMessages(){
-  const q=query(
-    ref(db,"messages/"+chatId),
-    orderByChild("timestamp")
-  );
+function loadMessages() {
+  const q = query(ref(db, "messages/" + chatId), orderByChild("timestamp"));
 
-  onValue(q,snapshot=>{
-    const container=document.getElementById("messages");
-    container.innerHTML="";
+  onValue(q, snapshot => {
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
 
-    snapshot.forEach(child=>{
-      const msg=child.val();
+    snapshot.forEach(child => {
+      const msg = child.val();
+      const key = child.key;
 
-      const row=document.createElement("div");
-      row.className="message-row";
-      row.style.justifyContent=
-        msg.sender===currentUser.uid?"flex-end":"flex-start";
+      const row = document.createElement("div");
+      row.className = "message-row";
+      row.style.justifyContent = msg.sender === currentUser.uid ? "flex-end" : "flex-start";
 
-      const wrapper=document.createElement("div");
-      wrapper.className="message-wrapper";
+      const wrapper = document.createElement("div");
+      wrapper.className = "message-wrapper";
 
-      const bubble=document.createElement("div");
-      bubble.className="message "+
-        (msg.sender===currentUser.uid?"sent":"received");
-      bubble.innerText=msg.text;
+      const bubble = document.createElement("div");
+      bubble.className = "message " + (msg.sender === currentUser.uid ? "sent" : "received");
+      bubble.innerText = msg.text;
 
-      const time=document.createElement("div");
-      time.className="timestamp";
-      time.innerText=
-        new Date(msg.timestamp)
-        .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      const time = document.createElement("div");
+      time.className = "timestamp";
+      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      bubble.onclick = () => time.classList.toggle("show");
 
       wrapper.appendChild(bubble);
       wrapper.appendChild(time);
-      row.appendChild(wrapper);
+
+      if (msg.sender === currentUser.uid) {
+        // Edit/Delete buttons
+        const actions = document.createElement("div");
+        actions.className = "action-buttons";
+
+        const editBtn = document.createElement("button");
+        editBtn.innerHTML = "✎";
+        editBtn.onclick = () => inlineEdit(bubble, key, msg.text);
+
+        const delBtn = document.createElement("button");
+        delBtn.innerHTML = "🗑";
+        delBtn.onclick = () => remove(ref(db,"messages/"+chatId+"/"+key));
+
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        row.appendChild(actions);
+        row.appendChild(wrapper);
+      } else {
+        row.appendChild(wrapper);
+      }
+
       container.appendChild(row);
     });
 
-    container.scrollTop=container.scrollHeight;
+    container.scrollTop = container.scrollHeight;
   });
 }
 
-window.sendMessage=function(){
-  const input=document.getElementById("messageInput");
-  const text=input.value.trim();
-  if(!text)return;
+function inlineEdit(bubble, key, oldText) {
+  bubble.innerHTML = "";
+  const input = document.createElement("input");
+  input.className = "edit-input";
+  input.value = oldText;
+  bubble.appendChild(input);
+  input.focus();
+
+  input.onblur = () => saveEdit(key, input.value);
+  input.onkeydown = e => { if(e.key==="Enter") saveEdit(key,input.value); };
+}
+
+function saveEdit(key,newText){
+  if(!newText.trim()) return;
+  update(ref(db,"messages/"+chatId+"/"+key), {text:newText});
+}
+
+window.sendMessage = function(){
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  if(!text) return;
 
   push(ref(db,"messages/"+chatId),{
-    sender:currentUser.uid,
-    text:text,
-    timestamp:Date.now()
+    sender: currentUser.uid,
+    text: text,
+    timestamp: Date.now()
   });
 
   input.value="";
 };
 
 document.getElementById("messageInput")
-.addEventListener("keydown",e=>{
-  if(e.key==="Enter")sendMessage();
-});
+.addEventListener("keydown",e => { if(e.key==="Enter") sendMessage(); });
 </script>
 
 </body>
