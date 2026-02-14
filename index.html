@@ -134,82 +134,87 @@
 
   <!-- Firebase SDK -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-      authDomain: "uzone-6148d.firebaseapp.com",
-      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-      projectId: "uzone-6148d",
-      storageBucket: "uzone-6148d.firebasestorage.app",
-      messagingSenderId: "88783701381",
-      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
-      measurementId: "G-HKL5246YMC"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+  projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.firebasestorage.app",
+  messagingSenderId: "88783701381",
+  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-    window.signUp = function () {
+function generateAccountNumber() {
+  return "UZ" + Math.floor(10000000 + Math.random() * 90000000);
+}
+
+window.signUp = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const errorEl = document.getElementById("error");
 
   errorEl.innerText = "";
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      window.location.href = "Uhub.html";
-    })
-    .catch((error) => {
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          errorEl.innerText = "An account with this email already exists.";
-          break;
-        case "auth/invalid-email":
-          errorEl.innerText = "Invalid email format.";
-          break;
-        case "auth/weak-password":
-          errorEl.innerText = "Password must be at least 6 characters.";
-          break;
-        default:
-          errorEl.innerText = "Unable to sign up. Please try again.";
-      }
-    });
-}
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
 
-  window.signIn = function () {
+    const accountNumber = generateAccountNumber();
+
+    await set(ref(db, "users/" + user.uid), {
+      email: email,
+      accountNumber: accountNumber,
+      createdAt: Date.now()
+    });
+
+    window.location.href = "Uhub.html";
+
+  } catch (error) {
+    switch (error.code) {
+      case "auth/email-already-in-use":
+        errorEl.innerText = "An account with this email already exists.";
+        break;
+      case "auth/invalid-email":
+        errorEl.innerText = "Invalid email format.";
+        break;
+      case "auth/weak-password":
+        errorEl.innerText = "Password must be at least 6 characters.";
+        break;
+      default:
+        errorEl.innerText = "Unable to sign up. Please try again.";
+    }
+  }
+};
+
+window.signIn = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const errorEl = document.getElementById("error");
 
   errorEl.innerText = "";
 
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      window.location.href = "Uhub.html";
-    })
-    .catch((error) => {
-      switch (error.code) {
-        case "auth/user-not-found":
-        case "auth/wrong-password":
-        case "auth/invalid-credential":
-          errorEl.innerText = "Invalid email or password.";
-          break;
-        case "auth/invalid-email":
-          errorEl.innerText = "Invalid email format.";
-          break;
-        default:
-          errorEl.innerText = "Login failed. Please try again.";
-      }
-    });
-}
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    window.location.href = "Uhub.html";
+  } catch (error) {
+    errorEl.innerText = "Invalid email or password.";
+  }
+};
+</script>
 
-  </script>
 
 </body>
 </html>
