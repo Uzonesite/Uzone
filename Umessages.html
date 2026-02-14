@@ -300,17 +300,17 @@ function loadMessages(){
 function adjustChatHeight() {
   const headerHeight = document.querySelector('.chat-header').offsetHeight;
   const inputHeight = document.querySelector('.input-area').offsetHeight;
-  const container = document.querySelector('.messages');
+  const messages = document.querySelector('.messages');
 
-  // Use window.innerHeight to account for keyboard shrinking viewport
-  const availableHeight = window.innerHeight - headerHeight - inputHeight;
-  container.style.height = `${availableHeight}px`;
+  // Use window.innerHeight for real visible viewport (adjusts for keyboard)
+  messages.style.height = `${window.innerHeight - headerHeight - inputHeight}px`;
 }
 
-// Run on load and whenever viewport changes (keyboard open/close)
+// Call on load, resize, and focus/blur of input
 window.addEventListener('load', adjustChatHeight);
 window.addEventListener('resize', adjustChatHeight);
-window.addEventListener('orientationchange', adjustChatHeight); // handle rotation
+document.getElementById('messageInput').addEventListener('focus', adjustChatHeight);
+document.getElementById('messageInput').addEventListener('blur', adjustChatHeight);
 
 
   
