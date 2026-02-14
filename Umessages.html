@@ -31,33 +31,29 @@ body{background:#0f0f14;color:white;padding:20px;}
 }
 
 .message-wrapper{
-  display:flex;flex-direction:column;max-width:70%;
+  display:flex;align-items:center;gap:6px;
 }
 
 .message{
   padding:10px 14px;border-radius:18px;font-size:14px;word-wrap:break-word;
+  max-width:70%;
 }
 
 .sent{background:#b00b55;border-bottom-right-radius:6px;}
 .received{background:#333;border-bottom-left-radius:6px;}
 
 .timestamp{
-  font-size:11px;color:#888;margin-right:4px;
-  user-select:none;
+  font-size:11px;color:#888;user-select:none;
+  white-space:nowrap;
 }
 
-.action-buttons{
-  display:flex;flex-direction:column;gap:4px;margin-right:6px;
-  align-items:center;
-}
-
-.action-buttons button{
+.action-button{
   width:28px;height:28px;border-radius:50%;border:none;
   background:#2a2a35;color:white;font-size:12px;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
   transition:0.2s ease;
 }
-.action-buttons button:hover{background:#3a3a45;}
+.action-button:hover{background:#3a3a45;}
 
 .edit-input{
   padding:8px 10px;border-radius:10px;border:none;outline:none;font-size:14px;width:100%;
@@ -138,34 +134,35 @@ function loadMessages(){
       row.style.justifyContent = msg.sender===currentUser.uid?"flex-end":"flex-start";
 
       if(msg.sender === currentUser.uid){
-        // Own message: [actions+timestamp] | bubble
-        const actions = document.createElement("div");
-        actions.className = "action-buttons";
+        // Own message: [timestamp][edit][delete][bubble]
+        const wrapper = document.createElement("div");
+        wrapper.className = "message-wrapper";
 
         const time = document.createElement("div");
         time.className = "timestamp";
         time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-        actions.appendChild(time);
+        wrapper.appendChild(time);
 
         const editBtn = document.createElement("button");
+        editBtn.className = "action-button";
         editBtn.innerHTML = "✎";
         editBtn.onclick = ()=>inlineEdit(bubble,key,msg.text);
-        actions.appendChild(editBtn);
+        wrapper.appendChild(editBtn);
 
         const delBtn = document.createElement("button");
+        delBtn.className = "action-button";
         delBtn.innerHTML = "🗑";
         delBtn.onclick = ()=>remove(ref(db,"messages/"+chatId+"/"+key));
-        actions.appendChild(delBtn);
+        wrapper.appendChild(delBtn);
 
         const bubble = document.createElement("div");
         bubble.className = "message sent";
         bubble.innerText = msg.text;
+        wrapper.appendChild(bubble);
 
-        row.appendChild(actions);
-        row.appendChild(bubble);
+        row.appendChild(wrapper);
 
       }else{
-        // Other's message: just bubble
         const bubble = document.createElement("div");
         bubble.className = "message received";
         bubble.innerText = msg.text;
