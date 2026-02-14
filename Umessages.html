@@ -15,17 +15,6 @@
   font-family: 'Poppins', sans-serif;
 }
 
-  .chat-header {
-  text-align: center;
-  font-weight: 600;
-  font-size: 18px;
-  color: #b00b55;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 10px;
-}
-
-  
 body {
   background: #0f0f14;
   color: white;
@@ -50,23 +39,37 @@ body {
   height: 80vh;
 }
 
+.chat-header {
+  text-align: center;
+  font-weight: 600;
+  font-size: 18px;
+  color: #b00b55;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
 .messages {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 15px;
-
   display: flex;
   flex-direction: column;
 }
 
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 75%;
+  margin-bottom: 8px;
+}
 
 .message {
-  margin-bottom: 12px;
   padding: 10px 14px;
   border-radius: 18px;
-  max-width: 75%;
   font-size: 14px;
   word-wrap: break-word;
+  cursor: pointer;
 }
 
 .sent {
@@ -81,20 +84,17 @@ body {
   border-bottom-left-radius: 5px;
 }
 
-  .timestamp {
+.timestamp {
   font-size: 11px;
   color: #888;
   margin-top: 4px;
-  display: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.message-wrapper {
-  display: flex;
-  flex-direction: column;
-  max-width: 75%;
+.timestamp.show {
+  opacity: 1;
 }
-
-
 
 .input-area {
   display: flex;
@@ -146,7 +146,7 @@ import { getDatabase, ref, push, onValue, get }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  apiKey: "YOUR_API_KEY",
   authDomain: "uzone-6148d.firebaseapp.com",
   databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
   projectId: "uzone-6148d",
@@ -170,9 +170,15 @@ onAuthStateChanged(auth, async (user) => {
     window.location.href = "index.html";
   } else {
     currentUser = user;
+
+    if (!otherUid) {
+      alert("No user selected.");
+      window.location.href = "Umatch.html";
+      return;
+    }
+
     chatId = [currentUser.uid, otherUid].sort().join("_");
 
-    // Load their name
     const userSnap = await get(ref(db, "users/" + otherUid));
     if (userSnap.exists()) {
       document.getElementById("chatHeader").innerText =
@@ -182,7 +188,6 @@ onAuthStateChanged(auth, async (user) => {
     loadMessages();
   }
 });
-
 
 function loadMessages() {
   const messagesRef = ref(db, "messages/" + chatId);
@@ -194,37 +199,33 @@ function loadMessages() {
     if (!snapshot.exists()) return;
 
     snapshot.forEach((child) => {
-  const msg = child.val();
+      const msg = child.val();
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "message-wrapper";
-  wrapper.style.alignSelf =
-    msg.sender === currentUser.uid ? "flex-end" : "flex-start";
+      const wrapper = document.createElement("div");
+      wrapper.className = "message-wrapper";
+      wrapper.style.alignSelf =
+        msg.sender === currentUser.uid ? "flex-end" : "flex-start";
 
-  const bubble = document.createElement("div");
-  bubble.className = "message " +
-    (msg.sender === currentUser.uid ? "sent" : "received");
-  bubble.innerText = msg.text;
+      const bubble = document.createElement("div");
+      bubble.className = "message " +
+        (msg.sender === currentUser.uid ? "sent" : "received");
+      bubble.innerText = msg.text;
 
-  const time = document.createElement("div");
-  time.className = "timestamp";
+      const time = document.createElement("div");
+      time.className = "timestamp";
+      time.innerText = formatTimestamp(new Date(msg.timestamp));
 
-  const date = new Date(msg.timestamp);
-  time.innerText = date.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+      bubble.addEventListener("click", () => {
+        document.querySelectorAll(".timestamp").forEach(t => {
+          t.classList.remove("show");
+        });
+        time.classList.toggle("show");
+      });
 
-  bubble.addEventListener("click", () => {
-    time.style.display =
-      time.style.display === "none" ? "block" : "none";
-  });
-
-  wrapper.appendChild(bubble);
-  wrapper.appendChild(time);
-  container.appendChild(wrapper);
-});
-
+      wrapper.appendChild(bubble);
+      wrapper.appendChild(time);
+      container.appendChild(wrapper);
+    });
 
     container.scrollTop = container.scrollHeight;
   });
@@ -245,6 +246,32 @@ window.sendMessage = function() {
 
   input.value = "";
 };
+
+function formatTimestamp(date) {
+  const now = new Date();
+
+  const isToday =
+    date.toDateString() === now.toDateString();
+
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+
+  const isYesterday =
+    date.toDateString() === yesterday.toDateString();
+
+  const timeString = date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  if (isToday) return "Today " + timeString;
+  if (isYesterday) return "Yesterday " + timeString;
+
+  return date.toLocaleDateString([], {
+    month: 'short',
+    day: 'numeric'
+  }) + ", " + timeString;
+}
 </script>
 
 </body>
