@@ -41,9 +41,17 @@ body{background:#0f0f14;color:white;padding:20px;}
   display:flex;width:100%;align-items:flex-end;margin-bottom:2px;
 }
 
-.message-wrapper{
-  display:flex;align-items:center;gap:6px;
+.message-wrapper .timestamp,
+.message-wrapper .action-button {
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
+
+.message-wrapper.active .timestamp,
+.message-wrapper.active .action-button {
+  opacity: 1;
+}
+
 
 .message{
   padding:10px 14px;border-radius:18px;font-size:14px;word-wrap:break-word;
@@ -219,9 +227,16 @@ function loadMessages(){
       container.appendChild(row);
 
       // Tap toggle for mobile
-      bubble.addEventListener("click", ()=>{
-        wrapper.classList.toggle("active");
-      });
+      bubble.addEventListener("click", () => {
+  // Remove 'active' from all other wrappers
+  document.querySelectorAll(".message-wrapper.active").forEach(w => {
+    if (w !== wrapper) w.classList.remove("active");
+  });
+
+  // Toggle active on this one
+  wrapper.classList.toggle("active");
+});
+
       if(msg.sender!==currentUser.uid){
         time.addEventListener("click", ()=>{
           wrapper.classList.toggle("active");
