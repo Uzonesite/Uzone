@@ -58,14 +58,8 @@ body {
   gap: 8px;
 }
 
-/* Hide scrollbar */
-.messages::-webkit-scrollbar {
-  display: none;
-}
-.messages {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.messages::-webkit-scrollbar { display: none; }
+.messages { -ms-overflow-style: none; scrollbar-width: none; }
 
 .message-row {
   display: flex;
@@ -78,6 +72,7 @@ body {
   flex-direction: column;
   width: fit-content;
   max-width: 70%;
+  position: relative;
 }
 
 .message {
@@ -85,7 +80,11 @@ body {
   border-radius: 18px;
   font-size: 14px;
   word-wrap: break-word;
-  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.message:hover {
+  transform: scale(1.02);
 }
 
 .sent {
@@ -110,11 +109,23 @@ body {
   opacity: 1;
 }
 
-/* Circular action buttons */
+.edited-label {
+  font-size: 10px;
+  color: #aaa;
+  margin-left: 6px;
+}
+
+/* Action buttons hidden until hover */
 .action-buttons {
   display: flex;
   gap: 6px;
   margin-right: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message-row:hover .action-buttons {
+  opacity: 1;
 }
 
 .action-buttons button {
@@ -134,6 +145,16 @@ body {
 
 .action-buttons button:hover {
   background: #3a3a45;
+}
+
+/* Inline editing input */
+.edit-input {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 100%;
 }
 
 .input-area {
@@ -166,12 +187,8 @@ body {
 <div class="back" onclick="window.location.href='Umatch.html'">← Back</div>
 
 <div class="chat-container">
-  <div class="chat-header" id="chatHeader">
-    Loading...
-  </div>
-
+  <div class="chat-header" id="chatHeader">Loading...</div>
   <div class="messages" id="messages"></div>
-
   <div class="input-area">
     <input type="text" id="messageInput" placeholder="Type a message..." />
     <button onclick="sendMessage()">Send</button>
@@ -186,13 +203,13 @@ import { getDatabase, ref, push, onValue, get, update, remove }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app",
-  messagingSenderId: "88783701381",
-  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -206,33 +223,21 @@ let currentUser;
 let chatId;
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    currentUser = user;
+  if (!user) return window.location.href = "index.html";
 
-    if (!otherUid) {
-      alert("No user selected.");
-      window.location.href = "Umatch.html";
-      return;
-    }
+  currentUser = user;
+  chatId = [currentUser.uid, otherUid].sort().join("_");
 
-    chatId = [currentUser.uid, otherUid].sort().join("_");
-
-    const userSnap = await get(ref(db, "users/" + otherUid));
-    if (userSnap.exists()) {
-      document.getElementById("chatHeader").innerText =
-        userSnap.val().name;
-    }
-
-    loadMessages();
+  const snap = await get(ref(db, "users/" + otherUid));
+  if (snap.exists()) {
+    document.getElementById("chatHeader").innerText = snap.val().name;
   }
+
+  loadMessages();
 });
 
 function loadMessages() {
-  const messagesRef = ref(db, "messages/" + chatId);
-
-  onValue(messagesRef, (snapshot) => {
+  onValue(ref(db, "messages/" + chatId), (snapshot) => {
     const container = document.getElementById("messages");
     container.innerHTML = "";
 
@@ -240,7 +245,7 @@ function loadMessages() {
 
     snapshot.forEach((child) => {
       const msg = child.val();
-      const messageKey = child.key;
+      const key = child.key;
 
       const row = document.createElement("div");
       row.className = "message-row";
@@ -253,18 +258,21 @@ function loadMessages() {
       const bubble = document.createElement("div");
       bubble.className = "message " +
         (msg.sender === currentUser.uid ? "sent" : "received");
+
       bubble.innerText = msg.text;
+
+      if (msg.edited) {
+        const edited = document.createElement("span");
+        edited.className = "edited-label";
+        edited.innerText = "(edited)";
+        bubble.appendChild(edited);
+      }
 
       const time = document.createElement("div");
       time.className = "timestamp";
-      time.innerText = formatTimestamp(new Date(msg.timestamp));
+      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
-      bubble.addEventListener("click", () => {
-        document.querySelectorAll(".timestamp").forEach(t => {
-          t.classList.remove("show");
-        });
-        time.classList.toggle("show");
-      });
+      bubble.onclick = () => time.classList.toggle("show");
 
       wrapper.appendChild(bubble);
       wrapper.appendChild(time);
@@ -275,14 +283,14 @@ function loadMessages() {
 
         const editBtn = document.createElement("button");
         editBtn.innerHTML = "✎";
-        editBtn.onclick = () => editMessage(messageKey, msg.text);
+        editBtn.onclick = () => inlineEdit(bubble, key, msg.text);
 
-        const deleteBtn = document.createElement("button");
-        deleteBtn.innerHTML = "🗑";
-        deleteBtn.onclick = () => deleteMessage(messageKey);
+        const delBtn = document.createElement("button");
+        delBtn.innerHTML = "🗑";
+        delBtn.onclick = () => remove(ref(db,"messages/"+chatId+"/"+key));
 
         actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
+        actions.appendChild(delBtn);
 
         row.appendChild(actions);
         row.appendChild(wrapper);
@@ -297,55 +305,42 @@ function loadMessages() {
   });
 }
 
+function inlineEdit(bubble, key, oldText) {
+  bubble.innerHTML = "";
+  const input = document.createElement("input");
+  input.className = "edit-input";
+  input.value = oldText;
+  bubble.appendChild(input);
+  input.focus();
+
+  input.onblur = () => saveEdit(key, input.value);
+  input.onkeydown = (e) => {
+    if (e.key === "Enter") saveEdit(key, input.value);
+  };
+}
+
+function saveEdit(key, newText) {
+  if (!newText.trim()) return;
+  update(ref(db,"messages/"+chatId+"/"+key),{
+    text:newText,
+    edited:true
+  });
+}
+
 window.sendMessage = function() {
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
   if (!text) return;
 
-  push(ref(db, "messages/" + chatId), {
-    sender: currentUser.uid,
-    text: text,
-    timestamp: Date.now()
+  push(ref(db,"messages/"+chatId),{
+    sender:currentUser.uid,
+    text:text,
+    timestamp:Date.now(),
+    edited:false
   });
 
-  input.value = "";
+  input.value="";
 };
-
-function editMessage(key, oldText) {
-  const newText = prompt("Edit message:", oldText);
-  if (newText !== null && newText.trim() !== "") {
-    update(ref(db, "messages/" + chatId + "/" + key), {
-      text: newText
-    });
-  }
-}
-
-function deleteMessage(key) {
-  if (confirm("Delete this message?")) {
-    remove(ref(db, "messages/" + chatId + "/" + key));
-  }
-}
-
-function formatTimestamp(date) {
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
-  const isYesterday = date.toDateString() === yesterday.toDateString();
-
-  const timeString = date.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  if (isToday) return "Today " + timeString;
-  if (isYesterday) return "Yesterday " + timeString;
-
-  return date.toLocaleDateString([], {
-    month: 'short',
-    day: 'numeric'
-  }) + ", " + timeString;
-}
 </script>
 
 </body>
