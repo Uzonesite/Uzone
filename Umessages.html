@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uzone Messages</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
+<link rel="icon" type="image/png" href="logo3.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-/* ================= RESET ================= */
+/* Reset and base */
 * {
   margin: 0;
   padding: 0;
@@ -16,78 +15,82 @@
   font-family: 'Poppins', sans-serif;
 }
 
-html, body {
-  height: 100%;
+body {
   background: #0f0f14;
   color: white;
+  padding: 0; /* handled inside container */
 }
 
-/* ================= BACK ================= */
+/* Back button */
 .back {
-  padding: 12px;
-  font-weight: 600;
   color: #b00b55;
+  font-weight: 600;
+  margin: 20px;
   cursor: pointer;
 }
 
-/* ================= CONTAINER ================= */
+/* Chat container */
 .chat-container {
-  max-width: 520px;
-  margin: 0 auto;
+  max-width: 500px;
+  margin: auto;
   background: #1b1b25;
   border-radius: 20px;
-
   display: flex;
   flex-direction: column;
-
-  height: 100vh; /* JS will adjust on mobile */
+  height: 100%; /* changed from 100vh */
   overflow: hidden;
 }
 
-/* ================= HEADER ================= */
 .chat-header {
-  flex-shrink: 0;
-  padding: 14px;
   text-align: center;
-  color: #b00b55;
   font-weight: 600;
+  font-size: 18px;
+  color: #b00b55;
+  padding: 15px 10px;
   border-bottom: 1px solid #333;
-  background: #1b1b25;
+  word-break: break-word;
+  flex-shrink: 0; /* header never shrinks */
 }
 
-/* ================= MESSAGES ================= */
 .messages {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
-  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  padding: 10px 15px;
+  gap: 4px;
+  min-height: 0; /* allow flex shrinking */
 }
 
-/* ================= MESSAGE ================= */
+
+/* Each message row */
 .message-row {
   display: flex;
+  width: 100%;
+  align-items: flex-end;
 }
 
+/* Message wrapper holds bubble + time + buttons */
 .message-wrapper {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 6px;
-  max-width: 100%;
 }
 
+/* Message bubble */
 .message {
   padding: 10px 14px;
   border-radius: 18px;
-  max-width: 70%;
-  word-break: break-word;
   font-size: 14px;
+  word-wrap: break-word;
+  max-width: 70%;
+  flex-shrink: 1;
 }
 
+/* Sent / received bubble colors */
 .sent {
   background: #b00b55;
-  margin-left: auto;
   border-bottom-right-radius: 6px;
 }
 
@@ -96,56 +99,73 @@ html, body {
   border-bottom-left-radius: 6px;
 }
 
-/* ================= META ================= */
+/* Timestamp */
 .timestamp {
   font-size: 11px;
   color: #888;
+  white-space: nowrap;
   opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
+/* Edit/delete buttons */
 .action-button {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: #2a2a35;
   border: none;
+  background: #2a2a35;
   color: white;
+  font-size: 12px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
   opacity: 0;
 }
 
+.action-button:hover {
+  background: #3a3a45;
+}
+
+/* Show timestamp and buttons on tap (active class) */
 .message-wrapper.active .timestamp,
 .message-wrapper.active .action-button {
   opacity: 1;
 }
 
-/* ================= EDIT ================= */
+/* Inline editing input */
 .edit-input {
-  width: 100%;
-  border: none;
-  outline: none;
   padding: 8px 10px;
   border-radius: 10px;
+  border: none;
+  outline: none;
   font-size: 14px;
+  width: 100%;
 }
 
-/* ================= INPUT ================= */
+/* Input area at bottom (sticky above keyboard) */
 .input-area {
-  flex-shrink: 0;
   display: flex;
   gap: 10px;
   padding: 10px;
-  border-top: 1px solid #333;
   background: #1b1b25;
+  border-top: 1px solid #333;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  position: relative; /* no sticky */
 }
-
 .input-area input {
   flex: 1;
   padding: 12px 16px;
   border-radius: 20px;
   border: none;
+  outline: none;
+  font-size: 14px;
+  min-width: 0;
 }
-
 .input-area button {
   background: #b00b55;
   border: none;
@@ -153,19 +173,22 @@ html, body {
   border-radius: 20px;
   color: white;
   font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
 }
+
+
 </style>
 </head>
-
 <body>
 
-<div class="back" onclick="location.href='Uhub.html'">← Back</div>
+<div class="back" onclick="window.location.href='Uhub.html'">← Back</div>
 
-<div class="chat-container" id="chatContainer">
-  <div class="chat-header" id="chatHeader">Loading…</div>
+<div class="chat-container">
+  <div class="chat-header" id="chatHeader">Loading...</div>
   <div class="messages" id="messages"></div>
   <div class="input-area">
-    <input id="messageInput" placeholder="Type a message…" />
+    <input type="text" id="messageInput" placeholder="Type a message..." />
     <button onclick="sendMessage()">Send</button>
   </div>
 </div>
@@ -173,132 +196,167 @@ html, body {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, onValue, get, update, remove, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const app = initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
   authDomain: "uzone-6148d.firebaseapp.com",
-  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com"
-});
+  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+  projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.firebasestorage.app",
+  messagingSenderId: "88783701381",
+  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+};
 
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-const params = new URLSearchParams(location.search);
+const params = new URLSearchParams(window.location.search);
 const otherUid = params.get("uid");
 
-let currentUser, chatId;
+let currentUser;
+let chatId;
 
-/* ========= KEYBOARD RESIZE FIX ========= */
-function resizeForKeyboard() {
-  const vh = window.visualViewport
-    ? window.visualViewport.height
-    : window.innerHeight;
-  document.getElementById("chatContainer").style.height = vh + "px";
-}
-
-window.visualViewport?.addEventListener("resize", resizeForKeyboard);
-window.addEventListener("resize", resizeForKeyboard);
-resizeForKeyboard();
-
-/* ========= AUTH ========= */
 onAuthStateChanged(auth, async user => {
-  if (!user) return location.href = "index.html";
+  if (!user) return window.location.href="index.html";
+  if (!otherUid || otherUid === user.uid) return window.location.href="Uhub.html";
+
   currentUser = user;
   chatId = [user.uid, otherUid].sort().join("_");
 
   const snap = await get(ref(db,"users/"+otherUid));
-  document.getElementById("chatHeader").innerText = snap.val().name;
+  if (!snap.exists()) return window.location.href="Uhub.html";
+
+  const userData = snap.val();
+document.getElementById("chatHeader").innerText = `${userData.name} (#${userData.accountNumber || 'N/A'})`;
 
   loadMessages();
 });
 
-/* ========= MESSAGES ========= */
-function loadMessages() {
-  onValue(ref(db,"messages/"+chatId), snap => {
-    const box = document.getElementById("messages");
-    box.innerHTML = "";
+function loadMessages(){
+  const q = query(ref(db,"messages/"+chatId), orderByChild("timestamp"));
 
-    snap.forEach(c => {
-      const m = c.val();
+  onValue(q, snapshot=>{
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
+
+    snapshot.forEach(child=>{
+      const msg = child.val();
+      const key = child.key;
+
       const row = document.createElement("div");
       row.className = "message-row";
+      row.style.justifyContent = msg.sender===currentUser.uid?"flex-end":"flex-start";
 
-      const wrap = document.createElement("div");
-      wrap.className = "message-wrapper";
+      const wrapper = document.createElement("div");
+      wrapper.className = "message-wrapper";
 
       const bubble = document.createElement("div");
-      bubble.className = "message " + (m.sender === currentUser.uid ? "sent" : "received");
-      bubble.textContent = m.text;
+      bubble.className = "message";
+      bubble.innerText = msg.text;
+      bubble.classList.add(msg.sender===currentUser.uid?"sent":"received");
 
       const time = document.createElement("div");
       time.className = "timestamp";
-      time.textContent = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
-      if (m.sender === currentUser.uid) {
-        const edit = document.createElement("button");
-        edit.className = "action-button";
-        edit.textContent = "✎";
-        edit.onclick = e => {
-          e.stopPropagation();
-          inlineEdit(bubble, c.key, m.text);
-        };
+      if(msg.sender === currentUser.uid){
+        // Own messages: [timestamp][edit][delete][bubble]
+        wrapper.appendChild(time);
 
-        const del = document.createElement("button");
-        del.className = "action-button";
-        del.textContent = "🗑";
-        del.onclick = e => {
-          e.stopPropagation();
-          remove(ref(db,"messages/"+chatId+"/"+c.key));
-        };
+        const editBtn = document.createElement("button");
+        editBtn.className = "action-button";
+        editBtn.innerHTML = "✎";
+        editBtn.onclick = () => inlineEdit(bubble,key,msg.text);
+        wrapper.appendChild(editBtn);
 
-        wrap.append(time, edit, del, bubble);
+        const delBtn = document.createElement("button");
+        delBtn.className = "action-button";
+        delBtn.innerHTML = "🗑";
+        delBtn.onclick = () => remove(ref(db, "messages/" + chatId + "/" + key));
+        wrapper.appendChild(delBtn);
+
+        wrapper.appendChild(bubble);
       } else {
-        wrap.append(bubble, time);
+        // Other messages: [bubble][timestamp]
+        wrapper.appendChild(bubble);
+        wrapper.appendChild(time);
       }
 
-      bubble.onclick = () => wrap.classList.toggle("active");
+      // Tap-to-toggle visibility
+      bubble.addEventListener("click", () => {
+        // Remove 'active' from other wrappers
+        document.querySelectorAll(".message-wrapper.active").forEach(w=>{
+          if(w !== wrapper) w.classList.remove("active");
+        });
+        wrapper.classList.toggle("active");
+      });
 
-      row.appendChild(wrap);
-      box.appendChild(row);
+      row.appendChild(wrapper);
+      container.appendChild(row);
     });
 
-    box.scrollTop = box.scrollHeight;
+    container.scrollTop = container.scrollHeight;
   });
 }
 
-/* ========= EDIT ========= */
-function inlineEdit(bubble, key, oldText) {
+function adjustChatHeight() {
+  const headerHeight = document.querySelector('.chat-header').offsetHeight;
+  const inputHeight = document.querySelector('.input-area').offsetHeight;
+  const container = document.querySelector('.messages');
+
+  // Use window.innerHeight to account for keyboard shrinking viewport
+  const availableHeight = window.innerHeight - headerHeight - inputHeight;
+  container.style.height = `${availableHeight}px`;
+}
+
+// Run on load and whenever viewport changes (keyboard open/close)
+window.addEventListener('load', adjustChatHeight);
+window.addEventListener('resize', adjustChatHeight);
+window.addEventListener('orientationchange', adjustChatHeight); // handle rotation
+
+
+  
+// Inline editing
+function inlineEdit(bubble,key,oldText){
   bubble.innerHTML = "";
   const input = document.createElement("input");
   input.className = "edit-input";
   input.value = oldText;
-
-  input.onclick = e => e.stopPropagation();
-  input.onkeydown = e => e.key === "Enter" && saveEdit(key, input.value);
-  input.onblur = () => saveEdit(key, input.value);
-
   bubble.appendChild(input);
   input.focus();
+
+  input.onblur = ()=>saveEdit(key,input.value);
+  input.onkeydown = e => { if(e.key==="Enter") saveEdit(key,input.value); };
 }
 
-function saveEdit(key, text) {
-  if (text.trim())
-    update(ref(db,"messages/"+chatId+"/"+key), { text });
+function saveEdit(key,newText){
+  if(!newText.trim()) return;
+  update(ref(db,"messages/"+chatId+"/"+key), {text:newText});
 }
 
-/* ========= SEND ========= */
-window.sendMessage = function() {
-  const i = messageInput;
-  if (!i.value.trim()) return;
-  push(ref(db,"messages/"+chatId), {
-    sender: currentUser.uid,
-    text: i.value,
-    timestamp: Date.now()
+// Send message
+window.sendMessage = function(){
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  if(!text) return;
+
+  push(ref(db,"messages/"+chatId),{
+    sender:currentUser.uid,
+    text:text,
+    timestamp:Date.now()
   });
-  i.value = "";
+
+  input.value="";
 };
+
+// Send on Enter
+document.getElementById("messageInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter") sendMessage();
+});
 </script>
+
 
 </body>
 </html>
