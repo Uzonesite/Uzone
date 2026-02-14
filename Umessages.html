@@ -55,7 +55,7 @@ body {
   margin-bottom: 15px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* Hide scrollbar */
@@ -70,13 +70,14 @@ body {
 .message-row {
   display: flex;
   align-items: flex-end;
-  gap: 6px;
+  width: 100%;
 }
 
 .message-wrapper {
   display: flex;
   flex-direction: column;
-  max-width: 75%;
+  width: fit-content;
+  max-width: 70%;
 }
 
 .message {
@@ -89,18 +90,18 @@ body {
 
 .sent {
   background: #b00b55;
-  border-bottom-right-radius: 5px;
+  border-bottom-right-radius: 6px;
 }
 
 .received {
   background: #333;
-  border-bottom-left-radius: 5px;
+  border-bottom-left-radius: 6px;
 }
 
 .timestamp {
   font-size: 11px;
   color: #888;
-  margin-top: 3px;
+  margin-top: 4px;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -109,25 +110,32 @@ body {
   opacity: 1;
 }
 
+/* NEW circular action buttons */
 .action-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  gap: 6px;
+  margin-right: 6px;
 }
 
 .action-buttons button {
-  background: #2a2a35;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   border: none;
-  color: #aaa;
-  font-size: 10px;
-  padding: 4px 6px;
-  border-radius: 6px;
+  background: #2a2a35;
+  color: white;
+  font-size: 12px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
 }
 
 .action-buttons button:hover {
   background: #3a3a45;
 }
+
 
 .input-area {
   display: flex;
@@ -222,70 +230,61 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-function loadMessages() {
-  const messagesRef = ref(db, "messages/" + chatId);
+snapshot.forEach((child) => {
+  const msg = child.val();
+  const messageKey = child.key;
 
-  onValue(messagesRef, (snapshot) => {
-    const container = document.getElementById("messages");
-    container.innerHTML = "";
+  const row = document.createElement("div");
+  row.className = "message-row";
+  row.style.justifyContent =
+    msg.sender === currentUser.uid ? "flex-end" : "flex-start";
 
-    if (!snapshot.exists()) return;
+  const wrapper = document.createElement("div");
+  wrapper.className = "message-wrapper";
 
-    snapshot.forEach((child) => {
-      const msg = child.val();
-      const messageKey = child.key;
+  const bubble = document.createElement("div");
+  bubble.className = "message " +
+    (msg.sender === currentUser.uid ? "sent" : "received");
+  bubble.innerText = msg.text;
 
-      const row = document.createElement("div");
-      row.className = "message-row";
-      row.style.justifyContent =
-        msg.sender === currentUser.uid ? "flex-end" : "flex-start";
+  const time = document.createElement("div");
+  time.className = "timestamp";
+  time.innerText = formatTimestamp(new Date(msg.timestamp));
 
-      if (msg.sender === currentUser.uid) {
-        const actions = document.createElement("div");
-        actions.className = "action-buttons";
-
-        const editBtn = document.createElement("button");
-        editBtn.innerText = "Edit";
-        editBtn.onclick = () => editMessage(messageKey, msg.text);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.innerText = "Delete";
-        deleteBtn.onclick = () => deleteMessage(messageKey);
-
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
-        row.appendChild(actions);
-      }
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-wrapper";
-
-      const bubble = document.createElement("div");
-      bubble.className = "message " +
-        (msg.sender === currentUser.uid ? "sent" : "received");
-      bubble.innerText = msg.text;
-
-      const time = document.createElement("div");
-      time.className = "timestamp";
-      time.innerText = formatTimestamp(new Date(msg.timestamp));
-
-      bubble.addEventListener("click", () => {
-        document.querySelectorAll(".timestamp").forEach(t => {
-          t.classList.remove("show");
-        });
-        time.classList.toggle("show");
-      });
-
-      wrapper.appendChild(bubble);
-      wrapper.appendChild(time);
-      row.appendChild(wrapper);
-
-      container.appendChild(row);
+  bubble.addEventListener("click", () => {
+    document.querySelectorAll(".timestamp").forEach(t => {
+      t.classList.remove("show");
     });
-
-    container.scrollTop = container.scrollHeight;
+    time.classList.toggle("show");
   });
-}
+
+  wrapper.appendChild(bubble);
+  wrapper.appendChild(time);
+
+  // If it's your message, add circular buttons on left
+  if (msg.sender === currentUser.uid) {
+    const actions = document.createElement("div");
+    actions.className = "action-buttons";
+
+    const editBtn = document.createElement("button");
+    editBtn.innerHTML = "✎";
+    editBtn.onclick = () => editMessage(messageKey, msg.text);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.innerHTML = "🗑";
+    deleteBtn.onclick = () => deleteMessage(messageKey);
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+
+    row.appendChild(actions);
+    row.appendChild(wrapper);
+  } else {
+    row.appendChild(wrapper);
+  }
+
+  container.appendChild(row);
+});
 
 window.sendMessage = function() {
   const input = document.getElementById("messageInput");
