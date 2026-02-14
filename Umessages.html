@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzone Messages</title>
+<link rel="icon" type="image/png" href="logo3.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #0f0f14;
+  color: white;
+  padding: 20px;
+}
+
+.back {
+  color: #b00b55;
+  font-weight: 600;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.chat-container {
+  max-width: 500px;
+  margin: auto;
+  background: #1b1b25;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 15px;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 10px 14px;
+  border-radius: 15px;
+  max-width: 70%;
+  font-size: 14px;
+}
+
+.sent {
+  background: #b00b55;
+  align-self: flex-end;
+}
+
+.received {
+  background: #333;
+  align-self: flex-start;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+}
+
+.input-area button {
+  background: #b00b55;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="back" onclick="window.location.href='Umatch.html'">← Back</div>
+
+<div class="chat-container">
+  <div class="messages" id="messages"></div>
+
+  <div class="input-area">
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, push, onValue }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+  projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.firebasestorage.app",
+  messagingSenderId: "88783701381",
+  appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const urlParams = new URLSearchParams(window.location.search);
+const otherUid = urlParams.get("uid");
+
+let currentUser;
+let chatId;
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    currentUser = user;
+    chatId = [currentUser.uid, otherUid].sort().join("_");
+    loadMessages();
+  }
+});
+
+function loadMessages() {
+  const messagesRef = ref(db, "messages/" + chatId);
+
+  onValue(messagesRef, (snapshot) => {
+    const container = document.getElementById("messages");
+    container.innerHTML = "";
+
+    if (!snapshot.exists()) return;
+
+    snapshot.forEach((child) => {
+      const msg = child.val();
+      const div = document.createElement("div");
+      div.className = "message " +
+        (msg.sender === currentUser.uid ? "sent" : "received");
+      div.innerText = msg.text;
+      container.appendChild(div);
+    });
+
+    container.scrollTop = container.scrollHeight;
+  });
+}
+
+window.sendMessage = function() {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  const messagesRef = ref(db, "messages/" + chatId);
+
+  push(messagesRef, {
+    sender: currentUser.uid,
+    text: text,
+    timestamp: Date.now()
+  });
+
+  input.value = "";
+};
+</script>
+
+</body>
+</html>
