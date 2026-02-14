@@ -8,176 +8,49 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#0f0f14;color:white;padding:20px;}
+.back{color:#b00b55;font-weight:600;margin-bottom:20px;cursor:pointer;}
+
+.chat-container{
+  max-width:500px;margin:auto;background:#1b1b25;
+  border-radius:20px;padding:20px;display:flex;
+  flex-direction:column;height:80vh;
 }
 
-body {
-  background: #0f0f14;
-  color: white;
-  padding: 20px;
+.chat-header{
+  text-align:center;font-weight:600;font-size:18px;
+  color:#b00b55;margin-bottom:15px;border-bottom:1px solid #333;
+  padding-bottom:10px;
 }
 
-.back {
-  color: #b00b55;
-  font-weight: 600;
-  margin-bottom: 20px;
-  cursor: pointer;
+.messages{
+  flex:1;overflow-y:auto;margin-bottom:15px;
+  display:flex;flex-direction:column;gap:8px;
 }
 
-.chat-container {
-  max-width: 500px;
-  margin: auto;
-  background: #1b1b25;
-  border-radius: 20px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  height: 80vh;
+.message-row{display:flex;width:100%;}
+.message-wrapper{display:flex;flex-direction:column;max-width:70%;}
+
+.message{
+  padding:10px 14px;border-radius:18px;font-size:14px;
+  word-wrap:break-word;
 }
 
-.chat-header {
-  text-align: center;
-  font-weight: 600;
-  font-size: 18px;
-  color: #b00b55;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 10px;
+.sent{background:#b00b55;border-bottom-right-radius:6px;}
+.received{background:#333;border-bottom-left-radius:6px;}
+
+.timestamp{
+  font-size:11px;color:#888;margin-top:4px;
 }
 
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.input-area{display:flex;gap:10px;}
+.input-area input{
+  flex:1;padding:10px;border-radius:10px;border:none;outline:none;
 }
-
-.messages::-webkit-scrollbar { display: none; }
-.messages { -ms-overflow-style: none; scrollbar-width: none; }
-
-.message-row {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-}
-
-.message-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
-  max-width: 70%;
-  position: relative;
-}
-
-.message {
-  padding: 10px 14px;
-  border-radius: 18px;
-  font-size: 14px;
-  word-wrap: break-word;
-  transition: transform 0.15s ease;
-}
-
-.message:hover {
-  transform: scale(1.02);
-}
-
-.sent {
-  background: #b00b55;
-  border-bottom-right-radius: 6px;
-}
-
-.received {
-  background: #333;
-  border-bottom-left-radius: 6px;
-}
-
-.timestamp {
-  font-size: 11px;
-  color: #888;
-  margin-top: 4px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.timestamp.show {
-  opacity: 1;
-}
-
-.edited-label {
-  font-size: 10px;
-  color: #aaa;
-  margin-left: 6px;
-}
-
-/* Action buttons hidden until hover */
-.action-buttons {
-  display: flex;
-  gap: 6px;
-  margin-right: 6px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.message-row:hover .action-buttons {
-  opacity: 1;
-}
-
-.action-buttons button {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: none;
-  background: #2a2a35;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s ease;
-}
-
-.action-buttons button:hover {
-  background: #3a3a45;
-}
-
-/* Inline editing input */
-.edit-input {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  width: 100%;
-}
-
-.input-area {
-  display: flex;
-  gap: 10px;
-}
-
-.input-area input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-}
-
-.input-area button {
-  background: #b00b55;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
+.input-area button{
+  background:#b00b55;border:none;padding:10px 20px;
+  border-radius:10px;color:white;font-weight:600;cursor:pointer;
 }
 </style>
 </head>
@@ -199,7 +72,7 @@ body {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, onValue, get, update, remove }
+import { getDatabase, ref, push, onValue, get, query, orderByChild }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -212,135 +85,94 @@ const firebaseConfig = {
   appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
 
-const urlParams = new URLSearchParams(window.location.search);
-const otherUid = urlParams.get("uid");
+const params=new URLSearchParams(window.location.search);
+const otherUid=params.get("uid");
 
 let currentUser;
 let chatId;
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return window.location.href = "index.html";
+onAuthStateChanged(auth,async user=>{
+  if(!user)return window.location.href="index.html";
 
-  currentUser = user;
-  chatId = [currentUser.uid, otherUid].sort().join("_");
+  if(!otherUid||otherUid===user.uid)
+    return window.location.href="Uhub.html";
 
-  const snap = await get(ref(db, "users/" + otherUid));
-  if (snap.exists()) {
-    document.getElementById("chatHeader").innerText = snap.val().name;
-  }
+  currentUser=user;
+  chatId=[user.uid,otherUid].sort().join("_");
+
+  const snap=await get(ref(db,"users/"+otherUid));
+  if(!snap.exists())
+    return window.location.href="Uhub.html";
+
+  document.getElementById("chatHeader").innerText=snap.val().name;
 
   loadMessages();
 });
 
-function loadMessages() {
-  onValue(ref(db, "messages/" + chatId), (snapshot) => {
-    const container = document.getElementById("messages");
-    container.innerHTML = "";
+function loadMessages(){
+  const q=query(
+    ref(db,"messages/"+chatId),
+    orderByChild("timestamp")
+  );
 
-    if (!snapshot.exists()) return;
+  onValue(q,snapshot=>{
+    const container=document.getElementById("messages");
+    container.innerHTML="";
 
-    snapshot.forEach((child) => {
-      const msg = child.val();
-      const key = child.key;
+    snapshot.forEach(child=>{
+      const msg=child.val();
 
-      const row = document.createElement("div");
-      row.className = "message-row";
-      row.style.justifyContent =
-        msg.sender === currentUser.uid ? "flex-end" : "flex-start";
+      const row=document.createElement("div");
+      row.className="message-row";
+      row.style.justifyContent=
+        msg.sender===currentUser.uid?"flex-end":"flex-start";
 
-      const wrapper = document.createElement("div");
-      wrapper.className = "message-wrapper";
+      const wrapper=document.createElement("div");
+      wrapper.className="message-wrapper";
 
-      const bubble = document.createElement("div");
-      bubble.className = "message " +
-        (msg.sender === currentUser.uid ? "sent" : "received");
+      const bubble=document.createElement("div");
+      bubble.className="message "+
+        (msg.sender===currentUser.uid?"sent":"received");
+      bubble.innerText=msg.text;
 
-      bubble.innerText = msg.text;
-
-      if (msg.edited) {
-        const edited = document.createElement("span");
-        edited.className = "edited-label";
-        edited.innerText = "(edited)";
-        bubble.appendChild(edited);
-      }
-
-      const time = document.createElement("div");
-      time.className = "timestamp";
-      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-
-      bubble.onclick = () => time.classList.toggle("show");
+      const time=document.createElement("div");
+      time.className="timestamp";
+      time.innerText=
+        new Date(msg.timestamp)
+        .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
       wrapper.appendChild(bubble);
       wrapper.appendChild(time);
-
-      if (msg.sender === currentUser.uid) {
-        const actions = document.createElement("div");
-        actions.className = "action-buttons";
-
-        const editBtn = document.createElement("button");
-        editBtn.innerHTML = "✎";
-        editBtn.onclick = () => inlineEdit(bubble, key, msg.text);
-
-        const delBtn = document.createElement("button");
-        delBtn.innerHTML = "🗑";
-        delBtn.onclick = () => remove(ref(db,"messages/"+chatId+"/"+key));
-
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-
-        row.appendChild(actions);
-        row.appendChild(wrapper);
-      } else {
-        row.appendChild(wrapper);
-      }
-
+      row.appendChild(wrapper);
       container.appendChild(row);
     });
 
-    container.scrollTop = container.scrollHeight;
+    container.scrollTop=container.scrollHeight;
   });
 }
 
-function inlineEdit(bubble, key, oldText) {
-  bubble.innerHTML = "";
-  const input = document.createElement("input");
-  input.className = "edit-input";
-  input.value = oldText;
-  bubble.appendChild(input);
-  input.focus();
-
-  input.onblur = () => saveEdit(key, input.value);
-  input.onkeydown = (e) => {
-    if (e.key === "Enter") saveEdit(key, input.value);
-  };
-}
-
-function saveEdit(key, newText) {
-  if (!newText.trim()) return;
-  update(ref(db,"messages/"+chatId+"/"+key),{
-    text:newText,
-    edited:true
-  });
-}
-
-window.sendMessage = function() {
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  if (!text) return;
+window.sendMessage=function(){
+  const input=document.getElementById("messageInput");
+  const text=input.value.trim();
+  if(!text)return;
 
   push(ref(db,"messages/"+chatId),{
     sender:currentUser.uid,
     text:text,
-    timestamp:Date.now(),
-    edited:false
+    timestamp:Date.now()
   });
 
   input.value="";
 };
+
+document.getElementById("messageInput")
+.addEventListener("keydown",e=>{
+  if(e.key==="Enter")sendMessage();
+});
 </script>
 
 </body>
