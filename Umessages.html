@@ -81,6 +81,20 @@ body {
   border-bottom-left-radius: 5px;
 }
 
+  .timestamp {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+  display: none;
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 75%;
+}
+
+
 
 .input-area {
   display: flex;
@@ -180,13 +194,37 @@ function loadMessages() {
     if (!snapshot.exists()) return;
 
     snapshot.forEach((child) => {
-      const msg = child.val();
-      const div = document.createElement("div");
-      div.className = "message " +
-        (msg.sender === currentUser.uid ? "sent" : "received");
-      div.innerText = msg.text;
-      container.appendChild(div);
-    });
+  const msg = child.val();
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message-wrapper";
+  wrapper.style.alignSelf =
+    msg.sender === currentUser.uid ? "flex-end" : "flex-start";
+
+  const bubble = document.createElement("div");
+  bubble.className = "message " +
+    (msg.sender === currentUser.uid ? "sent" : "received");
+  bubble.innerText = msg.text;
+
+  const time = document.createElement("div");
+  time.className = "timestamp";
+
+  const date = new Date(msg.timestamp);
+  time.innerText = date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  bubble.addEventListener("click", () => {
+    time.style.display =
+      time.style.display === "none" ? "block" : "none";
+  });
+
+  wrapper.appendChild(bubble);
+  wrapper.appendChild(time);
+  container.appendChild(wrapper);
+});
+
 
     container.scrollTop = container.scrollHeight;
   });
