@@ -59,9 +59,14 @@ body {
 
 .message-wrapper {
   display: flex;
-  flex-direction: column;
-  max-width: 75%;
+  align-items: center;
   margin-bottom: 8px;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
 }
 
 .message {
@@ -74,13 +79,11 @@ body {
 
 .sent {
   background: #b00b55;
-  align-self: flex-end;
   border-bottom-right-radius: 5px;
 }
 
 .received {
   background: #333;
-  align-self: flex-start;
   border-bottom-left-radius: 5px;
 }
 
@@ -94,6 +97,27 @@ body {
 
 .timestamp.show {
   opacity: 1;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  margin-left: 8px;
+  gap: 4px;
+}
+
+.action-buttons button {
+  background: #2a2a35;
+  border: none;
+  color: #ccc;
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.action-buttons button:hover {
+  background: #3a3a45;
 }
 
 .input-area {
@@ -126,10 +150,7 @@ body {
 <div class="back" onclick="window.location.href='Umatch.html'">← Back</div>
 
 <div class="chat-container">
-  <div class="chat-header" id="chatHeader">
-    Loading...
-  </div>
-
+  <div class="chat-header" id="chatHeader">Loading...</div>
   <div class="messages" id="messages"></div>
 
   <div class="input-area">
@@ -142,7 +163,7 @@ body {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, onValue, get }
+import { getDatabase, ref, push, onValue, get, remove, update }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -168,25 +189,18 @@ let chatId;
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "index.html";
-  } else {
-    currentUser = user;
-
-    if (!otherUid) {
-      alert("No user selected.");
-      window.location.href = "Umatch.html";
-      return;
-    }
-
-    chatId = [currentUser.uid, otherUid].sort().join("_");
-
-    const userSnap = await get(ref(db, "users/" + otherUid));
-    if (userSnap.exists()) {
-      document.getElementById("chatHeader").innerText =
-        userSnap.val().name;
-    }
-
-    loadMessages();
+    return;
   }
+
+  currentUser = user;
+  chatId = [currentUser.uid, otherUid].sort().join("_");
+
+  const userSnap = await get(ref(db, "users/" + otherUid));
+  if (userSnap.exists()) {
+    document.getElementById("chatHeader").innerText = userSnap.val().name;
+  }
+
+  loadMessages();
 });
 
 function loadMessages() {
@@ -200,11 +214,15 @@ function loadMessages() {
 
     snapshot.forEach((child) => {
       const msg = child.val();
+      const messageId = child.key;
 
       const wrapper = document.createElement("div");
       wrapper.className = "message-wrapper";
-      wrapper.style.alignSelf =
+      wrapper.style.justifyContent =
         msg.sender === currentUser.uid ? "flex-end" : "flex-start";
+
+      const content = document.createElement("div");
+      content.className = "message-content";
 
       const bubble = document.createElement("div");
       bubble.className = "message " +
@@ -216,14 +234,34 @@ function loadMessages() {
       time.innerText = formatTimestamp(new Date(msg.timestamp));
 
       bubble.addEventListener("click", () => {
-        document.querySelectorAll(".timestamp").forEach(t => {
-          t.classList.remove("show");
-        });
+        document.querySelectorAll(".timestamp").forEach(t =>
+          t.classList.remove("show")
+        );
         time.classList.toggle("show");
       });
 
-      wrapper.appendChild(bubble);
-      wrapper.appendChild(time);
+      content.appendChild(bubble);
+      content.appendChild(time);
+      wrapper.appendChild(content);
+
+      // Only add buttons for your messages
+      if (msg.sender === currentUser.uid) {
+        const actions = document.createElement("div");
+        actions.className = "action-buttons";
+
+        const editBtn = document.createElement("button");
+        editBtn.innerText = "Edit";
+        editBtn.onclick = () => editMessage(messageId, msg.text);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerText = "Delete";
+        deleteBtn.onclick = () => deleteMessage(messageId);
+
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+        wrapper.appendChild(actions);
+      }
+
       container.appendChild(wrapper);
     });
 
@@ -236,9 +274,7 @@ window.sendMessage = function() {
   const text = input.value.trim();
   if (!text) return;
 
-  const messagesRef = ref(db, "messages/" + chatId);
-
-  push(messagesRef, {
+  push(ref(db, "messages/" + chatId), {
     sender: currentUser.uid,
     text: text,
     timestamp: Date.now()
@@ -247,25 +283,35 @@ window.sendMessage = function() {
   input.value = "";
 };
 
+window.deleteMessage = function(messageId) {
+  remove(ref(db, "messages/" + chatId + "/" + messageId));
+};
+
+window.editMessage = function(messageId, oldText) {
+  const newText = prompt("Edit your message:", oldText);
+  if (!newText || newText.trim() === "") return;
+
+  update(ref(db, "messages/" + chatId + "/" + messageId), {
+    text: newText.trim(),
+    edited: true
+  });
+};
+
 function formatTimestamp(date) {
   const now = new Date();
-
-  const isToday =
-    date.toDateString() === now.toDateString();
-
   const yesterday = new Date();
   yesterday.setDate(now.getDate() - 1);
-
-  const isYesterday =
-    date.toDateString() === yesterday.toDateString();
 
   const timeString = date.toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit'
   });
 
-  if (isToday) return "Today " + timeString;
-  if (isYesterday) return "Yesterday " + timeString;
+  if (date.toDateString() === now.toDateString())
+    return "Today " + timeString;
+
+  if (date.toDateString() === yesterday.toDateString())
+    return "Yesterday " + timeString;
 
   return date.toLocaleDateString([], {
     month: 'short',
