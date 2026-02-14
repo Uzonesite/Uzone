@@ -37,23 +37,31 @@ body{background:#0f0f14;color:white;padding:20px;}
 .message{
   padding:10px 14px;border-radius:18px;font-size:14px;word-wrap:break-word;
   max-width:70%;
+  position: relative;
 }
 
 .sent{background:#b00b55;border-bottom-right-radius:6px;}
 .received{background:#333;border-bottom-left-radius:6px;}
 
 .timestamp{
-  font-size:11px;color:#888;user-select:none;
-  white-space:nowrap;
+  font-size:11px;color:#888;white-space:nowrap;
+  opacity:0;transition:opacity 0.2s ease;
 }
 
 .action-button{
   width:28px;height:28px;border-radius:50%;border:none;
   background:#2a2a35;color:white;font-size:12px;
   cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:0.2s ease;
+  transition:0.2s ease;opacity:0;
 }
 .action-button:hover{background:#3a3a45;}
+
+.message-wrapper:hover .timestamp,
+.message-wrapper:hover .action-button,
+.message-wrapper.active .timestamp,
+.message-wrapper.active .action-button{
+  opacity:1;
+}
 
 .edit-input{
   padding:8px 10px;border-radius:10px;border:none;outline:none;font-size:14px;width:100%;
@@ -133,43 +141,56 @@ function loadMessages(){
       row.className = "message-row";
       row.style.justifyContent = msg.sender===currentUser.uid?"flex-end":"flex-start";
 
-      if(msg.sender === currentUser.uid){
-        // Own message: [timestamp][edit][delete][bubble]
-        const wrapper = document.createElement("div");
-        wrapper.className = "message-wrapper";
+      const wrapper = document.createElement("div");
+      wrapper.className = "message-wrapper";
 
-        const time = document.createElement("div");
-        time.className = "timestamp";
-        time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-        wrapper.appendChild(time);
+      const bubble = document.createElement("div");
+      bubble.className = "message";
+      bubble.innerText = msg.text;
+      if(msg.sender===currentUser.uid) bubble.classList.add("sent");
+      else bubble.classList.add("received");
 
+      // Timestamp
+      const time = document.createElement("div");
+      time.className = "timestamp";
+      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+      wrapper.appendChild(time);
+
+      if(msg.sender===currentUser.uid){
+        // Own message: edit/delete buttons
         const editBtn = document.createElement("button");
-        editBtn.className = "action-button";
-        editBtn.innerHTML = "✎";
+        editBtn.className="action-button";
+        editBtn.innerHTML="✎";
         editBtn.onclick = ()=>inlineEdit(bubble,key,msg.text);
-        wrapper.appendChild(editBtn);
 
         const delBtn = document.createElement("button");
-        delBtn.className = "action-button";
-        delBtn.innerHTML = "🗑";
+        delBtn.className="action-button";
+        delBtn.innerHTML="🗑";
         delBtn.onclick = ()=>remove(ref(db,"messages/"+chatId+"/"+key));
+
+        wrapper.appendChild(editBtn);
         wrapper.appendChild(delBtn);
 
-        const bubble = document.createElement("div");
-        bubble.className = "message sent";
-        bubble.innerText = msg.text;
-        wrapper.appendChild(bubble);
-
-        row.appendChild(wrapper);
-
+        wrapper.appendChild(bubble); // bubble last
       }else{
-        const bubble = document.createElement("div");
-        bubble.className = "message received";
-        bubble.innerText = msg.text;
-        row.appendChild(bubble);
+        // Other user's message: timestamp on right
+        wrapper.appendChild(bubble);
+        wrapper.appendChild(time);
       }
 
+      row.appendChild(wrapper);
       container.appendChild(row);
+
+      // Tap toggle for mobile
+      bubble.addEventListener("click", ()=>{
+        wrapper.classList.toggle("active");
+      });
+      if(msg.sender!==currentUser.uid){
+        time.addEventListener("click", ()=>{
+          wrapper.classList.toggle("active");
+        });
+      }
     });
 
     container.scrollTop = container.scrollHeight;
