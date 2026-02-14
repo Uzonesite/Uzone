@@ -37,7 +37,7 @@ body {
   border-radius: 20px;
   display: flex;
   flex-direction: column;
-  height: 100vh; /* full viewport height on mobile */
+  height: 100%; /* changed from 100vh */
   overflow: hidden;
 }
 
@@ -53,12 +53,13 @@ body {
 }
 
 .messages {
-  flex: 1 1 auto; /* takes remaining space */
+  flex: 1 1 auto;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   padding: 10px 15px;
   gap: 4px;
+  min-height: 0; /* allow flex shrinking */
 }
 
 
@@ -150,12 +151,11 @@ body {
   gap: 10px;
   padding: 10px;
   background: #1b1b25;
-  position: sticky;
-  bottom: 0; 
-  z-index: 10;
   border-top: 1px solid #333;
   width: 100%;
   box-sizing: border-box;
+  flex-shrink: 0;
+  position: relative; /* no sticky */
 }
 .input-area input {
   flex: 1;
@@ -306,12 +306,16 @@ function adjustChatHeight() {
   const inputHeight = document.querySelector('.input-area').offsetHeight;
   const container = document.querySelector('.messages');
 
-  container.style.height = `calc(100vh - ${headerHeight + inputHeight}px)`;
+  // Use window.innerHeight to account for keyboard shrinking viewport
+  const availableHeight = window.innerHeight - headerHeight - inputHeight;
+  container.style.height = `${availableHeight}px`;
 }
 
-// Run on load and on window resize (including keyboard pop)
+// Run on load and whenever viewport changes (keyboard open/close)
 window.addEventListener('load', adjustChatHeight);
 window.addEventListener('resize', adjustChatHeight);
+window.addEventListener('orientationchange', adjustChatHeight); // handle rotation
+
 
   
 // Inline editing
