@@ -77,6 +77,23 @@ body {
 }
 
 .contact-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.contact-id {
+  font-size: 12px;
+  background: rgba(176, 11, 85, 0.15);
+  color: #b00b55;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+
+.contact-name {
   font-weight: 500;
 }
 
@@ -183,9 +200,19 @@ function renderUsers(users) {
     const div = document.createElement("div");
     div.className = "contact";
 
-    const name = document.createElement("div");
-    name.className = "contact-name";
-    name.innerText = user.name || user.email;
+    // 🔥 Name container
+    const nameWrapper = document.createElement("div");
+    nameWrapper.className = "contact-name";
+
+    const nameText = document.createElement("span");
+    nameText.innerText = user.name || user.email;
+
+    const idBadge = document.createElement("span");
+    idBadge.className = "contact-id";
+    idBadge.innerText = user.accountNumber || "";
+
+    nameWrapper.appendChild(nameText);
+    nameWrapper.appendChild(idBadge);
 
     const btn = document.createElement("button");
     btn.className = "dm-btn";
@@ -194,11 +221,12 @@ function renderUsers(users) {
       window.location.href = "Umessages.html?uid=" + user.uid;
     };
 
-    div.appendChild(name);
+    div.appendChild(nameWrapper);
     div.appendChild(btn);
     contactsList.appendChild(div);
   });
 }
+
 
 /* LIVE SEARCH */
 document.getElementById("searchInput").addEventListener("input", (e) => {
