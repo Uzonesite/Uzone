@@ -44,9 +44,29 @@ body {
   font-weight: 600;
   font-size: 18px;
   color: #b00b55;
-  margin-bottom: 15px;
   border-bottom: 1px solid #333;
   padding-bottom: 10px;
+}
+
+.nickname-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0 15px 0;
+}
+
+.nickname-actions button {
+  background: #2a2a35;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.nickname-actions button:hover {
+  background: #3a3a45;
 }
 
 .messages {
@@ -72,7 +92,6 @@ body {
   flex-direction: column;
   width: fit-content;
   max-width: 70%;
-  position: relative;
 }
 
 .message {
@@ -80,11 +99,6 @@ body {
   border-radius: 18px;
   font-size: 14px;
   word-wrap: break-word;
-  transition: transform 0.15s ease;
-}
-
-.message:hover {
-  transform: scale(1.02);
 }
 
 .sent {
@@ -115,7 +129,6 @@ body {
   margin-left: 6px;
 }
 
-/* Action buttons hidden until hover */
 .action-buttons {
   display: flex;
   gap: 6px;
@@ -137,24 +150,6 @@ body {
   color: white;
   font-size: 12px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s ease;
-}
-
-.action-buttons button:hover {
-  background: #3a3a45;
-}
-
-/* Inline editing input */
-.edit-input {
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  width: 100%;
 }
 
 .input-area {
@@ -188,11 +183,14 @@ body {
 
 <div class="chat-container">
   <div class="chat-header" id="chatHeader">Loading...</div>
-  <button id="setNicknameBtn"
-  style="margin-bottom:10px;background:#2a2a35;border:none;padding:6px 12px;border-radius:8px;color:white;cursor:pointer;">
-  Set Nickname
-</button>
+
+  <div class="nickname-actions">
+    <button id="setNickname">Set Nickname</button>
+    <button id="removeNickname">Remove Nickname</button>
+  </div>
+
   <div class="messages" id="messages"></div>
+
   <div class="input-area">
     <input type="text" id="messageInput" placeholder="Type a message..." />
     <button onclick="sendMessage()">Send</button>
@@ -225,6 +223,8 @@ const otherUid = urlParams.get("uid");
 
 let currentUser;
 let chatId;
+let realName = "";
+let accountNumber = "";
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) return window.location.href = "index.html";
@@ -233,32 +233,50 @@ onAuthStateChanged(auth, async (user) => {
   chatId = [currentUser.uid, otherUid].sort().join("_");
 
   const userSnap = await get(ref(db, "users/" + otherUid));
+  if (userSnap.exists()) {
+    const data = userSnap.val();
+    realName = data.name || data.email;
+    accountNumber = data.accountNumber || "";
+  }
 
-let displayName = "User";
-let accountNumber = "";
-
-if (userSnap.exists()) {
-  const data = userSnap.val();
-  displayName = data.name || data.email;
-  accountNumber = data.accountNumber || "";
-}
-
-// Check if nickname exists
-const nicknameSnap = await get(
-  ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid)
-);
-
-if (nicknameSnap.exists()) {
-  displayName = nicknameSnap.val();
-}
-
-document.getElementById("chatHeader").innerHTML =
-  displayName +
-  (accountNumber ? ` <span style="font-size:13px;color:#aaa;">(${accountNumber})</span>` : "");
-
-
+  loadHeader();
   loadMessages();
 });
+
+async function loadHeader() {
+  const nicknameSnap = await get(
+    ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid)
+  );
+
+  let displayName = realName;
+
+  if (nicknameSnap.exists()) {
+    displayName = nicknameSnap.val();
+  }
+
+  document.getElementById("chatHeader").innerHTML =
+    displayName +
+    (accountNumber ? ` <span style="font-size:13px;color:#aaa;">(${accountNumber})</span>` : "");
+}
+
+document.getElementById("setNickname").onclick = async () => {
+  const nickname = prompt("Enter nickname:");
+  if (!nickname || !nickname.trim()) return;
+
+  await update(
+    ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid),
+    nickname.trim()
+  );
+
+  loadHeader();
+};
+
+document.getElementById("removeNickname").onclick = async () => {
+  await remove(
+    ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid)
+  );
+  loadHeader();
+};
 
 function loadMessages() {
   onValue(ref(db, "messages/" + chatId), (snapshot) => {
@@ -285,82 +303,21 @@ function loadMessages() {
 
       bubble.innerText = msg.text;
 
-      if (msg.edited) {
-        const edited = document.createElement("span");
-        edited.className = "edited-label";
-        edited.innerText = "(edited)";
-        bubble.appendChild(edited);
-      }
-
       const time = document.createElement("div");
       time.className = "timestamp";
-      time.innerText = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      time.innerText = new Date(msg.timestamp)
+        .toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 
       bubble.onclick = () => time.classList.toggle("show");
 
       wrapper.appendChild(bubble);
       wrapper.appendChild(time);
 
-      if (msg.sender === currentUser.uid) {
-        const actions = document.createElement("div");
-        actions.className = "action-buttons";
-
-        const editBtn = document.createElement("button");
-        editBtn.innerHTML = "✎";
-        editBtn.onclick = () => inlineEdit(bubble, key, msg.text);
-
-        const delBtn = document.createElement("button");
-        delBtn.innerHTML = "🗑";
-        delBtn.onclick = () => remove(ref(db,"messages/"+chatId+"/"+key));
-
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-
-        row.appendChild(actions);
-        row.appendChild(wrapper);
-      } else {
-        row.appendChild(wrapper);
-      }
-
+      row.appendChild(wrapper);
       container.appendChild(row);
     });
 
     container.scrollTop = container.scrollHeight;
-  });
-}
-
-document.getElementById("setNicknameBtn").onclick = async () => {
-  const nickname = prompt("Enter nickname for this chat:");
-
-  if (!nickname || !nickname.trim()) return;
-
-  await update(
-    ref(db, "chatNicknames/" + chatId + "/" + currentUser.uid),
-    nickname.trim()
-  );
-
-  location.reload();
-};
-
-function inlineEdit(bubble, key, oldText) {
-  bubble.innerHTML = "";
-  const input = document.createElement("input");
-  input.className = "edit-input";
-  input.value = oldText;
-  bubble.appendChild(input);
-  input.focus();
-
-  input.onblur = () => saveEdit(key, input.value);
-  input.onkeydown = (e) => {
-    if (e.key === "Enter") saveEdit(key, input.value);
-  };
-}
-
-function saveEdit(key, newText) {
-  if (!newText.trim()) return;
-  update(ref(db,"messages/"+chatId+"/"+key),{
-    text:newText,
-    edited:true
   });
 }
 
