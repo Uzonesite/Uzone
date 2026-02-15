@@ -276,7 +276,7 @@
   </main>
 
   <script type="module">
-    // Firebase Web SDK (modular) via CDN. Current major versions are in the v12+ line. :contentReference[oaicite:1]{index=1}
+    // Firebase Web SDK (modular) via CDN. Current major versions are in the v12+ line.
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
     import {
@@ -287,6 +287,15 @@
       sendPasswordResetEmail,
       updateProfile
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+    // Firestore (for sequential public IDs + user doc)
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      runTransaction,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -307,6 +316,7 @@
     } catch (_) {}
 
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     // --- UI helpers ---
     const tabLogin = document.getElementById("tabLogin");
@@ -399,14 +409,44 @@
           }
 
           const cred = await createUserWithEmailAndPassword(auth, email, password);
+          const user = cred.user;
 
           // Optional display name
           const fn = firstNameEl.value.trim();
           const ln = lastNameEl.value.trim();
           const displayName = [fn, ln].filter(Boolean).join(" ");
+
           if (displayName) {
-            await updateProfile(cred.user, { displayName });
+            await updateProfile(user, { displayName });
           }
+
+          // --- Sequential public ID (U1, U2, U3...) ---
+          // IMPORTANT: Create this once in Firestore:
+          // meta/counters { userCounter: 0 }
+          const publicId = await runTransaction(db, async (transaction) => {
+            const counterRef = doc(db, "meta", "counters");
+            const counterSnap = await transaction.get(counterRef);
+
+            let current = 0;
+            if (counterSnap.exists()) {
+              current = Number(counterSnap.data().userCounter || 0);
+            }
+
+            const next = current + 1;
+
+            transaction.set(counterRef, { userCounter: next }, { merge: true });
+
+            return "U" + next;
+          });
+
+          // Create/seed the user's Firestore profile doc
+          await setDoc(doc(db, "users", user.uid), {
+            publicId,
+            name: displayName || "",
+            email: user.email || "",
+            verified: false,
+            createdAt: serverTimestamp()
+          }, { merge: true });
 
           setMsg("Account created! Redirecting…", "ok");
           window.location.href = "hub.html";
