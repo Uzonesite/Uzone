@@ -541,25 +541,32 @@ const signOutBtn = document.getElementById("signOutBtn");
     }
 
     function setVerificationUI(status){
-      // status: none | pending | verified | rejected
-      verifyBadge.classList.remove("pending","verified","rejected");
-      if (status === "verified") {
-        verifyBadge.classList.add("verified");
-        verifyText.textContent = "Verified";
-        openVerifyBtn.textContent = "View";
-      } else if (status === "pending") {
-        verifyBadge.classList.add("pending");
-        verifyText.textContent = "Pending";
-        openVerifyBtn.textContent = "Update";
-      } else if (status === "rejected") {
-        verifyBadge.classList.add("rejected");
-        verifyText.textContent = "Rejected";
-        openVerifyBtn.textContent = "Retry";
-      } else {
-        verifyText.textContent = "Not verified";
-        openVerifyBtn.textContent = "Verify";
-      }
-    }
+  verifyBadge.classList.remove("pending","verified","rejected");
+
+  if (status === "verified") {
+    verifyBadge.classList.add("verified");
+    verifyText.textContent = "Verified";
+    openVerifyBtn.style.display = "none";   // ✅ hide button completely
+
+  } else if (status === "pending") {
+    verifyBadge.classList.add("pending");
+    verifyText.textContent = "Pending";
+    openVerifyBtn.textContent = "Update";
+    openVerifyBtn.style.display = "inline-flex";
+
+  } else if (status === "rejected") {
+    verifyBadge.classList.add("rejected");
+    verifyText.textContent = "Rejected";
+    openVerifyBtn.textContent = "Retry";
+    openVerifyBtn.style.display = "inline-flex";
+
+  } else {
+    verifyText.textContent = "Not verified";
+    openVerifyBtn.textContent = "Verify";
+    openVerifyBtn.style.display = "inline-flex";
+  }
+}
+
 
 async function loadProfile(user) {
   const snap = await getDoc(doc(db, "users", user.uid));
