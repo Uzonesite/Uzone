@@ -37,6 +37,7 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     position:sticky; top:10px; z-index:10;
+    backdrop-filter: blur(8px);
   }
   .left{display:flex; align-items:center; gap:12px; min-width:0;}
   .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
@@ -64,6 +65,7 @@
     box-shadow:none;
     color:rgba(255,255,255,.92);
   }
+  .btn:disabled{opacity:.6; cursor:not-allowed}
 
   main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
   .card{
@@ -128,6 +130,81 @@
     line-height:1.35;
   }
 
+  /* Clean rating UI (no pie) */
+  .ratingTop{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .avgBig{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+  }
+  .avgBig .num{
+    font-size:26px;
+    font-weight:950;
+    letter-spacing:.2px;
+  }
+  .avgBig .outof{
+    color: rgba(255,255,255,.70);
+    font-size:12px;
+    transform: translateY(-2px);
+  }
+  .avgBig .count{
+    color: rgba(255,255,255,.70);
+    font-size:12px;
+    margin-left:6px;
+  }
+
+  .barWrap{
+    flex:1;
+    min-width: 240px;
+    display:grid;
+    gap:8px;
+  }
+  .bar{
+    height:10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.08);
+    overflow:hidden;
+  }
+  .bar > div{
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+  }
+  .barMeta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    color: rgba(255,255,255,.70);
+    font-size:12px;
+  }
+
+  .stars{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+  .starBtn{
+    width:34px;height:34px;border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    color: rgba(255,255,255,.9);
+    cursor:pointer;
+    font-weight:900;
+  }
+  .starBtn.active{
+    border-color: rgba(176,11,85,.60);
+    box-shadow: 0 0 0 3px rgba(176,11,85,.20);
+  }
+
   textarea{
     width:100%;
     padding:12px 12px;
@@ -139,6 +216,10 @@
     font-size:14px;
   }
   textarea{min-height:90px; resize:vertical}
+  textarea:focus{
+    border-color: rgba(176,11,85,.60);
+    box-shadow: 0 0 0 4px rgba(176,11,85,.20);
+  }
 
   .msg{
     display:none;
@@ -154,40 +235,40 @@
   .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
   .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 
-  .ratingWrap{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
-  .meter{
-    width:64px;height:64px;border-radius:999px;
-    background: conic-gradient(var(--accent) 0deg, rgba(255,255,255,.12) 0deg);
-    border:1px solid rgba(255,255,255,.14);
-    display:grid;
-    place-items:center;
-    font-weight:900;
-    font-size:13px;
-  }
-  .stars{display:flex; gap:6px; flex-wrap:wrap;}
-  .starBtn{
-    width:34px;height:34px;border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    color: rgba(255,255,255,.9);
-    cursor:pointer;
-    font-weight:900;
-  }
-  .starBtn.active{
-    border-color: rgba(176,11,85,.60);
-    box-shadow: 0 0 0 3px rgba(176,11,85,.20);
-  }
-
   .comment{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.16);
     border-radius:14px;
     padding:10px 12px;
     display:grid;
-    gap:6px;
+    gap:8px;
+  }
+  .commentTop{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
   }
   .comment .meta{color:var(--muted); font-size:12px;}
   .comment .text{font-size:13px; line-height:1.35;}
+  .commentRating{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    font-size:12px;
+    color: rgba(255,255,255,.88);
+    white-space:nowrap;
+  }
+  .commentRating b{font-weight:900}
+  .crDot{
+    width:7px;height:7px;border-radius:999px;
+    background: rgba(176,11,85,.95);
+    box-shadow: 0 0 0 4px rgba(176,11,85,.18);
+  }
 </style>
 </head>
 <body>
@@ -259,26 +340,41 @@
 
     <section class="card section">
       <h2 class="h">Rating</h2>
-      <div class="ratingWrap">
-        <div class="meter" id="meter">0.0</div>
-        <div>
-          <div class="mini">Rate this event (1–10)</div>
-          <div class="stars" id="stars"></div>
+
+      <div class="ratingTop">
+        <div class="avgBig">
+          <div class="num" id="avgNum">0.0</div>
+          <div class="outof">/10</div>
+          <div class="count" id="avgCount">(0 ratings)</div>
+        </div>
+
+        <div class="barWrap">
+          <div class="bar"><div id="avgBar"></div></div>
+          <div class="barMeta">
+            <span>Low</span>
+            <span>High</span>
+          </div>
         </div>
       </div>
-      <div class="mini" style="margin-top:8px;">Average rating updates as people rate.</div>
+
+      <div class="mini" style="margin-top:10px;">Your rating (1–10)</div>
+      <div class="stars" id="stars"></div>
+      <div class="mini" style="margin-top:8px;">Tip: when you post a comment, we attach your current rating.</div>
     </section>
   </section>
 
   <section class="card section">
     <h2 class="h">Comments</h2>
     <div id="commentLock" class="box" style="display:none;">Comments are available to accepted guests only.</div>
+
     <div style="display:grid; gap:10px; margin-top:10px;">
       <textarea id="commentInput" placeholder="Write a comment…"></textarea>
-      <div style="display:flex; justify-content:flex-end;">
+      <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
+        <button class="btn secondary" id="syncMyRating" type="button">Sync my rating</button>
         <button class="btn" id="postComment" type="button">Post Comment</button>
       </div>
     </div>
+
     <div style="margin-top:12px; display:grid; gap:10px;" id="comments"></div>
   </section>
 </main>
@@ -326,12 +422,15 @@ const statusChip = document.getElementById("statusChip");
 const statusText = document.getElementById("statusText");
 const msg = document.getElementById("msg");
 
-const meter = document.getElementById("meter");
+const avgNum = document.getElementById("avgNum");
+const avgCount = document.getElementById("avgCount");
+const avgBar = document.getElementById("avgBar");
 const stars = document.getElementById("stars");
 
 const commentLock = document.getElementById("commentLock");
 const commentInput = document.getElementById("commentInput");
 const postComment = document.getElementById("postComment");
+const syncMyRatingBtn = document.getElementById("syncMyRating");
 const comments = document.getElementById("comments");
 
 function setMsg(text, kind=""){
@@ -340,13 +439,6 @@ function setMsg(text, kind=""){
   msg.className = "msg" + (kind ? " " + kind : "");
 }
 function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-function pie(avg){
-  const v = Math.max(0, Math.min(10, Number(avg||0)));
-  const deg = (v/10) * 360;
-  meter.textContent = v.toFixed(1);
-  meter.style.background = `conic-gradient(var(--accent) ${deg}deg, rgba(255,255,255,.12) 0deg)`;
-}
 
 function fmtDate(yyyyMmDd){
   if (!yyyyMmDd) return "";
@@ -368,6 +460,13 @@ function fmtWhen(data){
   return `${start} → ${end}`;
 }
 
+function setAvgUI(avg, count){
+  const v = Math.max(0, Math.min(10, Number(avg||0)));
+  avgNum.textContent = v.toFixed(1);
+  avgCount.textContent = `(${count} rating${count===1?"":"s"})`;
+  avgBar.style.width = `${(v/10)*100}%`;
+}
+
 const params = new URLSearchParams(location.search);
 const eventId = params.get("id");
 
@@ -376,6 +475,8 @@ let eventData = null;
 let isHost = false;
 let isAccepted = false;
 let isInviteOnly = false;
+
+let myRating = 0; // cached
 
 function renderStars(selected){
   stars.innerHTML = "";
@@ -403,8 +504,7 @@ async function loadEvent(){
   img.src = eventData.imageUrl || "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=60";
   nameEl.textContent = eventData.name || "Event";
 
-  const invite = !!eventData.inviteOnly;
-  isInviteOnly = invite;
+  isInviteOnly = !!eventData.inviteOnly;
 
   // Host / accepted checks
   isHost = currentUser && eventData.hostUid === currentUser.uid;
@@ -416,23 +516,21 @@ async function loadEvent(){
 
   const canSeeDetails = !isInviteOnly || isHost || isAccepted;
 
-  // Small subline under title
   subline.textContent = canSeeDetails
     ? `${fmtWhen(eventData)} • ${eventData.location || "Location"}`
     : `Invite-only • Apply to see details`;
 
-  // Core numbers
   spotsEl.textContent = (eventData.spotsAvailable ?? "") === "" ? "—" : String(eventData.spotsAvailable);
   venueEl.textContent = eventData.venueSize || "—";
   sizeEl.textContent = eventData.sizeEstimate ?? "—";
   ratioEl.textContent = eventData.ratio || "—";
   bioEl.textContent = eventData.bio || "—";
 
-  // Tags row
+  // Tags
   tagsEl.innerHTML = "";
   const t0 = document.createElement("span");
-  t0.className = "tag " + (invite ? "invite" : "open");
-  t0.innerHTML = `<span class="dot"></span>${invite ? "Invite-only" : "Open"}`;
+  t0.className = "tag " + (isInviteOnly ? "invite" : "open");
+  t0.innerHTML = `<span class="dot"></span>${isInviteOnly ? "Invite-only" : "Open"}`;
   tagsEl.appendChild(t0);
 
   const tags = Array.isArray(eventData.tags) ? eventData.tags : [];
@@ -443,14 +541,12 @@ async function loadEvent(){
     tagsEl.appendChild(s);
   });
 
-  // Locked state
   lockedNote.style.display = (!canSeeDetails && isInviteOnly) ? "block" : "none";
 
-  // Details panel (locked)
   locationEl.textContent = canSeeDetails ? (eventData.location || "—") : "Hidden";
   whenEl.textContent = canSeeDetails ? fmtWhen(eventData) : "Hidden";
   hostEl.textContent = eventData.hostName || eventData.hostUid || "—";
-  visibilityEl.textContent = invite ? "Invite-only" : "Open";
+  visibilityEl.textContent = isInviteOnly ? "Invite-only" : "Open";
 
   // Apply button / status
   if (isInviteOnly && !isHost && !isAccepted){
@@ -473,6 +569,7 @@ async function loadEvent(){
   commentLock.style.display = canInteract ? "none" : "block";
   commentInput.disabled = !canInteract;
   postComment.disabled = !canInteract;
+  syncMyRatingBtn.disabled = !canInteract;
 
   await loadRatings();
   await loadMyRating();
@@ -507,7 +604,7 @@ async function loadRatings(){
     if (v > 0){ sum += v; count++; }
   });
   const avg = count ? (sum / count) : 0;
-  pie(avg);
+  setAvgUI(avg, count);
 
   try{
     await updateDoc(doc(db,"events",eventId), { ratingAvg: avg });
@@ -517,8 +614,8 @@ async function loadRatings(){
 async function loadMyRating(){
   if (!currentUser) return;
   const snap = await getDoc(doc(db, "events", eventId, "ratings", currentUser.uid));
-  const v = snap.exists() ? Number(snap.data()?.value || 0) : 0;
-  renderStars(v || 0);
+  myRating = snap.exists() ? Number(snap.data()?.value || 0) : 0;
+  renderStars(myRating || 0);
 }
 
 async function submitRating(v){
@@ -532,6 +629,7 @@ async function submitRating(v){
     updatedAt: serverTimestamp()
   }, { merge: true });
 
+  myRating = v;
   renderStars(v);
   await loadRatings();
 }
@@ -541,14 +639,29 @@ async function loadComments(){
   const snap = await getDocs(query(collection(db,"events",eventId,"comments"), orderBy("createdAt","desc")));
   snap.forEach(d=>{
     const c = d.data() || {};
+    const dt = c.createdAt?.toDate ? c.createdAt.toDate().toLocaleString() : "";
+    const r = Number(c.rating || 0);
+
     const div = document.createElement("div");
     div.className = "comment";
     div.innerHTML = `
-      <div class="meta">${esc(c.authorName || "User")} • ${c.createdAt?.toDate ? c.createdAt.toDate().toLocaleString() : ""}</div>
+      <div class="commentTop">
+        <div class="meta">${esc(c.authorName || "User")} • ${esc(dt)}</div>
+        <div class="commentRating" title="Commenter rating">
+          <span class="crDot"></span>
+          <span><b>${isFinite(r) && r > 0 ? r.toFixed(1) : "—"}</b>/10</span>
+        </div>
+      </div>
       <div class="text">${esc(c.text || "")}</div>
     `;
     comments.appendChild(div);
   });
+}
+
+async function syncMyRating(){
+  await loadMyRating();
+  setMsg(`Synced. Your current rating is ${myRating ? myRating : 0}/10.`, "ok");
+  setTimeout(()=>setMsg(""), 1200);
 }
 
 async function postAComment(){
@@ -558,12 +671,20 @@ async function postAComment(){
   const text = (commentInput.value || "").trim();
   if (!text) return;
 
+  // Ensure we attach the rating that the commenter assigned.
+  // If they haven't rated yet, we store 0 and show "—/10".
+  if (myRating === 0) {
+    // quick refresh in case they rated from another tab
+    await loadMyRating();
+  }
+
   postComment.disabled = true;
   try{
     await addDoc(collection(db,"events",eventId,"comments"), {
       text,
       authorUid: currentUser.uid,
       authorName: currentUser.displayName || currentUser.email || "User",
+      rating: myRating || 0,
       createdAt: serverTimestamp()
     });
     commentInput.value = "";
@@ -581,6 +702,7 @@ onAuthStateChanged(auth, async (user) => {
 
   applyBtn.addEventListener("click", apply);
   postComment.addEventListener("click", postAComment);
+  syncMyRatingBtn.addEventListener("click", syncMyRating);
 
   await loadEvent();
 });
