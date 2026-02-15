@@ -77,7 +77,7 @@
   @media (max-width: 820px){ .row{grid-template-columns:1fr;} }
 
   label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
-  input, textarea, select{
+  input, textarea{
     width:100%;
     padding:12px 12px;
     border-radius:12px;
@@ -88,7 +88,7 @@
     font-size:14px;
   }
   textarea{min-height:140px; resize:vertical}
-  input:focus, textarea:focus, select:focus{
+  input:focus, textarea:focus{
     border-color: rgba(176,11,85,.60);
     box-shadow: 0 0 0 4px rgba(176,11,85,.20);
   }
@@ -168,19 +168,9 @@
     user-select:none;
     cursor:pointer;
   }
-  .togglePill .tTitle{
-    display:grid;
-    gap:2px;
-  }
-  .togglePill .tTitle b{
-    color: rgba(255,255,255,.92);
-    font-size:13px;
-  }
-  .togglePill .tTitle span{
-    color: rgba(255,255,255,.65);
-    font-size:12px;
-    line-height:1.25;
-  }
+  .togglePill .tTitle{display:grid; gap:2px;}
+  .togglePill .tTitle b{color: rgba(255,255,255,.92); font-size:13px;}
+  .togglePill .tTitle span{color: rgba(255,255,255,.65); font-size:12px; line-height:1.25;}
   .switch{
     width:46px; height:26px;
     border-radius:999px;
@@ -264,10 +254,10 @@
       </label>
     </div>
 
-    <!-- NEW: Venue size + Spots available -->
+    <!-- NEW: venue size + host spots available -->
     <div class="row" style="margin-top:12px;">
       <label>Venue size (capacity / space)
-        <input id="venueSize" placeholder="e.g., 2-bedroom condo / small hall / 40-person capacity" />
+        <input id="venueSize" placeholder="e.g., small condo / house / 40-person capacity" />
       </label>
       <label>Spots available (host says)
         <input id="spotsAvailable" type="number" min="0" placeholder="e.g., 15" />
@@ -314,7 +304,8 @@
           <div class="progress" id="progress"><div id="progressBar"></div></div>
 
           <div class="mini">
-            This will upload your image and save it on the event.
+            If uploads fail with a “CORS” message, it’s almost always Storage Rules denying the request.
+            For now set Storage Rules to allow signed-in users.
           </div>
         </div>
 
@@ -341,17 +332,17 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import {
-  getFirestore, collection, addDoc, serverTimestamp, doc, getDoc
+  getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import {
-  getStorage, ref, uploadBytes, getDownloadURL
+  getStorage, ref, uploadBytesResumable, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
   authDomain: "uzone-6148d.firebaseapp.com",
   projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.appspot.com" // ✅ REQUIRED for Storage
+  storageBucket: "uzone-6148d.appspot.com"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -366,8 +357,10 @@ const nameEl = document.getElementById("name");
 const locationEl = document.getElementById("location");
 const dateEl = document.getElementById("date");
 const timeEl = document.getElementById("time");
-const venueSizeEl = document.getElementById("venueSize");         // NEW
-const spotsAvailableEl = document.getElementById("spotsAvailable"); // NEW
+
+const venueSizeEl = document.getElementById("venueSize");
+const spotsAvailableEl = document.getElementById("spotsAvailable");
+
 const sizeEl = document.getElementById("size");
 const ratioEl = document.getElementById("ratio");
 const vibesEl = document.getElementById("vibes");
@@ -446,29 +439,36 @@ imageFileEl.addEventListener("change", ()=>{
   previewEmpty.style.display = "none";
 });
 
+function sanitizeExt(filename){
+  const ext = (filename.split(".").pop() || "jpg").toLowerCase();
+  return ["png","jpg","jpeg","webp"].includes(ext) ? ext : "jpg";
+}
+
 async function uploadEventImage(eventId){
   if (!selectedFile) return "";
 
   progress.style.display = "block";
   progressBar.style.width = "0%";
 
-  progressBar.style.width = "25%";
-
-  const ext = (selectedFile.name.split(".").pop() || "jpg").toLowerCase();
-  const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "jpg";
-
+  const safeExt = sanitizeExt(selectedFile.name);
   const path = `event_images/${eventId}/${Date.now()}.${safeExt}`;
   const storageRef = ref(storage, path);
 
-  progressBar.style.width = "55%";
-  await uploadBytes(storageRef, selectedFile, { contentType: selectedFile.type });
+  // NOTE: if Storage rules deny this, the browser often shows it as “CORS”.
+  const task = uploadBytesResumable(storageRef, selectedFile, { contentType: selectedFile.type });
 
-  progressBar.style.width = "85%";
-  const url = await getDownloadURL(storageRef);
+  const url = await new Promise((resolve, reject) => {
+    task.on("state_changed",
+      (snap) => {
+        const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
+        progressBar.style.width = `${Math.max(2, Math.min(100, pct))}%`;
+      },
+      (err) => reject(err),
+      async () => resolve(await getDownloadURL(task.snapshot.ref))
+    );
+  });
 
-  progressBar.style.width = "100%";
-  setTimeout(()=>{ progress.style.display = "none"; }, 400);
-
+  setTimeout(()=>{ progress.style.display = "none"; }, 450);
   return url;
 }
 
@@ -487,6 +487,7 @@ postBtn.addEventListener("click", async ()=>{
   setMsg("");
 
   try{
+    // Pull host name from users collection if available
     let hostName = currentUser.displayName || "";
     try{
       const u = await getDoc(doc(db,"users",currentUser.uid));
@@ -501,18 +502,18 @@ postBtn.addEventListener("click", async ()=>{
 
     const sizeEstimate = Number(sizeEl.value || 0) || 0;
 
-    // NEW fields (safe parsing)
     const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
     const venueSize = (venueSizeEl.value || "").trim();
 
+    // Create doc first so we have eventId for storage path
     const eventRef = await addDoc(collection(db,"events"), {
       name,
       location: (locationEl.value||"").trim(),
       date: (dateEl.value||"").trim(),
       time: (timeEl.value||"").trim(),
 
-      venueSize,              // ✅ NEW
-      spotsAvailable,         // ✅ NEW
+      venueSize,
+      spotsAvailable,
 
       sizeEstimate,
       vibes: (vibesEl.value||"").trim(),
@@ -529,16 +530,27 @@ postBtn.addEventListener("click", async ()=>{
       createdAt: serverTimestamp()
     });
 
-    const imageUrl = await uploadEventImage(eventRef.id);
-    if (imageUrl){
-      const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js");
-      await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
+    // Upload image (optional) and patch imageUrl
+    try{
+      const imageUrl = await uploadEventImage(eventRef.id);
+      if (imageUrl){
+        await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
+      }
+    } catch(uploadErr){
+      // If this hits and you see “CORS”, your Storage rules are denying the request.
+      setMsg(
+        `Event posted, but image upload failed.\n\n${uploadErr?.message || uploadErr}\n\nFix: Firebase Storage Rules must allow signed-in users to write to event_images/.`,
+        "error"
+      );
+      setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventRef.id)}`; }, 1200);
+      return;
     }
 
     setMsg("Event posted!", "ok");
     setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventRef.id)}`; }, 600);
+
   } catch(e){
-    setMsg(e.message || "Failed to post event.", "error");
+    setMsg(e?.message || "Failed to post event.", "error");
   } finally {
     postBtn.disabled = false;
   }
