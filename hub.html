@@ -188,29 +188,6 @@
       line-height:1.45;
       max-width: 75ch;
     }
-
-    .quick{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-      position:relative;
-      z-index:1;
-    }
-    .quick a{
-      text-decoration:none;
-      color:rgba(255,255,255,.92);
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      padding:10px 12px;
-      border-radius: 999px;
-      font-weight:750;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-    }
-    .quick a:hover{ background: rgba(255,255,255,.08); }
-
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
@@ -322,28 +299,20 @@
 
     <div class="right">
       <span class="chip" id="userEmail">—</span>
-      <a class="btn secondary" href="profile.html">Profile</a>
-      <button class="btn" id="signOutBtn">Sign out</button>
+<button class="btn" id="signOutBtn">Sign out</button>
     </div>
   </header>
 
   <main>
-    <section class="hero" aria-label="Hub intro">
-      <div class="heroTop">
-        <div>
-          <h2 id="heroTitle">Your Hub</h2>
-          <p id="heroDesc">Meet people on campus, message instantly, and discover events — all in one place.</p>
-
-          <div class="quick" aria-label="Quick actions">
-            <a href="dating.html">🔥 Dating</a>
-            <a href="messages.html">💬 Messages</a>
-            <a href="events.html">📍 Events</a>
-            <a href="profile.html">👤 Profile</a>
-          </div>
-        </div>
-        <a class="btn secondary" href="profile.html">Open Profile</a>
-      </div>
-    </section>
+    <section class="hero" aria-label="Hub info">
+  <div class="heroTop">
+    <div>
+      <h2 id="heroTitle">Welcome to Uzone</h2>
+      <p id="heroDesc">Meet people on campus, message instantly, and discover events — all in one place. Pick a card below to get started.</p>
+      <div class="pill live" style="margin-top:12px;"><span class="dot"></span>Signed-in access enabled</div>
+    </div>
+  </div>
+</section>
 
     <section class="grid" aria-label="Hub navigation">
       <article class="card">
