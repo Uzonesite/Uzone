@@ -10,13 +10,11 @@
       --accent:#b00b55;
       --bg:#0b0b10;
       --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.70);
       --border: rgba(255,255,255,.14);
       --shadow: 0 20px 60px rgba(0,0,0,.45);
       --radius: 18px;
-      --radiusSm: 14px;
     }
     *{box-sizing:border-box}
     body{
@@ -44,30 +42,12 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
-    .left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width: 0;
-    }
-    .left img{
-      width:38px;height:38px;object-fit:contain;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
-    }
-    .title{
-      display:grid;
-      gap:2px;
-      min-width:0;
-    }
+    .left{display:flex; align-items:center; gap:12px; min-width:0;}
+    .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
+    .title{display:grid; gap:2px; min-width:0;}
     .title h1{margin:0;font-size:18px;letter-spacing:.2px}
     .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .right{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
     .chip{
       padding:8px 10px;
       border-radius:999px;
@@ -98,12 +78,7 @@
     }
     .btn:disabled{opacity:.65;cursor:not-allowed}
 
-    main{
-      width:min(1100px, 92vw);
-      margin:16px auto 34px auto;
-      display:grid;
-      gap:14px;
-    }
+    main{width:min(1100px, 92vw); margin:16px auto 34px auto; display:grid; gap:14px;}
 
     .card{
       border:1px solid var(--border);
@@ -121,16 +96,9 @@
       gap:16px;
       align-items:start;
     }
-    @media (max-width: 720px){
-      .profileTop{grid-template-columns: 1fr; }
-    }
+    @media (max-width: 720px){ .profileTop{grid-template-columns: 1fr;} }
 
-    .avatarWrap{
-      display:grid;
-      gap:10px;
-      justify-items:start;
-    }
-
+    .avatarWrap{display:grid; gap:10px; justify-items:start;}
     .avatar{
       width:120px;height:120px;
       border-radius:999px;
@@ -140,31 +108,11 @@
       box-shadow: 0 18px 50px rgba(0,0,0,.35);
     }
 
-    .miniBtns{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .fields{display:grid; gap:10px;}
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+    @media (max-width: 720px){ .row{grid-template-columns:1fr;} }
 
-    .fields{
-      display:grid;
-      gap:10px;
-    }
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    @media (max-width: 720px){
-      .row{grid-template-columns:1fr;}
-    }
-
-    label{
-      display:grid;
-      gap:6px;
-      font-size:13px;
-      color:rgba(255,255,255,.78);
-    }
+    label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
     input, select, textarea{
       width:100%;
       padding:12px 12px;
@@ -181,12 +129,7 @@
       box-shadow: 0 0 0 4px rgba(176,11,85,.20);
     }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:4px;
-    }
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;}
 
     .msg{
       margin-top:12px;
@@ -199,32 +142,13 @@
       white-space:pre-line;
       font-size:13px;
     }
-    .msg.error{
-      border-color: rgba(255,80,120,.35);
-      background: rgba(255,80,120,.10);
-    }
-    .msg.ok{
-      border-color: rgba(80,255,160,.25);
-      background: rgba(80,255,160,.10);
-    }
+    .msg.error{border-color: rgba(255,80,120,.35); background: rgba(255,80,120,.10);}
+    .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
 
-    .sectionTitle{
-      margin:0 0 10px 0;
-      font-size:15px;
-      color:rgba(255,255,255,.88);
-      letter-spacing:.2px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:8px;
-    }
-    @media (max-width: 720px){
-      .grid{grid-template-columns: repeat(3, 1fr);}
-    }
-    @media (max-width: 420px){
-      .grid{grid-template-columns: repeat(2, 1fr);}
-    }
+    .sectionTitle{margin:0 0 10px 0; font-size:15px; color:rgba(255,255,255,.88); letter-spacing:.2px;}
+
+    .grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;}
+    @media (max-width: 420px){ .grid{grid-template-columns: repeat(2, 1fr);} }
 
     .tile{
       position:relative;
@@ -235,18 +159,10 @@
       aspect-ratio: 1 / 1;
       cursor:pointer;
     }
-    .tile img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      transform: scale(1.00);
-      transition: transform .18s ease;
-    }
+    .tile img{width:100%; height:100%; object-fit:cover; display:block; transform: scale(1.00); transition: transform .18s ease;}
     .tile:hover img{transform: scale(1.03);}
     .tile .overlay{
-      position:absolute;
-      inset:auto 0 0 0;
+      position:absolute; inset:auto 0 0 0;
       padding:8px 10px;
       background: linear-gradient(180deg, transparent, rgba(0,0,0,.55));
       color: rgba(255,255,255,.88);
@@ -266,6 +182,43 @@
       font-size:13px;
       line-height:1.45;
     }
+
+    /* Verification badge */
+    .nameLine{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+    }
+    .badge .dot{
+      width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);
+    }
+    .badge.verified{
+      border-color: rgba(80,255,160,.25);
+      background: rgba(80,255,160,.10);
+    }
+    .badge.verified .dot{background: rgba(80,255,160,.75);}
+    .badge.pending{
+      border-color: rgba(255,210,80,.25);
+      background: rgba(255,210,80,.10);
+    }
+    .badge.pending .dot{background: rgba(255,210,80,.80);}
+    .badge.rejected{
+      border-color: rgba(255,80,120,.30);
+      background: rgba(255,80,120,.10);
+    }
+    .badge.rejected .dot{background: rgba(255,80,120,.80);}
 
     /* Lightbox */
     .lightbox{
@@ -301,10 +254,7 @@
       align-items:center;
       padding:10px 12px;
     }
-    .lightboxBar span{
-      color:rgba(255,255,255,.78);
-      font-size:13px;
-    }
+    .lightboxBar span{color:rgba(255,255,255,.78); font-size:13px;}
   </style>
 </head>
 
@@ -326,11 +276,12 @@
   </header>
 
   <main>
+    <!-- PROFILE -->
     <section class="card">
       <div class="profileTop">
         <div class="avatarWrap">
           <img id="avatarImg" class="avatar" alt="Profile picture" />
-          <div class="miniBtns">
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button class="btn secondary" id="changeAvatarBtn" type="button">Change pic</button>
             <input id="avatarInput" type="file" accept="image/*" style="display:none;" />
           </div>
@@ -340,6 +291,12 @@
         </div>
 
         <div class="fields">
+          <div class="nameLine">
+            <span class="chip" id="displayNameChip">—</span>
+            <span class="badge" id="verifyBadge"><span class="dot"></span><span id="verifyText">Not verified</span></span>
+            <button class="btn secondary" id="openVerifyBtn" type="button">Verify</button>
+          </div>
+
           <div class="row">
             <label>
               Name
@@ -395,6 +352,42 @@
       </div>
     </section>
 
+    <!-- VERIFICATION -->
+    <section class="card" id="verifyCard" style="display:none;">
+      <h2 class="sectionTitle">Verification</h2>
+      <div class="empty" style="margin-bottom:12px;">
+        Upload a clear photo of your <b>student ID</b> and a <b>selfie</b>. An admin will review it later.
+        <br /><br />
+        <b>Privacy:</b> This should be visible only to admins (we’ll enforce that with rules + admin claims).
+      </div>
+
+      <div class="row">
+        <div>
+          <label>
+            Student ID photo
+            <input id="idInput" type="file" accept="image/*" />
+          </label>
+          <div class="chip" id="idStatus">No ID selected</div>
+        </div>
+
+        <div>
+          <label>
+            Selfie (phone-friendly)
+            <input id="selfieInput" type="file" accept="image/*" capture="user" />
+          </label>
+          <div class="chip" id="selfieStatus">No selfie selected</div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:12px;">
+        <button class="btn" id="submitVerifyBtn" type="button">Submit for review</button>
+        <button class="btn secondary" id="closeVerifyBtn" type="button">Close</button>
+      </div>
+
+      <div class="msg" id="verifyMsg" aria-live="polite"></div>
+    </section>
+
+    <!-- POSTS -->
     <section class="card">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
         <h2 class="sectionTitle" style="margin:0;">Posts</h2>
@@ -425,14 +418,9 @@
   </div>
 
   <script type="module">
-    // Firebase v12+ modular CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
     import {
       getFirestore,
@@ -473,7 +461,7 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    // ---- UI refs ----
+    // UI refs
     const subline = document.getElementById("subline");
     const userEmail = document.getElementById("userEmail");
     const signOutBtn = document.getElementById("signOutBtn");
@@ -490,6 +478,20 @@
     const genderEl = document.getElementById("gender");
     const saveBtn = document.getElementById("saveBtn");
 
+    const displayNameChip = document.getElementById("displayNameChip");
+    const verifyBadge = document.getElementById("verifyBadge");
+    const verifyText = document.getElementById("verifyText");
+    const openVerifyBtn = document.getElementById("openVerifyBtn");
+
+    const verifyCard = document.getElementById("verifyCard");
+    const closeVerifyBtn = document.getElementById("closeVerifyBtn");
+    const idInput = document.getElementById("idInput");
+    const selfieInput = document.getElementById("selfieInput");
+    const idStatus = document.getElementById("idStatus");
+    const selfieStatus = document.getElementById("selfieStatus");
+    const submitVerifyBtn = document.getElementById("submitVerifyBtn");
+    const verifyMsg = document.getElementById("verifyMsg");
+
     const postBtn = document.getElementById("postBtn");
     const postInput = document.getElementById("postInput");
     const postsGrid = document.getElementById("postsGrid");
@@ -497,7 +499,6 @@
     const postCountChip = document.getElementById("postCountChip");
 
     const msgBox = document.getElementById("msgBox");
-
     const lightbox = document.getElementById("lightbox");
     const lightboxImg = document.getElementById("lightboxImg");
     const lightboxMeta = document.getElementById("lightboxMeta");
@@ -505,14 +506,14 @@
 
     let currentUser = null;
     let cachedPosts = [];
+    let selectedIdFile = null;
+    let selectedSelfieFile = null;
 
-    function setMsg(text, kind="") {
-      msgBox.style.display = text ? "block" : "none";
-      msgBox.textContent = text || "";
-      msgBox.className = "msg" + (kind ? " " + kind : "");
+    function setMsg(el, text, kind="") {
+      el.style.display = text ? "block" : "none";
+      el.textContent = text || "";
+      el.className = "msg" + (kind ? " " + kind : "");
     }
-
-    function safeText(v){ return (v ?? "").toString(); }
 
     function placeholderAvatarFromName(name){
       const initial = (name?.trim()?.[0] || "U").toUpperCase();
@@ -532,21 +533,41 @@
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
     }
 
+    function setVerificationUI(status){
+      // status: none | pending | verified | rejected
+      verifyBadge.classList.remove("pending","verified","rejected");
+      if (status === "verified") {
+        verifyBadge.classList.add("verified");
+        verifyText.textContent = "Verified";
+        openVerifyBtn.textContent = "View";
+      } else if (status === "pending") {
+        verifyBadge.classList.add("pending");
+        verifyText.textContent = "Pending";
+        openVerifyBtn.textContent = "Update";
+      } else if (status === "rejected") {
+        verifyBadge.classList.add("rejected");
+        verifyText.textContent = "Rejected";
+        openVerifyBtn.textContent = "Retry";
+      } else {
+        verifyText.textContent = "Not verified";
+        openVerifyBtn.textContent = "Verify";
+      }
+    }
+
     async function loadProfile(uid){
       const userRef = doc(db, "users", uid);
       const snap = await getDoc(userRef);
 
       if (!snap.exists()) {
-        // Create default profile doc
-        const defaultName = currentUser?.displayName || "";
         await setDoc(userRef, {
-          name: defaultName,
+          name: currentUser?.displayName || "",
           university: "",
           program: "",
           bio: "",
           age: "",
           gender: "",
           photoURL: "",
+          verification: { status: "none", updatedAt: serverTimestamp() },
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         }, { merge: true });
@@ -555,25 +576,29 @@
       const snap2 = await getDoc(userRef);
       const data = snap2.data() || {};
 
-      nameEl.value = safeText(data.name || currentUser?.displayName || "");
-      universityEl.value = safeText(data.university);
-      programEl.value = safeText(data.program);
-      bioEl.value = safeText(data.bio);
-      ageEl.value = safeText(data.age);
-      genderEl.value = safeText(data.gender);
+      nameEl.value = (data.name || currentUser?.displayName || "").toString();
+      universityEl.value = (data.university || "").toString();
+      programEl.value = (data.program || "").toString();
+      bioEl.value = (data.bio || "").toString();
+      ageEl.value = (data.age || "").toString();
+      genderEl.value = (data.gender || "").toString();
 
-      const photoURL = safeText(data.photoURL);
+      displayNameChip.textContent = nameEl.value.trim() || "Your name";
+
+      const photoURL = (data.photoURL || "").toString();
       avatarImg.src = photoURL || placeholderAvatarFromName(nameEl.value);
+
+      const vStatus = data?.verification?.status || "none";
+      setVerificationUI(vStatus);
 
       subline.textContent = "Edit your profile • Instagram-style";
     }
 
     async function saveProfile(){
       if (!currentUser) return;
+      setMsg(msgBox, "");
 
-      setMsg("");
       saveBtn.disabled = true;
-
       try{
         const payload = {
           name: nameEl.value.trim(),
@@ -586,40 +611,38 @@
         };
 
         await setDoc(doc(db, "users", currentUser.uid), payload, { merge: true });
-        setMsg("Saved!", "ok");
-        // update placeholder if no image
+
+        displayNameChip.textContent = payload.name || "Your name";
         if (!avatarImg.src || avatarImg.src.startsWith("data:image/svg+xml")) {
           avatarImg.src = placeholderAvatarFromName(payload.name);
         }
+        setMsg(msgBox, "Saved!", "ok");
       } catch(err){
-        setMsg(err?.message || "Failed to save profile.", "error");
+        setMsg(msgBox, err?.message || "Failed to save profile.", "error");
       } finally{
         saveBtn.disabled = false;
       }
     }
 
-    function fileToBlob(file){ return file; }
-
     async function uploadAvatar(file){
       if (!currentUser) return;
-      setMsg("");
+      setMsg(msgBox, "");
 
       changeAvatarBtn.disabled = true;
-
       try{
         const avatarRef = ref(storage, `avatars/${currentUser.uid}/avatar.jpg`);
-        await uploadBytes(avatarRef, fileToBlob(file), { contentType: file.type || "image/jpeg" });
-
+        await uploadBytes(avatarRef, file, { contentType: file.type || "image/jpeg" });
         const url = await getDownloadURL(avatarRef);
+
         await setDoc(doc(db, "users", currentUser.uid), {
           photoURL: url,
           updatedAt: serverTimestamp()
         }, { merge: true });
 
         avatarImg.src = url;
-        setMsg("Profile picture updated.", "ok");
+        setMsg(msgBox, "Profile picture updated.", "ok");
       } catch(err){
-        setMsg(err?.message || "Failed to upload avatar.", "error");
+        setMsg(msgBox, err?.message || "Failed to upload avatar.", "error");
       } finally{
         changeAvatarBtn.disabled = false;
       }
@@ -631,7 +654,6 @@
       const snaps = await getDocs(q);
 
       cachedPosts = snaps.docs.map(d => ({ id: d.id, ...d.data() }));
-
       postCountChip.textContent = `${cachedPosts.length} / 6`;
 
       postsGrid.innerHTML = "";
@@ -661,7 +683,6 @@
         postsGrid.appendChild(tile);
       });
 
-      // Disable posting if max reached
       postBtn.disabled = cachedPosts.length >= 6;
       postBtn.textContent = postBtn.disabled ? "Max 6 posts" : "Post picture";
     }
@@ -669,8 +690,7 @@
     function openLightbox(post){
       lightboxImg.src = post.url;
       const when = post.createdAt?.toDate ? post.createdAt.toDate() : null;
-      const dateTxt = when ? when.toLocaleString() : "";
-      lightboxMeta.textContent = dateTxt ? `Posted • ${dateTxt}` : "Posted";
+      lightboxMeta.textContent = when ? `Posted • ${when.toLocaleString()}` : "Posted";
       lightbox.style.display = "flex";
     }
     function closeLb(){
@@ -681,31 +701,23 @@
     async function addPost(file){
       if (!currentUser) return;
 
-      setMsg("");
-
-      // Re-check count (in case another tab posted)
+      setMsg(msgBox, "");
       await loadPosts(currentUser.uid);
       if (cachedPosts.length >= 6) {
-        setMsg("You’ve reached the max of 6 posts.", "error");
+        setMsg(msgBox, "You’ve reached the max of 6 posts.", "error");
         return;
       }
 
       postBtn.disabled = true;
-
       try{
-        // Create a post doc first (to get an ID), then upload file to that ID path.
         const postsRef = collection(db, "users", currentUser.uid, "posts");
-        const newDoc = await addDoc(postsRef, {
-          createdAt: serverTimestamp(),
-          url: "",
-          caption: ""
-        });
+        const newDoc = await addDoc(postsRef, { createdAt: serverTimestamp(), url: "", caption: "" });
 
         const postId = newDoc.id;
         const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
         const objRef = ref(storage, `posts/${currentUser.uid}/${postId}.${ext || "jpg"}`);
 
-        await uploadBytes(objRef, fileToBlob(file), { contentType: file.type || "image/jpeg" });
+        await uploadBytes(objRef, file, { contentType: file.type || "image/jpeg" });
         const url = await getDownloadURL(objRef);
 
         await setDoc(doc(db, "users", currentUser.uid, "posts", postId), {
@@ -713,21 +725,65 @@
           storagePath: `posts/${currentUser.uid}/${postId}.${ext || "jpg"}`
         }, { merge: true });
 
-        setMsg("Posted!", "ok");
+        setMsg(msgBox, "Posted!", "ok");
         await loadPosts(currentUser.uid);
       } catch(err){
-        setMsg(err?.message || "Failed to post photo.", "error");
+        setMsg(msgBox, err?.message || "Failed to post photo.", "error");
       } finally{
         postBtn.disabled = false;
       }
     }
 
-    // ---- Auth gate ----
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "index.html";
+    // --- Verification upload ---
+    function setVerifyMsg(text, kind=""){ setMsg(verifyMsg, text, kind); }
+
+    async function submitVerification(){
+      if (!currentUser) return;
+      setVerifyMsg("");
+
+      if (!selectedIdFile || !selectedSelfieFile) {
+        setVerifyMsg("Please select BOTH a student ID photo and a selfie.", "error");
         return;
       }
+
+      submitVerifyBtn.disabled = true;
+
+      try{
+        // Upload images first
+        const idPath = `verification/${currentUser.uid}/id.jpg`;
+        const selfiePath = `verification/${currentUser.uid}/selfie.jpg`;
+
+        await uploadBytes(ref(storage, idPath), selectedIdFile, { contentType: selectedIdFile.type || "image/jpeg" });
+        await uploadBytes(ref(storage, selfiePath), selectedSelfieFile, { contentType: selectedSelfieFile.type || "image/jpeg" });
+
+        // Create/replace request doc (one per user)
+        await setDoc(doc(db, "verification_requests", currentUser.uid), {
+          uid: currentUser.uid,
+          status: "pending",
+          idImagePath: idPath,
+          selfieImagePath: selfiePath,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        // Update user profile verification status to pending (user is allowed to set pending only by rules)
+        await setDoc(doc(db, "users", currentUser.uid), {
+          verification: { status: "pending", updatedAt: serverTimestamp() },
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        setVerificationUI("pending");
+        setVerifyMsg("Submitted! An admin will review it.", "ok");
+      } catch(err){
+        setVerifyMsg(err?.message || "Verification submission failed.", "error");
+      } finally{
+        submitVerifyBtn.disabled = false;
+      }
+    }
+
+    // Auth gate
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
       currentUser = user;
       userEmail.textContent = user.email || "Signed in";
       subline.textContent = "Loading profile…";
@@ -736,7 +792,7 @@
       await loadPosts(user.uid);
     });
 
-    // ---- UI events ----
+    // Events
     signOutBtn.addEventListener("click", async () => {
       await signOut(auth);
       window.location.href = "index.html";
@@ -761,13 +817,29 @@
     });
 
     closeLightbox.addEventListener("click", closeLb);
-    lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) closeLb();
+    lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLb(); });
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLb(); });
+
+    openVerifyBtn.addEventListener("click", () => {
+      verifyCard.style.display = "block";
+      verifyCard.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeLb();
+    closeVerifyBtn.addEventListener("click", () => {
+      verifyCard.style.display = "none";
+      setVerifyMsg("");
     });
 
+    idInput.addEventListener("change", () => {
+      selectedIdFile = idInput.files?.[0] || null;
+      idStatus.textContent = selectedIdFile ? `Selected: ${selectedIdFile.name}` : "No ID selected";
+    });
+
+    selfieInput.addEventListener("change", () => {
+      selectedSelfieFile = selfieInput.files?.[0] || null;
+      selfieStatus.textContent = selectedSelfieFile ? `Selected: ${selectedSelfieFile.name}` : "No selfie selected";
+    });
+
+    submitVerifyBtn.addEventListener("click", submitVerification);
   </script>
 </body>
 </html>
