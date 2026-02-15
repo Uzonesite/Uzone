@@ -88,9 +88,7 @@
       background: rgba(176,11,85,.10);
     }
 
-    .card{
-      padding:22px;
-    }
+    .card{ padding:22px; }
     .tabs{
       display:flex;
       gap:10px;
@@ -116,17 +114,8 @@
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.55));
       box-shadow: 0 12px 30px rgba(176,11,85,.25);
     }
-    .form{
-      margin-top:16px;
-      display:grid;
-      gap:12px;
-    }
-    label{
-      display:grid;
-      gap:6px;
-      font-size:13px;
-      color:rgba(255,255,255,.78);
-    }
+    .form{ margin-top:16px; display:grid; gap:12px; }
+    label{ display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78); }
     input{
       width:100%;
       padding:12px 12px;
@@ -140,14 +129,9 @@
       border-color: rgba(176,11,85,.60);
       box-shadow: 0 0 0 4px rgba(176,11,85,.20);
     }
-    .row{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    @media (max-width: 520px){
-      .row{grid-template-columns:1fr}
-    }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 520px){ .row{grid-template-columns:1fr} }
+
     .btn{
       margin-top:6px;
       padding:12px 14px;
@@ -160,16 +144,9 @@
       cursor:pointer;
       box-shadow: 0 18px 40px rgba(176,11,85,.22);
     }
-    .btn:disabled{
-      opacity:.65;
-      cursor:not-allowed;
-    }
-    .meta{
-      margin-top:10px;
-      color:rgba(255,255,255,.65);
-      font-size:13px;
-      line-height:1.4;
-    }
+    .btn:disabled{ opacity:.65; cursor:not-allowed; }
+
+    .meta{ margin-top:10px; color:rgba(255,255,255,.65); font-size:13px; line-height:1.4; }
     .msg{
       margin-top:10px;
       padding:10px 12px;
@@ -180,14 +157,8 @@
       display:none;
       white-space:pre-line;
     }
-    .msg.error{
-      border-color: rgba(255,80,120,.35);
-      background: rgba(255,80,120,.10);
-    }
-    .msg.ok{
-      border-color: rgba(80,255,160,.25);
-      background: rgba(80,255,160,.10);
-    }
+    .msg.error{ border-color: rgba(255,80,120,.35); background: rgba(255,80,120,.10); }
+    .msg.ok{ border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10); }
     a{color: rgba(255,255,255,.90)}
     .smallLink{
       display:inline-block;
@@ -276,7 +247,6 @@
   </main>
 
   <script type="module">
-    // Firebase Web SDK (modular) via CDN. Current major versions are in the v12+ line.
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
     import {
@@ -288,11 +258,11 @@
       updateProfile
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
-    // Firestore (for sequential public IDs + user doc)
     import {
       getFirestore,
       doc,
       setDoc,
+      getDoc,
       runTransaction,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
@@ -310,7 +280,6 @@
 
     const app = initializeApp(firebaseConfig);
 
-    // Analytics only works in supported browser contexts
     try {
       if (await analyticsSupported()) getAnalytics(app);
     } catch (_) {}
@@ -335,6 +304,7 @@
     const forgotPw = document.getElementById("forgotPw");
 
     let mode = "login"; // "login" | "signup"
+    let isSubmitting = false; // prevents auto-redirect from interrupting signup
 
     function setMsg(text, kind="") {
       msgBox.style.display = text ? "block" : "none";
@@ -370,9 +340,52 @@
       return err?.message || "Something went wrong. Please try again.";
     }
 
-    // If already logged in, go straight to hub
-    onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = "hub.html";
+    async function ensurePublicId(user, displayName="") {
+      const userRef = doc(db, "users", user.uid);
+      const snap = await getDoc(userRef);
+
+      if (snap.exists() && snap.data()?.publicId) {
+        return snap.data().publicId;
+      }
+
+      // Sequential public ID (U1, U2, U3...)
+      // Recommended one-time setup: meta/counters { userCounter: 0 }
+      const publicId = await runTransaction(db, async (transaction) => {
+        const counterRef = doc(db, "meta", "counters");
+        const counterSnap = await transaction.get(counterRef);
+
+        let current = 0;
+        if (counterSnap.exists()) {
+          current = Number(counterSnap.data()?.userCounter || 0);
+        }
+        const next = current + 1;
+
+        transaction.set(counterRef, { userCounter: next }, { merge: true });
+        return "U" + next;
+      });
+
+      await setDoc(userRef, {
+        publicId,
+        name: displayName || (snap.exists() ? (snap.data()?.name || "") : ""),
+        email: user.email || "",
+        verified: false,
+        createdAt: serverTimestamp()
+      }, { merge: true });
+
+      return publicId;
+    }
+
+    // Auto-redirect if already logged in (but NOT while submitting)
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      if (isSubmitting) return;
+
+      try {
+        // Backfill publicId for older accounts too
+        await ensurePublicId(user, user.displayName || "");
+      } catch (_) {}
+
+      window.location.href = "hub.html";
     });
 
     // Forgot password
@@ -399,6 +412,7 @@
       const password = pwEl.value;
 
       submitBtn.disabled = true;
+      isSubmitting = true;
 
       try {
         if (mode === "signup") {
@@ -411,7 +425,6 @@
           const cred = await createUserWithEmailAndPassword(auth, email, password);
           const user = cred.user;
 
-          // Optional display name
           const fn = firstNameEl.value.trim();
           const ln = lastNameEl.value.trim();
           const displayName = [fn, ln].filter(Boolean).join(" ");
@@ -420,44 +433,25 @@
             await updateProfile(user, { displayName });
           }
 
-          // --- Sequential public ID (U1, U2, U3...) ---
-          // IMPORTANT: Create this once in Firestore:
-          // meta/counters { userCounter: 0 }
-          const publicId = await runTransaction(db, async (transaction) => {
-            const counterRef = doc(db, "meta", "counters");
-            const counterSnap = await transaction.get(counterRef);
-
-            let current = 0;
-            if (counterSnap.exists()) {
-              current = Number(counterSnap.data().userCounter || 0);
-            }
-
-            const next = current + 1;
-
-            transaction.set(counterRef, { userCounter: next }, { merge: true });
-
-            return "U" + next;
-          });
-
-          // Create/seed the user's Firestore profile doc
-          await setDoc(doc(db, "users", user.uid), {
-            publicId,
-            name: displayName || "",
-            email: user.email || "",
-            verified: false,
-            createdAt: serverTimestamp()
-          }, { merge: true });
+          await ensurePublicId(user, displayName);
 
           setMsg("Account created! Redirecting…", "ok");
           window.location.href = "hub.html";
         } else {
           await signInWithEmailAndPassword(auth, email, password);
+
+          // Ensure publicId exists (for older users too)
+          if (auth.currentUser) {
+            await ensurePublicId(auth.currentUser, auth.currentUser.displayName || "");
+          }
+
           setMsg("Logged in! Redirecting…", "ok");
           window.location.href = "hub.html";
         }
       } catch (err) {
         setMsg(friendlyAuthError(err), "error");
       } finally {
+        isSubmitting = false;
         submitBtn.disabled = false;
       }
     });
