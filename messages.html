@@ -383,18 +383,20 @@ async function loadMatches(){
 
   renderChatList("");
 
-    // Auto-open a chat if we landed here via messages.html?chat=...
-  const target = getUrlChatTarget();
-  if (target.chatId) {
-    // Try to find name from our loaded matches list
-    const found = allChats.find(c => c.chatId === target.chatId);
-    const name = found ? found.name : "Chat";
+ // 🔥 Control sidebar visibility on page load
+const target = getUrlChatTarget();
 
-    openChat(target.chatId, name);
+if (target.chatId) {
+  // Coming from Dating match → open specific chat, hide sidebar on mobile
+  const found = allChats.find(c => c.chatId === target.chatId);
+  const name = found ? found.name : "Chat";
+  openChat(target.chatId, name);
 
-    // On mobile, close the sidebar so you see the conversation immediately
-    sidebar.classList.remove("open");
-  }
+  sidebar.classList.remove("open");
+} else {
+  // Coming from Hub → show chat list immediately
+  sidebar.classList.add("open");
+}
 }
 
 function renderChatList(filterText){
