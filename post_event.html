@@ -114,7 +114,7 @@
     color-scheme: dark; /* helps on many browsers */
   }
 
-  /* Bio sizing + spacing fix */
+  /* Description sizing + spacing fix */
   .bioLabel{gap:8px;}
   .bioLabel textarea{
     min-height: 210px;
@@ -395,7 +395,7 @@
 
     <div class="sectionHead">
       <h2>Details</h2>
-      <div class="hint">Tags + bio cover the vibe.</div>
+      <div class="hint">Tags + description cover the vibe.</div>
     </div>
 
     <div class="row">
@@ -425,8 +425,8 @@
     </div>
 
     <div class="row" style="margin-top:12px;">
-      <label class="bioLabel">Event bio
-        <textarea id="bio" placeholder="What is it? Who is it for? What should people expect?"></textarea>
+      <label class="bioLabel">Description
+        <textarea id="description" placeholder="Describe the vibe, what’s happening, who it’s for, what to bring, etc."></textarea>
       </label>
 
       <div class="stack">
@@ -512,7 +512,7 @@ const endTimeEl = document.getElementById("endTime");
 const sizeEstimateEl = document.getElementById("sizeEstimate");
 const ratioEl = document.getElementById("ratio");
 const tagsEl = document.getElementById("tags");
-const bioEl = document.getElementById("bio");
+const descriptionEl = document.getElementById("description");
 
 const inviteEl = document.getElementById("inviteOnly");
 const invitePill = document.getElementById("invitePill");
@@ -744,7 +744,7 @@ postBtn.addEventListener("click", async ()=>{
 
       sizeEstimate,
       ratio: (ratioEl.value||"").trim(),
-      bio: (bioEl.value||"").trim(),
+      description: (descriptionEl.value||"").trim(),
       tags,
 
       imageUrl: "",
