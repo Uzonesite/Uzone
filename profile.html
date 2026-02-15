@@ -298,7 +298,6 @@
 
         <div class="fields">
           <div class="nameLine">
-            <span class="chip" id="displayNameChip">—</span>
             <span class="badge id" id="idBadge"><span class="dot"></span><span id="idText">U—</span></span>
             <span class="badge" id="verifyBadge"><span class="dot"></span><span id="verifyText">Not verified</span></span>
             <button class="btn secondary" id="openVerifyBtn" type="button">Verify</button>
@@ -479,7 +478,6 @@ const signOutBtn = document.getElementById("signOutBtn");
     const genderEl = document.getElementById("gender");
     const saveBtn = document.getElementById("saveBtn");
 
-    const displayNameChip = document.getElementById("displayNameChip");
     const idBadge = document.getElementById("idBadge");
     const idText = document.getElementById("idText");
     const verifyBadge = document.getElementById("verifyBadge");
@@ -586,8 +584,6 @@ const signOutBtn = document.getElementById("signOutBtn");
       ageEl.value = (data.age || "").toString();
       genderEl.value = (data.gender || "").toString();
 
-      displayNameChip.textContent = nameEl.value.trim() || "Your name";
-
       const publicId = (data.publicId || "").toString().trim();
       if (publicId) {
         idText.textContent = publicId;
@@ -624,7 +620,7 @@ const signOutBtn = document.getElementById("signOutBtn");
 
         await setDoc(doc(db, "users", currentUser.uid), payload, { merge: true });
 
-        displayNameChip.textContent = payload.name || "Your name";
+         = payload.name || "Your name";
         if (!avatarImg.src || avatarImg.src.startsWith("data:image/svg+xml")) {
           avatarImg.src = placeholderAvatarFromName(payload.name);
         }
