@@ -95,7 +95,6 @@
 
   .stack{display:grid; gap:12px; align-content:start;}
 
-  /* Image uploader */
   .uploader{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.16);
@@ -117,11 +116,6 @@
     font-size:13px;
   }
   .preview img{width:100%; height:100%; object-fit:cover; display:none;}
-  .uploader .mini{
-    color: rgba(255,255,255,.70);
-    font-size:12px;
-    line-height:1.35;
-  }
   .fileRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
   .fileBtn{
     padding:10px 12px;
@@ -155,7 +149,6 @@
     background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
   }
 
-  /* Theme toggle pill for invite-only */
   .togglePill{
     display:flex;
     align-items:center;
@@ -188,7 +181,7 @@
     top:50%;
     left:3px;
     transform: translateY(-50%);
-    transition: transform .18s ease, background .18s ease;
+    transition: transform .18s ease;
   }
   .togglePill.on{
     border-color: rgba(176,11,85,.55);
@@ -201,7 +194,6 @@
   }
   .togglePill.on .switch::after{
     transform: translateY(-50%) translateX(20px);
-    background: rgba(255,255,255,.92);
   }
 
   .msg{
@@ -254,7 +246,6 @@
       </label>
     </div>
 
-    <!-- NEW: venue size + host spots available -->
     <div class="row" style="margin-top:12px;">
       <label>Venue size (capacity / space)
         <input id="venueSize" placeholder="e.g., small condo / house / 40-person capacity" />
@@ -282,7 +273,6 @@
       </label>
     </div>
 
-    <!-- Bio + Image/Invite aligned row -->
     <div class="row" style="margin-top:12px;">
       <label>Event bio
         <textarea id="bio" placeholder="Describe the event…"></textarea>
@@ -302,11 +292,6 @@
           </div>
 
           <div class="progress" id="progress"><div id="progressBar"></div></div>
-
-          <div class="mini">
-            If uploads fail with a “CORS” message, it’s almost always Storage Rules denying the request.
-            For now set Storage Rules to allow signed-in users.
-          </div>
         </div>
 
         <input id="inviteOnly" type="checkbox" hidden />
@@ -342,7 +327,8 @@ const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
   authDomain: "uzone-6148d.firebaseapp.com",
   projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.appspot.com"
+  // ✅ THIS MUST MATCH YOUR CONSOLE EXACTLY:
+  storageBucket: "uzone-6148d.firebasestorage.app"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -454,7 +440,6 @@ async function uploadEventImage(eventId){
   const path = `event_images/${eventId}/${Date.now()}.${safeExt}`;
   const storageRef = ref(storage, path);
 
-  // NOTE: if Storage rules deny this, the browser often shows it as “CORS”.
   const task = uploadBytesResumable(storageRef, selectedFile, { contentType: selectedFile.type });
 
   const url = await new Promise((resolve, reject) => {
@@ -487,7 +472,6 @@ postBtn.addEventListener("click", async ()=>{
   setMsg("");
 
   try{
-    // Pull host name from users collection if available
     let hostName = currentUser.displayName || "";
     try{
       const u = await getDoc(doc(db,"users",currentUser.uid));
@@ -501,11 +485,9 @@ postBtn.addEventListener("click", async ()=>{
       .slice(0, 12);
 
     const sizeEstimate = Number(sizeEl.value || 0) || 0;
-
     const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
     const venueSize = (venueSizeEl.value || "").trim();
 
-    // Create doc first so we have eventId for storage path
     const eventRef = await addDoc(collection(db,"events"), {
       name,
       location: (locationEl.value||"").trim(),
@@ -530,20 +512,9 @@ postBtn.addEventListener("click", async ()=>{
       createdAt: serverTimestamp()
     });
 
-    // Upload image (optional) and patch imageUrl
-    try{
+    if (selectedFile){
       const imageUrl = await uploadEventImage(eventRef.id);
-      if (imageUrl){
-        await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
-      }
-    } catch(uploadErr){
-      // If this hits and you see “CORS”, your Storage rules are denying the request.
-      setMsg(
-        `Event posted, but image upload failed.\n\n${uploadErr?.message || uploadErr}\n\nFix: Firebase Storage Rules must allow signed-in users to write to event_images/.`,
-        "error"
-      );
-      setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventRef.id)}`; }, 1200);
-      return;
+      await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
     }
 
     setMsg("Event posted!", "ok");
