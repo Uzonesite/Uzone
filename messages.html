@@ -43,16 +43,27 @@ body{
 }
 
 @media (max-width:768px){
-  .{
+  .sidebar{
     position:fixed;
-    left:-260px;
+    left:-280px;
     top:0;
     height:100%;
+    width:260px;
+    padding:12px;
+    background:var(--bg);
+    border-right:1px solid var(--border);
+    z-index:30;
   }
-  ..open{
+  .sidebar.open{
     left:0;
   }
+
+  /* optional: make chat take full width cleanly */
+  .chat{
+    width:100%;
+  }
 }
+
 
 /* Chat */
 .chat{
@@ -487,6 +498,18 @@ messageInput.addEventListener("keydown",e=>{
 
 chatSearch.addEventListener("input", () => {
   renderChatList(chatSearch.value);
+});
+
+document.addEventListener("click", (e) => {
+  if (window.innerWidth > 768) return;
+  if (!sidebar.classList.contains("open")) return;
+
+  const clickedInsideSidebar = sidebar.contains(e.target);
+  const clickedChatsButton = openSidebarBtn.contains(e.target);
+
+  if (!clickedInsideSidebar && !clickedChatsButton) {
+    sidebar.classList.remove("open");
+  }
 });
   
 </script>
