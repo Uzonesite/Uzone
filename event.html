@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Uzone • Event</title>
+<style>
+  :root{
+    --accent:#b00b55;
+    --bg:#0b0b10;
+    --panel: rgba(255,255,255,.06);
+    --border: rgba(255,255,255,.14);
+    --text: rgba(255,255,255,.92);
+    --muted: rgba(255,255,255,.70);
+    --shadow: 0 20px 60px rgba(0,0,0,.45);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100dvh;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--text);
+    background:
+      radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
+      radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
+      radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
+      var(--bg);
+  }
+  header{
+    width:min(1100px, 92vw);
+    margin:18px auto 0 auto;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 16px;
+    border:1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    position:sticky; top:10px; z-index:10;
+  }
+  .left{display:flex; align-items:center; gap:12px; min-width:0;}
+  .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
+  .title{display:grid; gap:2px; min-width:0;}
+  .title h1{margin:0;font-size:18px;letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+  .btn{
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(176,11,85,.55);
+    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+    color:white;
+    font-weight:750;
+    cursor:pointer;
+    box-shadow: 0 18px 40px rgba(176,11,85,.22);
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    white-space:nowrap;
+  }
+  .btn.secondary{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    box-shadow:none;
+    color:rgba(255,255,255,.92);
+  }
+  .chip{
+    padding:8px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    font-size:13px;
+    color:rgba(255,255,255,.85);
+  }
+  main{width:min(1100px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+  .card{
+    border:1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .hero{
+    display:grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap:0;
+  }
+  @media (max-width: 900px){ .hero{grid-template-columns: 1fr;} }
+  .heroImg{background: rgba(0,0,0,.20);}
+  .heroImg img{width:100%; height:100%; max-height: 380px; object-fit:cover; display:block;}
+  .heroBody{padding:14px;}
+  .name{font-size:22px; font-weight:900; letter-spacing:.2px; margin:0 0 6px 0;}
+  .mini{color:var(--muted); font-size:13px; line-height:1.4;}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+  .tag{display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.18); color: rgba(255,255,255,.86);}
+  .tag .dot{width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);}
+  .tag.invite .dot{background: rgba(255,210,80,.85);}
+  .tag.open .dot{background: rgba(80,255,160,.75);}
+  .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:14px;}
+  @media (max-width: 900px){ .grid2{grid-template-columns:1fr;} }
+  .section{padding:14px;}
+  .h{margin:0 0 10px 0; font-size:15px; letter-spacing:.2px;}
+  .row{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+  @media (max-width: 520px){ .row{grid-template-columns:1fr;} }
+  .box{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    border-radius:14px;
+    padding:10px 12px;
+    font-size:13px;
+    color: rgba(255,255,255,.86);
+    line-height:1.35;
+  }
+  textarea, input{
+    width:100%;
+    padding:12px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color:var(--text);
+    outline:none;
+    font-size:14px;
+  }
+  textarea{min-height:90px; resize:vertical}
+  .msg{display:none; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.16); color:rgba(255,255,255,.85); font-size:13px; white-space:pre-line;}
+  .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
+  .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
+
+  .ratingWrap{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .meter{
+    width:64px;height:64px;border-radius:999px;
+    background: conic-gradient(var(--accent) 0deg, rgba(255,255,255,.12) 0deg);
+    border:1px solid rgba(255,255,255,.14);
+    display:grid;
+    place-items:center;
+    font-weight:900;
+    font-size:13px;
+  }
+  .stars{display:flex; gap:6px; flex-wrap:wrap;}
+  .starBtn{
+    width:34px;height:34px;border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    color: rgba(255,255,255,.9);
+    cursor:pointer;
+    font-weight:900;
+  }
+  .starBtn.active{
+    border-color: rgba(176,11,85,.60);
+    box-shadow: 0 0 0 3px rgba(176,11,85,.20);
+  }
+
+  .comment{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    border-radius:14px;
+    padding:10px 12px;
+    display:grid;
+    gap:6px;
+  }
+  .comment .meta{color:var(--muted); font-size:12px;}
+  .comment .text{font-size:13px; line-height:1.35;}
+</style>
+</head>
+<body>
+<header>
+  <div class="left">
+    <img src="logo.png" alt="Uzone logo" />
+    <div class="title">
+      <h1 id="title">Event</h1>
+      <div class="sub" id="sub">Loading…</div>
+    </div>
+  </div>
+  <div class="right">
+    <a class="btn secondary" href="events.html">← Events</a>
+    <a class="btn secondary" href="hub.html">Hub</a>
+    <a class="btn secondary" href="my_events.html">My Events</a>
+    <span class="chip" id="userEmail">—</span>
+  </div>
+</header>
+
+<main>
+  <section class="card hero">
+    <div class="heroImg"><img id="img" alt="Event image"></div>
+    <div class="heroBody">
+      <div class="name" id="name">—</div>
+      <div class="mini" id="vibes">—</div>
+      <div class="chips" id="tags"></div>
+      <div style="margin-top:12px;" class="row">
+        <div class="box"><b>Size</b><br><span id="size">—</span></div>
+        <div class="box"><b>Ratio</b><br><span id="ratio">—</span></div>
+      </div>
+      <div style="margin-top:10px;" class="box"><b>Bio</b><br><span id="bio">—</span></div>
+
+      <div id="lockedNote" class="box" style="margin-top:10px; display:none;">
+        This event is invite-only. Apply to see the exact location and time.
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" id="applyBtn" type="button" style="display:none;">Apply</button>
+        <span class="chip" id="statusChip" style="display:none;">—</span>
+      </div>
+
+      <div class="msg" id="msg"></div>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <section class="card section">
+      <h2 class="h">Details</h2>
+      <div class="row">
+        <div class="box"><b>Location</b><br><span id="location">—</span></div>
+        <div class="box"><b>Date</b><br><span id="date">—</span></div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <div class="box"><b>Time</b><br><span id="time">—</span></div>
+        <div class="box"><b>Host</b><br><span id="host">—</span></div>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2 class="h">Rating</h2>
+      <div class="ratingWrap">
+        <div class="meter" id="meter">0.0</div>
+        <div>
+          <div class="mini">Rate this event (1–10)</div>
+          <div class="stars" id="stars"></div>
+        </div>
+      </div>
+      <div class="mini" style="margin-top:8px;">Average rating updates as people rate.</div>
+    </section>
+  </section>
+
+  <section class="card section">
+    <h2 class="h">Comments</h2>
+    <div id="commentLock" class="box" style="display:none;">Comments are available to accepted guests only.</div>
+    <div style="display:grid; gap:10px; margin-top:10px;">
+      <textarea id="commentInput" placeholder="Write a comment…"></textarea>
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn" id="postComment" type="button">Post Comment</button>
+      </div>
+    </div>
+    <div style="margin-top:12px; display:grid; gap:10px;" id="comments"></div>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs,
+  query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  projectId: "uzone-6148d",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const userEmail = document.getElementById("userEmail");
+const title = document.getElementById("title");
+const sub = document.getElementById("sub");
+const img = document.getElementById("img");
+const nameEl = document.getElementById("name");
+const vibesEl = document.getElementById("vibes");
+const tagsEl = document.getElementById("tags");
+const sizeEl = document.getElementById("size");
+const ratioEl = document.getElementById("ratio");
+const bioEl = document.getElementById("bio");
+
+const locationEl = document.getElementById("location");
+const dateEl = document.getElementById("date");
+const timeEl = document.getElementById("time");
+const hostEl = document.getElementById("host");
+
+const lockedNote = document.getElementById("lockedNote");
+const applyBtn = document.getElementById("applyBtn");
+const statusChip = document.getElementById("statusChip");
+const msg = document.getElementById("msg");
+
+const meter = document.getElementById("meter");
+const stars = document.getElementById("stars");
+
+const commentLock = document.getElementById("commentLock");
+const commentInput = document.getElementById("commentInput");
+const postComment = document.getElementById("postComment");
+const comments = document.getElementById("comments");
+
+function setMsg(text, kind=""){
+  msg.style.display = text ? "block" : "none";
+  msg.textContent = text || "";
+  msg.className = "msg" + (kind ? " " + kind : "");
+}
+function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function pie(avg){
+  const v = Math.max(0, Math.min(10, Number(avg||0)));
+  const deg = (v/10) * 360;
+  meter.textContent = v.toFixed(1);
+  meter.style.background = `conic-gradient(var(--accent) ${deg}deg, rgba(255,255,255,.12) 0deg)`;
+}
+
+const params = new URLSearchParams(location.search);
+const eventId = params.get("id");
+
+let currentUser = null;
+let eventData = null;
+let isHost = false;
+let isAccepted = false;
+let isInviteOnly = false;
+
+function renderStars(selected){
+  stars.innerHTML = "";
+  for (let i=1;i<=10;i++){
+    const b = document.createElement("button");
+    b.className = "starBtn" + (i === selected ? " active" : "");
+    b.textContent = String(i);
+    b.addEventListener("click", () => submitRating(i));
+    stars.appendChild(b);
+  }
+}
+
+async function loadEvent(){
+  const snap = await getDoc(doc(db, "events", eventId));
+  if (!snap.exists()){
+    title.textContent = "Event not found";
+    sub.textContent = "";
+    return;
+  }
+  eventData = snap.data();
+  title.textContent = eventData.name || "Event";
+  sub.textContent = "Event details";
+
+  img.src = eventData.imageUrl || "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=60";
+  nameEl.textContent = eventData.name || "Event";
+  vibesEl.textContent = eventData.vibes || "";
+  sizeEl.textContent = eventData.sizeEstimate ?? "—";
+  ratioEl.textContent = eventData.ratio || "—";
+  bioEl.textContent = eventData.bio || "—";
+
+  tagsEl.innerHTML = "";
+  const tags = Array.isArray(eventData.tags) ? eventData.tags : [];
+  const invite = !!eventData.inviteOnly;
+  const t1 = document.createElement("span");
+  t1.className = "tag " + (invite ? "invite" : "open");
+  t1.innerHTML = `<span class="dot"></span>${invite ? "Invite-only" : "Open"}`;
+  tagsEl.appendChild(t1);
+  tags.slice(0,6).forEach(t=>{
+    const s = document.createElement("span");
+    s.className = "tag";
+    s.textContent = t;
+    tagsEl.appendChild(s);
+  });
+
+  isInviteOnly = invite;
+  isHost = currentUser && eventData.hostUid === currentUser.uid;
+
+  // Determine accepted status
+  isAccepted = false;
+  if (currentUser){
+    const memSnap = await getDoc(doc(db, "events", eventId, "members", currentUser.uid));
+    isAccepted = memSnap.exists() && memSnap.data()?.status === "accepted";
+  }
+
+  // Location/date/time lock logic
+  const canSeeDetails = !isInviteOnly || isHost || isAccepted;
+
+  locationEl.textContent = canSeeDetails ? (eventData.location || "—") : "Hidden";
+  dateEl.textContent = canSeeDetails ? (eventData.date || "—") : "Hidden";
+  timeEl.textContent = canSeeDetails ? (eventData.time || "—") : "Hidden";
+  hostEl.textContent = eventData.hostName || eventData.hostUid || "—";
+
+  lockedNote.style.display = (!canSeeDetails && isInviteOnly) ? "block" : "none";
+
+  // Apply button
+  if (isInviteOnly && !isHost && !isAccepted){
+    applyBtn.style.display = "inline-flex";
+    statusChip.style.display = "inline-flex";
+
+    const appSnap = await getDoc(doc(db, "events", eventId, "applications", currentUser.uid));
+    if (!appSnap.exists()){
+      statusChip.textContent = "Not applied";
+    } else {
+      statusChip.textContent = "Status: " + (appSnap.data()?.status || "pending");
+    }
+  } else {
+    applyBtn.style.display = "none";
+    statusChip.style.display = "none";
+  }
+
+  // Ratings + comments lock
+  const canInteract = !isInviteOnly || isHost || isAccepted;
+  commentLock.style.display = canInteract ? "none" : "block";
+  commentInput.disabled = !canInteract;
+  postComment.disabled = !canInteract;
+
+  // Rating UI
+  await loadRatings();
+  await loadMyRating();
+  renderStars(0);
+
+  // Comments
+  await loadComments();
+}
+
+async function apply(){
+  setMsg("");
+  applyBtn.disabled = true;
+  try{
+    await setDoc(doc(db, "events", eventId, "applications", currentUser.uid), {
+      uid: currentUser.uid,
+      name: currentUser.displayName || "",
+      status: "pending",
+      createdAt: serverTimestamp()
+    }, { merge: true });
+    statusChip.textContent = "Status: pending";
+    setMsg("Applied! The host will review your request.", "ok");
+  } catch(e){
+    setMsg(e.message || "Failed to apply.", "error");
+  } finally {
+    applyBtn.disabled = false;
+  }
+}
+
+async function loadRatings(){
+  // compute average from all ratings
+  const snap = await getDocs(collection(db, "events", eventId, "ratings"));
+  let sum = 0, count = 0;
+  snap.forEach(d => {
+    const v = Number(d.data()?.value || 0);
+    if (v > 0){ sum += v; count++; }
+  });
+  const avg = count ? (sum / count) : 0;
+  pie(avg);
+  // store avg on event doc for list page
+  try{
+    await updateDoc(doc(db,"events",eventId), { ratingAvg: avg });
+  } catch(_) {}
+}
+
+async function loadMyRating(){
+  if (!currentUser) return;
+  const snap = await getDoc(doc(db, "events", eventId, "ratings", currentUser.uid));
+  const v = snap.exists() ? Number(snap.data()?.value || 0) : 0;
+  renderStars(v || 0);
+}
+
+async function submitRating(v){
+  if (!currentUser) return;
+  const canInteract = !isInviteOnly || isHost || isAccepted;
+  if (!canInteract) return;
+
+  await setDoc(doc(db, "events", eventId, "ratings", currentUser.uid), {
+    uid: currentUser.uid,
+    value: v,
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
+  renderStars(v);
+  await loadRatings();
+}
+
+async function loadComments(){
+  comments.innerHTML = "";
+  const snap = await getDocs(query(collection(db,"events",eventId,"comments"), orderBy("createdAt","desc")));
+  snap.forEach(d=>{
+    const c = d.data() || {};
+    const div = document.createElement("div");
+    div.className = "comment";
+    div.innerHTML = `
+      <div class="meta">${esc(c.authorName || "User")} • ${c.createdAt?.toDate ? c.createdAt.toDate().toLocaleString() : ""}</div>
+      <div class="text">${esc(c.text || "")}</div>
+    `;
+    comments.appendChild(div);
+  });
+}
+
+async function postAComment(){
+  const canInteract = !isInviteOnly || isHost || isAccepted;
+  if (!canInteract) return;
+
+  const text = (commentInput.value || "").trim();
+  if (!text) return;
+  postComment.disabled = true;
+
+  try{
+    await addDoc(collection(db,"events",eventId,"comments"), {
+      text,
+      authorUid: currentUser.uid,
+      authorName: currentUser.displayName || currentUser.email || "User",
+      createdAt: serverTimestamp()
+    });
+    commentInput.value = "";
+    await loadComments();
+  } finally {
+    postComment.disabled = false;
+  }
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = "index.html"; return; }
+  currentUser = user;
+  userEmail.textContent = user.email || "Signed in";
+  if (!eventId) { title.textContent = "Event not found"; return; }
+
+  applyBtn.addEventListener("click", apply);
+  postComment.addEventListener("click", postAComment);
+
+  await loadEvent();
+});
+</script>
+</body>
+</html>
