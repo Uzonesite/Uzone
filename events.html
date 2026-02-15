@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Uzone • Events</title>
+  <style>
+    :root{
+      --accent:#b00b55;
+      --bg:#0b0b10;
+      --panel: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100dvh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
+        radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
+        var(--bg);
+    }
+
+    header{
+      width:min(1100px, 92vw);
+      margin:18px auto 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .left{display:flex; align-items:center; gap:12px; min-width:0;}
+    .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
+    .title{display:grid; gap:2px; min-width:0;}
+    .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      font-size:13px;
+      color:rgba(255,255,255,.85);
+    }
+    .btn{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(176,11,85,.55);
+      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+      color:white;
+      font-weight:750;
+      cursor:pointer;
+      box-shadow: 0 18px 40px rgba(176,11,85,.22);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+    }
+    .btn.secondary{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      box-shadow:none;
+      color:rgba(255,255,255,.92);
+    }
+
+    main{width:min(1100px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+    .bar{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .searchWrap{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      width:min(720px,100%);
+      flex:1;
+    }
+    input{
+      flex:1;
+      min-width: 240px;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+    }
+    input:focus{
+      border-color: rgba(176,11,85,.60);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+    }
+    .card{
+      grid-column: span 6;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      text-decoration:none;
+      color:inherit;
+      display:grid;
+      grid-template-columns: 160px 1fr;
+      min-height: 150px;
+    }
+    @media (max-width: 860px){
+      .card{grid-column: span 12; grid-template-columns: 140px 1fr;}
+    }
+    .img{
+      background: rgba(0,0,0,.20);
+      border-right: 1px solid rgba(255,255,255,.10);
+    }
+    .img img{width:100%;height:100%;object-fit:cover;display:block;}
+    .body{
+      padding:12px 12px 12px 12px;
+      display:grid;
+      gap:8px;
+    }
+    .topline{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .name{
+      font-size:16px;
+      font-weight:850;
+      letter-spacing:.2px;
+      line-height:1.2;
+    }
+    .mini{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
+    }
+    .tag .dot{width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);}
+    .tag.invite .dot{background: rgba(255,210,80,.85);}
+    .tag.open .dot{background: rgba(80,255,160,.75);}
+
+    .ratingPill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      font-size:12px;
+      color: rgba(255,255,255,.86);
+      white-space:nowrap;
+    }
+    .meter{
+      width:36px;height:36px;border-radius:999px;
+      background: conic-gradient(var(--accent) 0deg, rgba(255,255,255,.12) 0deg);
+      border:1px solid rgba(255,255,255,.14);
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      font-size:11px;
+      color:rgba(255,255,255,.92);
+    }
+
+    .empty{
+      border:1px dashed rgba(255,255,255,.20);
+      background: rgba(0,0,0,.14);
+      border-radius: var(--radius);
+      padding:14px 16px;
+      color:rgba(255,255,255,.78);
+      font-size:13px;
+      line-height:1.45;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="left">
+      <img src="logo.png" alt="Uzone logo" />
+      <div class="title">
+        <h1>Events</h1>
+        <div class="sub" id="subline">Discover what’s happening</div>
+      </div>
+    </div>
+    <div class="right">
+      <a class="btn secondary" href="hub.html">← Hub</a>
+      <a class="btn secondary" href="my_events.html">My Events</a>
+      <span class="chip" id="userEmail">—</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="bar">
+      <div class="searchWrap">
+        <input id="search" placeholder="Search events (name, vibes, tags, school, program…)" />
+        <button class="btn secondary" id="refreshBtn" type="button">Refresh</button>
+      </div>
+      <a class="btn" href="post_event.html">Post Event</a>
+    </section>
+
+    <section id="grid" class="grid"></section>
+    <section id="empty" class="empty" style="display:none;">No events found.</section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, query, orderBy, limit
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      projectId: "uzone-6148d",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const userEmail = document.getElementById("userEmail");
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("empty");
+    const search = document.getElementById("search");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    let allEvents = [];
+
+    function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    function ratingCircle(avg){
+      const v = Math.max(0, Math.min(10, Number(avg||0)));
+      const deg = (v/10) * 360;
+      return { v, deg };
+    }
+
+    function render(list){
+      grid.innerHTML = "";
+      empty.style.display = list.length ? "none" : "block";
+
+      list.forEach(ev => {
+        const avg = ev.ratingAvg ?? 0;
+        const { v, deg } = ratingCircle(avg);
+
+        const tags = Array.isArray(ev.tags) ? ev.tags : [];
+        const inviteOnly = !!ev.inviteOnly;
+
+        const card = document.createElement("a");
+        card.className = "card";
+        card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
+
+        card.innerHTML = `
+          <div class="img">
+            <img alt="Event image" src="${esc(ev.imageUrl || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=60')}" />
+          </div>
+          <div class="body">
+            <div class="topline">
+              <div>
+                <div class="name">${esc(ev.name || "Event")}</div>
+                <div class="mini">${esc(ev.vibes || "")}</div>
+              </div>
+              <div class="ratingPill" title="Average rating">
+                <div class="meter" style="background: conic-gradient(var(--accent) ${deg}deg, rgba(255,255,255,.12) 0deg);">${v.toFixed(1)}</div>
+              </div>
+            </div>
+
+            <div class="mini">
+              Size: <b>${esc(ev.sizeEstimate ?? "—")}</b> • Ratio: <b>${esc(ev.ratio || "—")}</b>
+            </div>
+
+            <div class="chips">
+              <span class="tag ${inviteOnly ? "invite" : "open"}"><span class="dot"></span>${inviteOnly ? "Invite-only" : "Open"}</span>
+              ${tags.slice(0,4).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function applySearch(){
+      const q = (search.value || "").trim().toLowerCase();
+      if (!q) { render(allEvents); return; }
+
+      const filtered = allEvents.filter(ev => {
+        const hay = [
+          ev.name, ev.location, ev.vibes, ev.bio, ev.ratio,
+          ...(Array.isArray(ev.tags) ? ev.tags : [])
+        ].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+      render(filtered);
+    }
+
+    async function load(){
+      grid.innerHTML = "";
+      empty.style.display = "none";
+      allEvents = [];
+
+      // Default sort: sizeEstimate descending
+      const q = query(collection(db, "events"), orderBy("sizeEstimate", "desc"), limit(80));
+      const snap = await getDocs(q);
+      allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      render(allEvents);
+      applySearch();
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      userEmail.textContent = user.email || "Signed in";
+      await load();
+    });
+
+    search.addEventListener("input", applySearch);
+    refreshBtn.addEventListener("click", load);
+  </script>
+</body>
+</html>
