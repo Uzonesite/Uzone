@@ -352,6 +352,15 @@ if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", setAppHeight);
 }
 
+function getUrlChatTarget(){
+  const p = new URLSearchParams(window.location.search);
+  return {
+    chatId: p.get("chat") || null,
+    withUid: p.get("with") || null
+  };
+}
+
+
 async function loadMatches(){
   chatList.innerHTML = "";
   allChats = [];
@@ -373,6 +382,19 @@ async function loadMatches(){
   allChats.sort((a,b) => a.name.localeCompare(b.name));
 
   renderChatList("");
+
+    // Auto-open a chat if we landed here via messages.html?chat=...
+  const target = getUrlChatTarget();
+  if (target.chatId) {
+    // Try to find name from our loaded matches list
+    const found = allChats.find(c => c.chatId === target.chatId);
+    const name = found ? found.name : "Chat";
+
+    openChat(target.chatId, name);
+
+    // On mobile, close the sidebar so you see the conversation immediately
+    sidebar.classList.remove("open");
+  }
 }
 
 function renderChatList(filterText){
@@ -408,6 +430,7 @@ function renderChatList(filterText){
 
 function openChat(chatId,name){
   currentChatId=chatId;
+  history.replaceState(null, "", `messages.html?chat=${encodeURIComponent(chatId)}`);
   chatName.textContent=name;
   messagesDiv.innerHTML="";
 
