@@ -59,6 +59,10 @@ button {
   color:white;
   cursor:pointer;
 }
+button:disabled {
+  opacity:0.6;
+  cursor:not-allowed;
+}
 </style>
 </head>
 
@@ -78,7 +82,7 @@ button {
 
     <input type="file" id="image" accept="image/*">
 
-    <button onclick="postParty()">Post Event</button>
+    <button id="postBtn" onclick="postParty()">Post Event</button>
   </div>
 </div>
 
@@ -104,38 +108,57 @@ const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-let user;
+let user = null;
+
 onAuthStateChanged(auth, u => {
-  if (!u) location.href = "index.html";
+  if (!u) {
+    location.href = "index.html";
+    return;
+  }
   user = u;
 });
 
 window.postParty = async () => {
-  let imageURL = "";
-  const file = image.files[0];
-
-  if (file) {
-    const imgRef = sRef(storage, `partyImages/${Date.now()}_${file.name}`);
-    await uploadBytes(imgRef, file);
-    imageURL = await getDownloadURL(imgRef);
+  if (!user) {
+    alert("Auth not ready. Try again.");
+    return;
   }
 
-  const snap = await get(ref(db, "users/" + user.uid));
-  const name = snap.exists() ? snap.val().name : "Host";
+  const btn = document.getElementById("postBtn");
+  btn.disabled = true;
 
-  await set(push(ref(db, "parties")), {
-    hostUID: user.uid,
-    hostName: name,
-    location: location.value,
-    time: time.value,
-    vibes: vibes.value,
-    ratio: ratio.value,
-    description: description.value,
-    imageURL,
-    attendees: {}
-  });
+  try {
+    let imageURL = "";
+    const file = image.files[0];
 
-  location.href = "parties.html";
+    if (file) {
+      const imgRef = sRef(storage, `partyImages/${Date.now()}_${file.name}`);
+      await uploadBytes(imgRef, file);
+      imageURL = await getDownloadURL(imgRef);
+    }
+
+    const snap = await get(ref(db, "users/" + user.uid));
+    const name = snap.exists() ? snap.val().name : "Host";
+
+    await set(push(ref(db, "parties")), {
+      hostUID: user.uid,
+      hostName: name,
+      location: location.value,
+      time: time.value,
+      vibes: vibes.value,
+      ratio: ratio.value,
+      description: description.value,
+      imageURL,
+      attendees: {}
+    });
+
+    location.href = "parties.html";
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to post party.");
+    btn.disabled = false;
+  }
 };
 </script>
 
