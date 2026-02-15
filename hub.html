@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Uzone • Hub</title>
 
   <style>
@@ -20,7 +20,7 @@
     *{box-sizing:border-box}
     body{
       margin:0;
-      min-height:100vh;
+      min-height:100dvh;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       color:var(--text);
       background:
@@ -42,6 +42,10 @@
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      position:sticky;
+      top:10px;
+      z-index:10;
+      backdrop-filter: blur(10px);
     }
     .left{
       display:flex;
@@ -50,26 +54,52 @@
       min-width:0;
     }
     .left img{
-      width:38px;height:38px;object-fit:contain;
+      width:40px;height:40px;object-fit:contain;
       filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
     }
     .title{
-      display:grid;
-      gap:2px;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
       min-width:0;
     }
-    .title h1{
+    .brandRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .brandRow h1{
       margin:0;
       font-size:18px;
       letter-spacing:.2px;
+      line-height:1.1;
     }
-    .title .sub{
+    .sub{
       color:var(--muted);
       font-size:13px;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.88);
+      white-space:nowrap;
+    }
+    .badge .dot{
+      width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);
+    }
+    .badge.verified .dot{ background: rgba(80,255,160,.78); }
+    .badge.unverified .dot{ background: rgba(255,210,80,.85); }
 
     .right{
       display:flex;
@@ -85,6 +115,10 @@
       background: rgba(0,0,0,.18);
       font-size:13px;
       color:rgba(255,255,255,.85);
+      max-width: 260px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .btn{
       padding:10px 12px;
@@ -92,19 +126,21 @@
       border:1px solid rgba(176,11,85,.55);
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
       color:white;
-      font-weight:750;
+      font-weight:800;
       cursor:pointer;
       box-shadow: 0 18px 40px rgba(176,11,85,.22);
       text-decoration:none;
       display:inline-flex;
       align-items:center;
       gap:8px;
+      white-space:nowrap;
     }
     .btn.secondary{
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
       box-shadow:none;
       color:rgba(255,255,255,.92);
+      font-weight:750;
     }
 
     main{
@@ -126,8 +162,8 @@
     .hero::after{
       content:"";
       position:absolute;
-      inset:-40% -40% auto auto;
-      width:420px;height:420px;
+      inset:-45% -45% auto auto;
+      width:520px;height:520px;
       background: radial-gradient(circle, rgba(176,11,85,.22), transparent 60%);
       transform: rotate(18deg);
       pointer-events:none;
@@ -143,15 +179,37 @@
     }
     .hero h2{
       margin:0;
-      font-size:18px;
+      font-size:20px;
       letter-spacing:.2px;
     }
     .hero p{
       margin:8px 0 0 0;
       color:var(--muted);
       line-height:1.45;
-      max-width: 70ch;
+      max-width: 75ch;
     }
+
+    .quick{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+      position:relative;
+      z-index:1;
+    }
+    .quick a{
+      text-decoration:none;
+      color:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      padding:10px 12px;
+      border-radius: 999px;
+      font-weight:750;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .quick a:hover{ background: rgba(255,255,255,.08); }
 
     .grid{
       display:grid;
@@ -167,7 +225,10 @@
       padding:16px;
       position:relative;
       overflow:hidden;
-      min-height: 160px;
+      min-height: 170px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
     }
     .card::after{
       content:"";
@@ -191,6 +252,7 @@
       position:relative;
       z-index:1;
     }
+
     .actions{
       margin-top:12px;
       display:flex;
@@ -206,7 +268,7 @@
       background: rgba(0,0,0,.18);
       color:rgba(255,255,255,.92);
       text-decoration:none;
-      font-weight:700;
+      font-weight:800;
       display:inline-flex;
       align-items:center;
       gap:8px;
@@ -216,12 +278,7 @@
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
       box-shadow: 0 18px 40px rgba(176,11,85,.18);
     }
-    .linkBtn.disabled{
-      opacity:.55;
-      cursor:not-allowed;
-      pointer-events:none;
-    }
-    .tag{
+    .pill{
       display:inline-flex;
       align-items:center;
       gap:6px;
@@ -236,14 +293,14 @@
       z-index:1;
       width: fit-content;
     }
-    .tag .dot{
+    .pill .dot{
       width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);
     }
-    .tag.soon .dot{ background: rgba(255,210,80,.80); }
-    .tag.live .dot{ background: rgba(80,255,160,.75); }
+    .pill.live .dot{ background: rgba(80,255,160,.75); }
 
     @media (max-width: 860px){
       .card{grid-column: span 12;}
+      .chip{max-width: 100%;}
     }
   </style>
 </head>
@@ -253,13 +310,19 @@
     <div class="left">
       <img src="logo.png" alt="Uzone logo" />
       <div class="title">
-        <h1>Uzone</h1>
+        <div class="brandRow">
+          <h1>Uzone</h1>
+          <span class="badge unverified" id="verifyBadge" style="display:none;">
+            <span class="dot"></span><span id="verifyText">Unverified</span>
+          </span>
+        </div>
         <div class="sub" id="welcome">Loading…</div>
       </div>
     </div>
 
     <div class="right">
       <span class="chip" id="userEmail">—</span>
+      <a class="btn secondary" href="profile.html">Profile</a>
       <button class="btn" id="signOutBtn">Sign out</button>
     </div>
   </header>
@@ -268,8 +331,15 @@
     <section class="hero" aria-label="Hub intro">
       <div class="heroTop">
         <div>
-          <h2>Your Hub</h2>
-          <p>Meet people on campus, message instantly, and discover events — all in one place.</p>
+          <h2 id="heroTitle">Your Hub</h2>
+          <p id="heroDesc">Meet people on campus, message instantly, and discover events — all in one place.</p>
+
+          <div class="quick" aria-label="Quick actions">
+            <a href="dating.html">🔥 Dating</a>
+            <a href="messages.html">💬 Messages</a>
+            <a href="events.html">📍 Events</a>
+            <a href="profile.html">👤 Profile</a>
+          </div>
         </div>
         <a class="btn secondary" href="profile.html">Open Profile</a>
       </div>
@@ -277,38 +347,47 @@
 
     <section class="grid" aria-label="Hub navigation">
       <article class="card">
-        <h3>Profile</h3>
-        <p>Set up your profile, add photos, and manage verification.</p>
-        <div class="tag live"><span class="dot"></span>Live</div>
+        <div>
+          <h3>Profile</h3>
+          <p>Set up your profile, add photos, and manage verification.</p>
+          <div class="pill live"><span class="dot"></span>Live</div>
+        </div>
         <div class="actions">
           <a class="linkBtn primary" href="profile.html">Open Profile</a>
         </div>
       </article>
 
       <article class="card">
-        <h3>Dating</h3>
-        <p>Swipe to find matches with students at your university.</p>
-        <div class="tag soon"><span class="dot"></span>Coming soon</div>
+        <div>
+          <h3>Dating</h3>
+          <p>Swipe through students, match, and start conversations.</p>
+          <div class="pill live"><span class="dot"></span>Live</div>
+        </div>
         <div class="actions">
-          <a class="linkBtn disabled" href="dating.html" aria-disabled="true">Open Dating</a>
+          <a class="linkBtn primary" href="dating.html">Open Dating</a>
         </div>
       </article>
 
       <article class="card">
-        <h3>Messaging</h3>
-        <p>Chat with matches and friends — fast and simple.</p>
-        <div class="tag soon"><span class="dot"></span>Coming soon</div>
+        <div>
+          <h3>Messaging</h3>
+          <p>Chat with matches and friends — clean, fast, and mobile-friendly.</p>
+          <div class="pill live"><span class="dot"></span>Live</div>
+        </div>
         <div class="actions">
-          <a class="linkBtn disabled" href="messages.html" aria-disabled="true">Open Messages</a>
+          <a class="linkBtn primary" href="messages.html">Open Messages</a>
         </div>
       </article>
 
       <article class="card">
-        <h3>Events</h3>
-        <p>Find campus events, RSVP, and see what’s happening today.</p>
-        <div class="tag soon"><span class="dot"></span>Coming soon</div>
+        <div>
+          <h3>Events</h3>
+          <p>Discover events, apply to invite-only parties, and rate the vibes.</p>
+          <div class="pill live"><span class="dot"></span>Live</div>
+        </div>
         <div class="actions">
-          <a class="linkBtn disabled" href="events.html" aria-disabled="true">Open Events</a>
+          <a class="linkBtn primary" href="events.html">Open Events</a>
+          <a class="linkBtn" href="my_events.html">My Events</a>
         </div>
       </article>
     </section>
@@ -318,6 +397,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -334,19 +414,51 @@
     try { if (await analyticsSupported()) getAnalytics(app); } catch(_) {}
 
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     const welcome = document.getElementById("welcome");
     const userEmail = document.getElementById("userEmail");
     const signOutBtn = document.getElementById("signOutBtn");
 
-    onAuthStateChanged(auth, (user) => {
+    const verifyBadge = document.getElementById("verifyBadge");
+    const verifyText = document.getElementById("verifyText");
+
+    function setVerified(isVerified){
+      verifyBadge.style.display = "inline-flex";
+      if (isVerified){
+        verifyBadge.classList.remove("unverified");
+        verifyBadge.classList.add("verified");
+        verifyText.textContent = "Verified";
+      } else {
+        verifyBadge.classList.remove("verified");
+        verifyBadge.classList.add("unverified");
+        verifyText.textContent = "Unverified";
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
         return;
       }
-      const name = user.displayName?.trim();
-      welcome.textContent = name ? `Welcome, ${name}` : "Welcome back";
+
       userEmail.textContent = user.email || "Signed in";
+
+      // Prefer Firestore profile name (matches your profile page)
+      let displayName = user.displayName?.trim() || "";
+      let verified = false;
+
+      try{
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists()){
+          const data = snap.data() || {};
+          if (typeof data.name === "string" && data.name.trim()) displayName = data.name.trim();
+          verified = !!data.verified;
+        }
+      } catch(_) {}
+
+      welcome.textContent = displayName ? `Welcome, ${displayName}` : "Welcome back";
+      setVerified(verified);
     });
 
     signOutBtn.addEventListener("click", async () => {
