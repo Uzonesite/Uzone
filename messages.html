@@ -310,12 +310,22 @@ function openChat(chatId, name){
           bubble.replaceChild(input, text);
           input.focus();
 
-          input.onblur = async () => {
-            await updateDoc(
-              doc(db,"chats",chatId,"messages",docSnap.id),
-              { text: input.value }
-            );
-          };
+          async function saveEdit() {
+  await updateDoc(
+    doc(db,"chats",chatId,"messages",docSnap.id),
+    { text: input.value }
+  );
+}
+
+input.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    input.blur(); // triggers save
+  }
+});
+
+input.onblur = saveEdit;
+
         };
         actions.appendChild(editBtn);
 
@@ -361,6 +371,14 @@ sendBtn.onclick = async () => {
   replyToMessage=null;
   replyingToDiv.style.display="none";
 };
+
+messageInput.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendBtn.click();
+  }
+});
+
 
 cancelReply.onclick = () => {
   replyToMessage=null;
