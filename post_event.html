@@ -264,6 +264,16 @@
       </label>
     </div>
 
+    <!-- NEW: Venue size + Spots available -->
+    <div class="row" style="margin-top:12px;">
+      <label>Venue size (capacity / space)
+        <input id="venueSize" placeholder="e.g., 2-bedroom condo / small hall / 40-person capacity" />
+      </label>
+      <label>Spots available (host says)
+        <input id="spotsAvailable" type="number" min="0" placeholder="e.g., 15" />
+      </label>
+    </div>
+
     <div class="row" style="margin-top:12px;">
       <label>Size estimate (# of people)
         <input id="size" type="number" min="1" placeholder="e.g., 20" />
@@ -341,6 +351,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
   authDomain: "uzone-6148d.firebaseapp.com",
   projectId: "uzone-6148d",
+  storageBucket: "uzone-6148d.appspot.com" // ✅ REQUIRED for Storage
 };
 
 const app = initializeApp(firebaseConfig);
@@ -355,6 +366,8 @@ const nameEl = document.getElementById("name");
 const locationEl = document.getElementById("location");
 const dateEl = document.getElementById("date");
 const timeEl = document.getElementById("time");
+const venueSizeEl = document.getElementById("venueSize");         // NEW
+const spotsAvailableEl = document.getElementById("spotsAvailable"); // NEW
 const sizeEl = document.getElementById("size");
 const ratioEl = document.getElementById("ratio");
 const vibesEl = document.getElementById("vibes");
@@ -439,7 +452,6 @@ async function uploadEventImage(eventId){
   progress.style.display = "block";
   progressBar.style.width = "0%";
 
-  // We can't get fine-grained progress with uploadBytes, but we can still show staged progress.
   progressBar.style.width = "25%";
 
   const ext = (selectedFile.name.split(".").pop() || "jpg").toLowerCase();
@@ -475,7 +487,6 @@ postBtn.addEventListener("click", async ()=>{
   setMsg("");
 
   try{
-    // Pull host name from users collection if available
     let hostName = currentUser.displayName || "";
     try{
       const u = await getDoc(doc(db,"users",currentUser.uid));
@@ -490,29 +501,36 @@ postBtn.addEventListener("click", async ()=>{
 
     const sizeEstimate = Number(sizeEl.value || 0) || 0;
 
-    // Create the event doc first (so we can use its id for storage path)
+    // NEW fields (safe parsing)
+    const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
+    const venueSize = (venueSizeEl.value || "").trim();
+
     const eventRef = await addDoc(collection(db,"events"), {
       name,
       location: (locationEl.value||"").trim(),
       date: (dateEl.value||"").trim(),
       time: (timeEl.value||"").trim(),
+
+      venueSize,              // ✅ NEW
+      spotsAvailable,         // ✅ NEW
+
       sizeEstimate,
       vibes: (vibesEl.value||"").trim(),
       ratio: (ratioEl.value||"").trim(),
       bio: (bioEl.value||"").trim(),
       tags,
-      imageUrl: "",                 // filled after upload (if any)
+
+      imageUrl: "",
       inviteOnly: !!inviteEl.checked,
+
       ratingAvg: 0,
       hostUid: currentUser.uid,
       hostName: hostName || currentUser.email || "Host",
       createdAt: serverTimestamp()
     });
 
-    // Upload image (optional) and patch imageUrl
     const imageUrl = await uploadEventImage(eventRef.id);
     if (imageUrl){
-      // Patch the document using setDoc merge (keeps imports minimal)
       const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js");
       await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
     }
