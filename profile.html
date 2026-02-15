@@ -558,34 +558,42 @@ const signOutBtn = document.getElementById("signOutBtn");
 async function loadProfile(user) {
   const snap = await getDoc(doc(db, "users", user.uid));
 
-  if (!snap.exists()) return;
+  if (!snap.exists()) {
+    subline.textContent = "Profile not found (no users doc yet).";
+    // Still show something reasonable
+    idText.textContent = "U—";
+    setVerificationUI("none");
+    avatarImg.src = placeholderAvatarFromName("U");
+    return;
+  }
 
   const data = snap.data();
 
-  // --- SET USER ID BADGE ---
-  const userIdText = document.getElementById("userIdText");
-  userIdText.textContent = data.publicId || "U—";
+  // ✅ SET USER ID BADGE (uses your existing idText element)
+  idText.textContent = (data.publicId || "U—").toString();
 
-  // --- VERIFIED BADGE ---
-  const verifyBadge = document.getElementById("verifyBadge");
-  const verifyText = document.getElementById("verifyText");
+  // ✅ Verification status (your page already supports status strings)
+  const status =
+    data?.verification?.status ||
+    (data.verified === true ? "verified" : "none");
 
-  if (data.verified === true) {
-    verifyBadge.classList.add("verified");
-    verifyText.textContent = "Verified";
-  } else {
-    verifyBadge.classList.remove("verified");
-    verifyText.textContent = "Not verified";
-  }
+  setVerificationUI(status);
 
-  // Load other fields
-  document.getElementById("name").value = data.name || "";
-  document.getElementById("university").value = data.university || "";
-  document.getElementById("program").value = data.program || "";
-  document.getElementById("bio").value = data.bio || "";
-  document.getElementById("age").value = data.age || "";
-  document.getElementById("gender").value = data.gender || "";
+  // Fill fields
+  nameEl.value = data.name || "";
+  universityEl.value = data.university || "";
+  programEl.value = data.program || "";
+  bioEl.value = data.bio || "";
+  ageEl.value = data.age || "";
+  genderEl.value = data.gender || "";
+
+  // Avatar
+  const url = data.photoURL || "";
+  avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
+
+  subline.textContent = "Edit your profile";
 }
+
 
 
     async function saveProfile(){
@@ -776,13 +784,13 @@ async function loadProfile(user) {
 
     // Auth gate
     onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "index.html"; return; }
-      currentUser = user;
-subline.textContent = "Loading profile…";
+  if (!user) { window.location.href = "index.html"; return; }
+  currentUser = user;
+  subline.textContent = "Loading profile…";
 
-      await loadProfile(user.uid);
-      await loadPosts(user.uid);
-    });
+  await loadProfile(user);       // ✅ pass the full user object
+  await loadPosts(user.uid);     // ✅ uid is fine here
+});
 
     // Events
     signOutBtn.addEventListener("click", async () => {
