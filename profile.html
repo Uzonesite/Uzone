@@ -555,52 +555,38 @@ const signOutBtn = document.getElementById("signOutBtn");
       }
     }
 
-    async function loadProfile(uid){
-      const userRef = doc(db, "users", uid);
-      const snap = await getDoc(userRef);
+async function loadProfile(user) {
+  const snap = await getDoc(doc(db, "users", user.uid));
 
-      if (!snap.exists()) {
-        await setDoc(userRef, {
-          name: currentUser?.displayName || "",
-          university: "",
-          program: "",
-          bio: "",
-          age: "",
-          gender: "",
-          photoURL: "",
-          verification: { status: "none", updatedAt: serverTimestamp() },
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-      }
+  if (!snap.exists()) return;
 
-      const snap2 = await getDoc(userRef);
-      const data = snap2.data() || {};
+  const data = snap.data();
 
-      nameEl.value = (data.name || currentUser?.displayName || "").toString();
-      universityEl.value = (data.university || "").toString();
-      programEl.value = (data.program || "").toString();
-      bioEl.value = (data.bio || "").toString();
-      ageEl.value = (data.age || "").toString();
-      genderEl.value = (data.gender || "").toString();
+  // --- SET USER ID BADGE ---
+  const userIdText = document.getElementById("userIdText");
+  userIdText.textContent = data.publicId || "U—";
 
-      const publicId = (data.publicId || "").toString().trim();
-      if (publicId) {
-        idText.textContent = publicId;
-        idBadge.style.display = "inline-flex";
-      } else {
-        idText.textContent = "U—";
-        idBadge.style.display = "none";
-      }
+  // --- VERIFIED BADGE ---
+  const verifyBadge = document.getElementById("verifyBadge");
+  const verifyText = document.getElementById("verifyText");
 
-      const photoURL = (data.photoURL || "").toString();
-      avatarImg.src = photoURL || placeholderAvatarFromName(nameEl.value);
+  if (data.verified === true) {
+    verifyBadge.classList.add("verified");
+    verifyText.textContent = "Verified";
+  } else {
+    verifyBadge.classList.remove("verified");
+    verifyText.textContent = "Not verified";
+  }
 
-      const vStatus = data?.verification?.status || "none";
-      setVerificationUI(vStatus);
+  // Load other fields
+  document.getElementById("name").value = data.name || "";
+  document.getElementById("university").value = data.university || "";
+  document.getElementById("program").value = data.program || "";
+  document.getElementById("bio").value = data.bio || "";
+  document.getElementById("age").value = data.age || "";
+  document.getElementById("gender").value = data.gender || "";
+}
 
-      subline.textContent = "Edit your profile";
-    }
 
     async function saveProfile(){
       if (!currentUser) return;
