@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Uzone • My Events</title>
+<style>
+  :root{
+    --accent:#b00b55;
+    --bg:#0b0b10;
+    --border: rgba(255,255,255,.14);
+    --text: rgba(255,255,255,.92);
+    --muted: rgba(255,255,255,.70);
+    --shadow: 0 20px 60px rgba(0,0,0,.45);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100dvh;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:var(--text);
+    background:
+      radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
+      radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
+      radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
+      var(--bg);
+  }
+  header{
+    width:min(1100px, 92vw);
+    margin:18px auto 0 auto;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 16px;
+    border:1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .left{display:flex; align-items:center; gap:12px; min-width:0;}
+  .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
+  .title{display:grid; gap:2px; min-width:0;}
+  .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+  .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+  .btn{
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(176,11,85,.55);
+    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+    color:white;
+    font-weight:750;
+    cursor:pointer;
+    box-shadow: 0 18px 40px rgba(176,11,85,.22);
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    white-space:nowrap;
+  }
+  .btn.secondary{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    box-shadow:none;
+    color:rgba(255,255,255,.92);
+  }
+  .chip{
+    padding:8px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    font-size:13px;
+    color:rgba(255,255,255,.85);
+  }
+
+  main{width:min(1100px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+  .card{
+    border:1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding:14px;
+    overflow:hidden;
+  }
+  .eventRow{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    padding:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+  }
+  .name{font-weight:900; letter-spacing:.2px;}
+  .mini{color:var(--muted); font-size:13px; line-height:1.35;}
+  .actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .smallBtn{
+    padding:9px 10px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    color:rgba(255,255,255,.92);
+    cursor:pointer;
+    font-weight:750;
+  }
+  .danger{
+    border-color: rgba(255,80,120,.35);
+    background: rgba(255,80,120,.10);
+  }
+  .app{
+    margin-top:10px;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="left">
+    <img src="logo.png" alt="Uzone logo" />
+    <div class="title">
+      <h1>My Events</h1>
+      <div class="sub">Manage your events and approvals</div>
+    </div>
+  </div>
+  <div class="right">
+    <a class="btn secondary" href="events.html">← Events</a>
+    <a class="btn secondary" href="hub.html">Hub</a>
+    <a class="btn" href="post_event.html">Post Event</a>
+    <span class="chip" id="userEmail">—</span>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="list"></section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, query, where, doc,
+  deleteDoc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+  authDomain: "uzone-6148d.firebaseapp.com",
+  projectId: "uzone-6148d",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const userEmail = document.getElementById("userEmail");
+const list = document.getElementById("list");
+
+let currentUser = null;
+
+function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+async function load(){
+  list.innerHTML = "<div class='mini'>Loading…</div>";
+
+  const q = query(collection(db,"events"), where("hostUid","==",currentUser.uid));
+  const snap = await getDocs(q);
+  const events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  if (!events.length){
+    list.innerHTML = "<div class='mini'>You haven’t posted any events yet.</div>";
+    return;
+  }
+
+  list.innerHTML = "";
+  for (const ev of events){
+    const row = document.createElement("div");
+    row.className = "eventRow";
+    row.innerHTML = `
+      <div>
+        <div class="name">${esc(ev.name || "Event")}</div>
+        <div class="mini">
+          ${esc(ev.inviteOnly ? "Invite-only" : "Open")} • Size ${esc(ev.sizeEstimate ?? "—")} • ${esc(ev.vibes || "")}
+        </div>
+      </div>
+      <div class="actions">
+        <a class="smallBtn" href="event.html?id=${encodeURIComponent(ev.id)}">View</a>
+        <button class="smallBtn danger" data-del="${esc(ev.id)}">Delete</button>
+      </div>
+    `;
+    list.appendChild(row);
+
+    // Applications block (only relevant for inviteOnly, but we’ll show if any exist)
+    const appSnap = await getDocs(collection(db,"events",ev.id,"applications"));
+    if (!appSnap.empty){
+      appSnap.forEach(appDoc => {
+        const a = appDoc.data() || {};
+        const appRow = document.createElement("div");
+        appRow.className = "app";
+        appRow.innerHTML = `
+          <div>
+            <div class="name">${esc(a.name || a.uid || "Applicant")}</div>
+            <div class="mini">Status: <b>${esc(a.status || "pending")}</b></div>
+          </div>
+          <div class="actions">
+            <button class="smallBtn" data-accept="${esc(ev.id)}|${esc(appDoc.id)}">Accept</button>
+            <button class="smallBtn danger" data-deny="${esc(ev.id)}|${esc(appDoc.id)}">Deny</button>
+          </div>
+        `;
+        list.appendChild(appRow);
+      });
+    }
+  }
+
+  // Delete handlers
+  list.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const id = btn.getAttribute("data-del");
+      if (!confirm("Delete this event?")) return;
+      await deleteDoc(doc(db,"events",id));
+      await load();
+    });
+  });
+
+  // Accept / deny handlers
+  list.querySelectorAll("[data-accept]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const [eventId, uid] = btn.getAttribute("data-accept").split("|");
+      await setDoc(doc(db,"events",eventId,"members",uid), { uid, status:"accepted", updatedAt: serverTimestamp() }, { merge:true });
+      await setDoc(doc(db,"events",eventId,"applications",uid), { uid, status:"accepted", updatedAt: serverTimestamp() }, { merge:true });
+      await load();
+    });
+  });
+  list.querySelectorAll("[data-deny]").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      const [eventId, uid] = btn.getAttribute("data-deny").split("|");
+      await setDoc(doc(db,"events",eventId,"members",uid), { uid, status:"denied", updatedAt: serverTimestamp() }, { merge:true });
+      await setDoc(doc(db,"events",eventId,"applications",uid), { uid, status:"denied", updatedAt: serverTimestamp() }, { merge:true });
+      await load();
+    });
+  });
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href="index.html"; return; }
+  currentUser = user;
+  userEmail.textContent = user.email || "Signed in";
+  await load();
+});
+</script>
+</body>
+</html>
