@@ -355,6 +355,78 @@
     .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
     .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 
+    /* Matches list */
+    .matchesBox{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      border-radius: 14px;
+      overflow:hidden;
+    }
+    .matchesHeader{
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+    }
+    .matchesHeader .h{
+      font-weight:850;
+      letter-spacing:.2px;
+      font-size:13px;
+      color:rgba(255,255,255,.88);
+    }
+    .matchesList{
+      max-height: 320px;
+      overflow:auto;
+      display:grid;
+    }
+    .matchRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      cursor:pointer;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .matchRow:hover{ background: rgba(255,255,255,.04); }
+    .matchRow:last-child{ border-bottom:0; }
+    .matchAvatar{
+      width:36px;height:36px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      overflow:hidden;
+      background: rgba(0,0,0,.28);
+      flex: 0 0 auto;
+    }
+    .matchAvatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .matchMeta{
+      display:grid;
+      gap:2px;
+      min-width:0;
+      flex:1;
+    }
+    .matchName{
+      font-weight:850;
+      font-size:13px;
+      color:rgba(255,255,255,.90);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .matchSub{
+      font-size:12px;
+      color:rgba(255,255,255,.64);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .matchEmpty{
+      padding:10px 12px;
+      color:rgba(255,255,255,.70);
+      font-size:13px;
+      line-height:1.35;
+    }
+
     /* Match modal */
     .modal{
       position:fixed;
@@ -401,9 +473,11 @@
     .bubble{
       width:86px;height:86px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.18);
       overflow:hidden;
-      background: rgba(0,0,0,.22);
+      /* more opaque for readability */
+      background: rgba(0,0,0,.52);
+      box-shadow: 0 10px 26px rgba(0,0,0,.45);
     }
     .bubble img{width:100%;height:100%;object-fit:cover;display:block}
     .modalActions{
@@ -437,8 +511,8 @@
       <div class="seg">
         <div class="label">Searching for</div>
         <div class="toggle" role="tablist" aria-label="Gender filter">
-          <button class="pill active" id="findWomen" role="tab" aria-selected="true">Women</button>
-          <button class="pill" id="findMen" role="tab" aria-selected="false">Men</button>
+          <button class="pill active" id="findFemale" role="tab" aria-selected="true">Female</button>
+          <button class="pill" id="findMale" role="tab" aria-selected="false">Male</button>
         </div>
       </div>
 
@@ -484,6 +558,17 @@
 
         <div class="tiny" id="seenHint">—</div>
         <div class="msg" id="msgBox" aria-live="polite"></div>
+
+        <!-- Matches list -->
+        <div class="matchesBox" aria-label="Matches">
+          <div class="matchesHeader">
+            <div class="h">Matches</div>
+            <button class="btn secondary" id="refreshMatchesBtn" type="button" style="padding:8px 10px; border-radius:12px;">Refresh</button>
+          </div>
+          <div class="matchesList" id="matchesList">
+            <div class="matchEmpty" id="matchesEmpty">No matches yet.</div>
+          </div>
+        </div>
       </aside>
     </section>
   </main>
@@ -500,7 +585,7 @@
         <div class="pair">
           <div class="bubble"><img id="meBubble" alt="You" /></div>
           <div class="bubble"><img id="themBubble" alt="Match" /></div>
-          <div style="color:rgba(255,255,255,.85); font-size:14px; line-height:1.35;">
+          <div style="color:rgba(255,255,255,.88); font-size:14px; line-height:1.35;">
             You and <b id="matchName">—</b> liked each other.
           </div>
         </div>
@@ -556,8 +641,8 @@
     const userEmail = document.getElementById("userEmail");
     const signOutBtn = document.getElementById("signOutBtn");
 
-    const findWomen = document.getElementById("findWomen");
-    const findMen = document.getElementById("findMen");
+    const findFemale = document.getElementById("findFemale");
+    const findMale = document.getElementById("findMale");
     const refreshBtn = document.getElementById("refreshBtn");
     const seenBanner = document.getElementById("seenBanner");
 
@@ -588,17 +673,24 @@
     const matchName = document.getElementById("matchName");
     const messageLink = document.getElementById("messageLink");
 
+    const matchesList = document.getElementById("matchesList");
+    const matchesEmpty = document.getElementById("matchesEmpty");
+    const refreshMatchesBtn = document.getElementById("refreshMatchesBtn");
+
     let currentUser = null;
 
     // State
-    let searchGender = "Woman"; // "Woman" | "Man"
-    let candidates = [];        // array of { uid, ...profile }
+    let searchGender = "Female"; // "Female" | "Male"
+    let candidates = [];         // array of { uid, ...profile }
     let idx = 0;
-    let currentPhotos = [];     // array of URLs for current card
+    let currentPhotos = [];      // array of URLs for current card
     let photoIndex = 0;
 
     // Cache of swipe decisions: Map<otherUid, { direction: "like"|"dislike", updatedAt }>
     const swipeMap = new Map();
+
+    // Cache of matches: Map<matchId, { otherUid, chatId, name, photoURL }>
+    const matchMap = new Map();
 
     function setMsg(text, kind="") {
       msgBox.style.display = text ? "block" : "none";
@@ -641,11 +733,11 @@
     }
 
     function setToggleUI(){
-      const women = searchGender === "Woman";
-      findWomen.classList.toggle("active", women);
-      findMen.classList.toggle("active", !women);
-      findWomen.setAttribute("aria-selected", String(women));
-      findMen.setAttribute("aria-selected", String(!women));
+      const female = searchGender === "Female";
+      findFemale.classList.toggle("active", female);
+      findMale.classList.toggle("active", !female);
+      findFemale.setAttribute("aria-selected", String(female));
+      findMale.setAttribute("aria-selected", String(!female));
     }
 
     function setButtonsEnabled(enabled){
@@ -705,19 +797,16 @@
           const data = d.data() || {};
           if (data.url) urls.push(String(data.url));
         });
-      } catch(_) {
-        // ignore (still show avatar or placeholder)
-      }
+      } catch(_) {}
 
-      // Deduplicate
       const uniq = [...new Set(urls.filter(Boolean))];
       return uniq.length ? uniq : [avatar || placeholderAvatarFromName(profile?.name || "U")];
     }
 
     function normalizeGender(g){
       const s = (g || "").toString().trim().toLowerCase();
-      if (s === "man" || s === "male") return "Man";
-      if (s === "woman" || s === "female") return "Woman";
+      if (s === "male" || s === "man") return "Male";
+      if (s === "female" || s === "woman") return "Female";
       return g || "";
     }
 
@@ -753,7 +842,6 @@
       const vStatus = candidate?.verification?.status || "none";
       setVerificationUI(vStatus);
 
-      // Seen hint
       const sw = swipeMap.get(candidate.uid);
       if (sw) {
         seenHint.textContent = `You previously ${sw.direction === "like" ? "liked" : "disliked"} this profile.`;
@@ -761,11 +849,9 @@
         seenHint.textContent = " ";
       }
 
-      // Photos (async)
       setMsg("");
       renderPhotos([candidate.photoURL || placeholderAvatarFromName(name)]);
       getTopPhotosForUser(candidate.uid, candidate).then(urls => {
-        // Only apply if still viewing same candidate
         const current = candidates[idx];
         if (current && current.uid === candidate.uid) renderPhotos(urls);
       });
@@ -812,12 +898,10 @@
       candidates = [];
       idx = 0;
 
-      // Query users by gender
       const target = searchGender;
       const usersRef = collection(db, "users");
 
-      // NOTE: This assumes profiles store Gender exactly as "Woman" or "Man".
-      // If users might have empty gender, they just won't appear until set.
+      // NOTE: This assumes profiles store Gender exactly as "Female" or "Male".
       const q = query(usersRef, where("gender", "==", target), limit(60));
       const snaps = await getDocs(q);
 
@@ -827,14 +911,12 @@
         candidates.push({ uid: d.id, ...data });
       });
 
-      // If no candidates
       if (!candidates.length) {
         subline.textContent = "No profiles available";
         displayCandidate(null);
         return;
       }
 
-      // Shuffle lightly so it feels less static
       for (let i = candidates.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
@@ -875,6 +957,121 @@
       return matchId;
     }
 
+    function openChatWith(otherUid){
+      const chatId = chatIdFor(currentUser.uid, otherUid);
+      // We pass both chat + with so your messages page can reliably open the right thread
+      window.location.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
+    }
+
+    function renderMatches(){
+      matchesList.innerHTML = "";
+      const items = [...matchMap.values()];
+
+      if (!items.length) {
+        matchesList.appendChild(matchesEmpty);
+        matchesEmpty.style.display = "block";
+        return;
+      }
+
+      matchesEmpty.style.display = "none";
+
+      items.forEach(m => {
+        const row = document.createElement("div");
+        row.className = "matchRow";
+        row.addEventListener("click", () => openChatWith(m.otherUid));
+
+        const av = document.createElement("div");
+        av.className = "matchAvatar";
+        const img = document.createElement("img");
+        img.alt = "Match";
+        img.src = m.photoURL || placeholderAvatarFromName(m.name || "U");
+        av.appendChild(img);
+
+        const meta = document.createElement("div");
+        meta.className = "matchMeta";
+
+        const n = document.createElement("div");
+        n.className = "matchName";
+        n.textContent = m.name || "Student";
+
+        const sub = document.createElement("div");
+        sub.className = "matchSub";
+        sub.textContent = "Tap to message";
+
+        meta.appendChild(n);
+        meta.appendChild(sub);
+
+        row.appendChild(av);
+        row.appendChild(meta);
+        matchesList.appendChild(row);
+      });
+    }
+
+    async function loadMatches(){
+      matchMap.clear();
+
+      // Grab match docs where current user is a member
+      try{
+        const matchesRef = collection(db, "matches");
+        const q = query(matchesRef, where("members", "array-contains", currentUser.uid), limit(50));
+        const snaps = await getDocs(q);
+
+        const others = [];
+        snaps.forEach(d => {
+          const data = d.data() || {};
+          const members = (data.members || []).slice().sort();
+          if (!members.includes(currentUser.uid)) return;
+          const otherUid = members.find(x => x !== currentUser.uid);
+          if (!otherUid) return;
+          others.push({ matchId: d.id, otherUid, createdAt: data.createdAt || null });
+        });
+
+        // Fetch other user profiles (simple per-doc reads; small scale)
+        for (const m of others){
+          let name = "Student";
+          let photoURL = "";
+          try{
+            const uSnap = await getDoc(doc(db, "users", m.otherUid));
+            if (uSnap.exists()){
+              const u = uSnap.data() || {};
+              name = (u.name || "Student").toString().trim();
+              photoURL = (u.photoURL || "").toString();
+            }
+          } catch(_) {}
+
+          matchMap.set(m.matchId, {
+            matchId: m.matchId,
+            otherUid: m.otherUid,
+            chatId: chatIdFor(currentUser.uid, m.otherUid),
+            name,
+            photoURL,
+            createdAt: m.createdAt || null
+          });
+        }
+
+        // Sort: best-effort by createdAt if present (client-side)
+        const sorted = [...matchMap.entries()].sort((a, b) => {
+          const ta = a[1].createdAt?.toMillis ? a[1].createdAt.toMillis() : 0;
+          const tb = b[1].createdAt?.toMillis ? b[1].createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+
+        matchMap.clear();
+        sorted.forEach(([k, v]) => matchMap.set(k, v));
+
+        renderMatches();
+      } catch(err){
+        // If matches collection is locked by rules, show a helpful note
+        matchesList.innerHTML = "";
+        const div = document.createElement("div");
+        div.className = "matchEmpty";
+        div.textContent = err?.message
+          ? ("Couldn’t load matches: " + err.message)
+          : "Couldn’t load matches.";
+        matchesList.appendChild(div);
+      }
+    }
+
     async function swipe(direction){
       const cand = currentCandidate();
       if (!cand) return;
@@ -886,7 +1083,6 @@
       const myUid = currentUser.uid;
 
       try{
-        // Record my swipe
         await setDoc(doc(db, "users", myUid, "swipes", otherUid), {
           direction, // "like" | "dislike"
           updatedAt: serverTimestamp()
@@ -895,13 +1091,11 @@
         swipeMap.set(otherUid, { direction });
 
         if (direction === "like") {
-          // Check if they liked me
           const theirSwipeRef = doc(db, "users", otherUid, "swipes", myUid);
           const theirSnap = await getDoc(theirSwipeRef);
           const theirDir = theirSnap.exists() ? (theirSnap.data()?.direction || "") : "";
 
           if (theirDir === "like") {
-            // Match!
             const meSnap = await getDoc(doc(db, "users", myUid));
             const meProfile = meSnap.exists() ? meSnap.data() : {};
             const mePhoto = (meProfile?.photoURL || "") || placeholderAvatarFromName(meProfile?.name || "U");
@@ -910,10 +1104,23 @@
             const matchId = await ensureMatch(myUid, otherUid);
             const chatId = await ensureChat(myUid, otherUid);
 
+            // Update matches list immediately
+            matchMap.set(matchId, {
+              matchId,
+              otherUid,
+              chatId,
+              name: (cand.name || "Student").toString().trim(),
+              photoURL: (cand.photoURL || "").toString(),
+              createdAt: null
+            });
+            renderMatches();
+
             meBubble.src = mePhoto;
             themBubble.src = themPhoto;
             matchName.textContent = (cand.name || "Student").toString().trim();
-            messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&match=${encodeURIComponent(matchId)}`;
+
+            // Open the specific chat (not just messages page)
+            messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
 
             matchModal.style.display = "flex";
             setMsg("Matched!", "ok");
@@ -924,7 +1131,6 @@
           setMsg("Disliked.", "ok");
         }
 
-        // Move on
         nextCandidate();
       } catch(err){
         setMsg(err?.message || "Swipe failed.", "error");
@@ -941,6 +1147,7 @@
       subline.textContent = "Loading…";
 
       await loadMySwipes();
+      await loadMatches();
       setToggleUI();
       await loadCandidates();
     });
@@ -957,12 +1164,17 @@
       setToggleUI();
       loadCandidates();
     }
-    findWomen.addEventListener("click", () => setSearchGender("Woman"));
-    findMen.addEventListener("click", () => setSearchGender("Man"));
+    findFemale.addEventListener("click", () => setSearchGender("Female"));
+    findMale.addEventListener("click", () => setSearchGender("Male"));
 
     refreshBtn.addEventListener("click", async () => {
       await loadMySwipes();
       await loadCandidates();
+      await loadMatches();
+    });
+
+    refreshMatchesBtn.addEventListener("click", async () => {
+      await loadMatches();
     });
 
     // Like / Dislike
