@@ -9,9 +9,24 @@
 
 <style>
 * { box-sizing:border-box; font-family:Poppins,sans-serif; }
-body { background:#0f0f14; color:white; padding:20px; }
 
-.container { max-width:600px; margin:auto; }
+body {
+  background:#0f0f14;
+  color:white;
+  padding:20px;
+}
+
+.back {
+  color:#b00b55;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:16px;
+}
+
+.container {
+  max-width:600px;
+  margin:auto;
+}
 
 .card {
   background:#1b1b25;
@@ -29,7 +44,10 @@ input, textarea {
   margin-bottom:12px;
 }
 
-textarea { height:90px; resize:none; }
+textarea {
+  height:90px;
+  resize:none;
+}
 
 button {
   width:100%;
@@ -39,11 +57,14 @@ button {
   border-radius:14px;
   font-weight:600;
   color:white;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
+
+<div class="back" onclick="location.href='Usocial.html'">← Back</div>
 
 <div class="container">
   <div class="card">
@@ -84,7 +105,10 @@ const db = getDatabase(app);
 const storage = getStorage(app);
 
 let user;
-onAuthStateChanged(auth,u=>{ if(!u)location.href="index.html"; user=u; });
+onAuthStateChanged(auth, u => {
+  if (!u) location.href = "index.html";
+  user = u;
+});
 
 window.postParty = async () => {
   let imageURL = "";
@@ -96,22 +120,22 @@ window.postParty = async () => {
     imageURL = await getDownloadURL(imgRef);
   }
 
-  const snap = await get(ref(db,"users/"+user.uid));
+  const snap = await get(ref(db, "users/" + user.uid));
   const name = snap.exists() ? snap.val().name : "Host";
 
-  await set(push(ref(db,"parties")), {
-    hostUID:user.uid,
-    hostName:name,
-    location:location.value,
-    time:time.value,
-    vibes:vibes.value,
-    ratio:ratio.value,
-    description:description.value,
+  await set(push(ref(db, "parties")), {
+    hostUID: user.uid,
+    hostName: name,
+    location: location.value,
+    time: time.value,
+    vibes: vibes.value,
+    ratio: ratio.value,
+    description: description.value,
     imageURL,
-    attendees:{}
+    attendees: {}
   });
 
-  location.href="parties.html";
+  location.href = "parties.html";
 };
 </script>
 
