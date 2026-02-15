@@ -9,6 +9,7 @@
     --accent:#b00b55;
     --bg:#0b0b10;
     --panel: rgba(255,255,255,.06);
+    --panel2: rgba(255,255,255,.10);
     --border: rgba(255,255,255,.14);
     --text: rgba(255,255,255,.92);
     --muted: rgba(255,255,255,.70);
@@ -42,6 +43,7 @@
   .title h1{margin:0;font-size:18px;letter-spacing:.2px}
   .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+
   .btn{
     padding:10px 12px;
     border-radius:12px;
@@ -61,14 +63,7 @@
     box-shadow:none;
     color:rgba(255,255,255,.92);
   }
-  .chip{
-    padding:8px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    font-size:13px;
-    color:rgba(255,255,255,.85);
-  }
+  .btn:disabled{opacity:.6; cursor:not-allowed}
 
   main{width:min(1100px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
   .card{
@@ -92,20 +87,143 @@
     outline:none;
     font-size:14px;
   }
-  textarea{min-height:100px; resize:vertical}
+  textarea{min-height:140px; resize:vertical}
   input:focus, textarea:focus, select:focus{
     border-color: rgba(176,11,85,.60);
     box-shadow: 0 0 0 4px rgba(176,11,85,.20);
   }
-  .toggle{
-    display:flex; align-items:center; gap:10px;
+
+  .stack{display:grid; gap:12px; align-content:start;}
+
+  /* Image uploader */
+  .uploader{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    border-radius:14px;
+    padding:12px;
+    display:grid;
+    gap:10px;
+  }
+  .preview{
+    width:100%;
+    height:160px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    overflow:hidden;
+    display:grid;
+    place-items:center;
+    color: rgba(255,255,255,.65);
+    font-size:13px;
+  }
+  .preview img{width:100%; height:100%; object-fit:cover; display:none;}
+  .uploader .mini{
+    color: rgba(255,255,255,.70);
+    font-size:12px;
+    line-height:1.35;
+  }
+  .fileRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .fileBtn{
     padding:10px 12px;
     border-radius:12px;
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.18);
-    width:fit-content;
+    color:rgba(255,255,255,.92);
+    cursor:pointer;
+    font-weight:750;
+    display:inline-flex; align-items:center; gap:8px;
   }
-  .msg{display:none; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.16); color:rgba(255,255,255,.85); font-size:13px; white-space:pre-line;}
+  .fileName{
+    color: rgba(255,255,255,.75);
+    font-size:12px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    max-width: 100%;
+  }
+  .progress{
+    height:8px;
+    border-radius:999px;
+    background: rgba(255,255,255,.10);
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.10);
+    display:none;
+  }
+  .progress > div{
+    height:100%;
+    width:0%;
+    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+  }
+
+  /* Theme toggle pill for invite-only */
+  .togglePill{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    user-select:none;
+    cursor:pointer;
+  }
+  .togglePill .tTitle{
+    display:grid;
+    gap:2px;
+  }
+  .togglePill .tTitle b{
+    color: rgba(255,255,255,.92);
+    font-size:13px;
+  }
+  .togglePill .tTitle span{
+    color: rgba(255,255,255,.65);
+    font-size:12px;
+    line-height:1.25;
+  }
+  .switch{
+    width:46px; height:26px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.08);
+    position:relative;
+    flex:0 0 auto;
+  }
+  .switch::after{
+    content:"";
+    width:20px; height:20px;
+    border-radius:999px;
+    background: rgba(255,255,255,.85);
+    position:absolute;
+    top:50%;
+    left:3px;
+    transform: translateY(-50%);
+    transition: transform .18s ease, background .18s ease;
+  }
+  .togglePill.on{
+    border-color: rgba(176,11,85,.55);
+    box-shadow: 0 0 0 4px rgba(176,11,85,.18);
+    background: linear-gradient(180deg, rgba(176,11,85,.18), rgba(0,0,0,.18));
+  }
+  .togglePill.on .switch{
+    border-color: rgba(176,11,85,.55);
+    background: rgba(176,11,85,.35);
+  }
+  .togglePill.on .switch::after{
+    transform: translateY(-50%) translateX(20px);
+    background: rgba(255,255,255,.92);
+  }
+
+  .msg{
+    display:none;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    color:rgba(255,255,255,.85);
+    font-size:13px;
+    white-space:pre-line;
+  }
   .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
   .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 </style>
@@ -123,7 +241,6 @@
     <a class="btn secondary" href="events.html">← Events</a>
     <a class="btn secondary" href="my_events.html">My Events</a>
     <a class="btn secondary" href="hub.html">Hub</a>
-    <span class="chip" id="userEmail">—</span>
   </div>
 </header>
 
@@ -165,20 +282,39 @@
       </label>
     </div>
 
+    <!-- Bio + Image/Invite aligned row -->
     <div class="row" style="margin-top:12px;">
       <label>Event bio
         <textarea id="bio" placeholder="Describe the event…"></textarea>
       </label>
-      <div>
-        <label>Event image (URL)
-          <input id="imageUrl" placeholder="https://…" />
-        </label>
-        <div class="toggle" style="margin-top:10px;">
-          <input id="inviteOnly" type="checkbox" />
-          <label for="inviteOnly" style="margin:0; color:rgba(255,255,255,.85);">Invite-only</label>
+
+      <div class="stack">
+        <div class="uploader">
+          <div class="preview" id="preview">
+            <img id="previewImg" alt="Event image preview" />
+            <div id="previewEmpty">No image selected</div>
+          </div>
+
+          <div class="fileRow">
+            <input id="imageFile" type="file" accept="image/*" hidden />
+            <button class="fileBtn" id="pickImage" type="button">Upload image</button>
+            <div class="fileName" id="fileName">PNG/JPG/WebP • max 5MB</div>
+          </div>
+
+          <div class="progress" id="progress"><div id="progressBar"></div></div>
+
+          <div class="mini">
+            This will upload your image and save it on the event.
+          </div>
         </div>
-        <div style="color:rgba(255,255,255,.68); font-size:12px; line-height:1.35; margin-top:10px;">
-          Invite-only events hide the exact date/time/location until the host accepts applicants.
+
+        <input id="inviteOnly" type="checkbox" hidden />
+        <div class="togglePill" id="invitePill" role="switch" aria-checked="false" tabindex="0">
+          <div class="tTitle">
+            <b>Invite-only</b>
+            <span>Hide exact date/time/location until you accept applicants.</span>
+          </div>
+          <div class="switch" aria-hidden="true"></div>
         </div>
       </div>
     </div>
@@ -194,7 +330,12 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import {
+  getFirestore, collection, addDoc, serverTimestamp, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -205,8 +346,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-const userEmail = document.getElementById("userEmail");
 const msg = document.getElementById("msg");
 const postBtn = document.getElementById("postBtn");
 
@@ -219,10 +360,20 @@ const ratioEl = document.getElementById("ratio");
 const vibesEl = document.getElementById("vibes");
 const tagsEl = document.getElementById("tags");
 const bioEl = document.getElementById("bio");
-const imageEl = document.getElementById("imageUrl");
+
+const imageFileEl = document.getElementById("imageFile");
+const pickImageBtn = document.getElementById("pickImage");
+const fileNameEl = document.getElementById("fileName");
+const previewImg = document.getElementById("previewImg");
+const previewEmpty = document.getElementById("previewEmpty");
+const progress = document.getElementById("progress");
+const progressBar = document.getElementById("progressBar");
+
 const inviteEl = document.getElementById("inviteOnly");
+const invitePill = document.getElementById("invitePill");
 
 let currentUser = null;
+let selectedFile = null;
 
 function setMsg(text, kind=""){
   msg.style.display = text ? "block" : "none";
@@ -230,10 +381,88 @@ function setMsg(text, kind=""){
   msg.className = "msg" + (kind ? " " + kind : "");
 }
 
+function setInviteUI(){
+  const on = !!inviteEl.checked;
+  invitePill.classList.toggle("on", on);
+  invitePill.setAttribute("aria-checked", on ? "true" : "false");
+}
+invitePill.addEventListener("click", ()=>{
+  inviteEl.checked = !inviteEl.checked;
+  setInviteUI();
+});
+invitePill.addEventListener("keydown", (e)=>{
+  if (e.key === "Enter" || e.key === " "){
+    e.preventDefault();
+    inviteEl.checked = !inviteEl.checked;
+    setInviteUI();
+  }
+});
+setInviteUI();
+
+pickImageBtn.addEventListener("click", ()=> imageFileEl.click());
+
+imageFileEl.addEventListener("change", ()=>{
+  const f = imageFileEl.files?.[0] || null;
+  selectedFile = null;
+
+  if (!f){
+    fileNameEl.textContent = "PNG/JPG/WebP • max 5MB";
+    previewImg.style.display = "none";
+    previewEmpty.style.display = "block";
+    previewImg.src = "";
+    return;
+  }
+
+  if (!f.type.startsWith("image/")){
+    setMsg("Please choose an image file.", "error");
+    imageFileEl.value = "";
+    return;
+  }
+  if (f.size > 5 * 1024 * 1024){
+    setMsg("Image is too large. Max size is 5MB.", "error");
+    imageFileEl.value = "";
+    return;
+  }
+
+  selectedFile = f;
+  fileNameEl.textContent = f.name;
+
+  const url = URL.createObjectURL(f);
+  previewImg.src = url;
+  previewImg.style.display = "block";
+  previewEmpty.style.display = "none";
+});
+
+async function uploadEventImage(eventId){
+  if (!selectedFile) return "";
+
+  progress.style.display = "block";
+  progressBar.style.width = "0%";
+
+  // We can't get fine-grained progress with uploadBytes, but we can still show staged progress.
+  progressBar.style.width = "25%";
+
+  const ext = (selectedFile.name.split(".").pop() || "jpg").toLowerCase();
+  const safeExt = ["png","jpg","jpeg","webp"].includes(ext) ? ext : "jpg";
+
+  const path = `event_images/${eventId}/${Date.now()}.${safeExt}`;
+  const storageRef = ref(storage, path);
+
+  progressBar.style.width = "55%";
+  await uploadBytes(storageRef, selectedFile, { contentType: selectedFile.type });
+
+  progressBar.style.width = "85%";
+  const url = await getDownloadURL(storageRef);
+
+  progressBar.style.width = "100%";
+  setTimeout(()=>{ progress.style.display = "none"; }, 400);
+
+  return url;
+}
+
 onAuthStateChanged(auth, async (user)=>{
   if (!user) { window.location.href="index.html"; return; }
   currentUser = user;
-  userEmail.textContent = user.email || "Signed in";
 });
 
 postBtn.addEventListener("click", async ()=>{
@@ -261,7 +490,8 @@ postBtn.addEventListener("click", async ()=>{
 
     const sizeEstimate = Number(sizeEl.value || 0) || 0;
 
-    const eventDoc = await addDoc(collection(db,"events"), {
+    // Create the event doc first (so we can use its id for storage path)
+    const eventRef = await addDoc(collection(db,"events"), {
       name,
       location: (locationEl.value||"").trim(),
       date: (dateEl.value||"").trim(),
@@ -271,7 +501,7 @@ postBtn.addEventListener("click", async ()=>{
       ratio: (ratioEl.value||"").trim(),
       bio: (bioEl.value||"").trim(),
       tags,
-      imageUrl: (imageEl.value||"").trim(),
+      imageUrl: "",                 // filled after upload (if any)
       inviteOnly: !!inviteEl.checked,
       ratingAvg: 0,
       hostUid: currentUser.uid,
@@ -279,8 +509,16 @@ postBtn.addEventListener("click", async ()=>{
       createdAt: serverTimestamp()
     });
 
+    // Upload image (optional) and patch imageUrl
+    const imageUrl = await uploadEventImage(eventRef.id);
+    if (imageUrl){
+      // Patch the document using setDoc merge (keeps imports minimal)
+      const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js");
+      await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
+    }
+
     setMsg("Event posted!", "ok");
-    setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventDoc.id)}`; }, 600);
+    setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventRef.id)}`; }, 600);
   } catch(e){
     setMsg(e.message || "Failed to post event.", "error");
   } finally {
