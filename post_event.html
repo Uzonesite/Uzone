@@ -85,10 +85,7 @@
     letter-spacing:.25px;
     color:rgba(255,255,255,.92);
   }
-  .hint{
-    color:rgba(255,255,255,.60);
-    font-size:12px;
-  }
+  .hint{color:rgba(255,255,255,.60); font-size:12px;}
 
   .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
   .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;}
@@ -96,6 +93,7 @@
   @media (max-width: 860px){ .row{grid-template-columns:1fr;} }
 
   label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
+
   input, textarea{
     width:100%;
     padding:12px 12px;
@@ -106,15 +104,26 @@
     outline:none;
     font-size:14px;
   }
-  textarea{min-height:150px; resize:vertical}
   input:focus, textarea:focus{
     border-color: rgba(176,11,85,.60);
     box-shadow: 0 0 0 4px rgba(176,11,85,.20);
   }
 
+  /* Make native date/time pickers look consistent */
+  input[type="date"], input[type="time"]{
+    color-scheme: dark; /* helps on many browsers */
+  }
+
+  /* Bio sizing + spacing fix */
+  .bioLabel{gap:8px;}
+  .bioLabel textarea{
+    min-height: 210px;
+    line-height: 1.35;
+  }
+
   .stack{display:grid; gap:12px; align-content:start;}
 
-  /* Preview card (more like events page) */
+  /* Preview card */
   .previewCard{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.18);
@@ -162,7 +171,7 @@
   }
   .previewBottom{
     position:absolute; left:0; right:0; bottom:0;
-    padding:12px 12px 12px 12px;
+    padding:12px;
     display:grid; gap:6px;
   }
   .pTitle{
@@ -191,10 +200,7 @@
     backdrop-filter: blur(10px);
   }
   .pill b{font-weight:800; color: rgba(255,255,255,.92)}
-  .pChips{
-    display:flex; flex-wrap:wrap; gap:8px;
-    margin-top:4px;
-  }
+  .pChips{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;}
   .chip{
     padding:6px 10px;
     border-radius:999px;
@@ -255,7 +261,7 @@
     line-height:1.35;
   }
 
-  /* Invite-only toggle pill */
+  /* Invite-only toggle */
   .togglePill{
     display:flex;
     align-items:center;
@@ -316,11 +322,7 @@
   .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
   .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 
-  .divider{
-    height:1px;
-    background: rgba(255,255,255,.10);
-    margin:12px 0;
-  }
+  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
 </style>
 </head>
 <body>
@@ -368,27 +370,24 @@
 
     <div class="sectionHead">
       <h2>Schedule</h2>
-      <div class="hint">End date/time is optional.</div>
+      <div class="hint">Pick dates/times (end is optional).</div>
     </div>
 
-    <div class="row3">
+    <div class="row">
       <label>Start date
-        <input id="startDate" placeholder="e.g., 2026-02-22" />
+        <input id="startDate" type="date" />
       </label>
       <label>Start time
-        <input id="startTime" placeholder="e.g., 9:00 PM" />
-      </label>
-      <label>Timezone (display)
-        <input id="tz" value="America/Montreal" disabled />
+        <input id="startTime" type="time" />
       </label>
     </div>
 
     <div class="row" style="margin-top:12px;">
       <label>End date (optional)
-        <input id="endDate" placeholder="e.g., 2026-02-23" />
+        <input id="endDate" type="date" />
       </label>
       <label>End time (optional)
-        <input id="endTime" placeholder="e.g., 1:30 AM" />
+        <input id="endTime" type="time" />
       </label>
     </div>
 
@@ -396,7 +395,7 @@
 
     <div class="sectionHead">
       <h2>Details</h2>
-      <div class="hint">Keep it honest. Keep it readable.</div>
+      <div class="hint">Tags + bio cover the vibe.</div>
     </div>
 
     <div class="row">
@@ -412,6 +411,7 @@
       <label>Tags (comma separated)
         <input id="tags" placeholder="e.g., music, chill, no alcohol, games" />
       </label>
+
       <div class="stack">
         <input id="inviteOnly" type="checkbox" hidden />
         <div class="togglePill" id="invitePill" role="switch" aria-checked="false" tabindex="0">
@@ -425,14 +425,14 @@
     </div>
 
     <div class="row" style="margin-top:12px;">
-      <label>Event bio
+      <label class="bioLabel">Event bio
         <textarea id="bio" placeholder="What is it? Who is it for? What should people expect?"></textarea>
       </label>
 
       <div class="stack">
         <div class="sectionHead" style="margin:0;">
           <h2 style="font-size:13px;">Preview</h2>
-          <div class="hint">This is roughly how it’ll look on Events.</div>
+          <div class="hint">Close to the Events card.</div>
         </div>
 
         <div class="previewCard" aria-label="Event preview">
@@ -460,7 +460,7 @@
             <div class="fileName" id="fileName">PNG/JPG/WebP • max 5MB</div>
           </div>
           <div class="progress" id="progress"><div id="progressBar"></div></div>
-          <div class="mini">Tip: choose a wide photo (16:9-ish) for the cleanest crop.</div>
+          <div class="mini">Tip: wide photo works best (16:9-ish).</div>
         </div>
       </div>
     </div>
@@ -562,19 +562,26 @@ invitePill.addEventListener("keydown", (e)=>{
 setInviteUI();
 
 /* Preview formatting helpers */
-function fmtWhen(){
-  const sd = (startDateEl.value || "").trim();
-  const st = (startTimeEl.value || "").trim();
-  const ed = (endDateEl.value || "").trim();
-  const et = (endTimeEl.value || "").trim();
+function fmtDate(yyyyMmDd){
+  if (!yyyyMmDd) return "";
+  const [y,m,d] = yyyyMmDd.split("-").map(Number);
+  if (!y || !m || !d) return yyyyMmDd;
+  const dt = new Date(y, m-1, d);
+  return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+}
 
-  const start = [sd, st].filter(Boolean).join(" • ");
-  const end = [ed, et].filter(Boolean).join(" • ");
+function fmtWhen(){
+  const sd = startDateEl.value || "";
+  const st = startTimeEl.value || "";
+  const ed = endDateEl.value || "";
+  const et = endTimeEl.value || "";
+
+  const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
+  const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
 
   if (!start && !end) return "Start date & time";
   if (start && !end) return start;
   if (!start && end) return end;
-
   return `${start} → ${end}`;
 }
 
@@ -684,7 +691,6 @@ onAuthStateChanged(auth, async (user)=>{
 function maybePairError(a, b){
   const A = (a.value || "").trim();
   const B = (b.value || "").trim();
-  // If one is filled, require the other (keeps display clean)
   return (A && !B) || (!A && B);
 }
 
@@ -697,7 +703,7 @@ postBtn.addEventListener("click", async ()=>{
   const startDate = (startDateEl.value||"").trim();
   const startTime = (startTimeEl.value||"").trim();
   if (!startDate || !startTime){
-    setMsg("Please fill in Start date and Start time.", "error");
+    setMsg("Please pick a Start date and Start time.", "error");
     return;
   }
 
@@ -724,12 +730,10 @@ postBtn.addEventListener("click", async ()=>{
     const endDate = (endDateEl.value||"").trim();
     const endTime = (endTimeEl.value||"").trim();
 
-    // Create doc first (so we have ID for image path)
     const eventRef = await addDoc(collection(db,"events"), {
       name,
       location: (locationEl.value||"").trim(),
 
-      // New schedule fields
       startDate,
       startTime,
       endDate: endDate || "",
