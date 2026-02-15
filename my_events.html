@@ -8,6 +8,8 @@
   :root{
     --accent:#b00b55;
     --bg:#0b0b10;
+    --panel: rgba(255,255,255,.06);
+    --panel2: rgba(255,255,255,.10);
     --border: rgba(255,255,255,.14);
     --text: rgba(255,255,255,.92);
     --muted: rgba(255,255,255,.70);
@@ -25,8 +27,9 @@
       radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
       var(--bg);
   }
+
   header{
-    width:min(1100px, 92vw);
+    width:min(1120px, 92vw);
     margin:18px auto 0 auto;
     display:flex; align-items:center; justify-content:space-between; gap:12px;
     padding:14px 16px;
@@ -41,13 +44,14 @@
   .title h1{margin:0;font-size:18px;letter-spacing:.2px}
   .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+
   .btn{
     padding:10px 12px;
     border-radius:12px;
     border:1px solid rgba(176,11,85,.55);
     background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
     color:white;
-    font-weight:750;
+    font-weight:800;
     cursor:pointer;
     box-shadow: 0 18px 40px rgba(176,11,85,.22);
     text-decoration:none;
@@ -60,6 +64,7 @@
     box-shadow:none;
     color:rgba(255,255,255,.92);
   }
+
   .chip{
     padding:8px 10px;
     border-radius:999px;
@@ -67,9 +72,14 @@
     background: rgba(0,0,0,.18);
     font-size:13px;
     color:rgba(255,255,255,.85);
+    white-space:nowrap;
+    max-width: 260px;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
 
-  main{width:min(1100px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+  main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+
   .card{
     border:1px solid var(--border);
     background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
@@ -78,20 +88,59 @@
     padding:14px;
     overflow:hidden;
   }
+
+  .sectionHead{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin:2px 0 12px 0;
+  }
+  .sectionHead h2{
+    margin:0;
+    font-size:14px;
+    letter-spacing:.25px;
+    color:rgba(255,255,255,.92);
+  }
+  .hint{color:rgba(255,255,255,.60); font-size:12px;}
+
+  .msg{
+    display:none;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    color:rgba(255,255,255,.85);
+    font-size:13px;
+    white-space:pre-line;
+    margin-bottom:12px;
+  }
+  .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
+  .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
+
+  /* Event row (closer to your card style) */
   .eventRow{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    border-radius:14px;
+    padding:12px;
+    display:grid;
+    gap:10px;
+    margin-top:12px;
+  }
+  .eventTop{
     display:flex;
     justify-content:space-between;
     gap:10px;
     flex-wrap:wrap;
     align-items:flex-start;
-    padding:12px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.16);
   }
-  .name{font-weight:900; letter-spacing:.2px;}
+  .name{
+    font-weight:900;
+    letter-spacing:.2px;
+    font-size:15px;
+    line-height:1.15;
+  }
   .mini{color:var(--muted); font-size:13px; line-height:1.35;}
-  .actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+
   .smallBtn{
     padding:9px 10px;
     border-radius:12px;
@@ -99,14 +148,58 @@
     background: rgba(0,0,0,.18);
     color:rgba(255,255,255,.92);
     cursor:pointer;
-    font-weight:750;
+    font-weight:800;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
   }
+  .smallBtn:disabled{opacity:.6; cursor:not-allowed;}
   .danger{
     border-color: rgba(255,80,120,.35);
     background: rgba(255,80,120,.10);
   }
+
+  .pills{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+  .pill{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.30);
+    padding:6px 10px;
+    border-radius:999px;
+    display:inline-flex; gap:6px; align-items:center;
+    backdrop-filter: blur(10px);
+    font-size:12px;
+    color: rgba(255,255,255,.84);
+  }
+  .pill b{font-weight:800; color: rgba(255,255,255,.92)}
+  .dot{
+    width:7px; height:7px; border-radius:999px;
+    background: rgba(176,11,85,.95);
+    box-shadow: 0 0 0 4px rgba(176,11,85,.18);
+  }
+
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:2px;}
+  .tagChip{
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.82);
+    font-size:12px;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /* Applications */
+  .appsWrap{
+    border-top:1px solid rgba(255,255,255,.10);
+    padding-top:10px;
+    display:grid;
+    gap:10px;
+  }
   .app{
-    margin-top:10px;
     padding:10px 12px;
     border-radius:14px;
     border:1px solid rgba(255,255,255,.14);
@@ -116,6 +209,33 @@
     gap:10px;
     flex-wrap:wrap;
     align-items:center;
+  }
+  .app .name{font-size:14px;}
+  .statusPill{
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.22);
+    color: rgba(255,255,255,.86);
+    font-size:12px;
+    display:inline-flex;
+    gap:6px;
+    align-items:center;
+  }
+
+  .empty{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    border-radius:14px;
+    padding:14px;
+    display:grid;
+    gap:8px;
+  }
+  .empty b{font-weight:900}
+  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
+
+  @media (max-width: 520px){
+    .chip{max-width: 160px;}
   }
 </style>
 </head>
@@ -137,7 +257,15 @@
 </header>
 
 <main>
-  <section class="card" id="list"></section>
+  <section class="card">
+    <div class="sectionHead">
+      <h2>Your events</h2>
+      <div class="hint">Delete, view, and approve applicants.</div>
+    </div>
+
+    <div class="msg" id="msg"></div>
+    <div id="list"></div>
+  </section>
 </main>
 
 <script type="module">
@@ -145,7 +273,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import {
   getFirestore, collection, getDocs, query, where, doc,
-  deleteDoc, setDoc, serverTimestamp
+  deleteDoc, setDoc, serverTimestamp, orderBy
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -160,90 +288,275 @@ const db = getFirestore(app);
 
 const userEmail = document.getElementById("userEmail");
 const list = document.getElementById("list");
+const msg = document.getElementById("msg");
 
 let currentUser = null;
 
-function esc(s){ return String(s||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
 
-async function load(){
-  list.innerHTML = "<div class='mini'>Loading…</div>";
+function setMsg(text, kind=""){
+  msg.style.display = text ? "block" : "none";
+  msg.textContent = text || "";
+  msg.className = "msg" + (kind ? " " + kind : "");
+}
 
-  const q = query(collection(db,"events"), where("hostUid","==",currentUser.uid));
-  const snap = await getDocs(q);
-  const events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+function fmtDate(yyyyMmDd){
+  if (!yyyyMmDd) return "";
+  const [y,m,d] = String(yyyyMmDd).split("-").map(Number);
+  if (!y || !m || !d) return String(yyyyMmDd);
+  const dt = new Date(y, m-1, d);
+  return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+}
 
-  if (!events.length){
-    list.innerHTML = "<div class='mini'>You haven’t posted any events yet.</div>";
-    return;
-  }
+function fmtWhen(ev){
+  const start = [fmtDate(ev.startDate), ev.startTime].filter(Boolean).join(" • ");
+  const end = [fmtDate(ev.endDate), ev.endTime].filter(Boolean).join(" • ");
+  if (!start && !end) return "—";
+  if (start && !end) return start;
+  if (!start && end) return end;
+  return `${start} → ${end}`;
+}
 
-  list.innerHTML = "";
-  for (const ev of events){
-    const row = document.createElement("div");
-    row.className = "eventRow";
-    row.innerHTML = `
-      <div>
-        <div class="name">${esc(ev.name || "Event")}</div>
-        <div class="mini">
-          ${esc(ev.inviteOnly ? "Invite-only" : "Open")} • Size ${esc(ev.sizeEstimate ?? "—")} • ${esc(ev.vibes || "")}
+function normalizeTags(ev){
+  const t = ev.tags;
+  if (Array.isArray(t)) return t.map(x => String(x).trim()).filter(Boolean).slice(0, 8);
+  if (typeof t === "string") return t.split(",").map(s=>s.trim()).filter(Boolean).slice(0, 8);
+  return [];
+}
+
+async function fetchApplications(eventId){
+  const snap = await getDocs(collection(db,"events",eventId,"applications"));
+  if (snap.empty) return [];
+  return snap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+}
+
+function renderEmpty(){
+  list.innerHTML = `
+    <div class="empty">
+      <b>No events yet</b>
+      <div class="mini">Post your first event and it’ll show here with applications (if invite-only).</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
+        <a class="smallBtn" href="post_event.html">Post Event</a>
+        <a class="smallBtn" href="events.html">Browse Events</a>
+      </div>
+    </div>
+  `;
+}
+
+function renderLoading(){
+  list.innerHTML = `
+    <div class="mini">Loading…</div>
+    <div class="eventRow" style="opacity:.75">
+      <div class="eventTop">
+        <div>
+          <div class="name">Loading event…</div>
+          <div class="mini">Fetching details</div>
         </div>
       </div>
-      <div class="actions">
-        <a class="smallBtn" href="event.html?id=${encodeURIComponent(ev.id)}">View</a>
-        <button class="smallBtn danger" data-del="${esc(ev.id)}">Delete</button>
-      </div>
-    `;
-    list.appendChild(row);
+    </div>
+  `;
+}
 
-    // Applications block (only relevant for inviteOnly, but we’ll show if any exist)
-    const appSnap = await getDocs(collection(db,"events",ev.id,"applications"));
-    if (!appSnap.empty){
-      appSnap.forEach(appDoc => {
-        const a = appDoc.data() || {};
-        const appRow = document.createElement("div");
-        appRow.className = "app";
-        appRow.innerHTML = `
-          <div>
-            <div class="name">${esc(a.name || a.uid || "Applicant")}</div>
-            <div class="mini">Status: <b>${esc(a.status || "pending")}</b></div>
-          </div>
-          <div class="actions">
-            <button class="smallBtn" data-accept="${esc(ev.id)}|${esc(appDoc.id)}">Accept</button>
-            <button class="smallBtn danger" data-deny="${esc(ev.id)}|${esc(appDoc.id)}">Deny</button>
-          </div>
-        `;
-        list.appendChild(appRow);
-      });
+async function load(){
+  renderLoading();
+  setMsg("");
+
+  try{
+    // newest first (requires index sometimes; if it errors, we fallback)
+    let events = [];
+    try{
+      const q1 = query(
+        collection(db,"events"),
+        where("hostUid","==",currentUser.uid),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q1);
+      events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(_){
+      const q2 = query(collection(db,"events"), where("hostUid","==",currentUser.uid));
+      const snap = await getDocs(q2);
+      events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     }
+
+    if (!events.length){
+      renderEmpty();
+      return;
+    }
+
+    // load applications in parallel (keeps page snappy)
+    const appsByEvent = new Map();
+    await Promise.all(events.map(async (ev) => {
+      const apps = await fetchApplications(ev.id);
+      appsByEvent.set(ev.id, apps);
+    }));
+
+    list.innerHTML = "";
+    for (const ev of events){
+      const tags = normalizeTags(ev);
+      const when = fmtWhen(ev);
+      const where = (ev.location || "").trim() || "—";
+      const size = (ev.sizeEstimate ?? 0) ? String(ev.sizeEstimate) : "—";
+      const spots = (ev.spotsAvailable ?? 0) ? String(ev.spotsAvailable) : "—";
+      const inviteLabel = ev.inviteOnly ? "Invite-only" : "Public";
+      const desc = (ev.description || ev.bio || "").trim(); // supports old docs too
+
+      const row = document.createElement("div");
+      row.className = "eventRow";
+      row.innerHTML = `
+        <div class="eventTop">
+          <div style="min-width:0">
+            <div class="name">${esc(ev.name || "Event")}</div>
+
+            <div class="pills" style="margin-top:8px;">
+              <span class="pill"><span class="dot"></span><b>${esc(inviteLabel)}</b></span>
+              <span class="pill"><b>When</b> <span>${esc(when)}</span></span>
+              <span class="pill"><b>Where</b> <span title="${esc(where)}">${esc(where)}</span></span>
+            </div>
+
+            <div class="pills" style="margin-top:8px;">
+              <span class="pill"><b>Size</b> <span>${esc(size)}</span></span>
+              <span class="pill"><b>Spots</b> <span>${esc(spots)}</span></span>
+              ${ev.venueSize ? `<span class="pill"><b>Venue</b> <span title="${esc(ev.venueSize)}">${esc(ev.venueSize)}</span></span>` : ""}
+            </div>
+
+            ${desc ? `<div class="mini" style="margin-top:8px;">${esc(desc)}</div>` : `<div class="mini" style="margin-top:8px;">No description.</div>`}
+
+            ${tags.length ? `<div class="chips" style="margin-top:10px;">${tags.map(t=>`<div class="tagChip">${esc(t)}</div>`).join("")}</div>` : ""}
+          </div>
+
+          <div class="actions">
+            <a class="smallBtn" href="event.html?id=${encodeURIComponent(ev.id)}">View</a>
+            <button class="smallBtn danger" data-del="${esc(ev.id)}">Delete</button>
+          </div>
+        </div>
+
+        <div class="appsWrap" data-apps-wrap="${esc(ev.id)}" style="display:none;">
+          <div class="mini" style="margin-top:0;"><b>Applications</b></div>
+          <div data-apps="${esc(ev.id)}"></div>
+        </div>
+      `;
+      list.appendChild(row);
+
+      const apps = appsByEvent.get(ev.id) || [];
+      if (apps.length){
+        const wrap = row.querySelector(`[data-apps-wrap="${CSS.escape(ev.id)}"]`);
+        const container = row.querySelector(`[data-apps="${CSS.escape(ev.id)}"]`);
+        wrap.style.display = "grid";
+        container.innerHTML = "";
+
+        for (const a of apps){
+          const applicantName = (a.name || a.displayName || a.uid || a.id || "Applicant");
+          const status = (a.status || "pending").toLowerCase();
+
+          const appRow = document.createElement("div");
+          appRow.className = "app";
+          appRow.innerHTML = `
+            <div>
+              <div class="name">${esc(applicantName)}</div>
+              <div class="mini" style="margin-top:4px;">
+                <span class="statusPill">Status: <b>${esc(status)}</b></span>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="smallBtn" data-accept="${esc(ev.id)}|${esc(a.id)}">Accept</button>
+              <button class="smallBtn danger" data-deny="${esc(ev.id)}|${esc(a.id)}">Deny</button>
+            </div>
+          `;
+          container.appendChild(appRow);
+        }
+      }
+    }
+
+    // Delete handlers
+    list.querySelectorAll("[data-del]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const id = btn.getAttribute("data-del");
+        if (!id) return;
+        if (!confirm("Delete this event?")) return;
+
+        btn.disabled = true;
+        try{
+          await deleteDoc(doc(db,"events",id));
+          setMsg("Event deleted.", "ok");
+          await load();
+        } catch(e){
+          setMsg(e?.message || "Failed to delete event.", "error");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+
+    // Accept / deny handlers
+    list.querySelectorAll("[data-accept]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const raw = btn.getAttribute("data-accept") || "";
+        const [eventId, appId] = raw.split("|");
+        if (!eventId || !appId) return;
+
+        btn.disabled = true;
+        try{
+          await setDoc(doc(db,"events",eventId,"members",appId), {
+            uid: appId,
+            status: "accepted",
+            updatedAt: serverTimestamp()
+          }, { merge:true });
+
+          await setDoc(doc(db,"events",eventId,"applications",appId), {
+            uid: appId,
+            status: "accepted",
+            updatedAt: serverTimestamp()
+          }, { merge:true });
+
+          setMsg("Accepted.", "ok");
+          await load();
+        } catch(e){
+          setMsg(e?.message || "Failed to accept.", "error");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+
+    list.querySelectorAll("[data-deny]").forEach(btn=>{
+      btn.addEventListener("click", async ()=>{
+        const raw = btn.getAttribute("data-deny") || "";
+        const [eventId, appId] = raw.split("|");
+        if (!eventId || !appId) return;
+
+        btn.disabled = true;
+        try{
+          await setDoc(doc(db,"events",eventId,"members",appId), {
+            uid: appId,
+            status: "denied",
+            updatedAt: serverTimestamp()
+          }, { merge:true });
+
+          await setDoc(doc(db,"events",eventId,"applications",appId), {
+            uid: appId,
+            status: "denied",
+            updatedAt: serverTimestamp()
+          }, { merge:true });
+
+          setMsg("Denied.", "ok");
+          await load();
+        } catch(e){
+          setMsg(e?.message || "Failed to deny.", "error");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+
+  } catch(e){
+    list.innerHTML = "";
+    setMsg(e?.message || "Failed to load your events.", "error");
+    renderEmpty();
   }
-
-  // Delete handlers
-  list.querySelectorAll("[data-del]").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      const id = btn.getAttribute("data-del");
-      if (!confirm("Delete this event?")) return;
-      await deleteDoc(doc(db,"events",id));
-      await load();
-    });
-  });
-
-  // Accept / deny handlers
-  list.querySelectorAll("[data-accept]").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      const [eventId, uid] = btn.getAttribute("data-accept").split("|");
-      await setDoc(doc(db,"events",eventId,"members",uid), { uid, status:"accepted", updatedAt: serverTimestamp() }, { merge:true });
-      await setDoc(doc(db,"events",eventId,"applications",uid), { uid, status:"accepted", updatedAt: serverTimestamp() }, { merge:true });
-      await load();
-    });
-  });
-  list.querySelectorAll("[data-deny]").forEach(btn=>{
-    btn.addEventListener("click", async ()=>{
-      const [eventId, uid] = btn.getAttribute("data-deny").split("|");
-      await setDoc(doc(db,"events",eventId,"members",uid), { uid, status:"denied", updatedAt: serverTimestamp() }, { merge:true });
-      await setDoc(doc(db,"events",eventId,"applications",uid), { uid, status:"denied", updatedAt: serverTimestamp() }, { merge:true });
-      await load();
-    });
-  });
 }
 
 onAuthStateChanged(auth, async (user) => {
