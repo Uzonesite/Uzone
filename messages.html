@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>Uzone • Messages</title>
 
 <style>
@@ -13,16 +13,17 @@
   --border: rgba(255,255,255,.14);
   --text:white;
 }
+*{box-sizing:border-box}
 body{
   margin:0;
   background:var(--bg);
   font-family: system-ui, sans-serif;
   color:var(--text);
-  display:flex;
   height:100vh;
+  display:flex;
 }
 .sidebar{
-  width:280px;
+  width:260px;
   border-right:1px solid var(--border);
   overflow-y:auto;
   padding:12px;
@@ -35,11 +36,24 @@ body{
 .matchItem:hover{
   background:rgba(255,255,255,.05);
 }
+
 .chat{
   flex:1;
   display:flex;
   flex-direction:column;
+  height:100vh;
 }
+
+.chatHeader{
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  padding:14px;
+  border-bottom:1px solid var(--border);
+  font-weight:600;
+  z-index:10;
+}
+
 .messages{
   flex:1;
   overflow-y:auto;
@@ -48,15 +62,19 @@ body{
   flex-direction:column;
   gap:12px;
 }
+
 .bubble{
   max-width:70%;
   padding:12px 14px;
   border-radius:18px;
-  cursor:pointer;
-  position:relative;
   font-size:14px;
+  position:relative;
   display:flex;
   flex-direction:column;
+  transition:.15s;
+}
+.bubble:active{
+  transform:scale(.98);
 }
 .me{
   align-self:flex-end;
@@ -92,28 +110,35 @@ body{
   cursor:pointer;
   opacity:.7;
 }
-.inputBar{
+
+.inputArea{
+  position:sticky;
+  bottom:0;
+  background:var(--bg);
+  border-top:1px solid var(--border);
+  padding:12px;
   display:flex;
   flex-direction:column;
-  padding:12px;
-  border-top:1px solid var(--border);
 }
+
 .replyingTo{
   font-size:12px;
   opacity:.8;
   margin-bottom:6px;
   display:none;
 }
+
 .replyingTo button{
   background:none;
   border:none;
   color:white;
   cursor:pointer;
-  margin-left:6px;
 }
+
 .inputRow{
   display:flex;
 }
+
 .inputRow input{
   flex:1;
   padding:12px;
@@ -121,6 +146,7 @@ body{
   border:none;
   outline:none;
 }
+
 .inputRow button{
   margin-left:10px;
   padding:12px 18px;
@@ -130,6 +156,15 @@ body{
   color:white;
   cursor:pointer;
 }
+
+.editInput{
+  background:transparent;
+  border:none;
+  color:white;
+  font-size:14px;
+  outline:none;
+  width:100%;
+}
 </style>
 </head>
 <body>
@@ -137,11 +172,13 @@ body{
 <div class="sidebar" id="matchList"></div>
 
 <div class="chat">
+  <div class="chatHeader" id="chatHeader">Select a chat</div>
+
   <div class="messages" id="messages"></div>
 
-  <div class="inputBar">
+  <div class="inputArea">
     <div class="replyingTo" id="replyingTo">
-      Replying… <button id="cancelReply">✕</button>
+      Replying... <button id="cancelReply">✕</button>
     </div>
     <div class="inputRow">
       <input id="messageInput" placeholder="Type a message"/>
@@ -180,6 +217,7 @@ const db = getFirestore(app);
 
 const matchList = document.getElementById("matchList");
 const messagesDiv = document.getElementById("messages");
+const chatHeader = document.getElementById("chatHeader");
 const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const replyingToDiv = document.getElementById("replyingTo");
@@ -200,21 +238,26 @@ onAuthStateChanged(auth, async (user) => {
 
 async function loadMatches(){
   const snap = await getDocs(collection(db, "matches"));
-  snap.forEach(docSnap => {
+  snap.forEach(async (docSnap) => {
     const data = docSnap.data();
     if (data.members.includes(currentUser.uid)) {
       const other = data.members.find(m => m !== currentUser.uid);
+
+      const userSnap = await getDoc(doc(db,"users",other));
+      const name = userSnap.exists() ? userSnap.data().name : other;
+
       const div = document.createElement("div");
       div.className = "matchItem";
-      div.textContent = other;
-      div.onclick = () => openChat(docSnap.id);
+      div.textContent = name;
+      div.onclick = () => openChat(docSnap.id, name);
       matchList.appendChild(div);
     }
   });
 }
 
-function openChat(chatId){
+function openChat(chatId, name){
   currentChatId = chatId;
+  chatHeader.textContent = name;
   messagesDiv.innerHTML = "";
 
   const q = query(
@@ -251,8 +294,7 @@ function openChat(chatId){
 
       const replyBtn = document.createElement("button");
       replyBtn.textContent = "Reply";
-      replyBtn.onclick = (e) => {
-        e.stopPropagation();
+      replyBtn.onclick = () => {
         replyToMessage = msg;
         replyingToDiv.style.display = "block";
       };
@@ -261,25 +303,26 @@ function openChat(chatId){
       if (msg.senderId === currentUser.uid) {
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
-        editBtn.onclick = async (e) => {
-          e.stopPropagation();
-          const newText = prompt("Edit message:", msg.text);
-          if (newText) {
+        editBtn.onclick = () => {
+          const input = document.createElement("input");
+          input.value = msg.text;
+          input.className = "editInput";
+          bubble.replaceChild(input, text);
+          input.focus();
+
+          input.onblur = async () => {
             await updateDoc(
-              doc(db, "chats", chatId, "messages", docSnap.id),
-              { text: newText }
+              doc(db,"chats",chatId,"messages",docSnap.id),
+              { text: input.value }
             );
-          }
+          };
         };
         actions.appendChild(editBtn);
 
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "Delete";
-        deleteBtn.onclick = async (e) => {
-          e.stopPropagation();
-          await deleteDoc(
-            doc(db, "chats", chatId, "messages", docSnap.id)
-          );
+        deleteBtn.onclick = async () => {
+          await deleteDoc(doc(db,"chats",chatId,"messages",docSnap.id));
         };
         actions.appendChild(deleteBtn);
       }
@@ -305,7 +348,7 @@ sendBtn.onclick = async () => {
   if (!text || !currentChatId) return;
 
   await addDoc(
-    collection(db, "chats", currentChatId, "messages"),
+    collection(db,"chats",currentChatId,"messages"),
     {
       text,
       senderId: currentUser.uid,
@@ -314,14 +357,14 @@ sendBtn.onclick = async () => {
     }
   );
 
-  messageInput.value = "";
-  replyToMessage = null;
-  replyingToDiv.style.display = "none";
+  messageInput.value="";
+  replyToMessage=null;
+  replyingToDiv.style.display="none";
 };
 
 cancelReply.onclick = () => {
-  replyToMessage = null;
-  replyingToDiv.style.display = "none";
+  replyToMessage=null;
+  replyingToDiv.style.display="none";
 };
 </script>
 </body>
