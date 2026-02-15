@@ -4,145 +4,65 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uzone Parties</title>
-<link rel="icon" type="image/png" href="logo3.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
+* { box-sizing: border-box; font-family: Poppins, sans-serif; }
+body { background:#0f0f14; color:white; padding:20px; }
 
-body {
-  background: #0f0f14;
-  color: white;
-  padding: 24px;
-}
+.container { max-width:640px; margin:auto; }
 
-.back {
-  color: #b00b55;
-  margin-bottom: 20px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.container {
-  max-width: 640px;
-  margin: auto;
-}
-
-.card {
-  background: #1b1b25;
-  padding: 22px;
-  border-radius: 18px;
-  margin-bottom: 28px;
-}
-
-h2 {
-  color: #b00b55;
-  margin-bottom: 16px;
-}
-
-input, textarea {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 12px;
-  border: none;
-  background: #2a2a35;
-  color: white;
-}
-
-input[type="file"] {
-  padding: 8px;
-}
-
-textarea {
-  resize: none;
-  height: 90px;
-}
-
-label {
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  opacity: 0.9;
-}
-
-label input {
-  margin-right: 8px;
+.top-bar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
 }
 
 button {
-  background: #b00b55;
-  border: none;
-  padding: 12px;
-  border-radius: 12px;
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
-  width: 100%;
+  background:#b00b55;
+  border:none;
+  padding:12px 16px;
+  border-radius:12px;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
 }
 
-.party-item {
-  background: #222230;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 16px;
+.card {
+  background:#1b1b25;
+  padding:20px;
+  border-radius:18px;
 }
 
-.party-item img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 14px;
-  margin-bottom: 12px;
+.party {
+  background:#222230;
+  padding:16px;
+  border-radius:16px;
+  margin-bottom:16px;
 }
 
-.party-meta {
-  font-size: 14px;
-  opacity: 0.9;
-  line-height: 1.5;
-}
-
-.party-item button {
-  margin-top: 12px;
+.party img {
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="back" onclick="window.location.href='Uhub.html'">← Back</div>
-
 <div class="container">
 
-  <!-- CREATE PARTY -->
-  <div class="card">
-    <h2>Post a Party</h2>
-
-    <input type="text" id="location" placeholder="Location">
-    <label><input type="checkbox" id="locationPrivate"> Hide location (invite only)</label>
-
-    <input type="datetime-local" id="time">
-    <label><input type="checkbox" id="timePrivate"> Hide time (invite only)</label>
-
-    <input type="text" id="vibes" placeholder="Vibes (House, Chill, Wild)">
-    <textarea id="description" placeholder="Description"></textarea>
-    <input type="text" id="ratio" placeholder="Ratio girls:boys (e.g. 5:3)">
-
-    <input type="file" id="partyImage" accept="image/*">
-
-    <button onclick="postParty()">Post Party</button>
+  <div class="top-bar">
+    <h2>Explore Parties</h2>
+    <button onclick="location.href='post-party.html'">+ Post Party</button>
   </div>
 
-  <!-- VIEW PARTIES -->
   <div class="card">
-    <h2>Explore Parties</h2>
     <div id="partyList"></div>
   </div>
 
@@ -151,9 +71,7 @@ button {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -168,77 +86,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
 
-let currentUser;
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) window.location.href = "index.html";
-  currentUser = user;
+onAuthStateChanged(auth, user => {
+  if (!user) location.href = "index.html";
   loadParties();
 });
 
-window.postParty = async function () {
-  const imageFile = document.getElementById("partyImage").files[0];
-  let imageURL = "";
-
-  if (imageFile) {
-    const imgRef = sRef(storage, `partyImages/${Date.now()}_${imageFile.name}`);
-    await uploadBytes(imgRef, imageFile);
-    imageURL = await getDownloadURL(imgRef);
-  }
-
-  const userSnap = await get(ref(db, "users/" + currentUser.uid));
-  const hostName = userSnap.exists() ? userSnap.val().name : "Host";
-
-  const newPartyRef = push(ref(db, "parties"));
-
-  await set(newPartyRef, {
-    hostUID: currentUser.uid,
-    hostName,
-    location: location.value,
-    locationPrivate: locationPrivate.checked,
-    time: time.value,
-    timePrivate: timePrivate.checked,
-    vibes: vibes.value,
-    description: description.value,
-    ratio: ratio.value,
-    imageURL,
-    attendees: {}
-  });
-
-  alert("Party posted");
-};
-
 function loadParties() {
-  onValue(ref(db, "parties"), snap => {
+  onValue(ref(db,"parties"), snap => {
     const list = document.getElementById("partyList");
     list.innerHTML = "";
     if (!snap.exists()) return;
 
-    Object.entries(snap.val()).reverse().forEach(([id, p]) => {
+    Object.values(snap.val()).reverse().forEach(p => {
       const div = document.createElement("div");
-      div.className = "party-item";
+      div.className = "party";
       div.innerHTML = `
         ${p.imageURL ? `<img src="${p.imageURL}">` : ""}
-        <strong>${p.hostName}</strong>
-        <div class="party-meta">
-          ${p.locationPrivate ? "📍 Invite only" : "📍 " + p.location}<br>
-          ${p.timePrivate ? "⏰ Invite only" : "⏰ " + p.time}<br>
-          🎶 ${p.vibes}<br>
-          ⚖️ ${p.ratio}
-        </div>
-        <button onclick="apply('${id}')">Apply to Attend</button>
+        <strong>${p.hostName}</strong><br>
+        ${p.locationPrivate ? "📍 Invite only" : p.location}<br>
+        ${p.timePrivate ? "⏰ Invite only" : p.time}<br>
+        🎶 ${p.vibes} | ⚖️ ${p.ratio}
       `;
       list.appendChild(div);
     });
   });
 }
-
-window.apply = async id => {
-  await set(ref(db, `parties/${id}/attendees/${currentUser.uid}`), "pending");
-  alert("Application sent");
-};
 </script>
 
 </body>
