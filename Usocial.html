@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +19,7 @@
 body {
   background: #0f0f14;
   color: white;
-  padding: 30px;
+  padding: 24px;
 }
 
 .back {
@@ -30,35 +30,39 @@ body {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 640px;
   margin: auto;
 }
 
 .card {
   background: #1b1b25;
-  padding: 25px;
-  border-radius: 20px;
-  margin-bottom: 30px;
+  padding: 22px;
+  border-radius: 18px;
+  margin-bottom: 28px;
 }
 
 h2 {
   color: #b00b55;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 input, textarea {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 12px;
   border: none;
   background: #2a2a35;
   color: white;
 }
 
+input[type="file"] {
+  padding: 8px;
+}
+
 textarea {
   resize: none;
-  height: 80px;
+  height: 90px;
 }
 
 label {
@@ -66,6 +70,7 @@ label {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+  opacity: 0.9;
 }
 
 label input {
@@ -75,17 +80,37 @@ label input {
 button {
   background: #b00b55;
   border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
+  padding: 12px;
+  border-radius: 12px;
   color: white;
   cursor: pointer;
   font-weight: 600;
+  width: 100%;
 }
 
 .party-item {
-  border-top: 1px solid #333;
-  padding-top: 15px;
-  margin-top: 15px;
+  background: #222230;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.party-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+.party-meta {
+  font-size: 14px;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+.party-item button {
+  margin-top: 12px;
 }
 </style>
 </head>
@@ -106,9 +131,11 @@ button {
     <input type="datetime-local" id="time">
     <label><input type="checkbox" id="timePrivate"> Hide time (invite only)</label>
 
-    <input type="text" id="vibes" placeholder="Vibes (e.g. House, Chill, Wild)">
+    <input type="text" id="vibes" placeholder="Vibes (House, Chill, Wild)">
     <textarea id="description" placeholder="Description"></textarea>
     <input type="text" id="ratio" placeholder="Ratio girls:boys (e.g. 5:3)">
+
+    <input type="file" id="partyImage" accept="image/*">
 
     <button onclick="postParty()">Post Party</button>
   </div>
@@ -123,17 +150,17 @@ button {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } 
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, push, set, onValue, get } 
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
   authDomain: "uzone-6148d.firebaseapp.com",
   databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
   projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app",
+  storageBucket: "uzone-6148d.appspot.com",
   messagingSenderId: "88783701381",
   appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec"
 };
@@ -141,26 +168,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 let currentUser;
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    currentUser = user;
-    loadParties();
-  }
+  if (!user) window.location.href = "index.html";
+  currentUser = user;
+  loadParties();
 });
 
-window.postParty = async function() {
-  const location = document.getElementById("location").value;
-  const locationPrivate = document.getElementById("locationPrivate").checked;
-  const time = document.getElementById("time").value;
-  const timePrivate = document.getElementById("timePrivate").checked;
-  const vibes = document.getElementById("vibes").value;
-  const description = document.getElementById("description").value;
-  const ratio = document.getElementById("ratio").value;
+window.postParty = async function () {
+  const imageFile = document.getElementById("partyImage").files[0];
+  let imageURL = "";
+
+  if (imageFile) {
+    const imgRef = sRef(storage, `partyImages/${Date.now()}_${imageFile.name}`);
+    await uploadBytes(imgRef, imageFile);
+    imageURL = await getDownloadURL(imgRef);
+  }
 
   const userSnap = await get(ref(db, "users/" + currentUser.uid));
   const hostName = userSnap.exists() ? userSnap.val().name : "Host";
@@ -170,47 +196,48 @@ window.postParty = async function() {
   await set(newPartyRef, {
     hostUID: currentUser.uid,
     hostName,
-    location,
-    locationPrivate,
-    time,
-    timePrivate,
-    vibes,
-    description,
-    ratio,
+    location: location.value,
+    locationPrivate: locationPrivate.checked,
+    time: time.value,
+    timePrivate: timePrivate.checked,
+    vibes: vibes.value,
+    description: description.value,
+    ratio: ratio.value,
+    imageURL,
     attendees: {}
   });
 
-  alert("Party Posted!");
+  alert("Party posted");
 };
 
 function loadParties() {
-  onValue(ref(db, "parties"), (snapshot) => {
-    const container = document.getElementById("partyList");
-    container.innerHTML = "";
+  onValue(ref(db, "parties"), snap => {
+    const list = document.getElementById("partyList");
+    list.innerHTML = "";
+    if (!snap.exists()) return;
 
-    if (!snapshot.exists()) return;
-
-    Object.entries(snapshot.val()).forEach(([partyId, data]) => {
+    Object.entries(snap.val()).reverse().forEach(([id, p]) => {
       const div = document.createElement("div");
       div.className = "party-item";
-
       div.innerHTML = `
-        <strong>${data.hostName}</strong><br>
-        ${data.locationPrivate ? "Location: Invite Only" : "Location: " + data.location}<br>
-        ${data.timePrivate ? "Time: Invite Only" : "Time: " + data.time}<br>
-        Vibes: ${data.vibes}<br>
-        Ratio: ${data.ratio}<br>
-        <button onclick="apply('${partyId}')">Apply to Attend</button>
+        ${p.imageURL ? `<img src="${p.imageURL}">` : ""}
+        <strong>${p.hostName}</strong>
+        <div class="party-meta">
+          ${p.locationPrivate ? "📍 Invite only" : "📍 " + p.location}<br>
+          ${p.timePrivate ? "⏰ Invite only" : "⏰ " + p.time}<br>
+          🎶 ${p.vibes}<br>
+          ⚖️ ${p.ratio}
+        </div>
+        <button onclick="apply('${id}')">Apply to Attend</button>
       `;
-
-      container.appendChild(div);
+      list.appendChild(div);
     });
   });
 }
 
-window.apply = async function(partyId) {
-  await set(ref(db, "parties/" + partyId + "/attendees/" + currentUser.uid), "pending");
-  alert("Applied! Waiting for host approval.");
+window.apply = async id => {
+  await set(ref(db, `parties/${id}/attendees/${currentUser.uid}`), "pending");
+  alert("Application sent");
 };
 </script>
 
