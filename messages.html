@@ -441,11 +441,27 @@ function openChat(chatId,name){
 
       const replyBtn=document.createElement("button");
       replyBtn.textContent="Reply";
-      replyBtn.onclick=e=>{
-        e.stopPropagation();
-        replyToMessage=msg;
-        replyingToDiv.style.display="block";
-      };
+      replyBtn.onclick = e => {
+  e.stopPropagation();
+
+  replyToMessage = msg;
+  replyingToDiv.style.display = "block";
+
+  // Focus input immediately
+  messageInput.focus();
+
+  // Move cursor to end (safe for empty or existing text)
+  const len = messageInput.value.length;
+  messageInput.setSelectionRange(len, len);
+
+  // On mobile, ensure chat scrolls correctly
+  if (window.innerWidth <= 768) {
+    requestAnimationFrame(() => {
+      scrollMessagesToBottom();
+    });
+  }
+};
+
       actions.appendChild(replyBtn);
 
       if(msg.senderId===currentUser.uid){
