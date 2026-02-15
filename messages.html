@@ -9,7 +9,6 @@
 :root{
   --accent:#b00b55;
   --bg:#0b0b10;
-  --panel: rgba(255,255,255,.06);
   --border: rgba(255,255,255,.14);
   --text:white;
 }
@@ -19,14 +18,20 @@ body{
   background:var(--bg);
   font-family: system-ui, sans-serif;
   color:var(--text);
-  height:100vh;
+  height:100dvh;
   display:flex;
+  overflow:hidden;
 }
+
+/* Sidebar */
 .sidebar{
   width:260px;
   border-right:1px solid var(--border);
   overflow-y:auto;
   padding:12px;
+  transition:.25s;
+  background:var(--bg);
+  z-index:20;
 }
 .matchItem{
   padding:12px;
@@ -37,23 +42,63 @@ body{
   background:rgba(255,255,255,.05);
 }
 
+/* Mobile sidebar hidden */
+@media (max-width: 768px){
+  .sidebar{
+    position:fixed;
+    left:-260px;
+    top:0;
+    height:100%;
+  }
+  .sidebar.open{
+    left:0;
+  }
+}
+
+/* Chat Layout */
 .chat{
   flex:1;
   display:flex;
   flex-direction:column;
-  height:100vh;
+  height:100%;
 }
 
+/* Header */
 .chatHeader{
   position:sticky;
   top:0;
   background:var(--bg);
   padding:14px;
   border-bottom:1px solid var(--border);
-  font-weight:600;
+  display:flex;
+  align-items:center;
+  gap:12px;
   z-index:10;
+  min-height:56px;
 }
 
+#chatName{
+  flex:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-weight:600;
+}
+
+.headerBtn{
+  background:none;
+  border:none;
+  color:white;
+  cursor:pointer;
+  font-size:16px;
+  padding:6px 10px;
+  border-radius:8px;
+}
+.headerBtn:hover{
+  background:rgba(255,255,255,.08);
+}
+
+/* Messages */
 .messages{
   flex:1;
   overflow-y:auto;
@@ -68,10 +113,13 @@ body{
   padding:12px 14px;
   border-radius:18px;
   font-size:14px;
-  position:relative;
   display:flex;
   flex-direction:column;
   transition:.15s;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .bubble:active{
   transform:scale(.98);
@@ -84,6 +132,7 @@ body{
   align-self:flex-start;
   background:rgba(255,255,255,.1);
 }
+
 .replyPreview{
   font-size:12px;
   opacity:.7;
@@ -91,12 +140,14 @@ body{
   border-left:2px solid white;
   padding-left:6px;
 }
+
 .timestamp{
   font-size:11px;
   opacity:.7;
   margin-top:6px;
   display:none;
 }
+
 .actions{
   display:none;
   gap:8px;
@@ -111,6 +162,7 @@ body{
   opacity:.7;
 }
 
+/* Input */
 .inputArea{
   position:sticky;
   bottom:0;
@@ -169,10 +221,14 @@ body{
 </head>
 <body>
 
-<div class="sidebar" id="matchList"></div>
+<div class="sidebar" id="sidebar"></div>
 
 <div class="chat">
-  <div class="chatHeader" id="chatHeader">Select a chat</div>
+  <div class="chatHeader">
+    <button class="headerBtn" onclick="window.location.href='hub.html'">← Hub</button>
+    <button class="headerBtn" id="openSidebar">Chats</button>
+    <div id="chatName">Select a chat</div>
+  </div>
 
   <div class="messages" id="messages"></div>
 
@@ -215,9 +271,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const matchList = document.getElementById("matchList");
+const sidebar = document.getElementById("sidebar");
+const openSidebarBtn = document.getElementById("openSidebar");
 const messagesDiv = document.getElementById("messages");
-const chatHeader = document.getElementById("chatHeader");
+const chatName = document.getElementById("chatName");
 const messageInput = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const replyingToDiv = document.getElementById("replyingTo");
@@ -226,6 +283,10 @@ const cancelReply = document.getElementById("cancelReply");
 let currentUser = null;
 let currentChatId = null;
 let replyToMessage = null;
+
+openSidebarBtn.onclick = () => {
+  sidebar.classList.toggle("open");
+};
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -242,148 +303,84 @@ async function loadMatches(){
     const data = docSnap.data();
     if (data.members.includes(currentUser.uid)) {
       const other = data.members.find(m => m !== currentUser.uid);
-
       const userSnap = await getDoc(doc(db,"users",other));
       const name = userSnap.exists() ? userSnap.data().name : other;
 
       const div = document.createElement("div");
       div.className = "matchItem";
       div.textContent = name;
-      div.onclick = () => openChat(docSnap.id, name);
-      matchList.appendChild(div);
+      div.onclick = () => {
+        openChat(docSnap.id, name);
+        sidebar.classList.remove("open");
+      };
+      sidebar.appendChild(div);
     }
   });
 }
 
 function openChat(chatId, name){
   currentChatId = chatId;
-  chatHeader.textContent = name;
+  chatName.textContent = name;
   messagesDiv.innerHTML = "";
 
-  const q = query(
-    collection(db, "chats", chatId, "messages"),
-    orderBy("createdAt")
-  );
+  const q = query(collection(db,"chats",chatId,"messages"),orderBy("createdAt"));
 
   onSnapshot(q, snap => {
-    messagesDiv.innerHTML = "";
-    snap.forEach(docSnap => {
-      const msg = docSnap.data();
-      const bubble = document.createElement("div");
-      bubble.className = "bubble " + 
-        (msg.senderId === currentUser.uid ? "me" : "them");
+    messagesDiv.innerHTML="";
+    snap.forEach(docSnap=>{
+      const msg=docSnap.data();
+      const bubble=document.createElement("div");
+      bubble.className="bubble "+(msg.senderId===currentUser.uid?"me":"them");
 
-      if (msg.replyText) {
-        const reply = document.createElement("div");
-        reply.className = "replyPreview";
-        reply.textContent = msg.replyText;
+      if(msg.replyText){
+        const reply=document.createElement("div");
+        reply.className="replyPreview";
+        reply.textContent=msg.replyText;
         bubble.appendChild(reply);
       }
 
-      const text = document.createElement("div");
-      text.textContent = msg.text;
+      const text=document.createElement("div");
+      text.textContent=msg.text;
       bubble.appendChild(text);
 
-      const time = document.createElement("div");
-      time.className = "timestamp";
-      time.textContent = msg.createdAt?.toDate().toLocaleString() || "";
+      const time=document.createElement("div");
+      time.className="timestamp";
+      time.textContent=msg.createdAt?.toDate().toLocaleString()||"";
       bubble.appendChild(time);
 
-      const actions = document.createElement("div");
-      actions.className = "actions";
-
-      const replyBtn = document.createElement("button");
-      replyBtn.textContent = "Reply";
-      replyBtn.onclick = () => {
-        replyToMessage = msg;
-        replyingToDiv.style.display = "block";
-      };
-      actions.appendChild(replyBtn);
-
-      if (msg.senderId === currentUser.uid) {
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.onclick = () => {
-          const input = document.createElement("input");
-          input.value = msg.text;
-          input.className = "editInput";
-          bubble.replaceChild(input, text);
-          input.focus();
-
-          async function saveEdit() {
-  await updateDoc(
-    doc(db,"chats",chatId,"messages",docSnap.id),
-    { text: input.value }
-  );
-}
-
-input.addEventListener("keydown", async (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    input.blur(); // triggers save
-  }
-});
-
-input.onblur = saveEdit;
-
-        };
-        actions.appendChild(editBtn);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.onclick = async () => {
-          await deleteDoc(doc(db,"chats",chatId,"messages",docSnap.id));
-        };
-        actions.appendChild(deleteBtn);
-      }
-
-      bubble.appendChild(actions);
-
-      bubble.onclick = () => {
-        time.style.display =
-          time.style.display === "block" ? "none" : "block";
-        actions.style.display =
-          actions.style.display === "flex" ? "none" : "flex";
+      bubble.onclick=()=>{
+        time.style.display=time.style.display==="block"?"none":"block";
       };
 
       messagesDiv.appendChild(bubble);
     });
 
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    messagesDiv.scrollTop=messagesDiv.scrollHeight;
   });
 }
 
-sendBtn.onclick = async () => {
-  const text = messageInput.value.trim();
-  if (!text || !currentChatId) return;
+sendBtn.onclick=async()=>{
+  const text=messageInput.value.trim();
+  if(!text||!currentChatId)return;
 
-  await addDoc(
-    collection(db,"chats",currentChatId,"messages"),
-    {
-      text,
-      senderId: currentUser.uid,
-      createdAt: serverTimestamp(),
-      replyText: replyToMessage ? replyToMessage.text : null
-    }
-  );
+  await addDoc(collection(db,"chats",currentChatId,"messages"),{
+    text,
+    senderId:currentUser.uid,
+    createdAt:serverTimestamp(),
+    replyText:replyToMessage?replyToMessage.text:null
+  });
 
   messageInput.value="";
   replyToMessage=null;
   replyingToDiv.style.display="none";
 };
 
-messageInput.addEventListener("keydown", async (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
+messageInput.addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&!e.shiftKey){
     e.preventDefault();
     sendBtn.click();
   }
 });
-
-
-cancelReply.onclick = () => {
-  replyToMessage=null;
-  replyingToDiv.style.display="none";
-};
 </script>
 </body>
 </html>
