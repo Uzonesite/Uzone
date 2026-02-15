@@ -18,10 +18,15 @@ body{
   background:var(--bg);
   font-family: system-ui, sans-serif;
   color:var(--text);
-  height:100dvh;
+
+  /* Use a JS-updated variable instead of 100dvh */
+  height: var(--appH, 100dvh);
+
   display:flex;
   overflow:hidden;
+  overscroll-behavior: none; /* reduces weird bounce scrolling */
 }
+
 
 /* Sidebar */
 .sidebar{
@@ -253,6 +258,11 @@ body{
   color: rgba(255,255,255,.55);
 }
 
+@media (max-width:768px){
+  body.kb .messages{ padding: 12px; }
+  body.kb .chatHeader{ padding: 10px 12px; min-height: 48px; }
+  body.kb .inputArea{ padding: 8px; }
+}
   
 </style>
 </head>
@@ -329,6 +339,18 @@ onAuthStateChanged(auth, async user=>{
   currentUser=user;
   loadMatches();
 });
+
+function setAppHeight(){
+  // visualViewport is best on mobile browsers (esp iOS)
+  const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty("--appH", `${h}px`);
+}
+
+setAppHeight();
+window.addEventListener("resize", setAppHeight);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", setAppHeight);
+}
 
 async function loadMatches(){
   chatList.innerHTML = "";
@@ -489,12 +511,37 @@ sendBtn.onclick=async()=>{
   replyingToDiv.style.display="none";
 };
 
+function scrollMessagesToBottom(){
+  // use requestAnimationFrame to wait for layout after keyboard changes
+  requestAnimationFrame(() => {
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
+}
+
+messageInput.addEventListener("focus", () => {
+  if (window.innerWidth <= 768) scrollMessagesToBottom();
+});
+
+messageInput.addEventListener("click", () => {
+  if (window.innerWidth <= 768) scrollMessagesToBottom();
+});
+
+// also when viewport changes (keyboard open/close)
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", () => {
+    if (window.innerWidth <= 768) scrollMessagesToBottom();
+  });
+}
+
 messageInput.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&!e.shiftKey){
     e.preventDefault();
     sendBtn.click();
   }
 });
+
+messageInput.addEventListener("focus", () => document.body.classList.add("kb"));
+messageInput.addEventListener("blur",  () => document.body.classList.remove("kb"));
 
 chatSearch.addEventListener("input", () => {
   renderChatList(chatSearch.value);
