@@ -29,7 +29,7 @@
     }
 
     header{
-      width:min(1100px, 92vw);
+      width:min(1120px, 92vw);
       margin:18px auto 0 auto;
       display:flex;
       align-items:center;
@@ -47,21 +47,14 @@
     .title h1{margin:0;font-size:18px;letter-spacing:.2px}
     .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
-    .chip{
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      font-size:13px;
-      color:rgba(255,255,255,.85);
-    }
+
     .btn{
       padding:10px 12px;
       border-radius:12px;
       border:1px solid rgba(176,11,85,.55);
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
       color:white;
-      font-weight:750;
+      font-weight:800;
       cursor:pointer;
       box-shadow: 0 18px 40px rgba(176,11,85,.22);
       text-decoration:none;
@@ -77,7 +70,8 @@
       color:rgba(255,255,255,.92);
     }
 
-    main{width:min(1100px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+    main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+
     .bar{
       border:1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
@@ -95,7 +89,7 @@
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
-      width:min(720px,100%);
+      width:min(760px,100%);
       flex:1;
     }
     input{
@@ -119,6 +113,8 @@
       grid-template-columns: repeat(12, 1fr);
       gap:14px;
     }
+
+    /* New card style: image top, overlay, like your post preview */
     .card{
       grid-column: span 6;
       border:1px solid var(--border);
@@ -129,39 +125,102 @@
       text-decoration:none;
       color:inherit;
       display:grid;
-      grid-template-columns: 160px 1fr;
-      min-height: 150px;
     }
-    @media (max-width: 860px){
-      .card{grid-column: span 12; grid-template-columns: 140px 1fr;}
+    @media (max-width: 920px){
+      .card{grid-column: span 12;}
     }
-    .img{
+
+    .imgWrap{
+      position:relative;
+      width:100%;
+      aspect-ratio: 16 / 9;
       background: rgba(0,0,0,.20);
-      border-right: 1px solid rgba(255,255,255,.10);
     }
-    .img img{width:100%;height:100%;object-fit:cover;display:block;}
-    .body{
-      padding:12px 12px 12px 12px;
-      display:grid;
-      gap:8px;
+    .imgWrap img{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      display:block;
     }
-    .topline{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
+    .overlay{
+      position:absolute; inset:0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.82) 100%),
+        radial-gradient(1000px 380px at 30% 10%, rgba(176,11,85,.18), transparent 55%);
+      pointer-events:none;
+    }
+
+    .topBadge{
+      position:absolute; top:10px; left:10px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      font-size:12px;
+      color: rgba(255,255,255,.88);
+      display:flex; gap:8px; align-items:center;
+    }
+    .dot{
+      width:7px; height:7px; border-radius:999px;
+      background: rgba(176,11,85,.95);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.22);
+    }
+
+    .bottom{
+      position:absolute; left:0; right:0; bottom:0;
+      padding:12px;
+      display:grid; gap:8px;
     }
     .name{
       font-size:16px;
-      font-weight:850;
+      font-weight:900;
       letter-spacing:.2px;
-      line-height:1.2;
+      line-height:1.15;
+      text-shadow: 0 10px 30px rgba(0,0,0,.55);
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
     }
+    .meta{
+      display:flex; flex-wrap:wrap; gap:8px;
+      color: rgba(255,255,255,.80);
+      font-size:12px;
+      align-items:center;
+    }
+    .pill{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.30);
+      padding:6px 10px;
+      border-radius:999px;
+      display:inline-flex; gap:6px; align-items:center;
+      backdrop-filter: blur(10px);
+      max-width: 100%;
+    }
+    .pill b{font-weight:800; color: rgba(255,255,255,.92)}
+    .pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width: 320px;}
+
+    .body{
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
+
+    .line{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
     .mini{
       color:var(--muted);
       font-size:13px;
       line-height:1.35;
     }
+
     .chips{display:flex;gap:8px;flex-wrap:wrap}
     .tag{
       display:inline-flex;
@@ -173,10 +232,14 @@
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
       color: rgba(255,255,255,.86);
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
-    .tag .dot{width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);}
-    .tag.invite .dot{background: rgba(255,210,80,.85);}
-    .tag.open .dot{background: rgba(80,255,160,.75);}
+    .tag .tdot{width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);}
+    .tag.invite .tdot{background: rgba(255,210,80,.85);}
+    .tag.open .tdot{background: rgba(80,255,160,.75);}
 
     .ratingPill{
       display:inline-flex;
@@ -224,17 +287,16 @@
     <div class="right">
       <a class="btn secondary" href="hub.html">← Hub</a>
       <a class="btn secondary" href="my_events.html">My Events</a>
-      <span class="chip" id="userEmail">—</span>
+      <a class="btn" href="post_event.html">Post Event</a>
     </div>
   </header>
 
   <main>
     <section class="bar">
       <div class="searchWrap">
-        <input id="search" placeholder="Search events (name, vibes, tags, school, program…)" />
+        <input id="search" placeholder="Search events (name, tags, bio, location…)" />
         <button class="btn secondary" id="refreshBtn" type="button">Refresh</button>
       </div>
-      <a class="btn" href="post_event.html">Post Event</a>
     </section>
 
     <section id="grid" class="grid"></section>
@@ -258,7 +320,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const userEmail = document.getElementById("userEmail");
     const grid = document.getElementById("grid");
     const empty = document.getElementById("empty");
     const search = document.getElementById("search");
@@ -274,6 +335,29 @@
       return { v, deg };
     }
 
+    function fmtDate(yyyyMmDd){
+      if (!yyyyMmDd) return "";
+      const parts = yyyyMmDd.split("-").map(Number);
+      if (parts.length !== 3) return yyyyMmDd;
+      const [y,m,d] = parts;
+      if (!y || !m || !d) return yyyyMmDd;
+      const dt = new Date(y, m-1, d);
+      return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+    }
+
+    function fmtWhen(ev){
+      const sd = ev.startDate || "";
+      const st = ev.startTime || "";
+      const ed = ev.endDate || "";
+      const et = ev.endTime || "";
+      const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
+      const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
+      if (!start && !end) return "Time TBD";
+      if (start && !end) return start;
+      if (!start && end) return end;
+      return `${start} → ${end}`;
+    }
+
     function render(list){
       grid.innerHTML = "";
       empty.style.display = list.length ? "none" : "block";
@@ -285,19 +369,32 @@
         const tags = Array.isArray(ev.tags) ? ev.tags : [];
         const inviteOnly = !!ev.inviteOnly;
 
+        const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
+        const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
+
         const card = document.createElement("a");
         card.className = "card";
         card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
 
         card.innerHTML = `
-          <div class="img">
-            <img alt="Event image" src="${esc(ev.imageUrl || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=60')}" />
+          <div class="imgWrap">
+            <img alt="Event image" src="${esc(ev.imageUrl || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=60')}" />
+            <div class="overlay"></div>
+            <div class="topBadge"><span class="dot"></span><span>${inviteOnly ? "Invite-only" : "Open"}</span></div>
+            <div class="bottom">
+              <div class="name">${esc(ev.name || "Event")}</div>
+              <div class="meta">
+                <span class="pill"><b>When</b> <span>${esc(whenText)}</span></span>
+                <span class="pill"><b>Where</b> <span>${esc(whereText)}</span></span>
+              </div>
+            </div>
           </div>
+
           <div class="body">
-            <div class="topline">
-              <div>
-                <div class="name">${esc(ev.name || "Event")}</div>
-                <div class="mini">${esc(ev.vibes || "")}</div>
+            <div class="line">
+              <div class="mini">
+                Spots: <b>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</b>
+                • Venue: <b>${esc(ev.venueSize || "—")}</b>
               </div>
               <div class="ratingPill" title="Average rating">
                 <div class="meter" style="background: conic-gradient(var(--accent) ${deg}deg, rgba(255,255,255,.12) 0deg);">${v.toFixed(1)}</div>
@@ -309,8 +406,8 @@
             </div>
 
             <div class="chips">
-              <span class="tag ${inviteOnly ? "invite" : "open"}"><span class="dot"></span>${inviteOnly ? "Invite-only" : "Open"}</span>
-              ${tags.slice(0,4).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
+              <span class="tag ${inviteOnly ? "invite" : "open"}"><span class="tdot"></span>${inviteOnly ? "Invite-only" : "Open"}</span>
+              ${tags.slice(0,5).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
             </div>
           </div>
         `;
@@ -324,7 +421,8 @@
 
       const filtered = allEvents.filter(ev => {
         const hay = [
-          ev.name, ev.location, ev.vibes, ev.bio, ev.ratio,
+          ev.name, ev.location, ev.bio, ev.ratio, ev.venueSize,
+          ev.startDate, ev.startTime, ev.endDate, ev.endTime,
           ...(Array.isArray(ev.tags) ? ev.tags : [])
         ].join(" ").toLowerCase();
         return hay.includes(q);
@@ -337,9 +435,10 @@
       empty.style.display = "none";
       allEvents = [];
 
-      // Default sort: sizeEstimate descending
-      const q = query(collection(db, "events"), orderBy("sizeEstimate", "desc"), limit(80));
-      const snap = await getDocs(q);
+      // Prefer upcoming-ish ordering: startDate desc fallback to createdAt desc
+      // If some docs don't have startDate, they’ll still appear.
+      const qy = query(collection(db, "events"), orderBy("startDate", "desc"), limit(80));
+      const snap = await getDocs(qy);
       allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
       render(allEvents);
@@ -348,7 +447,6 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
-      userEmail.textContent = user.email || "Signed in";
       await load();
     });
 
