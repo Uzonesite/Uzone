@@ -529,7 +529,12 @@ messageInput.addEventListener("click", () => {
 // also when viewport changes (keyboard open/close)
 if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", () => {
-    if (window.innerWidth <= 768) scrollMessagesToBottom();
+    if (window.innerWidth <= 768) {
+      setAppHeight();
+      settleKeyboardFocus();
+    } else {
+      setAppHeight();
+    }
   });
 }
 
@@ -540,7 +545,31 @@ messageInput.addEventListener("keydown",e=>{
   }
 });
 
-messageInput.addEventListener("focus", () => document.body.classList.add("kb"));
+function lockWindowToTop(){
+  // Some mobile browsers scroll the PAGE when focusing an input.
+  // Your layout is an app (overflow hidden), so keep the window at 0.
+  window.scrollTo(0, 0);
+}
+
+function settleKeyboardFocus(){
+  // Run a few times because iOS can fire focus/resize in a weird order
+  // and does another scroll after the first one.
+  let n = 0;
+  const tick = () => {
+    lockWindowToTop();
+    scrollMessagesToBottom();
+    if (++n < 6) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+messageInput.addEventListener("focus", () => {
+  if (window.innerWidth <= 768) {
+    document.body.classList.add("kb");
+    settleKeyboardFocus();
+  }
+});
+
 messageInput.addEventListener("blur",  () => document.body.classList.remove("kb"));
 
 chatSearch.addEventListener("input", () => {
