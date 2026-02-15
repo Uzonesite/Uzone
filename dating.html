@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Uzone • Dating</title>
+
+  <style>
+    :root{
+      --accent:#b00b55;
+      --bg:#0b0b10;
+      --panel: rgba(255,255,255,.06);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --border: rgba(255,255,255,.14);
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
+        radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
+        var(--bg);
+    }
+
+    header{
+      width:min(1100px, 92vw);
+      margin:18px auto 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .left{display:flex; align-items:center; gap:12px; min-width:0;}
+    .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
+    .title{display:grid; gap:2px; min-width:0;}
+    .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      font-size:13px;
+      color:rgba(255,255,255,.85);
+    }
+    .btn{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(176,11,85,.55);
+      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+      color:white;
+      font-weight:750;
+      cursor:pointer;
+      box-shadow: 0 18px 40px rgba(176,11,85,.22);
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn.secondary{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      box-shadow:none;
+      color:rgba(255,255,255,.92);
+    }
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+
+    main{
+      width:min(1100px, 92vw);
+      margin:16px auto 30px auto;
+      display:grid;
+      gap:14px;
+    }
+
+    .bar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px 14px;
+    }
+
+    .seg{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .seg .label{
+      color:rgba(255,255,255,.78);
+      font-size:13px;
+    }
+    .toggle{
+      display:flex;
+      gap:8px;
+      padding:6px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      width:fit-content;
+    }
+    .pill{
+      border:0;
+      background:transparent;
+      color:rgba(255,255,255,.75);
+      padding:9px 12px;
+      border-radius:999px;
+      font-weight:750;
+      cursor:pointer;
+      letter-spacing:.2px;
+    }
+    .pill.active{
+      color:white;
+      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.55));
+      box-shadow: 0 14px 34px rgba(176,11,85,.22);
+    }
+
+    .seenBanner{
+      display:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,210,80,.25);
+      background: rgba(255,210,80,.10);
+      color: rgba(255,255,255,.86);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    /* Card layout */
+    .deck{
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:14px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .deck{grid-template-columns:1fr;}
+    }
+
+    .card{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .media{
+      position:relative;
+      background: rgba(0,0,0,.22);
+      aspect-ratio: 16/12;
+      overflow:hidden;
+    }
+    .media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      transform: scale(1.0);
+    }
+    .navBtn{
+      position:absolute;
+      top:50%;
+      transform: translateY(-50%);
+      width:44px;height:44px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.30);
+      color:white;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      font-size:18px;
+      user-select:none;
+      backdrop-filter: blur(8px);
+    }
+    .navBtn:disabled{opacity:.4;cursor:not-allowed}
+    .navBtn.left{left:10px}
+    .navBtn.right{right:10px}
+
+    .thumbs{
+      display:flex;
+      gap:8px;
+      padding:10px;
+      overflow-x:auto;
+      border-top:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.10);
+    }
+    .thumb{
+      width:54px;height:54px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      overflow:hidden;
+      flex:0 0 auto;
+      cursor:pointer;
+      position:relative;
+      background: rgba(0,0,0,.18);
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb.active{
+      border-color: rgba(176,11,85,.60);
+      box-shadow: 0 0 0 3px rgba(176,11,85,.20);
+    }
+
+    .info{
+      padding:14px 14px 16px 14px;
+      display:grid;
+      gap:10px;
+    }
+    .topline{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .nameLine{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      min-width:0;
+    }
+    .name{
+      font-size:20px;
+      font-weight:850;
+      letter-spacing:.2px;
+    }
+    .meta{
+      color:rgba(255,255,255,.72);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      font-size:12px;
+      color:rgba(255,255,255,.85);
+      user-select:none;
+    }
+    .badge .dot{width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);}
+    .badge.verified{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
+    .badge.verified .dot{background: rgba(80,255,160,.78);}
+    .badge.pending{border-color: rgba(255,210,80,.25); background: rgba(255,210,80,.10);}
+    .badge.pending .dot{background: rgba(255,210,80,.82);}
+    .badge.rejected{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
+    .badge.rejected .dot{background: rgba(255,80,120,.80);}
+
+    .bio{
+      color:rgba(255,255,255,.80);
+      line-height:1.45;
+      font-size:14px;
+      white-space:pre-line;
+    }
+
+    /* Side panel (actions) */
+    .side{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      display:grid;
+      gap:12px;
+      position:sticky;
+      top:14px;
+      height:fit-content;
+    }
+    @media (max-width: 980px){
+      .side{position:relative; top:auto;}
+    }
+    .bigActions{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .act{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:rgba(255,255,255,.92);
+      font-weight:850;
+      cursor:pointer;
+      padding:12px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      user-select:none;
+    }
+    .act.like{
+      border-color: rgba(80,255,160,.25);
+      background: rgba(80,255,160,.10);
+    }
+    .act.nope{
+      border-color: rgba(255,80,120,.30);
+      background: rgba(255,80,120,.10);
+    }
+    .act:disabled{opacity:.6;cursor:not-allowed}
+
+    .tiny{
+      color:rgba(255,255,255,.72);
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .statusLine{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .progress{
+      color:rgba(255,255,255,.85);
+      font-size:13px;
+    }
+
+    .msg{
+      display:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.16);
+      color:rgba(255,255,255,.85);
+      white-space:pre-line;
+      font-size:13px;
+      line-height:1.35;
+    }
+    .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
+    .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
+
+    /* Match modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.72);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:999;
+    }
+    .modalCard{
+      width:min(560px, 96vw);
+      border-radius: 18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.35));
+      box-shadow: var(--shadow);
+      padding:16px;
+    }
+    .modalTitle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .modalTitle h2{
+      margin:0;
+      font-size:20px;
+      letter-spacing:.2px;
+    }
+    .modalBody{
+      margin-top:10px;
+      display:grid;
+      gap:12px;
+    }
+    .pair{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .bubble{
+      width:86px;height:86px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      overflow:hidden;
+      background: rgba(0,0,0,.22);
+    }
+    .bubble img{width:100%;height:100%;object-fit:cover;display:block}
+    .modalActions{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="left">
+      <img src="logo.png" alt="Uzone logo" />
+      <div class="title">
+        <h1>Dating</h1>
+        <div class="sub" id="subline">Loading…</div>
+      </div>
+    </div>
+
+    <div class="right">
+      <a class="btn secondary" href="hub.html">← Hub</a>
+      <span class="chip" id="userEmail">—</span>
+      <button class="btn" id="signOutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="bar">
+      <div class="seg">
+        <div class="label">Searching for</div>
+        <div class="toggle" role="tablist" aria-label="Gender filter">
+          <button class="pill active" id="findWomen" role="tab" aria-selected="true">Women</button>
+          <button class="pill" id="findMen" role="tab" aria-selected="false">Men</button>
+        </div>
+      </div>
+
+      <div style="display:grid; gap:8px; justify-items:end; width:min(420px,100%);">
+        <div class="seenBanner" id="seenBanner">You’ve reached the end — recycling profiles you’ve already seen.</div>
+        <div class="statusLine">
+          <span class="progress" id="progressText">—</span>
+          <button class="btn secondary" id="refreshBtn" type="button">Refresh</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="deck">
+      <!-- Profile Card -->
+      <article class="card" aria-label="Candidate profile">
+        <div class="media">
+          <img id="mainImg" alt="Profile photo" />
+          <button class="navBtn left" id="prevImg" type="button" aria-label="Previous photo">‹</button>
+          <button class="navBtn right" id="nextImg" type="button" aria-label="Next photo">›</button>
+        </div>
+        <div class="thumbs" id="thumbs"></div>
+
+        <div class="info">
+          <div class="topline">
+            <div class="nameLine">
+              <div class="name" id="nameAge">—</div>
+              <div class="badge" id="verifyBadge"><span class="dot"></span><span id="verifyText">Not verified</span></div>
+            </div>
+            <div class="meta" id="genderLine">—</div>
+          </div>
+
+          <div class="meta" id="schoolProgram">—</div>
+          <div class="bio" id="bioText">—</div>
+        </div>
+      </article>
+
+      <!-- Side Panel -->
+      <aside class="side" aria-label="Actions">
+        <div class="bigActions">
+          <button class="act nope" id="nopeBtn" type="button">✕ Dislike</button>
+          <button class="act like" id="likeBtn" type="button">♥ Like</button>
+        </div>
+
+        <div class="tiny" id="seenHint">—</div>
+        <div class="msg" id="msgBox" aria-live="polite"></div>
+      </aside>
+    </section>
+  </main>
+
+  <!-- Match modal -->
+  <div class="modal" id="matchModal" role="dialog" aria-modal="true" aria-label="Match dialog">
+    <div class="modalCard">
+      <div class="modalTitle">
+        <h2>It’s a match!</h2>
+        <button class="btn secondary" id="closeMatch" type="button">Close</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="pair">
+          <div class="bubble"><img id="meBubble" alt="You" /></div>
+          <div class="bubble"><img id="themBubble" alt="Match" /></div>
+          <div style="color:rgba(255,255,255,.85); font-size:14px; line-height:1.35;">
+            You and <b id="matchName">—</b> liked each other.
+          </div>
+        </div>
+
+        <div class="modalActions">
+          <a class="btn" id="messageLink" href="messages.html">Message</a>
+          <button class="btn secondary" id="keepSwiping" type="button">Keep swiping</button>
+        </div>
+
+        <div class="tiny">Messaging page can be hooked up to the chat ID in the link.</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      collection,
+      doc,
+      getDoc,
+      getDocs,
+      setDoc,
+      serverTimestamp,
+      query,
+      where,
+      limit,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    try { if (await analyticsSupported()) getAnalytics(app); } catch(_) {}
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // UI refs
+    const subline = document.getElementById("subline");
+    const userEmail = document.getElementById("userEmail");
+    const signOutBtn = document.getElementById("signOutBtn");
+
+    const findWomen = document.getElementById("findWomen");
+    const findMen = document.getElementById("findMen");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const seenBanner = document.getElementById("seenBanner");
+
+    const mainImg = document.getElementById("mainImg");
+    const prevImg = document.getElementById("prevImg");
+    const nextImg = document.getElementById("nextImg");
+    const thumbs = document.getElementById("thumbs");
+
+    const nameAge = document.getElementById("nameAge");
+    const genderLine = document.getElementById("genderLine");
+    const schoolProgram = document.getElementById("schoolProgram");
+    const bioText = document.getElementById("bioText");
+
+    const verifyBadge = document.getElementById("verifyBadge");
+    const verifyText = document.getElementById("verifyText");
+
+    const nopeBtn = document.getElementById("nopeBtn");
+    const likeBtn = document.getElementById("likeBtn");
+    const seenHint = document.getElementById("seenHint");
+    const msgBox = document.getElementById("msgBox");
+    const progressText = document.getElementById("progressText");
+
+    const matchModal = document.getElementById("matchModal");
+    const closeMatch = document.getElementById("closeMatch");
+    const keepSwiping = document.getElementById("keepSwiping");
+    const meBubble = document.getElementById("meBubble");
+    const themBubble = document.getElementById("themBubble");
+    const matchName = document.getElementById("matchName");
+    const messageLink = document.getElementById("messageLink");
+
+    let currentUser = null;
+
+    // State
+    let searchGender = "Woman"; // "Woman" | "Man"
+    let candidates = [];        // array of { uid, ...profile }
+    let idx = 0;
+    let currentPhotos = [];     // array of URLs for current card
+    let photoIndex = 0;
+
+    // Cache of swipe decisions: Map<otherUid, { direction: "like"|"dislike", updatedAt }>
+    const swipeMap = new Map();
+
+    function setMsg(text, kind="") {
+      msgBox.style.display = text ? "block" : "none";
+      msgBox.textContent = text || "";
+      msgBox.className = "msg" + (kind ? " " + kind : "");
+    }
+
+    function placeholderAvatarFromName(name){
+      const initial = (name?.trim()?.[0] || "U").toUpperCase();
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900">
+          <defs>
+            <radialGradient id="g" cx="30%" cy="20%" r="90%">
+              <stop offset="0%" stop-color="#b00b55" stop-opacity="0.35"/>
+              <stop offset="65%" stop-color="#0b0b10" stop-opacity="1"/>
+            </radialGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#g)"/>
+          <text x="50%" y="52%" text-anchor="middle"
+                font-size="320" font-family="Arial" fill="rgba(255,255,255,0.88)"
+                dominant-baseline="middle">${initial}</text>
+        </svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function setVerificationUI(status){
+      verifyBadge.classList.remove("pending","verified","rejected");
+      if (status === "verified") {
+        verifyBadge.classList.add("verified");
+        verifyText.textContent = "Verified";
+      } else if (status === "pending") {
+        verifyBadge.classList.add("pending");
+        verifyText.textContent = "Pending";
+      } else if (status === "rejected") {
+        verifyBadge.classList.add("rejected");
+        verifyText.textContent = "Rejected";
+      } else {
+        verifyText.textContent = "Not verified";
+      }
+    }
+
+    function setToggleUI(){
+      const women = searchGender === "Woman";
+      findWomen.classList.toggle("active", women);
+      findMen.classList.toggle("active", !women);
+      findWomen.setAttribute("aria-selected", String(women));
+      findMen.setAttribute("aria-selected", String(!women));
+    }
+
+    function setButtonsEnabled(enabled){
+      nopeBtn.disabled = !enabled;
+      likeBtn.disabled = !enabled;
+      prevImg.disabled = !enabled;
+      nextImg.disabled = !enabled;
+    }
+
+    function setProgress(){
+      const total = candidates.length || 0;
+      const shown = total ? Math.min(idx + 1, total) : 0;
+      progressText.textContent = total ? `${shown} / ${total}` : "—";
+    }
+
+    function renderPhotos(urls){
+      currentPhotos = urls && urls.length ? urls : [placeholderAvatarFromName("U")];
+      photoIndex = 0;
+
+      function setMain(){
+        mainImg.src = currentPhotos[photoIndex];
+        prevImg.disabled = photoIndex === 0;
+        nextImg.disabled = photoIndex === currentPhotos.length - 1;
+
+        [...thumbs.children].forEach((el, i) => {
+          el.classList.toggle("active", i === photoIndex);
+        });
+      }
+
+      thumbs.innerHTML = "";
+      currentPhotos.forEach((u, i) => {
+        const t = document.createElement("div");
+        t.className = "thumb" + (i === 0 ? " active" : "");
+        const im = document.createElement("img");
+        im.src = u;
+        im.alt = "Photo";
+        t.appendChild(im);
+        t.addEventListener("click", () => { photoIndex = i; setMain(); });
+        thumbs.appendChild(t);
+      });
+
+      setMain();
+    }
+
+    async function getTopPhotosForUser(uid, profile){
+      // Compose: avatar first, then up to 6 posts
+      const urls = [];
+      const avatar = (profile?.photoURL || "").toString();
+      if (avatar) urls.push(avatar);
+
+      // Load posts (public read for signed-in users per your rules)
+      try{
+        const postsRef = collection(db, "users", uid, "posts");
+        const q = query(postsRef, orderBy("createdAt", "desc"), limit(6));
+        const snaps = await getDocs(q);
+        snaps.forEach(d => {
+          const data = d.data() || {};
+          if (data.url) urls.push(String(data.url));
+        });
+      } catch(_) {
+        // ignore (still show avatar or placeholder)
+      }
+
+      // Deduplicate
+      const uniq = [...new Set(urls.filter(Boolean))];
+      return uniq.length ? uniq : [avatar || placeholderAvatarFromName(profile?.name || "U")];
+    }
+
+    function normalizeGender(g){
+      const s = (g || "").toString().trim().toLowerCase();
+      if (s === "man" || s === "male") return "Man";
+      if (s === "woman" || s === "female") return "Woman";
+      return g || "";
+    }
+
+    function displayCandidate(candidate){
+      if (!candidate) {
+        nameAge.textContent = "No profiles found";
+        genderLine.textContent = "";
+        schoolProgram.textContent = "";
+        bioText.textContent = "Try switching the filter or check back later.";
+        setVerificationUI("none");
+        renderPhotos([placeholderAvatarFromName("U")]);
+        setButtonsEnabled(false);
+        seenHint.textContent = "";
+        setProgress();
+        return;
+      }
+
+      setButtonsEnabled(true);
+      setProgress();
+
+      const name = (candidate.name || "Student").toString().trim();
+      const age = (candidate.age || "").toString().trim();
+      const gender = normalizeGender(candidate.gender);
+      const uni = (candidate.university || "").toString().trim();
+      const program = (candidate.program || "").toString().trim();
+      const bio = (candidate.bio || "").toString().trim();
+
+      nameAge.textContent = age ? `${name}, ${age}` : name;
+      genderLine.textContent = gender ? gender : "";
+      schoolProgram.textContent = [uni, program].filter(Boolean).join(" • ") || "—";
+      bioText.textContent = bio || "—";
+
+      const vStatus = candidate?.verification?.status || "none";
+      setVerificationUI(vStatus);
+
+      // Seen hint
+      const sw = swipeMap.get(candidate.uid);
+      if (sw) {
+        seenHint.textContent = `You previously ${sw.direction === "like" ? "liked" : "disliked"} this profile.`;
+      } else {
+        seenHint.textContent = " ";
+      }
+
+      // Photos (async)
+      setMsg("");
+      renderPhotos([candidate.photoURL || placeholderAvatarFromName(name)]);
+      getTopPhotosForUser(candidate.uid, candidate).then(urls => {
+        // Only apply if still viewing same candidate
+        const current = candidates[idx];
+        if (current && current.uid === candidate.uid) renderPhotos(urls);
+      });
+    }
+
+    function recycleIfNeeded(){
+      if (!candidates.length) return;
+      if (idx >= candidates.length) {
+        idx = 0;
+        seenBanner.style.display = "block";
+        setTimeout(() => { seenBanner.style.display = "none"; }, 4500);
+      }
+    }
+
+    function currentCandidate(){
+      if (!candidates.length) return null;
+      recycleIfNeeded();
+      return candidates[idx] || null;
+    }
+
+    function nextCandidate(){
+      idx += 1;
+      recycleIfNeeded();
+      displayCandidate(currentCandidate());
+    }
+
+    async function loadMySwipes(){
+      swipeMap.clear();
+      const swipesRef = collection(db, "users", currentUser.uid, "swipes");
+      const snaps = await getDocs(swipesRef);
+      snaps.forEach(d => {
+        const v = d.data() || {};
+        if (v.direction) swipeMap.set(d.id, { direction: v.direction, updatedAt: v.updatedAt || null });
+      });
+    }
+
+    async function loadCandidates(){
+      setMsg("");
+      setButtonsEnabled(false);
+      subline.textContent = "Finding profiles…";
+      progressText.textContent = "—";
+      seenBanner.style.display = "none";
+
+      candidates = [];
+      idx = 0;
+
+      // Query users by gender
+      const target = searchGender;
+      const usersRef = collection(db, "users");
+
+      // NOTE: This assumes profiles store Gender exactly as "Woman" or "Man".
+      // If users might have empty gender, they just won't appear until set.
+      const q = query(usersRef, where("gender", "==", target), limit(60));
+      const snaps = await getDocs(q);
+
+      snaps.forEach(d => {
+        if (d.id === currentUser.uid) return;
+        const data = d.data() || {};
+        candidates.push({ uid: d.id, ...data });
+      });
+
+      // If no candidates
+      if (!candidates.length) {
+        subline.textContent = "No profiles available";
+        displayCandidate(null);
+        return;
+      }
+
+      // Shuffle lightly so it feels less static
+      for (let i = candidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+
+      subline.textContent = "Swipe and match";
+      displayCandidate(currentCandidate());
+    }
+
+    function chatIdFor(u1, u2){
+      return [u1, u2].sort().join("_");
+    }
+
+    async function ensureChat(u1, u2){
+      const chatId = chatIdFor(u1, u2);
+      const chatRef = doc(db, "chats", chatId);
+      const snap = await getDoc(chatRef);
+      if (!snap.exists()) {
+        await setDoc(chatRef, {
+          members: [u1, u2].sort(),
+          createdAt: serverTimestamp(),
+          lastMessageAt: serverTimestamp()
+        }, { merge: true });
+      }
+      return chatId;
+    }
+
+    async function ensureMatch(u1, u2){
+      const matchId = chatIdFor(u1, u2);
+      const matchRef = doc(db, "matches", matchId);
+      const snap = await getDoc(matchRef);
+      if (!snap.exists()) {
+        await setDoc(matchRef, {
+          members: [u1, u2].sort(),
+          createdAt: serverTimestamp()
+        }, { merge: true });
+      }
+      return matchId;
+    }
+
+    async function swipe(direction){
+      const cand = currentCandidate();
+      if (!cand) return;
+
+      setButtonsEnabled(false);
+      setMsg("");
+
+      const otherUid = cand.uid;
+      const myUid = currentUser.uid;
+
+      try{
+        // Record my swipe
+        await setDoc(doc(db, "users", myUid, "swipes", otherUid), {
+          direction, // "like" | "dislike"
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        swipeMap.set(otherUid, { direction });
+
+        if (direction === "like") {
+          // Check if they liked me
+          const theirSwipeRef = doc(db, "users", otherUid, "swipes", myUid);
+          const theirSnap = await getDoc(theirSwipeRef);
+          const theirDir = theirSnap.exists() ? (theirSnap.data()?.direction || "") : "";
+
+          if (theirDir === "like") {
+            // Match!
+            const meSnap = await getDoc(doc(db, "users", myUid));
+            const meProfile = meSnap.exists() ? meSnap.data() : {};
+            const mePhoto = (meProfile?.photoURL || "") || placeholderAvatarFromName(meProfile?.name || "U");
+            const themPhoto = (cand.photoURL || "") || placeholderAvatarFromName(cand.name || "U");
+
+            const matchId = await ensureMatch(myUid, otherUid);
+            const chatId = await ensureChat(myUid, otherUid);
+
+            meBubble.src = mePhoto;
+            themBubble.src = themPhoto;
+            matchName.textContent = (cand.name || "Student").toString().trim();
+            messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&match=${encodeURIComponent(matchId)}`;
+
+            matchModal.style.display = "flex";
+            setMsg("Matched!", "ok");
+          } else {
+            setMsg("Liked.", "ok");
+          }
+        } else {
+          setMsg("Disliked.", "ok");
+        }
+
+        // Move on
+        nextCandidate();
+      } catch(err){
+        setMsg(err?.message || "Swipe failed.", "error");
+      } finally {
+        setButtonsEnabled(true);
+      }
+    }
+
+    // Auth gate
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      currentUser = user;
+      userEmail.textContent = user.email || "Signed in";
+      subline.textContent = "Loading…";
+
+      await loadMySwipes();
+      setToggleUI();
+      await loadCandidates();
+    });
+
+    // Header actions
+    signOutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    });
+
+    // Toggle actions
+    function setSearchGender(next){
+      searchGender = next;
+      setToggleUI();
+      loadCandidates();
+    }
+    findWomen.addEventListener("click", () => setSearchGender("Woman"));
+    findMen.addEventListener("click", () => setSearchGender("Man"));
+
+    refreshBtn.addEventListener("click", async () => {
+      await loadMySwipes();
+      await loadCandidates();
+    });
+
+    // Like / Dislike
+    nopeBtn.addEventListener("click", () => swipe("dislike"));
+    likeBtn.addEventListener("click", () => swipe("like"));
+
+    // Photo nav
+    prevImg.addEventListener("click", () => {
+      if (photoIndex > 0) photoIndex -= 1;
+      mainImg.src = currentPhotos[photoIndex];
+      prevImg.disabled = photoIndex === 0;
+      nextImg.disabled = photoIndex === currentPhotos.length - 1;
+      [...thumbs.children].forEach((el, i) => el.classList.toggle("active", i === photoIndex));
+    });
+    nextImg.addEventListener("click", () => {
+      if (photoIndex < currentPhotos.length - 1) photoIndex += 1;
+      mainImg.src = currentPhotos[photoIndex];
+      prevImg.disabled = photoIndex === 0;
+      nextImg.disabled = photoIndex === currentPhotos.length - 1;
+      [...thumbs.children].forEach((el, i) => el.classList.toggle("active", i === photoIndex));
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener("keydown", (e) => {
+      if (matchModal.style.display === "flex") return;
+      if (e.key === "ArrowLeft") swipe("dislike");
+      if (e.key === "ArrowRight") swipe("like");
+    });
+
+    // Match modal controls
+    closeMatch.addEventListener("click", () => { matchModal.style.display = "none"; });
+    keepSwiping.addEventListener("click", () => { matchModal.style.display = "none"; });
+    matchModal.addEventListener("click", (e) => { if (e.target === matchModal) matchModal.style.display = "none"; });
+  </script>
+</body>
+</html>
