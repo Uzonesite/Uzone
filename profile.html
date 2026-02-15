@@ -114,15 +114,22 @@
 
     label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
     input, select, textarea{
-      width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color:var(--text);
-      outline:none;
-      font-size:14px;
-    }
+  width:100%;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: rgba(0,0,0,.45); /* darker background */
+  color: #ffffff; /* force solid white text */
+  outline:none;
+  font-size:14px;
+}
+
+/* Fix dropdown menu items (mobile/iOS fix) */
+select option {
+  background: #111111;
+  color: #ffffff;
+}
+
     textarea{min-height:92px;resize:vertical}
     input:focus, select:focus, textarea:focus{
       border-color: rgba(176,11,85,.60);
@@ -322,13 +329,12 @@
 
             <label>
               Gender
-              <select id="gender">
-                <option value="">Prefer not to say</option>
-                <option value="Woman">Woman</option>
-                <option value="Man">Man</option>
-                <option value="Non-binary">Non-binary</option>
-                <option value="Other">Other</option>
+              <select id="gender" required>
+                <option value="" disabled selected>Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
               </select>
+
             </label>
           </div>
 
