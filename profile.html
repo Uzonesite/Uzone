@@ -620,7 +620,6 @@ const signOutBtn = document.getElementById("signOutBtn");
 
         await setDoc(doc(db, "users", currentUser.uid), payload, { merge: true });
 
-         = payload.name || "Your name";
         if (!avatarImg.src || avatarImg.src.startsWith("data:image/svg+xml")) {
           avatarImg.src = placeholderAvatarFromName(payload.name);
         }
