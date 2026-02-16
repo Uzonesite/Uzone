@@ -4,6 +4,11 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>Uzone • Post Event</title>
+
+<!-- Tab icon -->
+<link rel="icon" type="image/png" href="logo.png" />
+<meta name="color-scheme" content="dark light" />
+
 <style>
   :root{
     --accent:#b00b55;
@@ -37,6 +42,12 @@
     background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+
+    /* match hub feel */
+    position: sticky;
+    top: 10px;
+    z-index: 10;
+    backdrop-filter: blur(10px);
   }
   .left{display:flex; align-items:center; gap:12px; min-width:0;}
   .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
@@ -45,26 +56,53 @@
   .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
+  /* Unified button system (same as hub/profile/events) */
   .btn{
     padding:10px 12px;
     border-radius:12px;
-    border:1px solid rgba(176,11,85,.55);
-    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-    color:white;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    color:rgba(255,255,255,.92);
     font-weight:800;
     cursor:pointer;
-    box-shadow: 0 18px 40px rgba(176,11,85,.22);
     text-decoration:none;
     display:inline-flex; align-items:center; gap:8px;
     white-space:nowrap;
+    user-select:none;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
   }
-  .btn.secondary{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    box-shadow:none;
-    color:rgba(255,255,255,.92);
+  .btn:hover{
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+    filter: brightness(1.06);
+  }
+  .btn:active{
+    transform: translateY(0px) scale(.99);
+    box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
+    filter: brightness(1.0);
+  }
+  .btn:focus-visible{
+    outline:none;
+    box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
   }
   .btn:disabled{opacity:.6; cursor:not-allowed}
+
+  /* Primary button (Post Event action) */
+  .btn.primary{
+    border:1px solid rgba(176,11,85,.55);
+    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+    color:white;
+    box-shadow: 0 18px 40px rgba(176,11,85,.22);
+  }
+  .btn.primary:hover{
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
+    filter: brightness(1.08);
+  }
+  .btn.primary:active{
+    box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.20);
+  }
 
   main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
   .card{
@@ -73,6 +111,7 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding:14px;
+    backdrop-filter: blur(10px);
   }
 
   .sectionHead{
@@ -111,7 +150,7 @@
 
   /* Make native date/time pickers look consistent */
   input[type="date"], input[type="time"]{
-    color-scheme: dark; /* helps on many browsers */
+    color-scheme: dark;
   }
 
   /* Description sizing + spacing fix */
@@ -233,7 +272,20 @@
     cursor:pointer;
     font-weight:800;
     display:inline-flex; align-items:center; gap:8px;
+    user-select:none;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
   }
+  .fileBtn:hover{
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    box-shadow: 0 0 14px rgba(176,11,85,.75), 0 14px 34px rgba(176,11,85,.24);
+    filter: brightness(1.06);
+  }
+  .fileBtn:active{
+    transform: translateY(0px) scale(.99);
+    box-shadow: 0 0 10px rgba(176,11,85,.65), 0 10px 26px rgba(176,11,85,.18);
+  }
+
   .fileName{
     color: rgba(255,255,255,.75);
     font-size:12px;
@@ -318,6 +370,7 @@
     color:rgba(255,255,255,.85);
     font-size:13px;
     white-space:pre-line;
+    margin-top:12px;
   }
   .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
   .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
@@ -335,9 +388,9 @@
     </div>
   </div>
   <div class="right">
-    <a class="btn secondary" href="events.html">← Events</a>
-    <a class="btn secondary" href="my_events.html">My Events</a>
-    <a class="btn secondary" href="hub.html">Hub</a>
+    <a class="btn" href="events.html">← Events</a>
+    <a class="btn" href="my_events.html">My Events</a>
+    <a class="btn" href="hub.html">Hub</a>
   </div>
 </header>
 
@@ -424,7 +477,7 @@
       </div>
     </div>
 
-    <div class="row" style="margin-top:12px;">
+    <div class="row" style="margin-top:্তা;">
       <label class="bioLabel">Description
         <textarea id="description" placeholder="Describe the vibe, what’s happening, who it’s for, what to bring, etc."></textarea>
       </label>
@@ -466,7 +519,7 @@
     </div>
 
     <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin-top:14px;">
-      <button class="btn" id="postBtn" type="button">Post Event</button>
+      <button class="btn primary" id="postBtn" type="button">Post Event</button>
     </div>
 
     <div class="msg" id="msg"></div>
