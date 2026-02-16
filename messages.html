@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>Uzone • Messages</title>
 
+<!-- Tab icon -->
+<link rel="icon" type="image/png" href="logo.png" />
+
 <style>
 :root{
   --accent:#b00b55;
@@ -99,17 +102,35 @@ body{
   font-weight:600;
 }
 
+/* ✅ Header buttons now match hub theme */
 .headerBtn{
-  background:none;
-  border:none;
-  color:white;
+  appearance:none;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  color: rgba(255,255,255,.92);
   cursor:pointer;
-  font-size:16px;
-  padding:6px 10px;
-  border-radius:8px;
+  font-size:14px;
+  font-weight:800;
+  letter-spacing:.2px;
+  padding:9px 12px;
+  border-radius:12px;
+  user-select:none;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
 }
 .headerBtn:hover{
-  background:rgba(255,255,255,.08);
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.24);
+  filter: brightness(1.06);
+}
+.headerBtn:active{
+  transform: translateY(0px) scale(.99);
+  box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.18);
+  filter: brightness(1.0);
+}
+.headerBtn:focus-visible{
+  outline:none;
+  box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
 }
 
 /* Messages */
@@ -212,6 +233,7 @@ body{
   outline:none;
 }
 
+/* ✅ Send button more interactive */
 .inputRow button{
   margin-left:10px;
   padding:12px 18px;
@@ -220,6 +242,23 @@ body{
   background:var(--accent);
   color:white;
   cursor:pointer;
+  font-weight:900;
+  letter-spacing:.2px;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.inputRow button:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.07);
+  box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+}
+.inputRow button:active{
+  transform: translateY(0px) scale(.99);
+  filter: brightness(1.0);
+  box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.18);
+}
+.inputRow button:focus-visible{
+  outline:none;
+  box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
 }
 
 .editInput{
