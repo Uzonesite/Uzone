@@ -210,12 +210,27 @@
       text-overflow:ellipsis;
       white-space:nowrap;
     }
+    .pill.verified{
+      border-color: rgba(80,255,160,.45);
+      background: rgba(80,255,160,.12);
+      color: #8cffc7;
+    }
 
     .sectionTitle{
       margin:0 0 8px 0;
       font-size:14px;
       letter-spacing:.25px;
       color:rgba(255,255,255,.92);
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .sectionTitle .hint{
+      color: rgba(255,255,255,.60);
+      font-size:12px;
+      font-weight:600;
     }
     .textBlock{
       color: rgba(255,255,255,.78);
@@ -225,10 +240,78 @@
       word-break:break-word;
     }
 
+    /* Posts */
+    .postsGrid{
+      display:grid;
+      gap:10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .postCard{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.16);
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow: 0 16px 50px rgba(0,0,0,.35);
+      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease, background .14s ease;
+    }
+    .postCard:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      background: rgba(0,0,0,.20);
+    }
+    .postMedia{
+      width:100%;
+      aspect-ratio: 16 / 11;
+      background: rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+    .postMedia img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .postBody{
+      padding:12px;
+      display:grid;
+      gap:8px;
+    }
+    .postText{
+      color: rgba(255,255,255,.86);
+      font-size:14px;
+      line-height:1.35;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .postMeta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      color: rgba(255,255,255,.62);
+      font-size:12px;
+    }
+    .empty{
+      display:none;
+      border:1px dashed rgba(255,255,255,.16);
+      border-radius:14px;
+      padding:14px;
+      background: rgba(0,0,0,.12);
+      color: rgba(255,255,255,.75);
+      font-size:13px;
+      line-height:1.4;
+    }
+
     @media (max-width: 720px){
       .profileTop{ grid-template-columns: 86px 1fr; }
       .avatar{ width:86px; height:86px; }
       .name{ font-size:20px; }
+      .postsGrid{ grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -245,7 +328,6 @@
     <div class="right">
       <a class="btn" href="directory.html">Directory</a>
       <a class="btn" href="hub.html">Hub</a>
-      <a class="btn" href="messages.html">Umessages</a>
     </div>
   </header>
 
@@ -260,7 +342,7 @@
           <div class="nameRow">
             <div class="nameBlock">
               <h2 class="name" id="name">Loading…</h2>
-              <div class="uid" id="uidLine"></div>
+              <div class="uid" id="uidLine" style="display:none;"></div>
             </div>
 
             <div class="actions">
@@ -279,6 +361,19 @@
       <h3 class="sectionTitle">About</h3>
       <div class="textBlock" id="about">Loading…</div>
     </section>
+
+    <section class="card">
+      <h3 class="sectionTitle">
+        <span>Posts</span>
+        <span class="hint" id="postsHint">Loading…</span>
+      </h3>
+
+      <div class="empty" id="postsEmpty">
+        No posts yet.
+      </div>
+
+      <div class="postsGrid" id="postsGrid"></div>
+    </section>
   </main>
 
   <script type="module">
@@ -286,7 +381,8 @@
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
-      getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp
+      getFirestore, doc, getDoc, setDoc, deleteDoc, serverTimestamp,
+      collection, getDocs, query, orderBy, limit
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -317,6 +413,9 @@
       messageBtn: document.getElementById("messageBtn"),
       addBtn: document.getElementById("addBtn"),
       removeBtn: document.getElementById("removeBtn"),
+      postsGrid: document.getElementById("postsGrid"),
+      postsEmpty: document.getElementById("postsEmpty"),
+      postsHint: document.getElementById("postsHint"),
     };
 
     function showMsg(text, kind="ok"){
@@ -327,15 +426,6 @@
     function hideMsg(){
       els.msg.style.display = "none";
       els.msg.textContent = "";
-    }
-
-    function escapeHtml(s){
-      return (s ?? "").toString()
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
     }
 
     function getParam(name){
@@ -349,26 +439,114 @@
     }
 
     function getAvatar(u){
-      return u?.avatarUrl || u?.avatar || u?.photoURL || u?.photoUrl || "";
+      return u?.photoURL || u?.photoUrl || u?.avatarUrl || u?.avatar || "";
+    }
+
+    function getPublicId(u){
+      const v = (u?.publicId ?? u?.publicID ?? "").toString().trim();
+      return v || "U?";
     }
 
     function setAvatar(src){
       if (!src) return;
       els.avatar.src = src;
-      els.avatar.onerror = () => { /* keep whatever already shows */ };
+      els.avatar.onerror = () => { /* keep fallback */ };
     }
 
-    function pill(text){
+    function pill(text, cls=""){
       const s = document.createElement("span");
-      s.className = "pill";
+      s.className = "pill" + (cls ? ` ${cls}` : "");
       s.textContent = text;
       return s;
+    }
+
+    function tsToDate(ts){
+      try{
+        if (!ts) return null;
+        // Firestore Timestamp
+        if (typeof ts.toDate === "function") return ts.toDate();
+        // millis
+        if (typeof ts === "number") return new Date(ts);
+        // ISO/string
+        const d = new Date(ts);
+        return isNaN(d.getTime()) ? null : d;
+      }catch(_){
+        return null;
+      }
+    }
+
+    function fmtDate(d){
+      if (!d) return "";
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+    }
+
+    function postTextOf(p){
+      return (p.text ?? p.caption ?? p.body ?? p.content ?? "").toString().trim();
+    }
+
+    function postImageOf(p){
+      return (p.imageUrl ?? p.imageURL ?? p.photoURL ?? p.photoUrl ?? p.mediaUrl ?? p.mediaURL ?? "").toString().trim();
+    }
+
+    function renderPosts(posts){
+      els.postsGrid.innerHTML = "";
+      els.postsEmpty.style.display = posts.length ? "none" : "block";
+      els.postsHint.textContent = posts.length ? `${posts.length} post${posts.length===1?"":"s"}` : "0 posts";
+
+      const frag = document.createDocumentFragment();
+
+      for (const p of posts){
+        const card = document.createElement("div");
+        card.className = "postCard";
+
+        const img = postImageOf(p);
+        const text = postTextOf(p);
+        const created = tsToDate(p.createdAt || p.created || p.timestamp || p.time);
+        const when = fmtDate(created);
+
+        const media = document.createElement("div");
+        media.className = "postMedia";
+        if (img){
+          const im = document.createElement("img");
+          im.src = img;
+          im.alt = "Post image";
+          im.loading = "lazy";
+          im.referrerPolicy = "no-referrer";
+          media.appendChild(im);
+        } else {
+          media.innerHTML = `<div style="color:rgba(255,255,255,.55);font-weight:800;">No image</div>`;
+        }
+
+        const body = document.createElement("div");
+        body.className = "postBody";
+        body.innerHTML = `
+          <div class="postText">${text ? escapeHtml(text) : "<span style='color:rgba(255,255,255,.62)'>No caption</span>"}</div>
+          <div class="postMeta">
+            <span>${when || ""}</span>
+            <span>${p.likesCount ?? p.likes ?? "" ? `❤ ${escapeHtml(String(p.likesCount ?? p.likes))}` : ""}</span>
+          </div>
+        `;
+
+        card.appendChild(media);
+        card.appendChild(body);
+        frag.appendChild(card);
+      }
+
+      els.postsGrid.appendChild(frag);
+    }
+
+    function escapeHtml(s){
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
     async function loadProfile(targetUid){
       hideMsg();
       els.name.textContent = "Loading…";
-      els.uidLine.textContent = "";
       els.meta.innerHTML = "";
       els.about.textContent = "Loading…";
 
@@ -387,23 +565,28 @@
         document.title = `Uzone • ${name}`;
         els.subline.textContent = "Directory profile";
         els.name.textContent = name;
-        els.uidLine.textContent = `UID: ${targetUid}`;
 
-        setAvatar(getAvatar(u));
+        // publicId + verified pills (same style as Directory)
+        const verified = (u.verified === true);
+        const publicId = getPublicId(u);
 
+        if (verified) els.meta.appendChild(pill("✓ Verified", "verified"));
+        els.meta.appendChild(pill(`🆔 ${publicId}`));
+
+        // other meta
         const uni = (u.university || "").toString().trim();
         const prog = (u.program || "").toString().trim();
         const gender = (u.gender || "").toString().trim();
         const age = (u.age ?? "");
-        const verified = !!u.verified;
 
-        if (verified) els.meta.appendChild(pill("✅ Verified"));
         if (uni) els.meta.appendChild(pill(`🏫 ${uni}`));
         if (prog) els.meta.appendChild(pill(`🎓 ${prog}`));
         if (gender) els.meta.appendChild(pill(`🧍 ${gender}`));
         if (age !== "" && age !== null && age !== undefined) els.meta.appendChild(pill(`🎂 ${String(age)}`));
 
-        // About text (support multiple fields you might use across pages)
+        setAvatar(getAvatar(u));
+
+        // About text (support multiple fields)
         const about =
           (u.description && u.description.toString().trim()) ? u.description.toString().trim() :
           (u.bio && u.bio.toString().trim()) ? u.bio.toString().trim() :
@@ -444,9 +627,48 @@
     }
 
     function goToChat(targetUid){
-      // Works with the "with" pattern you were building earlier:
-      // messages.html?with=<uid>
+      // messages.html should open the chat when it sees ?with=<uid>
       window.location.href = `messages.html?with=${encodeURIComponent(targetUid)}`;
+    }
+
+    async function loadPosts(targetUid){
+      els.postsHint.textContent = "Loading…";
+      els.postsEmpty.style.display = "none";
+      els.postsGrid.innerHTML = "";
+
+      try{
+        // users/{uid}/posts
+        // If your posts don't have createdAt, it will fall back to unsorted.
+        const colRef = collection(db, "users", targetUid, "posts");
+
+        let snaps;
+        try{
+          const qy = query(colRef, orderBy("createdAt", "desc"), limit(30));
+          snaps = await getDocs(qy);
+        } catch(e){
+          // If no createdAt field / missing index, fallback
+          snaps = await getDocs(colRef);
+        }
+
+        const posts = [];
+        snaps.forEach(d => posts.push({ __id: d.id, ...(d.data() || {}) }));
+
+        // If fallback unsorted, try to sort in JS
+        posts.sort((a,b)=>{
+          const da = tsToDate(a.createdAt || a.created || a.timestamp || a.time);
+          const dbb = tsToDate(b.createdAt || b.created || b.timestamp || b.time);
+          const ta = da ? da.getTime() : 0;
+          const tb = dbb ? dbb.getTime() : 0;
+          return tb - ta;
+        });
+
+        renderPosts(posts);
+      } catch(err){
+        console.error(err);
+        els.postsHint.textContent = "Posts unavailable";
+        els.postsEmpty.style.display = "block";
+        els.postsEmpty.textContent = "Could not load posts (check Firestore rules).";
+      }
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -465,6 +687,8 @@
         els.messageBtn.disabled = true;
         els.addBtn.disabled = true;
         els.removeBtn.disabled = true;
+        els.postsHint.textContent = "";
+        els.postsEmpty.style.display = "block";
         return;
       }
 
@@ -482,6 +706,9 @@
         els.removeBtn.disabled = true;
         return;
       }
+
+      // Load posts
+      await loadPosts(targetUid);
 
       // Hook buttons
       els.messageBtn.addEventListener("click", () => goToChat(targetUid));
