@@ -4,7 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Uzone • Login</title>
+
+  <!-- Tab icon (favicon) -->
   <link rel="icon" type="image/png" href="logo.png" />
+
   <meta name="color-scheme" content="dark light" />
 
   <style>
@@ -201,15 +204,16 @@
 
     <section class="card" aria-label="Login card">
       <div class="tabs" role="tablist" aria-label="Login or sign up">
-        <button class="tab active" id="tabLogin" role="tab" aria-selected="true">Login</button>
-        <button class="tab" id="tabSignup" role="tab" aria-selected="false">Sign up</button>
+        <button class="tab active" id="tabLogin" role="tab" aria-selected="true" type="button">Login</button>
+        <button class="tab" id="tabSignup" role="tab" aria-selected="false" type="button">Sign up</button>
       </div>
 
-      <form class="form" id="authForm">
+      <form class="form" id="authForm" novalidate>
         <div class="row" id="nameRow" style="display:none;">
           <label>
             First name
-            <input id="firstName" autocomplete="given-name" placeholder="Jack" required />
+            <!-- NOTE: NOT hard-required here; we toggle required in JS so login isn't blocked -->
+            <input id="firstName" autocomplete="given-name" placeholder="Jack" />
           </label>
           <label>
             Last name (optional)
@@ -315,6 +319,7 @@
     function setMode(nextMode){
       mode = nextMode;
       const isLogin = mode === "login";
+
       tabLogin.classList.toggle("active", isLogin);
       tabSignup.classList.toggle("active", !isLogin);
       tabLogin.setAttribute("aria-selected", String(isLogin));
@@ -324,11 +329,21 @@
       confirmLabel.style.display = isLogin ? "none" : "grid";
       submitBtn.textContent = isLogin ? "Login" : "Create account";
       pwEl.autocomplete = isLogin ? "current-password" : "new-password";
+
+      // ✅ First name required ONLY on signup (and disabled during login so it can't block)
+      firstNameEl.required = !isLogin;
+      firstNameEl.disabled = isLogin;
+      lastNameEl.disabled = isLogin;
+      cpwEl.required = !isLogin;
+
       setMsg("");
     }
 
     tabLogin.addEventListener("click", () => setMode("login"));
     tabSignup.addEventListener("click", () => setMode("signup"));
+
+    // Initialize mode state on load
+    setMode("login");
 
     function friendlyAuthError(err){
       const code = (err?.code || "").toString();
@@ -348,8 +363,6 @@
         return snap.data().publicId;
       }
 
-      // Sequential public ID (U1, U2, U3...)
-      // Recommended one-time setup: meta/counters { userCounter: 0 }
       const publicId = await runTransaction(db, async (transaction) => {
         const counterRef = doc(db, "meta", "counters");
         const counterSnap = await transaction.get(counterRef);
@@ -381,7 +394,6 @@
       if (isSubmitting) return;
 
       try {
-        // Backfill publicId for older accounts too
         await ensurePublicId(user, user.displayName || "");
       } catch (_) {}
 
@@ -408,6 +420,12 @@
       e.preventDefault();
       setMsg("");
 
+      // Let the browser validate visible required fields
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
       const email = emailEl.value.trim();
       const password = pwEl.value;
 
@@ -421,6 +439,7 @@
             setMsg("First name is required.", "error");
             return;
           }
+
           const confirm = cpwEl.value;
           if (password !== confirm) {
             setMsg("Passwords do not match.", "error");
@@ -430,14 +449,10 @@
           const cred = await createUserWithEmailAndPassword(auth, email, password);
           const user = cred.user;
 
-          const fn = firstNameEl.value.trim();
           const ln = lastNameEl.value.trim();
           const displayName = [fn, ln].filter(Boolean).join(" ");
 
-          if (displayName) {
-            await updateProfile(user, { displayName });
-          }
-
+          await updateProfile(user, { displayName });
           await ensurePublicId(user, displayName);
 
           setMsg("Account created! Redirecting…", "ok");
@@ -445,7 +460,6 @@
         } else {
           await signInWithEmailAndPassword(auth, email, password);
 
-          // Ensure publicId exists (for older users too)
           if (auth.currentUser) {
             await ensurePublicId(auth.currentUser, auth.currentUser.displayName || "");
           }
