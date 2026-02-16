@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Uzone • Umatch</title>
+  <title>Uzone • Dating</title>
 
   <!-- Tab icon -->
   <link rel="icon" type="image/png" href="logo.png" />
@@ -344,6 +344,7 @@
       justify-content:center;
       gap:10px;
       user-select:none;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
     }
     .act.like{
       border-color: rgba(80,255,160,.25);
@@ -353,6 +354,33 @@
       border-color: rgba(255,80,120,.30);
       background: rgba(255,80,120,.10);
     }
+
+    /* ✅ Green glow hover for Like */
+    .act.like:hover{
+      border-color: rgba(80,255,160,.75);
+      box-shadow: 0 0 16px rgba(80,255,160,.95), 0 16px 40px rgba(80,255,160,.22);
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+    .act.like:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px rgba(80,255,160,.85), 0 10px 28px rgba(80,255,160,.16);
+      filter: brightness(1.0);
+    }
+
+    /* ✅ Red glow hover for Pass */
+    .act.nope:hover{
+      border-color: rgba(255,80,120,.85);
+      box-shadow: 0 0 16px rgba(255,80,120,.95), 0 16px 40px rgba(255,80,120,.22);
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+    .act.nope:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px rgba(255,80,120,.85), 0 10px 28px rgba(255,80,120,.16);
+      filter: brightness(1.0);
+    }
+
     .act:disabled{opacity:.6;cursor:not-allowed}
 
     .tiny{
@@ -510,7 +538,6 @@
       border-radius:999px;
       border:1px solid rgba(255,255,255,.18);
       overflow:hidden;
-      /* more opaque for readability */
       background: rgba(0,0,0,.52);
       box-shadow: 0 10px 26px rgba(0,0,0,.45);
     }
@@ -529,13 +556,13 @@
     <div class="left">
       <img src="logo.png" alt="Uzone logo" />
       <div class="title">
-        <h1>Umatch</h1>
+        <h1>Dating</h1>
         <div class="sub" id="subline">Loading…</div>
       </div>
     </div>
 
     <div class="right">
-      <a class="btn secondary" href="hub.html">Uhub</a>
+      <a class="btn secondary" href="hub.html">← Hub</a>
     </div>
   </header>
 
@@ -585,7 +612,8 @@
       <!-- Side Panel -->
       <aside class="side" aria-label="Actions">
         <div class="bigActions">
-          <button class="act nope" id="nopeBtn" type="button">✕ Dislike</button>
+          <!-- ✅ text changed to Pass -->
+          <button class="act nope" id="nopeBtn" type="button">✕ Pass</button>
           <button class="act like" id="likeBtn" type="button">♥ Like</button>
         </div>
 
@@ -625,6 +653,8 @@
 
         <div class="modalActions">
           <a class="btn" id="messageLink" href="messages.html">Message</a>
+          <!-- ✅ added Pass button in the match modal -->
+          <button class="btn secondary" id="passMatch" type="button">Pass</button>
           <button class="btn secondary" id="keepSwiping" type="button">Keep swiping</button>
         </div>
 
@@ -699,6 +729,7 @@
     const matchModal = document.getElementById("matchModal");
     const closeMatch = document.getElementById("closeMatch");
     const keepSwiping = document.getElementById("keepSwiping");
+    const passMatch = document.getElementById("passMatch");
     const meBubble = document.getElementById("meBubble");
     const themBubble = document.getElementById("themBubble");
     const matchName = document.getElementById("matchName");
@@ -990,7 +1021,6 @@
 
     function openChatWith(otherUid){
       const chatId = chatIdFor(currentUser.uid, otherUid);
-      // We pass both chat + with so your messages page can reliably open the right thread
       window.location.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
     }
 
@@ -1041,7 +1071,6 @@
     async function loadMatches(){
       matchMap.clear();
 
-      // Grab match docs where current user is a member
       try{
         const matchesRef = collection(db, "matches");
         const q = query(matchesRef, where("members", "array-contains", currentUser.uid), limit(50));
@@ -1057,7 +1086,6 @@
           others.push({ matchId: d.id, otherUid, createdAt: data.createdAt || null });
         });
 
-        // Fetch other user profiles (simple per-doc reads; small scale)
         for (const m of others){
           let name = "Student";
           let photoURL = "";
@@ -1080,7 +1108,6 @@
           });
         }
 
-        // Sort: best-effort by createdAt if present (client-side)
         const sorted = [...matchMap.entries()].sort((a, b) => {
           const ta = a[1].createdAt?.toMillis ? a[1].createdAt.toMillis() : 0;
           const tb = b[1].createdAt?.toMillis ? b[1].createdAt.toMillis() : 0;
@@ -1092,7 +1119,6 @@
 
         renderMatches();
       } catch(err){
-        // If matches collection is locked by rules, show a helpful note
         matchesList.innerHTML = "";
         const div = document.createElement("div");
         div.className = "matchEmpty";
@@ -1135,12 +1161,10 @@
             const chatId = await ensureChat(myUid, otherUid);
             await ensureMatch(myUid, otherUid);
 
-            // Set modal
             meBubble.src = mePhoto;
             themBubble.src = themPhoto;
             matchName.textContent = (cand.name || "Student").toString().trim();
 
-            // deep-link to messages
             messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
 
             matchModal.style.display = "flex";
@@ -1191,6 +1215,10 @@
 
     closeMatch.addEventListener("click", () => { matchModal.style.display = "none"; });
     keepSwiping.addEventListener("click", () => { matchModal.style.display = "none"; });
+
+    /* ✅ Pass button in match modal */
+    passMatch.addEventListener("click", () => { matchModal.style.display = "none"; });
+
     matchModal.addEventListener("click", (e) => { if (e.target === matchModal) matchModal.style.display = "none"; });
 
     refreshMatchesBtn.addEventListener("click", loadMatches);
