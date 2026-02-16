@@ -108,18 +108,8 @@
       flex-wrap:wrap;
       justify-content:flex-end;
     }
-    .chip{
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      font-size:13px;
-      color:rgba(255,255,255,.85);
-      max-width: 260px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+
+    /* Buttons: more interactive */
     .btn{
       padding:10px 12px;
       border-radius:12px;
@@ -134,13 +124,23 @@
       align-items:center;
       gap:8px;
       white-space:nowrap;
+      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease, border-color .12s ease;
+      user-select:none;
     }
-    .btn.secondary{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      box-shadow:none;
-      color:rgba(255,255,255,.92);
-      font-weight:750;
+    .btn:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+      box-shadow: 0 22px 55px rgba(176,11,85,.28);
+      border-color: rgba(176,11,85,.75);
+    }
+    .btn:active{
+      transform: translateY(0px) scale(.99);
+      filter: brightness(1.0);
+      box-shadow: 0 14px 34px rgba(176,11,85,.20);
+    }
+    .btn:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 18px 40px rgba(176,11,85,.22);
     }
 
     main{
@@ -188,6 +188,7 @@
       line-height:1.45;
       max-width: 75ch;
     }
+
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
@@ -206,6 +207,12 @@
       display:flex;
       flex-direction:column;
       justify-content:space-between;
+      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.20);
+      box-shadow: 0 26px 70px rgba(0,0,0,.50);
     }
     .card::after{
       content:"";
@@ -237,7 +244,9 @@
       flex-wrap:wrap;
       position:relative;
       z-index:1;
+      align-items:center;
     }
+
     .linkBtn{
       padding:10px 12px;
       border-radius:12px;
@@ -249,12 +258,34 @@
       display:inline-flex;
       align-items:center;
       gap:8px;
+      transition: transform .12s ease, filter .12s ease, border-color .12s ease, box-shadow .12s ease, background .12s ease;
+      user-select:none;
     }
+    .linkBtn:hover{
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+    }
+    .linkBtn:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 10px 28px rgba(0,0,0,.25);
+    }
+    .linkBtn:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.14), 0 16px 40px rgba(0,0,0,.35);
+    }
+
     .linkBtn.primary{
       border:1px solid rgba(176,11,85,.55);
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
       box-shadow: 0 18px 40px rgba(176,11,85,.18);
     }
+    .linkBtn.primary:hover{
+      border-color: rgba(176,11,85,.80);
+      box-shadow: 0 22px 55px rgba(176,11,85,.24);
+    }
+
     .pill{
       display:inline-flex;
       align-items:center;
@@ -277,7 +308,6 @@
 
     @media (max-width: 860px){
       .card{grid-column: span 12;}
-      .chip{max-width: 100%;}
     }
   </style>
 </head>
@@ -298,21 +328,21 @@
     </div>
 
     <div class="right">
-      <span class="chip" id="userEmail">—</span>
-<button class="btn" id="signOutBtn">Sign out</button>
+      <!-- Removed email chip -->
+      <button class="btn" id="signOutBtn" type="button">Sign out</button>
     </div>
   </header>
 
   <main>
     <section class="hero" aria-label="Hub info">
-  <div class="heroTop">
-    <div>
-      <h2 id="heroTitle">Welcome to Uzone</h2>
-      <p id="heroDesc">Meet people on campus, message instantly, and discover events — all in one place. Pick a card below to get started.</p>
-      <div class="pill live" style="margin-top:12px;"><span class="dot"></span>Signed-in access enabled</div>
-    </div>
-  </div>
-</section>
+      <div class="heroTop">
+        <div>
+          <h2 id="heroTitle">Welcome to Uzone</h2>
+          <p id="heroDesc">Meet people on campus, message instantly, and discover events — all in one place. Pick a card below to get started.</p>
+          <div class="pill live" style="margin-top:12px;"><span class="dot"></span>Signed-in access enabled</div>
+        </div>
+      </div>
+    </section>
 
     <section class="grid" aria-label="Hub navigation">
       <article class="card">
@@ -335,6 +365,8 @@
         <div class="actions">
           <a class="linkBtn primary" href="events.html">Open Events</a>
           <a class="linkBtn" href="my_events.html">My Events</a>
+          <!-- New button -->
+          <a class="linkBtn" href="post_event.html">Post Event</a>
         </div>
       </article>
 
@@ -359,7 +391,6 @@
           <a class="linkBtn primary" href="messages.html">Open Messages</a>
         </div>
       </article>
-
     </section>
   </main>
 
@@ -387,7 +418,6 @@
     const db = getFirestore(app);
 
     const welcome = document.getElementById("welcome");
-    const userEmail = document.getElementById("userEmail");
     const signOutBtn = document.getElementById("signOutBtn");
 
     const verifyBadge = document.getElementById("verifyBadge");
@@ -411,8 +441,6 @@
         window.location.href = "index.html";
         return;
       }
-
-      userEmail.textContent = user.email || "Signed in";
 
       // Prefer Firestore profile name (matches your profile page)
       let displayName = user.displayName?.trim() || "";
