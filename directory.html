@@ -55,6 +55,7 @@
 
     .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
+    /* Unified button system (glassy + accent glow) */
     .btn{
       padding:10px 12px;
       border-radius:12px;
@@ -96,6 +97,9 @@
       border-color: var(--accent);
       box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
       filter: brightness(1.08);
+    }
+    .btn.primary:active{
+      box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.20);
     }
 
     main{
@@ -166,7 +170,7 @@
       font-size:13px;
       color:rgba(255,255,255,.85);
       white-space:nowrap;
-      max-width: 420px;
+      max-width: 520px;
       overflow:hidden;
       text-overflow:ellipsis;
     }
@@ -270,6 +274,11 @@
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
+    }
+    .pill.verified{
+      border-color: rgba(80,255,160,.45);
+      background: rgba(80,255,160,.12);
+      color: #8cffc7;
     }
 
     .empty{
@@ -417,51 +426,6 @@
 
     function norm(s){ return (s ?? "").toString().trim().toLowerCase(); }
 
-    function getAvatar(user){
-      return user.avatarUrl || user.avatar || user.photoURL || user.photoUrl || "";
-    }
-
-    function displayName(user){
-      return (user.name && user.name.trim()) ? user.name.trim()
-        : (user.displayName && user.displayName.trim()) ? user.displayName.trim()
-        : "Unnamed";
-    }
-
-    // ---- U# public ID (robust: tries a bunch of likely field names) ----
-    function getUserNumber(user){
-      const candidates = [
-        user.userNumber,
-        user.userNum,
-        user.uNumber,
-        user.publicId,
-        user.publicID,
-        user.userIdNumber,
-        user.userIDNumber,
-        user.uIdNumber,
-        user.uIDNumber,
-        user.U, // (some people store just "U": 12 etc)
-      ];
-      for (const c of candidates){
-        if (c === 0) return 0;
-        if (c !== null && c !== undefined && String(c).trim() !== "" && !Number.isNaN(Number(c))){
-          return Number(c);
-        }
-      }
-      return null;
-    }
-
-    function formatPublicId(num){
-      if (num === null || num === undefined) return "U?";
-      // If someone stored "U12" as a string, still handle it
-      const s = String(num).trim();
-      if (/^u\d+$/i.test(s)) return "U" + s.replace(/^\D+/,"");
-      return "U" + String(Math.trunc(Number(s)));
-    }
-
-    function openProfile(uid){
-      window.location.href = `view_profile.html?uid=${encodeURIComponent(uid)}`;
-    }
-
     function escapeHtml(s){
       return (s ?? "").toString()
         .replaceAll("&","&amp;")
@@ -474,6 +438,32 @@
       return escapeHtml(s).replaceAll("\n","").replaceAll("\r","");
     }
 
+    function getAvatar(user){
+      return user.photoURL || user.photoUrl || user.avatarUrl || user.avatar || "";
+    }
+
+    function displayName(user){
+      return (user.name && user.name.trim()) ? user.name.trim()
+        : (user.displayName && user.displayName.trim()) ? user.displayName.trim()
+        : "Unnamed";
+    }
+
+    // Uses your Firestore field: publicId (like "U2")
+    function getPublicId(user){
+      const v = (user.publicId ?? user.publicID ?? "").toString().trim();
+      return v || "U?";
+    }
+
+    function extractPublicNumber(publicId){
+      const s = (publicId ?? "").toString().trim();
+      const m = s.match(/(\d+)/);
+      return m ? parseInt(m[1], 10) : null;
+    }
+
+    function openProfile(uid){
+      window.location.href = `view_profile.html?uid=${encodeURIComponent(uid)}`;
+    }
+
     function rowTemplate(u){
       const uid = u.__uid || "";
       const name = displayName(u);
@@ -483,10 +473,13 @@
       const age = (u.age ?? "");
       const avatar = getAvatar(u);
 
-      const userNum = getUserNumber(u);
-      const publicId = formatPublicId(userNum);
+      const publicId = getPublicId(u);
+      const verified = (u.verified === true);
 
       const metaBits = [];
+      if (verified){
+        metaBits.push(`<span class="pill verified">✓ Verified</span>`);
+      }
       metaBits.push(`<span class="pill">🆔 ${escapeHtml(publicId)}</span>`);
       if (university) metaBits.push(`<span class="pill">🏫 ${escapeHtml(university)}</span>`);
       if (program) metaBits.push(`<span class="pill">🎓 ${escapeHtml(program)}</span>`);
@@ -496,7 +489,7 @@
       const wrapper = document.createElement("div");
       wrapper.className = "rowCard";
       wrapper.innerHTML = `
-        <img class="avatar" alt="Avatar" src="${avatar ? escapeAttr(avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='rgba(255,255,255,.08)'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' fill='rgba(255,255,255,.55)' font-family='system-ui' font-size='34'%3F%3E%3F%3C/text%3E%3F%3C/svg%3E"}" />
+        <img class="avatar" alt="Avatar" src="${avatar ? escapeAttr(avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='rgba(255,255,255,.08)'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' fill='rgba(255,255,255,.55)' font-family='system-ui' font-size='34'%3F%3E%3F%3C/text%3E%3C/svg%3E"}" />
         <div class="rowMain">
           <div class="nameLine">
             <div class="name">${escapeHtml(name)}</div>
@@ -518,7 +511,6 @@
     }
 
     let allUsers = [];
-    let currentUid = null;
 
     function populateSchoolOptions(users){
       const set = new Set();
@@ -549,17 +541,16 @@
       }
 
       const filtered = allUsers.filter(u => {
-        const uid = (u.__uid || "").toString();
+        const uid = (u.__uid || "").toString(); // internal doc id, not displayed
         const name = (u.name || u.displayName || "").toString();
         const uni = (u.university || "").toString();
         const prog = (u.program || "").toString();
         const g = (u.gender || "").toString();
         const age = (u.age !== undefined && u.age !== null && u.age !== "") ? parseInt(u.age, 10) : null;
 
-        const userNum = getUserNumber(u);
-        const publicId = formatPublicId(userNum);
+        const publicId = getPublicId(u);
 
-        // Search: name / uni / program / public U# (and also raw uid if you ever need it)
+        // Search: name / uni / program / publicId (and keep uid in search for admin/debug)
         if (q){
           const blob = `${name} ${uni} ${prog} ${publicId} ${uid}`.toLowerCase();
           if (!blob.includes(q)) return false;
@@ -578,13 +569,14 @@
         return true;
       });
 
-      // Sort by U# if present, else by name
+      // Sort by U# numeric part if possible, else name
       filtered.sort((a,b)=>{
-        const an = getUserNumber(a);
-        const bn = getUserNumber(b);
-        const aHas = an !== null && an !== undefined && !Number.isNaN(Number(an));
-        const bHas = bn !== null && bn !== undefined && !Number.isNaN(Number(bn));
-        if (aHas && bHas) return Number(an) - Number(bn);
+        const an = extractPublicNumber(getPublicId(a));
+        const bn = extractPublicNumber(getPublicId(b));
+        const aHas = an !== null && !Number.isNaN(an);
+        const bHas = bn !== null && !Number.isNaN(bn);
+
+        if (aHas && bHas) return an - bn;
         if (aHas && !bHas) return -1;
         if (!aHas && bHas) return 1;
         return displayName(a).localeCompare(displayName(b));
@@ -616,14 +608,13 @@
         const users = [];
         snap.forEach(docSnap => {
           const data = docSnap.data() || {};
-          data.__uid = docSnap.id;     // internal UID (doc id)
+          data.__uid = docSnap.id; // internal uid (doc id)
           users.push(data);
         });
 
         allUsers = users;
         populateSchoolOptions(allUsers);
         applyFilters();
-
         els.subline.textContent = "Search by name, school (university), degree (program), or U#";
       } catch(err){
         console.error(err);
@@ -656,7 +647,6 @@
         window.location.href = "index.html";
         return;
       }
-      currentUid = user.uid;
       await loadUsers();
     });
   </script>
