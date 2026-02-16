@@ -615,7 +615,7 @@
         allUsers = users;
         populateSchoolOptions(allUsers);
         applyFilters();
-        els.subline.textContent = "Search by name, school (university), degree (program), or U#";
+        els.subline.textContent = "Search by name, school, program, or U#";
       } catch(err){
         console.error(err);
         showMsg("Could not load directory (check Firestore rules / internet).", "error");
