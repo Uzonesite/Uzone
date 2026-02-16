@@ -181,9 +181,9 @@
       </div>
 
       <p>
-        A student social space for uni life — meet people, message, and find events.
+        A student social space for uni life — meet people, message, and find your next motive.
         <br /><br />
-        Sign in to access your Hub.
+        Sign in to access the Uhub.
       </p>
 
       <div class="pillRow">
@@ -194,8 +194,7 @@
       </div>
 
       <p class="meta">
-        Tip: If login fails on GitHub Pages, your Firebase project likely needs your
-        GitHub Pages domain added to <b>Authorized domains</b>.
+        Tip: Use a <b>school email</b> to get verified faster.
       </p>
     </section>
 
@@ -208,8 +207,8 @@
       <form class="form" id="authForm">
         <div class="row" id="nameRow" style="display:none;">
           <label>
-            First name (optional)
-            <input id="firstName" autocomplete="given-name" placeholder="Jack" />
+            First name
+            <input id="firstName" autocomplete="given-name" placeholder="Jack" required />
           </label>
           <label>
             Last name (optional)
@@ -416,6 +415,11 @@
 
       try {
         if (mode === "signup") {
+          const fn = firstNameEl.value.trim();
+          if (!fn) {
+            setMsg("First name is required.", "error");
+            return;
+          }
           const confirm = cpwEl.value;
           if (password !== confirm) {
             setMsg("Passwords do not match.", "error");
