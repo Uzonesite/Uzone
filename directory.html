@@ -55,7 +55,6 @@
 
     .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
-    /* Unified button system (glassy + accent glow) */
     .btn{
       padding:10px 12px;
       border-radius:12px;
@@ -97,9 +96,6 @@
       border-color: var(--accent);
       box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
       filter: brightness(1.08);
-    }
-    .btn.primary:active{
-      box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.20);
     }
 
     main{
@@ -301,14 +297,12 @@
       <img src="logo.png" alt="Uzone" />
       <div class="title">
         <h1>Directory</h1>
-        <div class="sub" id="subline">Find people by name, school, degree, or UID</div>
+        <div class="sub" id="subline">Find people by name, school, degree, or U#</div>
       </div>
     </div>
     <div class="right">
       <a class="btn" href="hub.html">Hub</a>
       <a class="btn" href="profile.html">My Profile</a>
-      <a class="btn" href="messages.html">Umessages</a>
-      <a class="btn" href="events.html">Uevents</a>
     </div>
   </header>
 
@@ -316,7 +310,7 @@
     <section class="card">
       <div class="bar">
         <div class="searchWrap">
-          <input id="q" type="search" placeholder="Search name, school, degree, or UID…" autocomplete="off" />
+          <input id="q" type="search" placeholder="Search name, school, degree, or U#…" autocomplete="off" />
           <select id="schoolFilter" aria-label="Filter by school">
             <option value="">All schools</option>
           </select>
@@ -424,7 +418,6 @@
     function norm(s){ return (s ?? "").toString().trim().toLowerCase(); }
 
     function getAvatar(user){
-      // Try a few common fields (safe fallbacks)
       return user.avatarUrl || user.avatar || user.photoURL || user.photoUrl || "";
     }
 
@@ -434,53 +427,39 @@
         : "Unnamed";
     }
 
-    function openProfile(uid){
-      // We'll build this page next:
-      window.location.href = `view_profile.html?uid=${encodeURIComponent(uid)}`;
+    // ---- U# public ID (robust: tries a bunch of likely field names) ----
+    function getUserNumber(user){
+      const candidates = [
+        user.userNumber,
+        user.userNum,
+        user.uNumber,
+        user.publicId,
+        user.publicID,
+        user.userIdNumber,
+        user.userIDNumber,
+        user.uIdNumber,
+        user.uIDNumber,
+        user.U, // (some people store just "U": 12 etc)
+      ];
+      for (const c of candidates){
+        if (c === 0) return 0;
+        if (c !== null && c !== undefined && String(c).trim() !== "" && !Number.isNaN(Number(c))){
+          return Number(c);
+        }
+      }
+      return null;
     }
 
-    function rowTemplate(u){
-      const uid = u.__uid || "";
-      const name = displayName(u);
-      const university = (u.university || "").toString().trim();
-      const program = (u.program || "").toString().trim();
-      const gender = (u.gender || "").toString().trim();
-      const age = (u.age ?? "");
-      const avatar = getAvatar(u);
+    function formatPublicId(num){
+      if (num === null || num === undefined) return "U?";
+      // If someone stored "U12" as a string, still handle it
+      const s = String(num).trim();
+      if (/^u\d+$/i.test(s)) return "U" + s.replace(/^\D+/,"");
+      return "U" + String(Math.trunc(Number(s)));
+    }
 
-      const metaBits = [];
-      if (university) metaBits.push(`<span class="pill">🏫 ${escapeHtml(university)}</span>`);
-      if (program) metaBits.push(`<span class="pill">🎓 ${escapeHtml(program)}</span>`);
-      if (gender) metaBits.push(`<span class="pill">🧍 ${escapeHtml(gender)}</span>`);
-      if (age !== "" && age !== null && age !== undefined) metaBits.push(`<span class="pill">🎂 ${escapeHtml(String(age))}</span>`);
-      metaBits.push(`<span class="pill">🆔 ${escapeHtml(uid)}</span>`);
-
-      const wrapper = document.createElement("div");
-      wrapper.className = "rowCard";
-      wrapper.innerHTML = `
-        <img class="avatar" alt="Avatar" src="${avatar ? escapeAttr(avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='rgba(255,255,255,.08)'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' fill='rgba(255,255,255,.55)' font-family='system-ui' font-size='34'%3F%3E%3F%3C/text%3E%3C/svg%3E"}" />
-        <div class="rowMain">
-          <div class="nameLine">
-            <div class="name">${escapeHtml(name)}</div>
-          </div>
-          <div class="meta">${metaBits.join("")}</div>
-        </div>
-        <div class="rowActions">
-          <button class="btn primary" type="button">View</button>
-        </div>
-      `;
-
-      wrapper.addEventListener("click", (e) => {
-        // Don’t double-trigger if click is inside button: we still open profile either way
-        openProfile(uid);
-      });
-      wrapper.querySelector("button")?.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        openProfile(uid);
-      });
-
-      return wrapper;
+    function openProfile(uid){
+      window.location.href = `view_profile.html?uid=${encodeURIComponent(uid)}`;
     }
 
     function escapeHtml(s){
@@ -495,6 +474,49 @@
       return escapeHtml(s).replaceAll("\n","").replaceAll("\r","");
     }
 
+    function rowTemplate(u){
+      const uid = u.__uid || "";
+      const name = displayName(u);
+      const university = (u.university || "").toString().trim();
+      const program = (u.program || "").toString().trim();
+      const gender = (u.gender || "").toString().trim();
+      const age = (u.age ?? "");
+      const avatar = getAvatar(u);
+
+      const userNum = getUserNumber(u);
+      const publicId = formatPublicId(userNum);
+
+      const metaBits = [];
+      metaBits.push(`<span class="pill">🆔 ${escapeHtml(publicId)}</span>`);
+      if (university) metaBits.push(`<span class="pill">🏫 ${escapeHtml(university)}</span>`);
+      if (program) metaBits.push(`<span class="pill">🎓 ${escapeHtml(program)}</span>`);
+      if (gender) metaBits.push(`<span class="pill">🧍 ${escapeHtml(gender)}</span>`);
+      if (age !== "" && age !== null && age !== undefined) metaBits.push(`<span class="pill">🎂 ${escapeHtml(String(age))}</span>`);
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "rowCard";
+      wrapper.innerHTML = `
+        <img class="avatar" alt="Avatar" src="${avatar ? escapeAttr(avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='rgba(255,255,255,.08)'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' fill='rgba(255,255,255,.55)' font-family='system-ui' font-size='34'%3F%3E%3F%3C/text%3E%3F%3C/svg%3E"}" />
+        <div class="rowMain">
+          <div class="nameLine">
+            <div class="name">${escapeHtml(name)}</div>
+          </div>
+          <div class="meta">${metaBits.join("")}</div>
+        </div>
+        <div class="rowActions">
+          <button class="btn primary" type="button">View</button>
+        </div>
+      `;
+
+      wrapper.addEventListener("click", () => openProfile(uid));
+      wrapper.querySelector("button")?.addEventListener("click", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        openProfile(uid);
+      });
+
+      return wrapper;
+    }
+
     let allUsers = [];
     let currentUid = null;
 
@@ -505,7 +527,6 @@
         if (uni) set.add(uni);
       }
       const items = Array.from(set).sort((a,b)=> a.localeCompare(b));
-      // Keep first option
       els.school.querySelectorAll("option:not(:first-child)").forEach(o => o.remove());
       for (const uni of items){
         const opt = document.createElement("option");
@@ -522,7 +543,6 @@
       const minA = els.ageMin.value ? parseInt(els.ageMin.value, 10) : null;
       const maxA = els.ageMax.value ? parseInt(els.ageMax.value, 10) : null;
 
-      // quick sanity: if both set and inverted, swap
       let minAge = minA, maxAge = maxA;
       if (minAge !== null && maxAge !== null && minAge > maxAge){
         const t = minAge; minAge = maxAge; maxAge = t;
@@ -536,9 +556,12 @@
         const g = (u.gender || "").toString();
         const age = (u.age !== undefined && u.age !== null && u.age !== "") ? parseInt(u.age, 10) : null;
 
-        // Search: name / uni / program / uid
+        const userNum = getUserNumber(u);
+        const publicId = formatPublicId(userNum);
+
+        // Search: name / uni / program / public U# (and also raw uid if you ever need it)
         if (q){
-          const blob = `${name} ${uni} ${prog} ${uid}`.toLowerCase();
+          const blob = `${name} ${uni} ${prog} ${publicId} ${uid}`.toLowerCase();
           if (!blob.includes(q)) return false;
         }
 
@@ -555,10 +578,15 @@
         return true;
       });
 
-      // Sort: verified first (if field exists), then name
+      // Sort by U# if present, else by name
       filtered.sort((a,b)=>{
-        const av = !!a.verified, bv = !!b.verified;
-        if (av !== bv) return bv - av;
+        const an = getUserNumber(a);
+        const bn = getUserNumber(b);
+        const aHas = an !== null && an !== undefined && !Number.isNaN(Number(an));
+        const bHas = bn !== null && bn !== undefined && !Number.isNaN(Number(bn));
+        if (aHas && bHas) return Number(an) - Number(bn);
+        if (aHas && !bHas) return -1;
+        if (!aHas && bHas) return 1;
         return displayName(a).localeCompare(displayName(b));
       });
 
@@ -572,8 +600,6 @@
 
       const frag = document.createDocumentFragment();
       for (const u of list){
-        // optionally hide yourself
-        // if (u.__uid === currentUid) continue;
         frag.appendChild(rowTemplate(u));
       }
       els.results.appendChild(frag);
@@ -590,7 +616,7 @@
         const users = [];
         snap.forEach(docSnap => {
           const data = docSnap.data() || {};
-          data.__uid = docSnap.id;
+          data.__uid = docSnap.id;     // internal UID (doc id)
           users.push(data);
         });
 
@@ -598,7 +624,7 @@
         populateSchoolOptions(allUsers);
         applyFilters();
 
-        els.subline.textContent = "Search by name, school (university), degree (program), or UID";
+        els.subline.textContent = "Search by name, school (university), degree (program), or U#";
       } catch(err){
         console.error(err);
         showMsg("Could not load directory (check Firestore rules / internet).", "error");
@@ -631,8 +657,6 @@
         return;
       }
       currentUid = user.uid;
-
-      // Load directory once signed in
       await loadUsers();
     });
   </script>
