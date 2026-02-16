@@ -317,10 +317,9 @@
     </div>
   </div>
   <div class="right">
-    <a class="btn" href="events.html">Umotives</a>
     <a class="btn" href="hub.html">Uhub</a>
+    <a class="btn" href="events.html">Umotives</a>
     <a class="btn primary" href="post_event.html">Post Motive</a>
-    <span class="chip" id="userEmail">—</span>
   </div>
 </header>
 
@@ -354,7 +353,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const userEmail = document.getElementById("userEmail");
 const list = document.getElementById("list");
 const msg = document.getElementById("msg");
 
@@ -408,8 +406,8 @@ function renderEmpty(){
       <b>No events yet</b>
       <div class="mini">Post your first event and it’ll show here with applications (if invite-only).</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;">
-        <a class="smallBtn" href="post_event.html">Post Event</a>
-        <a class="smallBtn" href="events.html">Browse Events</a>
+        <a class="smallBtn" href="post_event.html">Post Motive</a>
+        <a class="smallBtn" href="events.html">Browse Motives</a>
       </div>
     </div>
   `;
@@ -630,7 +628,6 @@ async function load(){
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href="index.html"; return; }
   currentUser = user;
-  userEmail.textContent = user.email || "Signed in";
   await load();
 });
 </script>
