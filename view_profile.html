@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Uzone • Profile</title>
+  <title>Uzone • View Profile</title>
   <link rel="icon" type="image/png" href="logo.png" />
   <meta name="color-scheme" content="dark light" />
 
@@ -179,12 +179,6 @@
       text-overflow:ellipsis;
       max-width: 52ch;
     }
-    .uid{
-      color: rgba(255,255,255,.65);
-      font-size:13px;
-      margin-top:4px;
-      word-break:break-all;
-    }
     .actions{
       display:flex;
       gap:10px;
@@ -210,6 +204,7 @@
       text-overflow:ellipsis;
       white-space:nowrap;
     }
+    /* ✅ same as directory */
     .pill.verified{
       border-color: rgba(80,255,160,.45);
       background: rgba(80,255,160,.12);
@@ -240,62 +235,51 @@
       word-break:break-word;
     }
 
-    /* Posts */
+    /* Posts (match profile.html style more: square tiles) */
     .postsGrid{
       display:grid;
-      gap:10px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+      margin-top:12px;
     }
-    .postCard{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.16);
-      border-radius:14px;
+    @media (max-width: 720px){
+      .profileTop{ grid-template-columns: 86px 1fr; }
+      .avatar{ width:86px; height:86px; }
+      .name{ font-size:20px; }
+      .postsGrid{ grid-template-columns: repeat(2, 1fr); }
+    }
+    .tile{
+      position:relative;
+      border-radius: 14px;
       overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      aspect-ratio: 1 / 1;
+      cursor:pointer;
       box-shadow: 0 16px 50px rgba(0,0,0,.35);
       transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease, background .14s ease;
     }
-    .postCard:hover{
+    .tile:hover{
       transform: translateY(-1px);
       border-color: rgba(255,255,255,.22);
       box-shadow: 0 18px 60px rgba(0,0,0,.45);
       background: rgba(0,0,0,.20);
     }
-    .postMedia{
-      width:100%;
-      aspect-ratio: 16 / 11;
-      background: rgba(255,255,255,.06);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-    }
-    .postMedia img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    .postBody{
-      padding:12px;
-      display:grid;
-      gap:8px;
-    }
-    .postText{
-      color: rgba(255,255,255,.86);
-      font-size:14px;
-      line-height:1.35;
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-    .postMeta{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      color: rgba(255,255,255,.62);
+    .tile img{width:100%; height:100%; object-fit:cover; display:block; transform: scale(1.00); transition: transform .18s ease;}
+    .tile:hover img{transform: scale(1.03);}
+    .tile .overlay{
+      position:absolute; inset:auto 0 0 0;
+      padding:8px 10px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.55));
+      color: rgba(255,255,255,.88);
       font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-end;
+      pointer-events:none;
     }
+
     .empty{
       display:none;
       border:1px dashed rgba(255,255,255,.16);
@@ -305,14 +289,46 @@
       color: rgba(255,255,255,.75);
       font-size:13px;
       line-height:1.4;
+      margin-top:12px;
     }
 
-    @media (max-width: 720px){
-      .profileTop{ grid-template-columns: 86px 1fr; }
-      .avatar{ width:86px; height:86px; }
-      .name{ font-size:20px; }
-      .postsGrid{ grid-template-columns: 1fr; }
+    /* Lightbox */
+    .lightbox{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:999;
     }
+    .lightboxInner{
+      width:min(920px, 96vw);
+      border-radius: 18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      box-shadow: var(--shadow);
+    }
+    .lightboxInner img{
+      width:100%;
+      height:auto;
+      display:block;
+      max-height: 80vh;
+      object-fit:contain;
+      background: rgba(0,0,0,.45);
+    }
+    .lightboxBar{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      padding:10px 12px;
+    }
+    .lightboxBar span{color:rgba(255,255,255,.78); font-size:13px;}
   </style>
 </head>
 
@@ -321,7 +337,7 @@
     <div class="left">
       <img src="logo.png" alt="Uzone" />
       <div class="title">
-        <h1>Profile</h1>
+        <h1>View Profile</h1>
         <div class="sub" id="subline">Viewing directory profile</div>
       </div>
     </div>
@@ -342,7 +358,6 @@
           <div class="nameRow">
             <div class="nameBlock">
               <h2 class="name" id="name">Loading…</h2>
-              <div class="uid" id="uidLine" style="display:none;"></div>
             </div>
 
             <div class="actions">
@@ -368,13 +383,21 @@
         <span class="hint" id="postsHint">Loading…</span>
       </h3>
 
-      <div class="empty" id="postsEmpty">
-        No posts yet.
-      </div>
-
+      <div class="empty" id="postsEmpty">No posts yet.</div>
       <div class="postsGrid" id="postsGrid"></div>
     </section>
   </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Post viewer">
+    <div class="lightboxInner">
+      <img id="lightboxImg" alt="Post" />
+      <div class="lightboxBar">
+        <span id="lightboxMeta">—</span>
+        <button class="btn" id="closeLightbox" type="button">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -407,7 +430,6 @@
       subline: document.getElementById("subline"),
       avatar: document.getElementById("avatar"),
       name: document.getElementById("name"),
-      uidLine: document.getElementById("uidLine"),
       meta: document.getElementById("meta"),
       about: document.getElementById("about"),
       messageBtn: document.getElementById("messageBtn"),
@@ -416,6 +438,10 @@
       postsGrid: document.getElementById("postsGrid"),
       postsEmpty: document.getElementById("postsEmpty"),
       postsHint: document.getElementById("postsHint"),
+      lightbox: document.getElementById("lightbox"),
+      lightboxImg: document.getElementById("lightboxImg"),
+      lightboxMeta: document.getElementById("lightboxMeta"),
+      closeLightbox: document.getElementById("closeLightbox"),
     };
 
     function showMsg(text, kind="ok"){
@@ -463,11 +489,8 @@
     function tsToDate(ts){
       try{
         if (!ts) return null;
-        // Firestore Timestamp
         if (typeof ts.toDate === "function") return ts.toDate();
-        // millis
         if (typeof ts === "number") return new Date(ts);
-        // ISO/string
         const d = new Date(ts);
         return isNaN(d.getTime()) ? null : d;
       }catch(_){
@@ -480,61 +503,6 @@
       return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
     }
 
-    function postTextOf(p){
-      return (p.text ?? p.caption ?? p.body ?? p.content ?? "").toString().trim();
-    }
-
-    function postImageOf(p){
-      return (p.imageUrl ?? p.imageURL ?? p.photoURL ?? p.photoUrl ?? p.mediaUrl ?? p.mediaURL ?? "").toString().trim();
-    }
-
-    function renderPosts(posts){
-      els.postsGrid.innerHTML = "";
-      els.postsEmpty.style.display = posts.length ? "none" : "block";
-      els.postsHint.textContent = posts.length ? `${posts.length} post${posts.length===1?"":"s"}` : "0 posts";
-
-      const frag = document.createDocumentFragment();
-
-      for (const p of posts){
-        const card = document.createElement("div");
-        card.className = "postCard";
-
-        const img = postImageOf(p);
-        const text = postTextOf(p);
-        const created = tsToDate(p.createdAt || p.created || p.timestamp || p.time);
-        const when = fmtDate(created);
-
-        const media = document.createElement("div");
-        media.className = "postMedia";
-        if (img){
-          const im = document.createElement("img");
-          im.src = img;
-          im.alt = "Post image";
-          im.loading = "lazy";
-          im.referrerPolicy = "no-referrer";
-          media.appendChild(im);
-        } else {
-          media.innerHTML = `<div style="color:rgba(255,255,255,.55);font-weight:800;">No image</div>`;
-        }
-
-        const body = document.createElement("div");
-        body.className = "postBody";
-        body.innerHTML = `
-          <div class="postText">${text ? escapeHtml(text) : "<span style='color:rgba(255,255,255,.62)'>No caption</span>"}</div>
-          <div class="postMeta">
-            <span>${when || ""}</span>
-            <span>${p.likesCount ?? p.likes ?? "" ? `❤ ${escapeHtml(String(p.likesCount ?? p.likes))}` : ""}</span>
-          </div>
-        `;
-
-        card.appendChild(media);
-        card.appendChild(body);
-        frag.appendChild(card);
-      }
-
-      els.postsGrid.appendChild(frag);
-    }
-
     function escapeHtml(s){
       return (s ?? "").toString()
         .replaceAll("&","&amp;")
@@ -543,6 +511,40 @@
         .replaceAll('"',"&quot;")
         .replaceAll("'","&#039;");
     }
+
+    // ✅ profile.html posts use field "url"
+    function postImageOf(p){
+      return (
+        p?.url ??
+        p?.imageUrl ??
+        p?.imageURL ??
+        p?.photoURL ??
+        p?.photoUrl ??
+        p?.mediaUrl ??
+        p?.mediaURL ??
+        ""
+      ).toString().trim();
+    }
+    function postCaptionOf(p){
+      return (p?.caption ?? p?.text ?? p?.body ?? p?.content ?? "").toString().trim();
+    }
+
+    function openLightbox(post){
+      const img = postImageOf(post);
+      if (!img) return;
+      els.lightboxImg.src = img;
+      const created = tsToDate(post.createdAt || post.created || post.timestamp || post.time);
+      els.lightboxMeta.textContent = created ? `Posted • ${fmtDate(created)}` : "Posted";
+      els.lightbox.style.display = "flex";
+    }
+    function closeLightbox(){
+      els.lightbox.style.display = "none";
+      els.lightboxImg.src = "";
+      els.lightboxMeta.textContent = "—";
+    }
+    els.closeLightbox.addEventListener("click", closeLightbox);
+    els.lightbox.addEventListener("click", (e) => { if (e.target === els.lightbox) closeLightbox(); });
+    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLightbox(); });
 
     async function loadProfile(targetUid){
       hideMsg();
@@ -566,8 +568,8 @@
         els.subline.textContent = "Directory profile";
         els.name.textContent = name;
 
-        // publicId + verified pills (same style as Directory)
-        const verified = (u.verified === true);
+        // ✅ same badges as Directory
+        const verified = (u.verified === true) || (u?.verification?.status === "verified");
         const publicId = getPublicId(u);
 
         if (verified) els.meta.appendChild(pill("✓ Verified", "verified"));
@@ -586,7 +588,6 @@
 
         setAvatar(getAvatar(u));
 
-        // About text (support multiple fields)
         const about =
           (u.description && u.description.toString().trim()) ? u.description.toString().trim() :
           (u.bio && u.bio.toString().trim()) ? u.bio.toString().trim() :
@@ -606,7 +607,6 @@
     }
 
     async function isFriend(meUid, targetUid){
-      // Friends stored as: users/{meUid}/friends/{targetUid}
       try{
         const fSnap = await getDoc(doc(db, "users", meUid, "friends", targetUid));
         return fSnap.exists();
@@ -626,9 +626,34 @@
       }
     }
 
-    function goToChat(targetUid){
-      // messages.html should open the chat when it sees ?with=<uid>
-      window.location.href = `messages.html?with=${encodeURIComponent(targetUid)}`;
+    // ✅ same chat id logic as dating page: [u1,u2].sort().join("_")
+    function chatIdFor(u1, u2){
+      return [u1, u2].sort().join("_");
+    }
+
+    async function ensureChat(u1, u2){
+      const chatId = chatIdFor(u1, u2);
+      const chatRef = doc(db, "chats", chatId);
+      const snap = await getDoc(chatRef);
+      if (!snap.exists()){
+        await setDoc(chatRef, {
+          members: [u1, u2].sort(),
+          createdAt: serverTimestamp(),
+          lastMessageAt: serverTimestamp()
+        }, { merge: true });
+      }
+      return chatId;
+    }
+
+    async function goToChat(meUid, targetUid){
+      try{
+        const chatId = await ensureChat(meUid, targetUid);
+        // ✅ opens messages page AND targets the chat (same pattern as matches)
+        window.location.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(targetUid)}`;
+      } catch(err){
+        console.error(err);
+        showMsg("Could not open chat (check Firestore rules).", "error");
+      }
     }
 
     async function loadPosts(targetUid){
@@ -637,23 +662,22 @@
       els.postsGrid.innerHTML = "";
 
       try{
-        // users/{uid}/posts
-        // If your posts don't have createdAt, it will fall back to unsorted.
         const colRef = collection(db, "users", targetUid, "posts");
 
         let snaps;
         try{
-          const qy = query(colRef, orderBy("createdAt", "desc"), limit(30));
+          // profile.html uses createdAt, url
+          const qy = query(colRef, orderBy("createdAt", "desc"), limit(6));
           snaps = await getDocs(qy);
         } catch(e){
-          // If no createdAt field / missing index, fallback
+          // fallback if no createdAt index
           snaps = await getDocs(colRef);
         }
 
         const posts = [];
         snaps.forEach(d => posts.push({ __id: d.id, ...(d.data() || {}) }));
 
-        // If fallback unsorted, try to sort in JS
+        // sort fallback
         posts.sort((a,b)=>{
           const da = tsToDate(a.createdAt || a.created || a.timestamp || a.time);
           const dbb = tsToDate(b.createdAt || b.created || b.timestamp || b.time);
@@ -662,7 +686,41 @@
           return tb - ta;
         });
 
-        renderPosts(posts);
+        // render tiles
+        els.postsGrid.innerHTML = "";
+        const valid = posts.filter(p => !!postImageOf(p));
+
+        els.postsEmpty.style.display = valid.length ? "none" : "block";
+        els.postsHint.textContent = `${valid.length} post${valid.length===1?"":"s"}`;
+
+        const frag = document.createDocumentFragment();
+        valid.forEach(p => {
+          const t = document.createElement("div");
+          t.className = "tile";
+          const img = document.createElement("img");
+          img.src = postImageOf(p);
+          img.alt = "Post";
+          img.loading = "lazy";
+          img.referrerPolicy = "no-referrer";
+
+          const overlay = document.createElement("div");
+          overlay.className = "overlay";
+          const left = document.createElement("span");
+          left.textContent = postCaptionOf(p) || " ";
+          const right = document.createElement("span");
+          const created = tsToDate(p.createdAt || p.created || p.timestamp || p.time);
+          right.textContent = created ? created.toLocaleDateString() : "";
+          overlay.appendChild(left);
+          overlay.appendChild(right);
+
+          t.appendChild(img);
+          t.appendChild(overlay);
+
+          t.addEventListener("click", () => openLightbox(p));
+          frag.appendChild(t);
+        });
+
+        els.postsGrid.appendChild(frag);
       } catch(err){
         console.error(err);
         els.postsHint.textContent = "Posts unavailable";
@@ -693,12 +751,10 @@
       }
 
       if (targetUid === meUid){
-        els.subline.textContent = "That’s you 😭 (opening your profile)";
         window.location.href = "profile.html";
         return;
       }
 
-      // Load profile
       const profile = await loadProfile(targetUid);
       if (!profile){
         els.messageBtn.disabled = true;
@@ -707,11 +763,10 @@
         return;
       }
 
-      // Load posts
       await loadPosts(targetUid);
 
-      // Hook buttons
-      els.messageBtn.addEventListener("click", () => goToChat(targetUid));
+      // ✅ Message: open messages page AND open the specific chat
+      els.messageBtn.addEventListener("click", () => goToChat(meUid, targetUid));
 
       // Friend state
       let friend = await isFriend(meUid, targetUid);
