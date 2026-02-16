@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Uzone • Dating</title>
 
+  <!-- Tab icon -->
+  <link rel="icon" type="image/png" href="logo.png" />
+
   <style>
     :root{
       --accent:#b00b55;
@@ -56,25 +59,54 @@
       font-size:13px;
       color:rgba(255,255,255,.85);
     }
+
+    /* Buttons: match the glassy hub theme + accent glow */
     .btn{
       padding:10px 12px;
       border-radius:12px;
-      border:1px solid rgba(176,11,85,.55);
-      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-      color:white;
-      font-weight:750;
+      border:1px solid rgba(176,11,85,.45);
+      background: linear-gradient(180deg, rgba(176,11,85,.22), rgba(0,0,0,.18));
+      color:rgba(255,255,255,.92);
+      font-weight:800;
       cursor:pointer;
-      box-shadow: 0 18px 40px rgba(176,11,85,.22);
       text-decoration:none;
       display:inline-flex;
       align-items:center;
       gap:8px;
+      user-select:none;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
     }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+      filter: brightness(1.06);
+    }
+    .btn:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
+      filter: brightness(1.0);
+    }
+    .btn:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
+    }
+
     .btn.secondary{
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
       box-shadow:none;
       color:rgba(255,255,255,.92);
+    }
+    .btn.secondary:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.24);
+      filter: brightness(1.05);
+    }
+    .btn.secondary:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.18);
     }
     .btn:disabled{opacity:.6;cursor:not-allowed}
 
@@ -429,17 +461,17 @@
 
     /* Match modal */
     .modal{
-  position:fixed;
-  inset:0;
-  background: rgba(0,0,0,.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  z-index:999;
-}
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:999;
+    }
 
     .modalCard{
       width:min(560px, 96vw);
@@ -504,8 +536,6 @@
 
     <div class="right">
       <a class="btn secondary" href="hub.html">← Hub</a>
-      <span class="chip" id="userEmail">—</span>
-      <button class="btn" id="signOutBtn">Sign out</button>
     </div>
   </header>
 
@@ -606,7 +636,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
     import {
       getFirestore,
@@ -641,8 +671,6 @@
 
     // UI refs
     const subline = document.getElementById("subline");
-    const userEmail = document.getElementById("userEmail");
-    const signOutBtn = document.getElementById("signOutBtn");
 
     const findFemale = document.getElementById("findFemale");
     const findMale = document.getElementById("findMale");
@@ -1104,87 +1132,30 @@
             const mePhoto = (meProfile?.photoURL || "") || placeholderAvatarFromName(meProfile?.name || "U");
             const themPhoto = (cand.photoURL || "") || placeholderAvatarFromName(cand.name || "U");
 
-            const matchId = await ensureMatch(myUid, otherUid);
             const chatId = await ensureChat(myUid, otherUid);
+            await ensureMatch(myUid, otherUid);
 
-            // Update matches list immediately
-            matchMap.set(matchId, {
-              matchId,
-              otherUid,
-              chatId,
-              name: (cand.name || "Student").toString().trim(),
-              photoURL: (cand.photoURL || "").toString(),
-              createdAt: null
-            });
-            renderMatches();
-
+            // Set modal
             meBubble.src = mePhoto;
             themBubble.src = themPhoto;
             matchName.textContent = (cand.name || "Student").toString().trim();
 
-            // Open the specific chat (not just messages page)
+            // deep-link to messages
             messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
 
             matchModal.style.display = "flex";
-            setMsg("Matched!", "ok");
-          } else {
-            setMsg("Liked.", "ok");
+            await loadMatches();
           }
-        } else {
-          setMsg("Disliked.", "ok");
         }
-
-        nextCandidate();
       } catch(err){
         setMsg(err?.message || "Swipe failed.", "error");
-      } finally {
+      } finally{
         setButtonsEnabled(true);
+        nextCandidate();
       }
     }
 
-    // Auth gate
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "index.html"; return; }
-      currentUser = user;
-      userEmail.textContent = user.email || "Signed in";
-      subline.textContent = "Loading…";
-
-      await loadMySwipes();
-      await loadMatches();
-      setToggleUI();
-      await loadCandidates();
-    });
-
-    // Header actions
-    signOutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "index.html";
-    });
-
-    // Toggle actions
-    function setSearchGender(next){
-      searchGender = next;
-      setToggleUI();
-      loadCandidates();
-    }
-    findFemale.addEventListener("click", () => setSearchGender("Female"));
-    findMale.addEventListener("click", () => setSearchGender("Male"));
-
-    refreshBtn.addEventListener("click", async () => {
-      await loadMySwipes();
-      await loadCandidates();
-      await loadMatches();
-    });
-
-    refreshMatchesBtn.addEventListener("click", async () => {
-      await loadMatches();
-    });
-
-    // Like / Dislike
-    nopeBtn.addEventListener("click", () => swipe("dislike"));
-    likeBtn.addEventListener("click", () => swipe("like"));
-
-    // Photo nav
+    // Controls
     prevImg.addEventListener("click", () => {
       if (photoIndex > 0) photoIndex -= 1;
       mainImg.src = currentPhotos[photoIndex];
@@ -1200,17 +1171,41 @@
       [...thumbs.children].forEach((el, i) => el.classList.toggle("active", i === photoIndex));
     });
 
-    // Keyboard shortcuts
-    window.addEventListener("keydown", (e) => {
-      if (matchModal.style.display === "flex") return;
-      if (e.key === "ArrowLeft") swipe("dislike");
-      if (e.key === "ArrowRight") swipe("like");
+    findFemale.addEventListener("click", async () => {
+      searchGender = "Female";
+      setToggleUI();
+      await loadCandidates();
+    });
+    findMale.addEventListener("click", async () => {
+      searchGender = "Male";
+      setToggleUI();
+      await loadCandidates();
     });
 
-    // Match modal controls
+    refreshBtn.addEventListener("click", async () => {
+      await loadCandidates();
+    });
+
+    nopeBtn.addEventListener("click", () => swipe("dislike"));
+    likeBtn.addEventListener("click", () => swipe("like"));
+
     closeMatch.addEventListener("click", () => { matchModal.style.display = "none"; });
     keepSwiping.addEventListener("click", () => { matchModal.style.display = "none"; });
     matchModal.addEventListener("click", (e) => { if (e.target === matchModal) matchModal.style.display = "none"; });
+
+    refreshMatchesBtn.addEventListener("click", loadMatches);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      currentUser = user;
+
+      subline.textContent = "Loading…";
+      setToggleUI();
+
+      await loadMySwipes();
+      await loadMatches();
+      await loadCandidates();
+    });
   </script>
 </body>
 </html>
