@@ -3,7 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Uzone • Profile</title>
+  <title>Uzone • Uprofile</title>
+
+  <!-- Tab icon -->
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <meta name="color-scheme" content="dark light" />
 
   <style>
     :root{
@@ -56,27 +61,48 @@
       font-size:13px;
       color:rgba(255,255,255,.85);
     }
+
+    /* Buttons: match the glassy hub theme + accent glow */
     .btn{
       padding:10px 12px;
       border-radius:12px;
-      border:1px solid rgba(176,11,85,.55);
-      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-      color:white;
-      font-weight:750;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:rgba(255,255,255,.92);
+      font-weight:800;
       cursor:pointer;
-      box-shadow: 0 18px 40px rgba(176,11,85,.22);
       text-decoration:none;
       display:inline-flex;
       align-items:center;
       gap:8px;
+      user-select:none;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
     }
-    .btn.secondary{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      box-shadow:none;
-      color:rgba(255,255,255,.92);
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+      filter: brightness(1.06);
+    }
+    .btn:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
+      filter: brightness(1.0);
+    }
+    .btn:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
     }
     .btn:disabled{opacity:.65;cursor:not-allowed}
+
+    .btn.primary{
+      border-color: rgba(176,11,85,.45);
+      background: linear-gradient(180deg, rgba(176,11,85,.22), rgba(0,0,0,.18));
+    }
+    .btn.primary:hover{
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent), 0 18px 45px rgba(176,11,85,.34);
+    }
 
     main{width:min(1100px, 92vw); margin:16px auto 34px auto; display:grid; gap:14px;}
 
@@ -114,21 +140,16 @@
 
     label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
     input, select, textarea{
-  width:100%;
-  padding:12px 12px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background: rgba(0,0,0,.45); /* darker background */
-  color: #ffffff; /* force solid white text */
-  outline:none;
-  font-size:14px;
-}
-
-/* Fix dropdown menu items (mobile/iOS fix) */
-select option {
-  background: #111111;
-  color: #ffffff;
-}
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.45);
+      color: #ffffff;
+      outline:none;
+      font-size:14px;
+    }
+    select option { background: #111111; color: #ffffff; }
 
     textarea{min-height:92px;resize:vertical}
     input:focus, select:focus, textarea:focus{
@@ -227,7 +248,6 @@ select option {
     }
     .badge.rejected .dot{background: rgba(255,80,120,.80);}
 
-
     .badge.id{
       border-color: rgba(176,11,85,.45);
       background: rgba(176,11,85,.12);
@@ -277,14 +297,14 @@ select option {
     <div class="left">
       <img src="logo.png" alt="Uzone logo" />
       <div class="title">
-        <h1>Profile</h1>
+        <h1>Uprofile</h1>
         <div class="sub" id="subline">Loading…</div>
       </div>
     </div>
 
     <div class="right">
-      <a class="btn secondary" href="hub.html">← Hub</a>
-<button class="btn" id="signOutBtn">Sign out</button>
+      <a class="btn" href="hub.html" aria-label="Back to hub">← Hub</a>
+      <!-- Sign out removed -->
     </div>
   </header>
 
@@ -295,7 +315,7 @@ select option {
         <div class="avatarWrap">
           <img id="avatarImg" class="avatar" alt="Profile picture" />
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn secondary" id="changeAvatarBtn" type="button">Change pic</button>
+            <button class="btn" id="changeAvatarBtn" type="button">Change pic</button>
             <input id="avatarInput" type="file" accept="image/*" style="display:none;" />
           </div>
           <div style="color:rgba(255,255,255,.62); font-size:12px; line-height:1.35;">
@@ -307,7 +327,7 @@ select option {
           <div class="nameLine">
             <span class="badge id" id="idBadge"><span class="dot"></span><span id="idText">U—</span></span>
             <span class="badge" id="verifyBadge"><span class="dot"></span><span id="verifyText">Not verified</span></span>
-            <button class="btn secondary" id="openVerifyBtn" type="button">Verify</button>
+            <button class="btn" id="openVerifyBtn" type="button">Verify</button>
           </div>
 
           <div class="row">
@@ -334,7 +354,6 @@ select option {
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
-
             </label>
           </div>
 
@@ -351,7 +370,7 @@ select option {
           </label>
 
           <div class="actions">
-            <button class="btn" id="saveBtn" type="button">Save profile</button>
+            <button class="btn primary" id="saveBtn" type="button">Save profile</button>
           </div>
 
           <div class="msg" id="msgBox" aria-live="polite"></div>
@@ -387,8 +406,8 @@ select option {
       </div>
 
       <div class="actions" style="margin-top:12px;">
-        <button class="btn" id="submitVerifyBtn" type="button">Submit for review</button>
-        <button class="btn secondary" id="closeVerifyBtn" type="button">Close</button>
+        <button class="btn primary" id="submitVerifyBtn" type="button">Submit for review</button>
+        <button class="btn" id="closeVerifyBtn" type="button">Close</button>
       </div>
 
       <div class="msg" id="verifyMsg" aria-live="polite"></div>
@@ -400,7 +419,7 @@ select option {
         <h2 class="sectionTitle" style="margin:0;">Posts</h2>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <span class="chip" id="postCountChip">0 / 6</span>
-          <button class="btn" id="postBtn" type="button">Post picture</button>
+          <button class="btn primary" id="postBtn" type="button">Post picture</button>
           <input id="postInput" type="file" accept="image/*" style="display:none;" />
         </div>
       </div>
@@ -419,7 +438,7 @@ select option {
       <img id="lightboxImg" alt="Post" />
       <div class="lightboxBar">
         <span id="lightboxMeta">—</span>
-        <button class="btn secondary" id="closeLightbox" type="button">Close</button>
+        <button class="btn" id="closeLightbox" type="button">Close</button>
       </div>
     </div>
   </div>
@@ -427,7 +446,7 @@ select option {
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
     import {
       getFirestore,
@@ -470,7 +489,6 @@ select option {
 
     // UI refs
     const subline = document.getElementById("subline");
-const signOutBtn = document.getElementById("signOutBtn");
 
     const avatarImg = document.getElementById("avatarImg");
     const changeAvatarBtn = document.getElementById("changeAvatarBtn");
@@ -484,7 +502,6 @@ const signOutBtn = document.getElementById("signOutBtn");
     const genderEl = document.getElementById("gender");
     const saveBtn = document.getElementById("saveBtn");
 
-    const idBadge = document.getElementById("idBadge");
     const idText = document.getElementById("idText");
     const verifyBadge = document.getElementById("verifyBadge");
     const verifyText = document.getElementById("verifyText");
@@ -541,73 +558,61 @@ const signOutBtn = document.getElementById("signOutBtn");
     }
 
     function setVerificationUI(status){
-  verifyBadge.classList.remove("pending","verified","rejected");
+      verifyBadge.classList.remove("pending","verified","rejected");
 
-  if (status === "verified") {
-    verifyBadge.classList.add("verified");
-    verifyText.textContent = "Verified";
-    openVerifyBtn.style.display = "none";   // ✅ hide button completely
+      if (status === "verified") {
+        verifyBadge.classList.add("verified");
+        verifyText.textContent = "Verified";
+        openVerifyBtn.style.display = "none";
+      } else if (status === "pending") {
+        verifyBadge.classList.add("pending");
+        verifyText.textContent = "Pending";
+        openVerifyBtn.textContent = "Update";
+        openVerifyBtn.style.display = "inline-flex";
+      } else if (status === "rejected") {
+        verifyBadge.classList.add("rejected");
+        verifyText.textContent = "Rejected";
+        openVerifyBtn.textContent = "Retry";
+        openVerifyBtn.style.display = "inline-flex";
+      } else {
+        verifyText.textContent = "Not verified";
+        openVerifyBtn.textContent = "Verify";
+        openVerifyBtn.style.display = "inline-flex";
+      }
+    }
 
-  } else if (status === "pending") {
-    verifyBadge.classList.add("pending");
-    verifyText.textContent = "Pending";
-    openVerifyBtn.textContent = "Update";
-    openVerifyBtn.style.display = "inline-flex";
+    async function loadProfile(user) {
+      const snap = await getDoc(doc(db, "users", user.uid));
 
-  } else if (status === "rejected") {
-    verifyBadge.classList.add("rejected");
-    verifyText.textContent = "Rejected";
-    openVerifyBtn.textContent = "Retry";
-    openVerifyBtn.style.display = "inline-flex";
+      if (!snap.exists()) {
+        subline.textContent = "Profile not found (no users doc yet).";
+        idText.textContent = "U—";
+        setVerificationUI("none");
+        avatarImg.src = placeholderAvatarFromName("U");
+        return;
+      }
 
-  } else {
-    verifyText.textContent = "Not verified";
-    openVerifyBtn.textContent = "Verify";
-    openVerifyBtn.style.display = "inline-flex";
-  }
-}
+      const data = snap.data();
+      idText.textContent = (data.publicId || "U—").toString();
 
+      const status =
+        data?.verification?.status ||
+        (data.verified === true ? "verified" : "none");
 
-async function loadProfile(user) {
-  const snap = await getDoc(doc(db, "users", user.uid));
+      setVerificationUI(status);
 
-  if (!snap.exists()) {
-    subline.textContent = "Profile not found (no users doc yet).";
-    // Still show something reasonable
-    idText.textContent = "U—";
-    setVerificationUI("none");
-    avatarImg.src = placeholderAvatarFromName("U");
-    return;
-  }
+      nameEl.value = data.name || "";
+      universityEl.value = data.university || "";
+      programEl.value = data.program || "";
+      bioEl.value = data.bio || "";
+      ageEl.value = data.age || "";
+      genderEl.value = data.gender || "";
 
-  const data = snap.data();
+      const url = data.photoURL || "";
+      avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
 
-  // ✅ SET USER ID BADGE (uses your existing idText element)
-  idText.textContent = (data.publicId || "U—").toString();
-
-  // ✅ Verification status (your page already supports status strings)
-  const status =
-    data?.verification?.status ||
-    (data.verified === true ? "verified" : "none");
-
-  setVerificationUI(status);
-
-  // Fill fields
-  nameEl.value = data.name || "";
-  universityEl.value = data.university || "";
-  programEl.value = data.program || "";
-  bioEl.value = data.bio || "";
-  ageEl.value = data.age || "";
-  genderEl.value = data.gender || "";
-
-  // Avatar
-  const url = data.photoURL || "";
-  avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
-
-  subline.textContent = "Edit your profile";
-}
-
-
+      subline.textContent = "Edit your profile";
+    }
 
     async function saveProfile(){
       if (!currentUser) return;
@@ -748,7 +753,6 @@ async function loadProfile(user) {
       }
     }
 
-    // --- Verification upload ---
     function setVerifyMsg(text, kind=""){ setMsg(verifyMsg, text, kind); }
 
     async function submitVerification(){
@@ -763,14 +767,12 @@ async function loadProfile(user) {
       submitVerifyBtn.disabled = true;
 
       try{
-        // Upload images first
         const idPath = `verification/${currentUser.uid}/id.jpg`;
         const selfiePath = `verification/${currentUser.uid}/selfie.jpg`;
 
         await uploadBytes(ref(storage, idPath), selectedIdFile, { contentType: selectedIdFile.type || "image/jpeg" });
         await uploadBytes(ref(storage, selfiePath), selectedSelfieFile, { contentType: selectedSelfieFile.type || "image/jpeg" });
 
-        // Create/replace request doc (one per user)
         await setDoc(doc(db, "verification_requests", currentUser.uid), {
           uid: currentUser.uid,
           status: "pending",
@@ -780,7 +782,6 @@ async function loadProfile(user) {
           updatedAt: serverTimestamp()
         }, { merge: true });
 
-        // Update user profile verification status to pending (user is allowed to set pending only by rules)
         await setDoc(doc(db, "users", currentUser.uid), {
           verification: { status: "pending", updatedAt: serverTimestamp() },
           updatedAt: serverTimestamp()
@@ -795,20 +796,13 @@ async function loadProfile(user) {
       }
     }
 
-    // Auth gate
     onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = "index.html"; return; }
-  currentUser = user;
-  subline.textContent = "Loading profile…";
+      if (!user) { window.location.href = "index.html"; return; }
+      currentUser = user;
+      subline.textContent = "Loading profile…";
 
-  await loadProfile(user);       // ✅ pass the full user object
-  await loadPosts(user.uid);     // ✅ uid is fine here
-});
-
-    // Events
-    signOutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "index.html";
+      await loadProfile(user);
+      await loadPosts(user.uid);
     });
 
     saveBtn.addEventListener("click", saveProfile);
