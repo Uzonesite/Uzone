@@ -370,7 +370,7 @@
       border-color: rgba(90, 255, 170, .35);
       background: rgba(90, 255, 170, .10);
     }
-  
+
     /* Modal (edit motive) */
     .modalOverlay{
       position:fixed; inset:0;
@@ -590,9 +590,34 @@
     const reqMsg = document.getElementById("reqMsg");
     const emptyReq = document.getElementById("emptyReq");
 
+    // --- Edit modal refs ---
+    const editOverlay = document.getElementById("editOverlay");
+    const closeEditBtn = document.getElementById("closeEditBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const saveEditBtn = document.getElementById("saveEditBtn");
+    const deleteFromModalBtn = document.getElementById("deleteFromModalBtn");
+    const editMsg = document.getElementById("editMsg");
+
+    const eName = document.getElementById("eName");
+    const eLocation = document.getElementById("eLocation");
+    const eStartDate = document.getElementById("eStartDate");
+    const eStartTime = document.getElementById("eStartTime");
+    const eEndDate = document.getElementById("eEndDate");
+    const eEndTime = document.getElementById("eEndTime");
+    const eTags = document.getElementById("eTags");
+    const eDesc = document.getElementById("eDesc");
+    const eInviteBtn = document.getElementById("eInviteBtn");
+    const eVenueSize = document.getElementById("eVenueSize");
+    const eSpots = document.getElementById("eSpots");
+    const eEst = document.getElementById("eEst");
+
     let currentUser = null;
     let allMine = [];         // full event objects
     let allRequests = [];     // aggregated pending requests
+
+    // modal state
+    let editingEventId = null;
+    let editingInviteOnly = false;
 
     function showMsg(el, text, kind=""){
       el.className = "msg" + (kind ? " " + kind : "");
@@ -642,6 +667,154 @@
         .replaceAll('"',"&quot;")
         .replaceAll("'","&#039;");
     }
+
+    // --- Modal helpers ---
+    function setEditMsg(text, kind=""){
+      editMsg.className = "msg" + (kind ? " " + kind : "");
+      editMsg.style.display = text ? "block" : "none";
+      editMsg.textContent = text || "";
+    }
+
+    function setInviteUI(on){
+      editingInviteOnly = !!on;
+      eInviteBtn.classList.toggle("on", editingInviteOnly);
+      eInviteBtn.setAttribute("aria-pressed", editingInviteOnly ? "true" : "false");
+      eInviteBtn.textContent = editingInviteOnly ? "Invite-only" : "Public";
+    }
+
+    function openEdit(ev){
+      if (!currentUser) return;
+
+      editingEventId = ev.id;
+      setEditMsg("");
+
+      eName.value = safeStr(ev.name || "Untitled");
+      eLocation.value = safeStr(ev.location || "");
+
+      eStartDate.value = safeStr(ev.startDate || "");
+      eStartTime.value = safeStr(ev.startTime || "");
+      eEndDate.value = safeStr(ev.endDate || "");
+      eEndTime.value = safeStr(ev.endTime || "");
+
+      eTags.value = Array.isArray(ev.tags) ? ev.tags.join(", ") : safeStr(ev.tags || "");
+      eDesc.value = pickDescription(ev);
+
+      eVenueSize.value = (ev.venueSize ?? "");
+      eSpots.value = (ev.spots ?? ev.spotsAvailable ?? "");
+      eEst.value = (ev.estimatedAttendance ?? ev.est ?? "");
+
+      setInviteUI(!!ev.inviteOnly);
+
+      editOverlay.classList.add("show");
+      editOverlay.setAttribute("aria-hidden", "false");
+    }
+
+    function closeEdit(){
+      editOverlay.classList.remove("show");
+      editOverlay.setAttribute("aria-hidden", "true");
+      setEditMsg("");
+      editingEventId = null;
+      editingInviteOnly = false;
+    }
+
+    eInviteBtn.addEventListener("click", () => setInviteUI(!editingInviteOnly));
+    closeEditBtn.addEventListener("click", closeEdit);
+    cancelEditBtn.addEventListener("click", closeEdit);
+
+    editOverlay.addEventListener("click", (e) => {
+      if (e.target === editOverlay) closeEdit();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && editOverlay.classList.contains("show")) closeEdit();
+    });
+
+    async function confirmAndDelete(ev){
+      if (!currentUser) return;
+
+      const ok = confirm(`Delete "${(ev.name || "this event")}"? This can’t be undone.`);
+      if (!ok) return;
+
+      try{
+        await deleteDoc(doc(db, "events", ev.id));
+
+        // optimistic UI update
+        allMine = allMine.filter(x => x.id !== ev.id);
+        renderMine();
+        await loadInviteRequests(currentUser.uid).catch(() => {});
+
+        setTopMsg("Deleted.", "good");
+        setTimeout(() => setTopMsg(""), 1200);
+      }catch(err){
+        console.error(err);
+        setTopMsg(err?.message || "Could not delete (rules?).", "bad");
+      }
+    }
+
+    deleteFromModalBtn.addEventListener("click", async () => {
+      const ev = allMine.find(x => x.id === editingEventId);
+      if (!ev) return;
+      await confirmAndDelete(ev);
+      closeEdit();
+    });
+
+    saveEditBtn.addEventListener("click", async () => {
+      if (!currentUser || !editingEventId) return;
+      setEditMsg("");
+      saveEditBtn.disabled = true;
+
+      try{
+        const tags = (eTags.value || "")
+          .split(",")
+          .map(s => s.trim())
+          .filter(Boolean);
+
+        const toNumOrNull = (v) => {
+          const raw = (v ?? "").toString().trim();
+          if (!raw) return null;
+          const n = Number(raw);
+          return Number.isFinite(n) ? n : null;
+        };
+
+        const patch = {
+          name: eName.value.trim(),
+          location: eLocation.value.trim(),
+          startDate: eStartDate.value || "",
+          startTime: eStartTime.value || "",
+          endDate: eEndDate.value || "",
+          endTime: eEndTime.value || "",
+          tags,
+          description: eDesc.value.trim(),
+          inviteOnly: editingInviteOnly,
+          updatedAt: serverTimestamp(),
+        };
+
+        const venueSize = toNumOrNull(eVenueSize.value);
+        const spots = toNumOrNull(eSpots.value);
+        const est = toNumOrNull(eEst.value);
+
+        if (venueSize !== null) patch.venueSize = venueSize;
+        if (spots !== null) patch.spots = spots;
+        if (est !== null) patch.estimatedAttendance = est;
+
+        await updateDoc(doc(db, "events", editingEventId), patch);
+
+        // optimistic local update
+        const local = allMine.find(x => x.id === editingEventId);
+        if (local) Object.assign(local, patch);
+
+        renderMine();
+        await loadInviteRequests(currentUser.uid).catch(() => {});
+
+        setEditMsg("Saved.", "good");
+        setTimeout(() => closeEdit(), 500);
+      }catch(err){
+        console.error(err);
+        setEditMsg(err?.message || "Could not save (rules?).", "bad");
+      }finally{
+        saveEditBtn.disabled = false;
+      }
+    });
 
     function renderMine(){
       const q = lower(searchEl.value.trim());
@@ -693,7 +866,6 @@
               <button class="mini" type="button" data-edit="${esc(e.id)}">Edit</button>
               <button class="mini danger" type="button" data-del="${esc(e.id)}">Delete</button>
             </div>
-            
           </div>
         `;
         mineGrid.appendChild(el);
@@ -713,7 +885,6 @@
           }
         });
       });
-
 
       // Wire edit buttons
       mineGrid.querySelectorAll('button[data-edit]').forEach(btn => {
@@ -933,6 +1104,7 @@
       }
     });
   </script>
+
   <!-- Edit Motive Modal -->
   <div class="modalOverlay" id="editOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
