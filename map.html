@@ -154,7 +154,7 @@
     #map{ height: 74dvh; width: 100%; }
     @media (max-width: 920px){ #map{ height: 72dvh; } }
 
-    /* AdvancedMarker HTML pin (fixed positioning) */
+    /* AdvancedMarker HTML pin */
     .pinWrap{ position:relative; width:1px; height:1px; overflow: visible; }
     .glow-pin{
       position:absolute;
@@ -183,7 +183,7 @@
       100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
     }
 
-    /* Popup */
+    /* Popup card */
     .card{
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       width: 270px;
@@ -316,9 +316,15 @@
     const radius = $("radius");
     const radiusVal = $("radiusVal");
 
+    // ✅ focus support
+    const params = new URLSearchParams(window.location.search);
+    const focusId = (params.get("focus") || "").trim();
+    let focusDone = false;
+
     let gmap, info;
     let allEvents = [];
     let markers = [];
+    let markerById = new Map();
     let userCenter = null;
 
     function esc(s){
@@ -380,6 +386,7 @@
     function clearMarkers(){
       markers.forEach(m => m.map = null);
       markers = [];
+      markerById = new Map();
     }
 
     function openInfo(marker, ev){
@@ -402,6 +409,46 @@
       info.open({ map: gmap, anchor: marker });
     }
 
+    // ✅ after markers render, auto-open the focused event's popup
+    function tryFocusOpen(){
+      if (focusDone) return;
+      if (!focusId) return;
+
+      const ev = allEvents.find(x => x.id === focusId);
+      if (!ev) return;
+
+      // don't ever "reveal" invite-only exact location from URL focus
+      if (ev.inviteOnly) return;
+
+      const m = markerById.get(focusId);
+      const pos = safeLatLng(ev);
+
+      // if we don't have a marker yet (e.g. radius filter excluded it), add a one-off marker
+      if (!m && pos){
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          map: gmap,
+          position: pos,
+          content: buildPinEl(),
+        });
+        marker.addListener("gmp-click", () => openInfo(marker, ev));
+        markers.push(marker);
+        markerById.set(focusId, marker);
+
+        gmap.panTo(pos);
+        gmap.setZoom(16);
+        openInfo(marker, ev);
+        focusDone = true;
+        return;
+      }
+
+      if (m && pos){
+        gmap.panTo(pos);
+        gmap.setZoom(16);
+        openInfo(m, ev);
+        focusDone = true;
+      }
+    }
+
     // Haversine distance (km)
     function distKm(a, b){
       const R = 6371;
@@ -415,6 +462,42 @@
         Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng/2) ** 2;
 
       return 2 * R * Math.asin(Math.sqrt(s));
+    }
+
+    function renderMarkers(list){
+      clearMarkers();
+
+      const bounds = new google.maps.LatLngBounds();
+      let added = 0;
+
+      list.forEach(ev => {
+        const pos = safeLatLng(ev);
+        if (!pos) return;
+
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          map: gmap,
+          position: pos,
+          content: buildPinEl(),
+        });
+
+        marker.addListener("gmp-click", () => openInfo(marker, ev));
+        markers.push(marker);
+        markerById.set(ev.id, marker);
+
+        bounds.extend(pos);
+        added++;
+      });
+
+      if (added > 0){
+        gmap.fitBounds(bounds, 80);
+      } else if (userCenter){
+        gmap.panTo(userCenter);
+        gmap.setZoom(13);
+      }
+
+      // ✅ now that markers exist, try to open the focused one
+      // (delay 0 makes sure map finished layout)
+      setTimeout(tryFocusOpen, 0);
     }
 
     function applyNearFilter(){
@@ -439,41 +522,12 @@
       subline.textContent = `Near you • ${km} km radius`;
     }
 
-    function renderMarkers(list){
-      clearMarkers();
-
-      const bounds = new google.maps.LatLngBounds();
-      let added = 0;
-
-      list.forEach(ev => {
-        const pos = safeLatLng(ev);
-        if (!pos) return;
-
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          map: gmap,
-          position: pos,
-          content: buildPinEl(),
-        });
-
-        marker.addListener("gmp-click", () => openInfo(marker, ev));
-        markers.push(marker);
-        bounds.extend(pos);
-        added++;
-      });
-
-      if (added > 0){
-        gmap.fitBounds(bounds, 80);
-      } else if (userCenter){
-        gmap.panTo(userCenter);
-        gmap.setZoom(13);
-      }
-    }
-
     async function loadEvents(){
       count.textContent = "Loading…";
       const snap = await getDocs(collection(db, "events"));
       allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       applyNearFilter();
+      // applyNearFilter -> renderMarkers -> tryFocusOpen
     }
 
     function whenGoogleReady(timeoutMs = 12000){
@@ -544,7 +598,10 @@
       applyNearFilter();
     });
 
-    refreshBtn.addEventListener("click", loadEvents);
+    refreshBtn.addEventListener("click", () => {
+      focusDone = false; // allow focus again after refresh
+      loadEvents();
+    });
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
