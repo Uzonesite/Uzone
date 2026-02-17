@@ -334,7 +334,7 @@
         <div class="box"><b>Ratio</b><br><span id="ratio">—</span></div>
       </div>
 
-      <div style="margin-top:10px;" class="box"><b>Bio</b><br><span id="bio">—</span></div>
+      <div style="margin-top:10px;" class="box"><b>Description</b><br><span id="description">—</span></div>
 
       <div id="lockedNote" class="box" style="margin-top:10px; display:none;">
         This event is invite-only. Apply to see the exact location and schedule.
@@ -433,7 +433,7 @@ const spotsEl = document.getElementById("spots");
 const venueEl = document.getElementById("venue");
 const sizeEl = document.getElementById("size");
 const ratioEl = document.getElementById("ratio");
-const bioEl = document.getElementById("bio");
+const descEl = document.getElementById("description");
 
 const locationEl = document.getElementById("location");
 const whenEl = document.getElementById("when");
@@ -548,7 +548,7 @@ async function loadEvent(){
   venueEl.textContent = eventData.venueSize || "—";
   sizeEl.textContent = eventData.sizeEstimate ?? "—";
   ratioEl.textContent = eventData.ratio || "—";
-  bioEl.textContent = eventData.bio || "—";
+  descEl.textContent = eventData.description || eventData.bio || "—";
 
   // Tags
   tagsEl.innerHTML = "";
