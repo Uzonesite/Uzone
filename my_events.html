@@ -364,6 +364,19 @@
 
     <div id="msg" class="msg"></div>
 
+    <section id="requestsPanel" class="bar" style="display:none;">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span class="chip"><span class="dot invite"></span><b>Invite requests</b></span>
+        <span class="chip" id="reqCountChip">0 pending</span>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="btn" id="reqRefreshBtn" type="button">Refresh requests</button>
+      </div>
+    </section>
+
+    <section id="reqList" class="grid" style="display:none;"></section>
+
+
     <section id="grid" class="grid"></section>
     <section id="empty" class="empty" style="display:none;">
       You haven’t posted any motives yet.<br><br>
@@ -375,7 +388,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
-      getFirestore, collection, getDocs, query, orderBy, limit
+      getFirestore, collection, getDocs, query, orderBy, limit, doc, setDoc, updateDoc, where, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -396,8 +409,14 @@
     const countChip = document.getElementById("countChip");
     const msg = document.getElementById("msg");
 
+    const requestsPanel = document.getElementById("requestsPanel");
+    const reqList = document.getElementById("reqList");
+    const reqCountChip = document.getElementById("reqCountChip");
+    const reqRefreshBtn = document.getElementById("reqRefreshBtn");
+
     let currentUser = null;
     let allMine = [];
+    let pendingRequests = [];
 
     function setMsg(text, kind=""){
       msg.style.display = text ? "block" : "none";
@@ -431,8 +450,157 @@
       if (!start && !end) return "Time TBD";
       if (start && !end) return start;
       if (!start && end) return end;
-      return `${start} → ${end}`;
+      
+    function tsToMs(ts){
+      try{
+        if (!ts) return 0;
+        if (typeof ts.toMillis === "function") return ts.toMillis();
+        if (typeof ts.seconds === "number") return ts.seconds * 1000;
+      }catch(_){}
+      return 0;
     }
+    function fmtRelative(ms){
+      if (!ms) return "—";
+      const diff = Date.now() - ms;
+      const mins = Math.floor(diff/60000);
+      if (mins < 1) return "just now";
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins/60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs/24);
+      return `${days}d ago`;
+    }
+
+    async function refreshRequests(){
+      pendingRequests = [];
+      if (!currentUser){ return; }
+      // Only for invite-only events you host
+      const inviteMine = allMine.filter(e => !!e.inviteOnly);
+
+      if (!inviteMine.length){
+        requestsPanel.style.display = "none";
+        reqList.style.display = "none";
+        reqCountChip.textContent = "0 pending";
+        return;
+      }
+
+      try{
+        // For each event, load pending applications
+        for (const ev of inviteMine){
+          const qApps = query(
+            collection(db, "events", ev.id, "applications"),
+            where("status","==","pending"),
+            orderBy("createdAt","desc")
+          );
+          const snap = await getDocs(qApps);
+          const cnt = snap.size;
+          ev._pendingCount = cnt;
+
+          snap.forEach(d => {
+            const a = d.data() || {};
+            pendingRequests.push({
+              eventId: ev.id,
+              eventName: ev.name || "Motive",
+              applicantUid: a.uid || d.id,
+              applicantName: a.name || a.displayName || "User",
+              createdAtMs: tsToMs(a.createdAt),
+            });
+          });
+        }
+
+        // Update panel visibility + count
+        const total = pendingRequests.length;
+        reqCountChip.textContent = `${total} pending`;
+        requestsPanel.style.display = total ? "flex" : "none";
+        reqList.style.display = total ? "grid" : "none";
+
+        render(allMine); // refresh cards to show pending badge
+        renderRequestList();
+
+      }catch(e){
+        console.error(e);
+        requestsPanel.style.display = "flex";
+        reqList.style.display = "none";
+        reqCountChip.textContent = "—";
+        setMsg((e?.message || "Failed to load requests.") + "\nIf you recently changed Firestore rules, make sure hosts can read events/{eventId}/applications.", "error");
+      }
+    }
+
+    function renderRequestList(){
+      reqList.innerHTML = "";
+      if (!pendingRequests.length){
+        reqList.style.display = "none";
+        return;
+      }
+      // Sort newest first (best-effort)
+      const sorted = [...pendingRequests].sort((a,b) => (b.createdAtMs||0) - (a.createdAtMs||0));
+
+      sorted.forEach(r => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.cursor = "default";
+        card.innerHTML = `
+          <div class="body" style="gap:12px;">
+            <div class="line" style="align-items:flex-start;">
+              <div style="display:grid; gap:4px;">
+                <div class="mini" style="color:rgba(255,255,255,.92); font-weight:900;">${esc(r.eventName)}</div>
+                <div class="mini">Applicant: <b>${esc(r.applicantName)}</b> <span style="color:rgba(255,255,255,.60);">(${esc(r.applicantUid)})</span></div>
+                <div class="mini" style="color:rgba(255,255,255,.65);">Requested ${esc(fmtRelative(r.createdAtMs))}</div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+                <a class="btn" href="event.html?id=${encodeURIComponent(r.eventId)}">Open motive</a>
+                <button class="btn primary" data-accept="${esc(r.eventId)}::${esc(r.applicantUid)}" type="button">Accept</button>
+                <button class="btn" data-deny="${esc(r.eventId)}::${esc(r.applicantUid)}" type="button">Deny</button>
+              </div>
+            </div>
+          </div>
+        `;
+        reqList.appendChild(card);
+      });
+
+      // Wire buttons
+      reqList.querySelectorAll("button[data-accept]").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const key = btn.getAttribute("data-accept") || "";
+          const [eventId, uid] = key.split("::");
+          await decide(eventId, uid, true);
+        });
+      });
+      reqList.querySelectorAll("button[data-deny]").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const key = btn.getAttribute("data-deny") || "";
+          const [eventId, uid] = key.split("::");
+          await decide(eventId, uid, false);
+        });
+      });
+    }
+
+    async function decide(eventId, uid, accept){
+      if (!eventId || !uid) return;
+      setMsg("");
+      try{
+        // Create/Update member record if accepted
+        if (accept){
+          await setDoc(doc(db, "events", eventId, "members", uid), {
+            uid,
+            status: "accepted",
+            acceptedAt: serverTimestamp()
+          }, { merge:true });
+        }
+        // Update application status
+        await updateDoc(doc(db, "events", eventId, "applications", uid), {
+          status: accept ? "accepted" : "denied",
+          decidedAt: serverTimestamp()
+        });
+
+        setMsg(accept ? "Accepted request." : "Denied request.", "ok");
+        await refreshRequests();
+      }catch(e){
+        console.error(e);
+        setMsg(e?.message || "Failed to update request.", "error");
+      }
+    }
+
 
     function render(list){
       grid.innerHTML = "";
@@ -479,6 +647,7 @@
             </div>
 
             <div class="tagsRow">
+              ${(inviteOnly && (ev._pendingCount||0)>0) ? `<span class="tag" style="border-color: rgba(255,210,80,.35); background: rgba(255,210,80,.10);">⏳ ${ev._pendingCount} pending</span>` : ""}
               ${tags.slice(0,6).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
             </div>
           </div>
@@ -493,7 +662,7 @@
 
       const filtered = allMine.filter(ev => {
         const hay = [
-          ev.name, ev.location, ev.description, ev.bio,
+          ev.name, ev.location, ev.description, ev.description,
           ev.venueSize, ev.sizeEstimate, ev.ratio,
           ev.startDate, ev.startTime, ev.endDate, ev.endTime,
           ...(Array.isArray(ev.tags) ? ev.tags : [])
@@ -525,6 +694,8 @@
         });
 
         allMine = mine;
+        await refreshRequests();
+
         subline.textContent = currentUser
           ? `Showing motives posted by you (${currentUser.uid})`
           : `My Motives`;
@@ -538,6 +709,7 @@
     }
 
     refreshBtn.addEventListener("click", load);
+    reqRefreshBtn.addEventListener("click", refreshRequests);
     search.addEventListener("input", applySearch);
 
     onAuthStateChanged(auth, (user) => {
