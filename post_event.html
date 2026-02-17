@@ -155,13 +155,8 @@
       background: rgba(0,0,0,.20);
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
     }
-    #map{
-      height: 360px;
-      width: 100%;
-    }
-    @media (max-width: 920px){
-      #map{height: 320px;}
-    }
+    #map{ height: 360px; width: 100%; }
+    @media (max-width: 920px){ #map{height: 320px;} }
 
     .status{
       padding:10px 12px;
@@ -171,6 +166,10 @@
       color:rgba(255,255,255,.86);
       font-size:13px;
       line-height:1.35;
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .status.ok{border-color: rgba(80,255,160,.28);}
 
@@ -191,9 +190,11 @@
       box-shadow: 0 0 0 4px rgba(176,11,85,.20);
     }
 
-    /* Glow marker HTML for AdvancedMarker */
-    .pinWrap{ position:relative; width:1px; height:1px; }
+    /* Glow marker HTML for AdvancedMarker (FIXED positioning) */
+    .pinWrap{ position:relative; width:1px; height:1px; overflow:visible; }
     .glow-pin{
+      position:absolute;
+      left:0; top:0;
       width: 16px; height: 16px; border-radius: 999px;
       background: var(--accent);
       box-shadow:
@@ -204,6 +205,7 @@
     }
     .glow-pulse{
       position:absolute;
+      left:0; top:0;
       width: 46px; height: 46px;
       border-radius: 999px;
       border: 2px solid rgba(176,11,85,.35);
@@ -322,7 +324,6 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-    // Firebase (same project you’re using elsewhere)
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
       authDomain: "uzone-6148d.firebaseapp.com",
@@ -344,7 +345,7 @@
     const descEl = $("description");
     const inviteOnlyEl = $("inviteOnly");
 
-    const placeEl = $("locationInput"); // <gmp-place-autocomplete>
+    const placeEl = $("locationInput");
     const mapEl = $("map");
     const pinStatus = $("pinStatus");
     const postBtn = $("postBtn");
@@ -365,7 +366,7 @@
       pinStatus.classList.toggle("ok", !!ok);
     }
 
-    function whenGoogleReady(timeoutMs = 10000){
+    function whenGoogleReady(timeoutMs = 12000){
       return new Promise((resolve, reject) => {
         const start = Date.now();
         const tick = () => {
@@ -408,7 +409,13 @@
       }
 
       gmap.panTo(pos);
-      setStatus(label ? `Pinned: ${label}` : `Pinned: ${lat.toFixed(5)}, ${lng.toFixed(5)}`, true);
+      setStatus(
+        label ? `Pinned: ${label} (${lat.toFixed(5)}, ${lng.toFixed(5)})`
+              : `Pinned: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+        true
+      );
+
+      console.log("[PIN]", { label: picked.label, lat: picked.lat, lng: picked.lng });
     }
 
     function clearPicked(){
@@ -426,18 +433,29 @@
         .slice(0, 20);
     }
 
+    async function geocodeFallback(address){
+      // Fallback if the place object doesn’t include geometry for some reason.
+      return new Promise((resolve) => {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ address }, (results, status) => {
+          if (status !== "OK" || !results?.length) return resolve(null);
+          const loc = results[0].geometry.location;
+          resolve({ lat: loc.lat(), lng: loc.lng() });
+        });
+      });
+    }
+
     async function initMap(){
       await whenGoogleReady();
 
-      const defaultCenter = { lat: 45.4215, lng: -75.6972 }; // Ottawa default
+      const defaultCenter = { lat: 45.4215, lng: -75.6972 };
       gmap = new google.maps.Map(mapEl, {
-  center: defaultCenter,
-  zoom: 12,
-  mapId: "f4ab270f6c4fc6deeed4fa00",
-  clickableIcons: false,
-  gestureHandling: "greedy",
-});
-
+        center: defaultCenter,
+        zoom: 12,
+        mapId: "f4ab270f6c4fc6deeed4fa00",
+        clickableIcons: false,
+        gestureHandling: "greedy",
+      });
 
       // click-to-drop-pin
       gmap.addListener("click", (e) => {
@@ -445,18 +463,40 @@
         setPicked(e.latLng.lat(), e.latLng.lng(), null);
       });
 
-      // Places address search (new component)
+      // Places address search (bulletproof)
       placeEl.addEventListener("gmp-select", async (e) => {
-        const place = e.place;
-        await place.fetchFields({ fields: ["displayName","formattedAddress","location"] });
-        if (!place.location) return;
+        try{
+          // Some versions emit placePrediction; convert it to a Place.
+          const place = e.placePrediction?.toPlace?.() ?? e.place;
+          if (!place) return;
 
-        const lat = place.location.lat();
-        const lng = place.location.lng();
-        const label = place.formattedAddress || place.displayName || null;
+          await place.fetchFields({ fields: ["displayName","formattedAddress","location"] });
 
-        setPicked(lat, lng, label);
-        gmap.setZoom(15);
+          const label = place.formattedAddress || place.displayName || null;
+
+          if (place.location){
+            const lat = place.location.lat();
+            const lng = place.location.lng();
+            setPicked(lat, lng, label);
+            gmap.setZoom(15);
+            return;
+          }
+
+          // Fallback if no location
+          if (label){
+            const ll = await geocodeFallback(label);
+            if (ll){
+              setPicked(ll.lat, ll.lng, label);
+              gmap.setZoom(15);
+              return;
+            }
+          }
+
+          setMsg("Couldn’t get a map location from that result. Try a more specific address.", false);
+        } catch (err){
+          console.error(err);
+          setMsg("Address select failed (check console).", false);
+        }
       });
 
       useMyLocBtn.addEventListener("click", () => {
@@ -471,7 +511,6 @@
       });
 
       clearPinBtn.addEventListener("click", clearPicked);
-
       setStatus("No pin selected. Search an address or click the map.", false);
     }
 
@@ -501,18 +540,16 @@
           endDate,
           endTime,
           description,
-
-          // map fields:
-          location: picked.label, // human-readable
+          location: picked.label,
           lat: picked.lat,
           lng: picked.lng,
-
           inviteOnly,
-
           ownerUid: user.uid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         };
+
+        console.log("[SAVE]", payload);
 
         const ref = await addDoc(collection(db, "events"), payload);
         setMsg("Posted! Opening…", true);
