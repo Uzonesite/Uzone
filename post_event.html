@@ -273,6 +273,26 @@
           <textarea id="description" placeholder="What’s the vibe? What should people know?"></textarea>
         </div>
 
+        <div class="col6">
+          <label for="spotsAvailable">Spots available</label>
+          <input id="spotsAvailable" type="number" min="0" inputmode="numeric" placeholder="e.g., 50" />
+        </div>
+
+        <div class="col6">
+          <label for="venueSize">Venue size</label>
+          <input id="venueSize" placeholder="e.g., Small house, Club, Rooftop" />
+        </div>
+
+        <div class="col6">
+          <label for="sizeEstimate">Estimated attendance size</label>
+          <input id="sizeEstimate" placeholder="e.g., 30–40 people" />
+        </div>
+
+        <div class="col6">
+          <label for="ratio">Ratio (optional)</label>
+          <input id="ratio" placeholder="e.g., 60% girls / 40% guys" />
+        </div>
+
         <div class="col12">
           <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer;">
             <input id="inviteOnly" type="checkbox" style="width:18px;height:18px;" />
@@ -343,6 +363,10 @@
     const endDateEl = $("endDate");
     const endTimeEl = $("endTime");
     const descEl = $("description");
+    const spotsEl = $("spotsAvailable");
+    const venueEl = $("venueSize");
+    const sizeEl = $("sizeEstimate");
+    const ratioEl = $("ratio");
     const inviteOnlyEl = $("inviteOnly");
 
     const placeEl = $("locationInput");
@@ -524,6 +548,11 @@
       const description = descEl.value.trim() || null;
       const inviteOnly = !!inviteOnlyEl.checked;
 
+      const spotsAvailable = (spotsEl?.value ?? "").toString().trim() === "" ? null : Number(spotsEl.value);
+      const venueSize = venueEl.value.trim() || null;
+      const sizeEstimate = sizeEl.value.trim() || null;
+      const ratio = ratioEl.value.trim() || null;
+
       if (!name) return setMsg("Please enter a motive name.", false);
       if (!startDate || !startTime) return setMsg("Please choose a start date and time.", false);
       if (!picked.lat || !picked.lng) return setMsg("Please search an address or click the map to drop a pin.", false);
@@ -544,6 +573,12 @@
           lat: picked.lat,
           lng: picked.lng,
           inviteOnly,
+          spotsAvailable,
+          venueSize,
+          sizeEstimate,
+          ratio,
+          hostUid: user.uid,
+          hostName: user.displayName || "",
           ownerUid: user.uid,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -556,15 +591,21 @@
         window.location.href = `event.html?id=${encodeURIComponent(ref.id)}`;
       } catch (err){
         console.error(err);
-        setMsg("Failed to post. Check console + Firestore rules.", false);
-      } finally {
+        setMsg(err?.message || "Failed to post.", false);
         postBtn.disabled = false;
       }
     }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "index.html"; return; }
-      await initMap();
+    onAuthStateChanged(auth, (user) => {
+      if (!user){
+        window.location.href = "login.html";
+        return;
+      }
+      initMap().catch(err => {
+        console.error(err);
+        setMsg(err.message || "Map init failed.", false);
+      });
+
       postBtn.addEventListener("click", () => postEvent(user));
     });
   </script>
