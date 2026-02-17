@@ -718,6 +718,20 @@
       });
     }
 
+    function reverseGeocode(lat, lng){
+  return new Promise((resolve) => {
+    try{
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status !== "OK" || !results?.length) return resolve(null);
+        resolve(results[0].formatted_address || null);
+      });
+    }catch(_){
+      resolve(null);
+    }
+  });
+}
+
     async function initMap(){
       await whenGoogleReady();
 
@@ -769,15 +783,23 @@
       });
 
       useMyLocBtn.addEventListener("click", () => {
-        if (!navigator.geolocation) return alert("Geolocation not supported.");
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            setPicked(pos.coords.latitude, pos.coords.longitude, "Your location");
-            gmap.setZoom(15);
-          },
-          () => alert("Couldn’t get your location.")
-        );
-      });
+  if (!navigator.geolocation) return alert("Geolocation not supported.");
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      // Try to turn coords into the closest address on the map
+      const addr = await reverseGeocode(lat, lng);
+
+      // If reverse geocode fails, still save coords (label will just be coords)
+      setPicked(lat, lng, addr || null);
+      gmap.setZoom(15);
+    },
+    () => alert("Couldn’t get your location."),
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+  );
+});
 
       clearPinBtn.addEventListener("click", clearPicked);
       setStatus("No pin selected. Search an address or click the map.", false);
