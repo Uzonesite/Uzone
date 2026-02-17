@@ -59,14 +59,14 @@
     .title h1{margin:0;font-size:18px;letter-spacing:.2px}
     .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
-
+    /* Buttons: match events page "glassy + accent glow" behavior */
     .btn{
       padding:10px 12px;
       border-radius:12px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
       color:rgba(255,255,255,.92);
-      font-weight:900;
+      font-weight:800;
       cursor:pointer;
       text-decoration:none;
       display:inline-flex;
@@ -78,13 +78,35 @@
     }
     .btn:hover{
       transform: translateY(-1px);
-      border-color: rgba(176,11,85,.65);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.10), 0 18px 50px rgba(0,0,0,.35);
-      filter: brightness(1.05);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+      filter: brightness(1.06);
     }
+    .btn:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
+      filter: brightness(1.0);
+    }
+    .btn:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
+    }
+    .btn:disabled{opacity:.65;cursor:not-allowed}
+
+    /* Primary accent button */
     .btn.primary{
-      background: linear-gradient(180deg, rgba(176,11,85,.30), rgba(176,11,85,.14));
-      border-color: rgba(176,11,85,.55);
+      border:1px solid rgba(176,11,85,.55);
+      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+      color:white;
+      box-shadow: 0 18px 40px rgba(176,11,85,.22);
+    }
+    .btn.primary:hover{
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
+      filter: brightness(1.08);
+    }
+    .btn.primary:active{
+      box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.20);
     }
 
     main{
@@ -126,7 +148,7 @@
       padding:12px 12px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.22);
+      background: rgba(255,255,255,.06);
       color: var(--text);
       outline: none;
       transition: box-shadow .12s ease, border-color .12s ease;
@@ -246,10 +268,10 @@
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.16);
       color: rgba(255,255,255,.92);
-      font-weight:950;
+      font-weight:900;
       cursor:pointer;
       text-decoration:none;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
       display:inline-flex;
       align-items:center;
       gap:8px;
@@ -258,8 +280,18 @@
     }
     .mini:hover{
       transform: translateY(-1px);
-      border-color: rgba(176,11,85,.65);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.10);
+      border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(176,11,85,.55), 0 0 0 4px rgba(176,11,85,.10);
+      filter: brightness(1.06);
+    }
+    .mini:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px rgba(176,11,85,.45), 0 0 0 4px rgba(176,11,85,.08);
+      filter: brightness(1.0);
+    }
+    .mini:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(176,11,85,.22), 0 0 14px rgba(176,11,85,.55);
     }
 
     .list{
@@ -539,7 +571,7 @@
               <a class="mini" href="event.html?id=${encodeURIComponent(e.id)}">Open</a>
               <button class="mini" type="button" data-copy="${esc(e.id)}">Copy link</button>
             </div>
-            <span class="badge">${esc(e.id)}</span>
+            
           </div>
         `;
         mineGrid.appendChild(el);
@@ -667,7 +699,7 @@
             <div>
               <h3 class="reqTitle">${esc(r.eventName)} <span class="badge invite" style="margin-left:8px;">invite-only</span></h3>
               <div class="reqMeta">
-                <div><b>Applicant:</b> ${esc(r.applicantUid)}</div>
+                <div><b>Applicant:</b> ${esc(r.applicantName || r.displayName || "User")}</div>
                 <div><b>When:</b> ${esc(r.eventWhen)}</div>
                 <div><b>Requested:</b> ${esc(created || "—")}</div>
                 ${note ? `<div><b>Note:</b> ${esc(note)}</div>` : ""}
@@ -749,7 +781,7 @@
         return;
       }
       currentUser = user;
-      subline.textContent = `Signed in as ${user.displayName || "User"} • ${user.uid}`;
+      subline.textContent = `Signed in as ${user.displayName || "User"}`;
 
       try{
         await refreshAll();
