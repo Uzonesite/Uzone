@@ -370,6 +370,126 @@
       border-color: rgba(90, 255, 170, .35);
       background: rgba(90, 255, 170, .10);
     }
+  
+    /* Modal (edit motive) */
+    .modalOverlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.62);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:50;
+    }
+    .modalOverlay.show{display:flex}
+    .modal{
+      width:min(720px, 100%);
+      border-radius: 22px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(15,15,22,.82);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modalHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(135deg, rgba(176,11,85,.18), rgba(255,255,255,.02));
+    }
+    .modalHead h3{margin:0;font-size:16px;letter-spacing:.2px}
+    .modalBody{padding:16px 18px}
+    .formGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+    .field label{
+      font-size:12px;
+      color: rgba(255,255,255,.78);
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .field input, .field textarea{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      outline:none;
+      font: inherit;
+      transition: box-shadow .12s ease, border-color .12s ease, transform .12s ease;
+    }
+    .field input:focus, .field textarea:focus{
+      border-color: rgba(176,11,85,.65);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.18), 0 0 14px rgba(176,11,85,.55);
+    }
+    .field textarea{min-height:92px;resize:vertical}
+    .span2{grid-column:1 / -1}
+    .toggleRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+    }
+    .toggleRow .tTitle{font-weight:900}
+    .pillBtn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.92);
+      cursor:pointer;
+      font-weight:900;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+    }
+    .pillBtn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(176,11,85,.55);
+      filter: brightness(1.06);
+    }
+    .pillBtn.on{
+      border-color: rgba(176,11,85,.65);
+      background: linear-gradient(135deg, rgba(176,11,85,.90), rgba(176,11,85,.45));
+      box-shadow: 0 0 18px rgba(176,11,85,.55);
+    }
+    .modalFoot{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      padding:14px 18px 18px;
+      border-top:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .danger{
+      border-color: rgba(255,90,90,.45) !important;
+    }
+    .danger:hover{
+      border-color: rgba(255,90,90,.85) !important;
+      box-shadow: 0 0 18px rgba(255,90,90,.45) !important;
+    }
+    @media (max-width: 720px){
+      .formGrid{grid-template-columns:1fr}
+      .span2{grid-column:auto}
+    }
   </style>
 </head>
 
@@ -439,7 +559,7 @@
       collection, doc,
       getDocs, getDoc,
       query, where,
-      setDoc, updateDoc,
+      setDoc, updateDoc, deleteDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
@@ -570,6 +690,8 @@
             <div class="leftA">
               <a class="mini" href="event.html?id=${encodeURIComponent(e.id)}">Open</a>
               <button class="mini" type="button" data-copy="${esc(e.id)}">Copy link</button>
+              <button class="mini" type="button" data-edit="${esc(e.id)}">Edit</button>
+              <button class="mini danger" type="button" data-del="${esc(e.id)}">Delete</button>
             </div>
             
           </div>
@@ -589,6 +711,26 @@
           }catch{
             setTopMsg("Couldn’t copy (browser blocked clipboard).", "bad");
           }
+        });
+      });
+
+
+      // Wire edit buttons
+      mineGrid.querySelectorAll('button[data-edit]').forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-edit");
+          const ev = allMine.find(x => x.id === id);
+          if (ev) openEdit(ev);
+        });
+      });
+
+      // Wire delete buttons
+      mineGrid.querySelectorAll('button[data-del]').forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-del");
+          const ev = allMine.find(x => x.id === id);
+          if (!ev) return;
+          await confirmAndDelete(ev);
         });
       });
     }
@@ -791,5 +933,93 @@
       }
     });
   </script>
+  <!-- Edit Motive Modal -->
+  <div class="modalOverlay" id="editOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="modalHead">
+        <h3 id="editTitle">Edit your motive</h3>
+        <button class="btn" type="button" id="closeEditBtn">Close</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="msg" id="editMsg" style="margin:0 0 10px; display:none;"></div>
+
+        <div class="formGrid">
+          <div class="field">
+            <label for="eName">Title</label>
+            <input id="eName" type="text" placeholder="Motive name" />
+          </div>
+
+          <div class="field">
+            <label for="eLocation">Location</label>
+            <input id="eLocation" type="text" placeholder="e.g., ByWard Market" />
+          </div>
+
+          <div class="field">
+            <label for="eStartDate">Start date</label>
+            <input id="eStartDate" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="eStartTime">Start time</label>
+            <input id="eStartTime" type="time" />
+          </div>
+
+          <div class="field">
+            <label for="eEndDate">End date (optional)</label>
+            <input id="eEndDate" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="eEndTime">End time (optional)</label>
+            <input id="eEndTime" type="time" />
+          </div>
+
+          <div class="field span2">
+            <label for="eTags">Tags (comma separated)</label>
+            <input id="eTags" type="text" placeholder="party, chill, study..." />
+          </div>
+
+          <div class="field span2">
+            <label for="eDesc">Description</label>
+            <textarea id="eDesc" placeholder="What’s the vibe?"></textarea>
+          </div>
+
+          <div class="field span2">
+            <div class="toggleRow">
+              <div>
+                <div class="tTitle">Invite-only</div>
+                <div class="muted" style="font-size:12px;">Only approved requests can see / join</div>
+              </div>
+              <button class="pillBtn" id="eInviteBtn" type="button" aria-pressed="false">Public</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="eVenueSize">Venue size (optional)</label>
+            <input id="eVenueSize" type="number" min="0" inputmode="numeric" placeholder="e.g., 120" />
+          </div>
+
+          <div class="field">
+            <label for="eSpots">Spots available (optional)</label>
+            <input id="eSpots" type="number" min="0" inputmode="numeric" placeholder="e.g., 40" />
+          </div>
+
+          <div class="field span2">
+            <label for="eEst">Estimated attendance (optional)</label>
+            <input id="eEst" type="number" min="0" inputmode="numeric" placeholder="e.g., 80" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modalFoot">
+        <button class="btn" type="button" id="cancelEditBtn">Cancel</button>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn danger" type="button" id="deleteFromModalBtn">Delete</button>
+          <button class="btn primary" type="button" id="saveEditBtn">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
