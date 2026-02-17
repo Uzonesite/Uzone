@@ -680,18 +680,34 @@
 
       try{
         // NOTE: This avoids needing a Firestore composite index.
-        // We fetch recent events and filter client-side by hostUid/ownerUid.
-        const qy = query(collection(db, "events"), orderBy("createdAt", "desc"), limit(200));
-        const snap = await getDocs(qy);
+        // Fetch *all* events created by you (avoid client-side limits / field drift).
+        // We try multiple legacy fields for compatibility.
+        const mineMap = new Map();
 
-        const mine = [];
-        snap.forEach(d => {
-          const data = d.data() || {};
-          const host = data.hostUid || data.ownerUid || "";
-          if (currentUser && host === currentUser.uid){
-            mine.push({ id: d.id, ...data });
+        async function addMineBy(field){
+          try{
+            const qy = query(
+              collection(db, "events"),
+              where(field, "==", currentUser.uid),
+              orderBy("createdAt", "desc"),
+              limit(500)
+            );
+            const snap = await getDocs(qy);
+            snap.forEach(d => mineMap.set(d.id, { id: d.id, ...(d.data() || {}) }));
+          } catch (e){
+            // If an index is missing or field doesn't exist in some docs, skip quietly.
+            console.warn("Query failed for field:", field, e?.message || e);
           }
-        });
+        }
+
+        await addMineBy("hostUid");
+        await addMineBy("ownerUid");
+        await addMineBy("createdBy");
+        await addMineBy("creatorUid");
+        await addMineBy("uid");
+
+        const mine = Array.from(mineMap.values())
+          .sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
 
         allMine = mine;
         await refreshRequests();
