@@ -350,7 +350,7 @@
   <main>
     <section class="bar">
       <div class="searchWrap">
-        <input id="search" placeholder="Search motives (name, tags, bio, location…)" />
+        <input id="search" placeholder="Search motives (name, tags, description, location…)" />
         <button class="btn" id="refreshBtn" type="button">Refresh</button>
       </div>
     </section>
@@ -481,7 +481,7 @@
 
       const filtered = allEvents.filter(ev => {
         const hay = [
-          ev.name, ev.location, ev.bio, ev.ratio, ev.venueSize,
+          ev.name, ev.location, ev.description, ev.ratio, ev.venueSize,
           ev.startDate, ev.startTime, ev.endDate, ev.endTime,
           ...(Array.isArray(ev.tags) ? ev.tags : [])
         ].join(" ").toLowerCase();
