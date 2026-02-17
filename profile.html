@@ -218,6 +218,16 @@
       gap:8px;
       flex-wrap:wrap;
     }
+
+.badge.credits{
+  border-color: rgba(120,160,255,.35);
+  background: rgba(120,160,255,.10);
+}
+.badge.credits .dot{
+  background: rgba(120,160,255,.85);
+}
+
+    
     .badge{
       display:inline-flex;
       align-items:center;
@@ -325,10 +335,24 @@
 
         <div class="fields">
           <div class="nameLine">
-            <span class="badge id" id="idBadge"><span class="dot"></span><span id="idText">U—</span></span>
-            <span class="badge" id="verifyBadge"><span class="dot"></span><span id="verifyText">Not verified</span></span>
-            <button class="btn" id="openVerifyBtn" type="button">Verify</button>
-          </div>
+  <span class="badge id" id="idBadge">
+    <span class="dot"></span>
+    <span id="idText">U—</span>
+  </span>
+
+  <span class="badge credits" id="creditsBadge">
+    <span class="dot"></span>
+    <span id="creditsText">0 Credits</span>
+  </span>
+
+  <span class="badge" id="verifyBadge">
+    <span class="dot"></span>
+    <span id="verifyText">Not verified</span>
+  </span>
+
+  <button class="btn" id="openVerifyBtn" type="button">Verify</button>
+</div>
+
 
           <div class="row">
             <label>
@@ -528,6 +552,8 @@
     const lightboxMeta = document.getElementById("lightboxMeta");
     const closeLightbox = document.getElementById("closeLightbox");
 
+    const creditsText = document.getElementById("creditsText");
+
     let currentUser = null;
     let cachedPosts = [];
     let selectedIdFile = null;
@@ -587,6 +613,8 @@
       if (!snap.exists()) {
         subline.textContent = "Profile not found (no users doc yet).";
         idText.textContent = "U—";
+        const credits = Number(data.credits || 0);
+creditsText.textContent = `${credits} Credit${credits === 1 ? "" : "s"}`;
         setVerificationUI("none");
         avatarImg.src = placeholderAvatarFromName("U");
         return;
