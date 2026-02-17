@@ -383,6 +383,60 @@
 
     .act:disabled{opacity:.6;cursor:not-allowed}
 
+    .act.super{
+      grid-column: 1 / -1;
+      border-color: rgba(176,11,85,.55);
+      background: linear-gradient(180deg, rgba(176,11,85,.20), rgba(0,0,0,.18));
+    }
+    .act.super:hover{
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.22);
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+    .act.super:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.16);
+      filter: brightness(1.0);
+    }
+
+    .rowBtns{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex:0 0 auto;
+    }
+    .miniBtn{
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:rgba(255,255,255,.92);
+      font-weight:850;
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      font-size:12px;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .miniBtn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent), 0 14px 34px rgba(176,11,85,.20);
+      filter: brightness(1.05);
+    }
+    .miniBtn:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 9px var(--accent), 0 10px 28px rgba(176,11,85,.16);
+      filter: brightness(1.0);
+    }
+    .miniBtn.good{ border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10); }
+    .miniBtn.good:hover{ border-color: rgba(80,255,160,.70); box-shadow: 0 0 12px rgba(80,255,160,.65), 0 14px 34px rgba(80,255,160,.18); }
+    .miniBtn.bad{ border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10); }
+    .miniBtn.bad:hover{ border-color: rgba(255,80,120,.80); box-shadow: 0 0 12px rgba(255,80,120,.65), 0 14px 34px rgba(255,80,120,.18); }
+    .miniBtn:disabled{opacity:.6;cursor:not-allowed}
+
     .tiny{
       color:rgba(255,255,255,.72);
       font-size:13px;
@@ -562,6 +616,7 @@
     </div>
 
     <div class="right">
+      <span class="chip" id="creditsChip">Credits: —</span>
       <a class="btn secondary" href="hub.html">Hub</a>
     </div>
   </header>
@@ -617,6 +672,8 @@
           <button class="act like" id="likeBtn" type="button">♥ Like</button>
         </div>
 
+        <button class="act super" id="superLikeBtn" type="button">★ Super Like (1 credit)</button>
+
         <div class="tiny" id="seenHint">—</div>
         <div class="msg" id="msgBox" aria-live="polite"></div>
 
@@ -630,6 +687,18 @@
             <div class="matchEmpty" id="matchesEmpty">No matches yet.</div>
           </div>
         </div>
+
+        <!-- Liked You (credit-gated reveal) -->
+        <div class="matchesBox" aria-label="Liked you">
+          <div class="matchesHeader">
+            <div class="h">Liked you</div>
+            <button class="btn secondary" id="revealLikeBtn" type="button" style="padding:8px 10px; border-radius:12px;">View who liked you (1 credit)</button>
+          </div>
+          <div class="matchesList" id="likedList">
+            <div class="matchEmpty" id="likedEmpty">No likes yet.</div>
+          </div>
+        </div>
+
       </aside>
     </section>
   </main>
@@ -679,7 +748,8 @@
       query,
       where,
       limit,
-      orderBy
+      orderBy,
+      runTransaction
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -739,6 +809,13 @@
     const matchesEmpty = document.getElementById("matchesEmpty");
     const refreshMatchesBtn = document.getElementById("refreshMatchesBtn");
 
+    const creditsChip = document.getElementById("creditsChip");
+
+    const likedList = document.getElementById("likedList");
+    const likedEmpty = document.getElementById("likedEmpty");
+    const revealLikeBtn = document.getElementById("revealLikeBtn");
+    const superLikeBtn = document.getElementById("superLikeBtn");
+
     let currentUser = null;
 
     // State
@@ -754,10 +831,133 @@
     // Cache of matches: Map<matchId, { otherUid, chatId, name, photoURL }>
     const matchMap = new Map();
 
+    // Liked-you cache: Map<likerUid, { uid, revealed, type, createdAt, name?, photoURL? }>
+    const likedMap = new Map();
+
+    let myCredits = 0;
+
     function setMsg(text, kind="") {
       msgBox.style.display = text ? "block" : "none";
       msgBox.textContent = text || "";
       msgBox.className = "msg" + (kind ? " " + kind : "");
+    }
+
+    async function refreshCredits(){
+      try{
+        const meSnap = await getDoc(doc(db, "users", currentUser.uid));
+        const me = meSnap.exists() ? (meSnap.data() || {}) : {};
+        const c = Number(me.credits ?? 0);
+        myCredits = Number.isFinite(c) ? c : 0;
+      } catch(_){
+        myCredits = myCredits || 0;
+      }
+      if (creditsChip) creditsChip.textContent = `Credits: ${myCredits}`;
+      if (revealLikeBtn) revealLikeBtn.disabled = myCredits <= 0;
+      if (superLikeBtn) superLikeBtn.disabled = myCredits <= 0;
+    }
+
+    async function spendOneCredit({ reason="spend", targetUid=null } = {}){
+      try{
+        const meRef = doc(db, "users", currentUser.uid);
+        const ok = await runTransaction(db, async (tx) => {
+          const snap = await tx.get(meRef);
+          const me = snap.exists() ? (snap.data() || {}) : {};
+          const c = Number(me.credits ?? 0);
+          const credits = Number.isFinite(c) ? c : 0;
+          if (credits <= 0) return false;
+
+          tx.set(meRef, { credits: credits - 1, creditsUpdatedAt: serverTimestamp() }, { merge:true });
+
+          const logRef = doc(collection(db, "users", currentUser.uid, "credit_logs"));
+          tx.set(logRef, { reason, targetUid: targetUid || null, delta: -1, createdAt: serverTimestamp() }, { merge:true });
+          return true;
+        });
+
+        if (ok) {
+          myCredits = Math.max(0, (myCredits || 0) - 1);
+          if (creditsChip) creditsChip.textContent = `Credits: ${myCredits}`;
+          if (revealLikeBtn) revealLikeBtn.disabled = myCredits <= 0;
+          if (superLikeBtn) superLikeBtn.disabled = myCredits <= 0;
+          return true;
+        }
+        return false;
+      } catch(err){
+        console.error(err);
+        return false;
+      }
+    }
+
+    async function upsertLikedBy(targetUid, type="like"){
+      // Writes into THEIR incoming list: users/{targetUid}/likedBy/{meUid}
+      try{
+        const meUid = currentUser.uid;
+        await setDoc(doc(db, "users", targetUid, "likedBy", meUid), {
+          fromUid: meUid,
+          type: type || "like", // "like" | "superlike"
+          createdAt: serverTimestamp()
+        }, { merge:true });
+      } catch(err){
+        console.warn("likedBy write failed:", err?.message || err);
+      }
+    }
+
+    async function loadLikedYou(){
+      likedMap.clear();
+      try{
+        const ref = collection(db, "users", currentUser.uid, "likedBy");
+        let snaps;
+        try{
+          const qy = query(ref, orderBy("createdAt", "desc"), limit(60));
+          snaps = await getDocs(qy);
+        } catch(e){
+          snaps = await getDocs(ref);
+        }
+
+        const rows = [];
+        snaps.forEach(d => {
+          const v = d.data() || {};
+          rows.push({
+            uid: d.id,
+            revealed: !!v.revealed,
+            type: (v.type || "like"),
+            createdAt: v.createdAt || null,
+            revealedAt: v.revealedAt || null
+          });
+        });
+
+        rows.sort((a,b)=>{
+          const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return tb - ta;
+        });
+
+        for (const r of rows){
+          let name = "";
+          let photoURL = "";
+          if (r.revealed){
+            try{
+              const uSnap = await getDoc(doc(db, "users", r.uid));
+              if (uSnap.exists()){
+                const u = uSnap.data() || {};
+                name = (u.name || "Student").toString().trim();
+                photoURL = (u.photoURL || "").toString();
+              }
+            } catch(_) {}
+          }
+          likedMap.set(r.uid, { ...r, name, photoURL });
+        }
+
+        renderLikedYou();
+      } catch(err){
+        console.error(err);
+        likedList.innerHTML = "";
+        const div = document.createElement("div");
+        div.className = "matchEmpty";
+        div.textContent = err?.message
+          ? ("Couldn’t load likes: " + err.message)
+          : "Couldn’t load likes.";
+        likedList.appendChild(div);
+      }
     }
 
     function placeholderAvatarFromName(name){
@@ -776,6 +976,126 @@
                 dominant-baseline="middle">${initial}</text>
         </svg>`;
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function renderLikedYou(){
+      if (!likedList) return;
+      likedList.innerHTML = "";
+      const items = [...likedMap.values()];
+
+      if (!items.length) {
+        likedList.appendChild(likedEmpty);
+        likedEmpty.style.display = "block";
+        return;
+      }
+      likedEmpty.style.display = "none";
+
+      items.forEach(it => {
+        const row = document.createElement("div");
+        row.className = "matchRow";
+        row.style.cursor = it.revealed ? "pointer" : "default";
+
+        const av = document.createElement("div");
+        av.className = "matchAvatar";
+        const img = document.createElement("img");
+        img.alt = "Like";
+        img.src = it.revealed
+          ? (it.photoURL || placeholderAvatarFromName(it.name || "U"))
+          : placeholderAvatarFromName("?");
+        av.appendChild(img);
+
+        const meta = document.createElement("div");
+        meta.className = "matchMeta";
+
+        const n = document.createElement("div");
+        n.className = "matchName";
+        n.textContent = it.revealed ? (it.name || "Student") : "Locked";
+
+        const sub = document.createElement("div");
+        sub.className = "matchSub";
+        sub.textContent = it.revealed
+          ? "View / Pass / Match"
+          : ((it.type === "superlike") ? "Someone super liked you" : "Someone liked you");
+
+        meta.appendChild(n);
+        meta.appendChild(sub);
+
+        row.appendChild(av);
+        row.appendChild(meta);
+
+        if (it.revealed){
+          const btns = document.createElement("div");
+          btns.className = "rowBtns";
+
+          const viewBtn = document.createElement("button");
+          viewBtn.className = "miniBtn";
+          viewBtn.type = "button";
+          viewBtn.textContent = "View";
+          viewBtn.addEventListener("click", (e)=>{
+            e.stopPropagation();
+            window.location.href = `view_profile.html?uid=${encodeURIComponent(it.uid)}`;
+          });
+
+          const passBtn = document.createElement("button");
+          passBtn.className = "miniBtn bad";
+          passBtn.type = "button";
+          passBtn.textContent = "Pass";
+          passBtn.addEventListener("click", async (e)=>{
+            e.stopPropagation();
+            await decideOnRevealedLike(it.uid, "dislike");
+          });
+
+          const matchBtn = document.createElement("button");
+          matchBtn.className = "miniBtn good";
+          matchBtn.type = "button";
+          matchBtn.textContent = "Match";
+          matchBtn.addEventListener("click", async (e)=>{
+            e.stopPropagation();
+            await decideOnRevealedLike(it.uid, "like");
+          });
+
+          btns.appendChild(viewBtn);
+          btns.appendChild(passBtn);
+          btns.appendChild(matchBtn);
+
+          row.addEventListener("click", ()=> {
+            window.location.href = `view_profile.html?uid=${encodeURIComponent(it.uid)}`;
+          });
+
+          row.appendChild(btns);
+        }
+
+        likedList.appendChild(row);
+      });
+    }
+
+    async function revealNextLike(){
+      const locked = [...likedMap.values()].filter(x => !x.revealed);
+      if (!locked.length){
+        setMsg("No locked likes to reveal.", "ok");
+        return;
+      }
+
+      const ok = await spendOneCredit({ reason:"reveal_like", targetUid: locked[0].uid });
+      if (!ok){
+        setMsg("You need a credit to reveal who liked you.", "error");
+        await refreshCredits();
+        return;
+      }
+
+      const target = locked[0].uid;
+      try{
+        await setDoc(doc(db, "users", currentUser.uid, "likedBy", target), {
+          revealed: true,
+          revealedAt: serverTimestamp()
+        }, { merge:true });
+      } catch(err){
+        console.error(err);
+        setMsg("Couldn’t reveal (Firestore rules?).", "error");
+      }
+
+      await loadLikedYou();
+      setMsg("Revealed 1 like.", "ok");
     }
 
     function setVerificationUI(status){
@@ -807,6 +1127,7 @@
       likeBtn.disabled = !enabled;
       prevImg.disabled = !enabled;
       nextImg.disabled = !enabled;
+      if (superLikeBtn) superLikeBtn.disabled = !enabled || myCredits <= 0;
     }
 
     function setProgress(){
@@ -845,12 +1166,10 @@
     }
 
     async function getTopPhotosForUser(uid, profile){
-      // Compose: avatar first, then up to 6 posts
       const urls = [];
       const avatar = (profile?.photoURL || "").toString();
       if (avatar) urls.push(avatar);
 
-      // Load posts (public read for signed-in users per your rules)
       try{
         const postsRef = collection(db, "users", uid, "posts");
         const q = query(postsRef, orderBy("createdAt", "desc"), limit(6));
@@ -963,7 +1282,6 @@
       const target = searchGender;
       const usersRef = collection(db, "users");
 
-      // NOTE: This assumes profiles store Gender exactly as "Female" or "Male".
       const q = query(usersRef, where("gender", "==", target), limit(60));
       const snaps = await getDocs(q);
 
@@ -1039,7 +1357,6 @@
       items.forEach(m => {
         const row = document.createElement("div");
         row.className = "matchRow";
-        row.addEventListener("click", () => openChatWith(m.otherUid));
 
         const av = document.createElement("div");
         av.className = "matchAvatar";
@@ -1057,13 +1374,41 @@
 
         const sub = document.createElement("div");
         sub.className = "matchSub";
-        sub.textContent = "Tap to message";
+        sub.textContent = " ";
 
         meta.appendChild(n);
         meta.appendChild(sub);
 
+        const btns = document.createElement("div");
+        btns.className = "rowBtns";
+
+        const viewBtn = document.createElement("button");
+        viewBtn.className = "miniBtn";
+        viewBtn.type = "button";
+        viewBtn.textContent = "View";
+        viewBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.location.href = `view_profile.html?uid=${encodeURIComponent(m.otherUid)}`;
+        });
+
+        const msgBtn = document.createElement("button");
+        msgBtn.className = "miniBtn";
+        msgBtn.type = "button";
+        msgBtn.textContent = "Message";
+        msgBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openChatWith(m.otherUid);
+        });
+
+        btns.appendChild(viewBtn);
+        btns.appendChild(msgBtn);
+
+        row.addEventListener("click", () => openChatWith(m.otherUid));
+
         row.appendChild(av);
         row.appendChild(meta);
+        row.appendChild(btns);
+
         matchesList.appendChild(row);
       });
     }
@@ -1129,6 +1474,49 @@
       }
     }
 
+    async function decideOnRevealedLike(otherUid, direction){
+      try{
+        await setDoc(doc(db, "users", currentUser.uid, "swipes", otherUid), {
+          direction,
+          updatedAt: serverTimestamp()
+        }, { merge:true });
+
+        swipeMap.set(otherUid, { direction });
+
+        if (direction === "like"){
+          const themSnap = await getDoc(doc(db, "users", otherUid));
+          const them = themSnap.exists() ? (themSnap.data() || {}) : {};
+          const meSnap = await getDoc(doc(db, "users", currentUser.uid));
+          const me = meSnap.exists() ? (meSnap.data() || {}) : {};
+
+          const mePhoto = (me?.photoURL || "") || placeholderAvatarFromName(me?.name || "U");
+          const themPhoto = (them?.photoURL || "") || placeholderAvatarFromName(them?.name || "U");
+
+          const chatId = await ensureChat(currentUser.uid, otherUid);
+          await ensureMatch(currentUser.uid, otherUid);
+
+          meBubble.src = mePhoto;
+          themBubble.src = themPhoto;
+          matchName.textContent = (them?.name || "Student").toString().trim();
+          messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
+
+          matchModal.style.display = "flex";
+          await loadMatches();
+        }
+
+        await setDoc(doc(db, "users", currentUser.uid, "likedBy", otherUid), {
+          handled: true,
+          handledAt: serverTimestamp(),
+          handledDirection: direction
+        }, { merge:true });
+
+        await loadLikedYou();
+      } catch(err){
+        console.error(err);
+        setMsg(err?.message || "Couldn’t apply decision.", "error");
+      }
+    }
+
     async function swipe(direction){
       const cand = currentCandidate();
       if (!cand) return;
@@ -1148,6 +1536,9 @@
         swipeMap.set(otherUid, { direction });
 
         if (direction === "like") {
+          // Add me to their "Liked you" list (locked on their side until they spend credits)
+          await upsertLikedBy(otherUid, "like");
+
           const theirSwipeRef = doc(db, "users", otherUid, "swipes", myUid);
           const theirSnap = await getDoc(theirSwipeRef);
           const theirDir = theirSnap.exists() ? (theirSnap.data()?.direction || "") : "";
@@ -1213,6 +1604,69 @@
     nopeBtn.addEventListener("click", () => swipe("dislike"));
     likeBtn.addEventListener("click", () => swipe("like"));
 
+    // Credit-gated: reveal who liked you
+    revealLikeBtn.addEventListener("click", revealNextLike);
+
+    // Credit-gated: Super Like (spends 1 credit, counts as a Like, and flags as superlike on their Liked You list)
+    superLikeBtn.addEventListener("click", async () => {
+      const cand = currentCandidate();
+      if (!cand) return;
+
+      setButtonsEnabled(false);
+      setMsg("");
+
+      const otherUid = cand.uid;
+
+      const ok = await spendOneCredit({ reason:"super_like", targetUid: otherUid });
+      if (!ok){
+        setMsg("You need a credit to Super Like.", "error");
+        setButtonsEnabled(true);
+        await refreshCredits();
+        return;
+      }
+
+      try{
+        await setDoc(doc(db, "users", currentUser.uid, "swipes", otherUid), {
+          direction: "like",
+          updatedAt: serverTimestamp(),
+          superlike: true
+        }, { merge:true });
+
+        swipeMap.set(otherUid, { direction: "like" });
+
+        await upsertLikedBy(otherUid, "superlike");
+
+        const theirSnap = await getDoc(doc(db, "users", otherUid, "swipes", currentUser.uid));
+        const theirDir = theirSnap.exists() ? (theirSnap.data()?.direction || "") : "";
+
+        if (theirDir === "like") {
+          const meSnap = await getDoc(doc(db, "users", currentUser.uid));
+          const meProfile = meSnap.exists() ? meSnap.data() : {};
+          const mePhoto = (meProfile?.photoURL || "") || placeholderAvatarFromName(meProfile?.name || "U");
+          const themPhoto = (cand.photoURL || "") || placeholderAvatarFromName(cand.name || "U");
+
+          const chatId = await ensureChat(currentUser.uid, otherUid);
+          await ensureMatch(currentUser.uid, otherUid);
+
+          meBubble.src = mePhoto;
+          themBubble.src = themPhoto;
+          matchName.textContent = (cand.name || "Student").toString().trim();
+          messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
+
+          matchModal.style.display = "flex";
+          await loadMatches();
+        }
+
+        setMsg("Super Like sent.", "ok");
+      } catch(err){
+        console.error(err);
+        setMsg(err?.message || "Super Like failed.", "error");
+      } finally{
+        setButtonsEnabled(true);
+        nextCandidate();
+      }
+    });
+
     closeMatch.addEventListener("click", () => { matchModal.style.display = "none"; });
     keepSwiping.addEventListener("click", () => { matchModal.style.display = "none"; });
 
@@ -1230,8 +1684,10 @@
       subline.textContent = "Loading…";
       setToggleUI();
 
+      await refreshCredits();
       await loadMySwipes();
       await loadMatches();
+      await loadLikedYou();
       await loadCandidates();
     });
   </script>
