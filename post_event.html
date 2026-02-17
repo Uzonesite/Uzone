@@ -1,515 +1,246 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Uzone • Post Motive</title>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-  <link rel="icon" type="image/png" href="logo.png" :contentReference[oaicite:4]{index=4}r-scheme" content="dark light" />
+  // === Firebase (use your existing config) ===
+  const firebaseConfig = {
+    apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+    authDomain: "uzone-6148d.firebaseapp.com",
+    projectId: "uzone-6148d",
+  };
 
-  <style>
-    :root{
-      --accent:#b00b55;
-      --bg:#0b0b10;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
-      --border: rgba(255,255,255,.14);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.70);
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
-      --radius: 18px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100dvh;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
-        radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
-        radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
-        var(--bg);
-    }
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    header{
-      width:min(1120px, 92vw);
-      margin:18px auto 0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 16px;
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      position: sticky;
-      top: 10px;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-    }
-    .left{display:flex; align-items:center; gap:12px; min-width:0;}
-    .left img{
-      width:38px;height:38px;object-fit:contain;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
-    }
-    .title{display:grid; gap:2px; min-width:0;}
-    .title h1{margin:0;font-size:18px;letter-spacing:.2px}
-    .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+  const $ = (id) => document.getElementById(id);
 
-    .btn{
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color:rgba(255,255,255,.92);
-      font-weight:800;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-      user-select:none;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
-    }
-    .btn:hover{
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
-      filter: brightness(1.06);
-    }
-    .btn:active{
-      transform: translateY(0px) scale(.99);
-      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
-      filter: brightness(1.0);
-    }
-    .btn:focus-visible{
-      outline:none;
-      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
-    }
-    .btn:disabled{opacity:.65;cursor:not-allowed}
+  // === Required elements on the page ===
+  // Map container: <div id="map"></div>
+  // Places element: <gmp-place-autocomplete id="locationInput"></gmp-place-autocomplete>
+  const mapEl = $("map");
+  const placeEl = $("locationInput"); // gmp-place-autocomplete
+  const pinStatus = $("pinStatus");   // optional
+  const postBtn = $("postBtn");       // optional
 
-    .btn.primary{
-      border:1px solid rgba(176,11,85,.55);
-      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-      color:white;
-      box-shadow: 0 18px 40px rgba(176,11,85,.22);
-    }
-    .btn.primary:hover{
-      border-color: var(--accent);
-      box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
-      filter: brightness(1.08);
+  // === Optional form fields (rename these ids to match your post_event.html) ===
+  const nameEl = $("name");                 // event name input
+  const tagsEl = $("tags");                 // tags input (comma list)
+  const startDateEl = $("startDate");       // type="date"
+  const startTimeEl = $("startTime");       // type="time"
+  const endDateEl = $("endDate");           // optional type="date"
+  const endTimeEl = $("endTime");           // optional type="time"
+  const descEl = $("description");          // textarea
+  const inviteOnlyEl = $("inviteOnly");     // checkbox (optional)
+
+  // === Map state ===
+  let gmap;
+  let marker; // AdvancedMarkerElement
+  let picked = { lat: null, lng: null, label: null };
+
+  function setPinStatus(text, ok = false) {
+    if (!pinStatus) return;
+    pinStatus.textContent = text;
+    pinStatus.style.borderColor = ok ? "rgba(80,255,160,.28)" : "rgba(255,80,120,.35)";
+  }
+
+  function buildGlowPinEl() {
+    // If you already have CSS classes like .glow-pin/.glow-pulse, you can use those instead.
+    const wrap = document.createElement("div");
+    wrap.style.position = "relative";
+    const pulse = document.createElement("div");
+    pulse.style.position = "absolute";
+    pulse.style.width = "46px";
+    pulse.style.height = "46px";
+    pulse.style.borderRadius = "999px";
+    pulse.style.border = "2px solid rgba(176,11,85,.35)";
+    pulse.style.transform = "translate(-50%, -50%)";
+    pulse.style.left = "0px";
+    pulse.style.top = "0px";
+    pulse.style.animation = "pulse 1.6s ease-out infinite";
+
+    const dot = document.createElement("div");
+    dot.style.width = "16px";
+    dot.style.height = "16px";
+    dot.style.borderRadius = "999px";
+    dot.style.background = "#b00b55";
+    dot.style.boxShadow = "0 0 10px #b00b55, 0 0 22px rgba(176,11,85,.75), 0 0 46px rgba(176,11,85,.45)";
+    dot.style.transform = "translate(-50%, -50%)";
+    dot.style.left = "0px";
+    dot.style.top = "0px";
+    dot.style.position = "absolute";
+
+    wrap.appendChild(pulse);
+    wrap.appendChild(dot);
+    return wrap;
+  }
+
+  function setPicked(lat, lng, label = null) {
+    picked.lat = lat;
+    picked.lng = lng;
+    picked.label = label;
+
+    const pos = { lat, lng };
+    const content = buildGlowPinEl();
+
+    if (!marker) {
+      marker = new google.maps.marker.AdvancedMarkerElement({
+        map: gmap,
+        position: pos,
+        content
+      });
+    } else {
+      marker.position = pos;
+      marker.content = content;
     }
 
-    main{
-      width:min(1120px, 92vw);
-      margin:16px auto 30px auto;
-      display:grid;
-      gap:14px;
-    }
+    gmap.panTo(pos);
+    setPinStatus(label ? `Pinned: ${label}` : `Pinned: ${lat.toFixed(5)}, ${lng.toFixed(5)}`, true);
+  }
 
-    .panel{
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:14px;
-      backdrop-filter: blur(10px);
-    }
+  function clearPicked() {
+    picked = { lat: null, lng: null, label: null };
+    if (marker) marker.map = null;
+    marker = null;
+    setPinStatus("No pin selected. Search an address or click the map.", false);
+  }
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap:14px;
-    }
-    .col6{grid-column: span 6;}
-    .col12{grid-column: span 12;}
-    @media (max-width: 920px){
-      .col6,.col12{grid-column: span 12;}
-    }
+  function whenGoogleReady(timeoutMs = 10000) {
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const tick = () => {
+        if (window.google?.maps?.Map) return resolve();
+        if (Date.now() - start > timeoutMs) return reject(new Error("Google Maps failed to load."));
+        setTimeout(tick, 50);
+      };
+      tick();
+    });
+  }
 
-    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px 2px;}
-    input, textarea, select{
-      width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color:var(--text);
-      outline:none;
-      font-size:14px;
-    }
-    input:focus, textarea:focus, select:focus{
-      border-color: rgba(176,11,85,.60);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
-    }
-    textarea{min-height:110px; resize:vertical;}
+  function parseTags(str) {
+    return (str || "")
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean)
+      .slice(0, 20);
+  }
 
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-    .hint{font-size:13px; color:rgba(255,255,255,.75); line-height:1.35;}
+  async function initMap() {
+    await whenGoogleReady();
 
-    /* Map */
-    #mapWrap{
-      border:1px solid rgba(255,255,255,.14);
-      border-radius: 18px;
-      overflow:hidden;
-      background: rgba(0,0,0,.20);
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-    }
-    #map{
-      height: 360px;
-      width: 100%;
-    }
-    @media (max-width: 920px){
-      #map{height: 320px;}
-    }
+    const defaultCenter = { lat: 45.4215, lng: -75.6972 }; // Ottawa default
+    gmap = new google.maps.Map(mapEl, {
+      center: defaultCenter,
+      zoom: 12,
+      // If you have a Map ID, put it here; otherwise remove this line:
+      // mapId: "YOUR_MAP_ID",
+      clickableIcons: false,
+      gestureHandling: "greedy"
+    });
 
-    /* Custom glow marker (Advanced Marker uses HTML content) */
-    .glow-pin{
-      width: 16px;
-      height: 16px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow:
-        0 0 10px var(--accent),
-        0 0 22px rgba(176,11,85,.75),
-        0 0 46px rgba(176,11,85,.45);
-      transform: translate(-50%, -50%);
-    }
-    .glow-pulse{
-      position:absolute;
-      width: 46px; height: 46px;
-      border-radius: 999px;
-      border: 2px solid rgba(176,11,85,.35);
-      transform: translate(-50%, -50%);
-      animation: pulse 1.6s ease-out infinite;
-      pointer-events:none;
-    }
-    @keyframes pulse{
-      0%{opacity:.85; transform: translate(-50%,-50%) scale(.35);}
-      100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
-    }
+    // Click-to-drop-pin
+    gmap.addListener("click", (e) => {
+      if (!e?.latLng) return;
+      setPicked(e.latLng.lat(), e.latLng.lng(), null);
+    });
 
-    .status{
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color:rgba(255,255,255,.86);
-      font-size:13px;
-      line-height:1.35;
-    }
-    .status b{color:rgba(255,255,255,.94)}
-    .danger{border-color: rgba(255,80,120,.35)}
-    .ok{border-color: rgba(80,255,160,.28)}
-  </style>
-</head>
-<body>
-  <header>
-    <div class="left">
-      <img src="logo.png" alt="Uzone logo" />
-      <div class="title">
-        <h1>Post Motive</h1>
-        <div class="sub">Drop a pin or search an address • saved to the map</div>
-      </div>
-    </div>
-    <div class="right">
-      <a class="btn" href="hub.html">Uhub</a>
-      <a class="btn" href="events.html">Umotives</a>
-      <a class="btn" href="my_events.html">My Motives</a>
-    </div>
-  </header>
+    // Places search (NEW component: gmp-place-autocomplete)
+    if (placeEl) {
+      placeEl.addEventListener("gmp-select", async (e) => {
+        const place = e.place;
+        await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
+        if (!place.location) return;
 
-  <main>
-    <section class="panel">
-      <div class="grid">
-        <div class="col6">
-          <label for="name">Motive name</label>
-          <input id="name" placeholder="e.g., Rooftop pregame" />
-        </div>
+        const lat = place.location.lat();
+        const lng = place.location.lng();
+        const label = place.formattedAddress || place.displayName || null;
 
-        <div class="col6">
-          <label for="tags">Tags (comma separated)</label>
-          <input id="tags" placeholder="e.g., party, uottawa, music" />
-        </div>
-
-        <div class="col6">
-          <label for="startDate">Start date</label>
-          <input id="startDate" type="date" />
-        </div>
-        <div class="col6">
-          <label for="startTime">Start time</label>
-          <input id="startTime" type="time" />
-        </div>
-
-        <div class="col6">
-          <label for="endDate">End date (optional)</label>
-          <input id="endDate" type="date" />
-        </div>
-        <div class="col6">
-          <label for="endTime">End time (optional)</label>
-          <input id="endTime" type="time" />
-        </div>
-
-        <div class="col12">
-          <label for="description">Description</label>
-          <textarea id="description" placeholder="What’s the vibe? What should people know?"></textarea>
-        </div>
-
-        <div class="col12">
-          <div class="row" style="justify-content:space-between;">
-            <div class="row" style="gap:12px;">
-              <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer;">
-                <input id="inviteOnly" type="checkbox" style="width:18px;height:18px;" />
-                <span class="hint"><b>Invite-only</b> (hide exact location on discovery map)</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="grid">
-        <div class="col12">
-          <label for="locationInput">Search address (optional)</label>
-          <input id="locationInput" placeholder="Type an address or place name, or just click the map to drop a pin…" />
-          <div class="hint" style="margin-top:8px;">
-            Tip: Clicking the map drops a pin. Dragging the map is fine. You can also use “Use my location”.
-          </div>
-        </div>
-
-        <div class="col12" id="mapWrap">
-          <div id="map"></div>
-        </div>
-
-        <div class="col12">
-          <div class="row" style="justify-content:space-between;">
-            <div class="row">
-              <button class="btn" id="useMyLocBtn" type="button">Use my location</button>
-              <button class="btn" id="clearPinBtn" type="button">Clear pin</button>
-            </div>
-            <div id="pinStatus" class="status danger">No pin selected. Click the map or search an address.</div>
-          </div>
-        </div>
-
-        <div class="col12">
-          <div class="row" style="justify-content:flex-end;">
-            <button class="btn primary" id="postBtn" type="button">Post Motive</button>
-          </div>
-          <div class="hint" id="msg" style="margin-top:10px;"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Google Maps JS (replace key + map_id) -->
-  <script
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt8UPeNwhR4mPoQgWUoYxUE2UrlKYL6UE&libraries=places,marker&v=weekly"
-    async defer></script>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-    import {
-      getFirestore, collection, addDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-      authDomain: "uzone-6148d.firebaseapp.com",
-      projectId: "uzone-6148d",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const $ = (id) => document.getElementById(id);
-    const msg = $("msg");
-    const postBtn = $("postBtn");
-    const pinStatus = $("pinStatus");
-
-    let gmap, marker, autocomplete;
-    let picked = { lat: null, lng: null, place: null };
-
-    function esc(s){
-      return String(s||"").replace(/[&<>"']/g, m => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-      }[m]));
-    }
-
-    function setStatus(text, ok){
-      pinStatus.textContent = text;
-      pinStatus.classList.toggle("ok", !!ok);
-      pinStatus.classList.toggle("danger", !ok);
-    }
-
-    function setPicked(lat, lng, placeText){
-      picked.lat = lat;
-      picked.lng = lng;
-      picked.place = placeText || null;
-
-      const content = document.createElement("div");
-      content.style.position = "relative";
-      const dot = document.createElement("div");
-      dot.className = "glow-pin";
-      const pulse = document.createElement("div");
-      pulse.className = "glow-pulse";
-      content.appendChild(pulse);
-      content.appendChild(dot);
-
-      if (!marker){
-        marker = new google.maps.marker.AdvancedMarkerElement({
-          map: gmap,
-          position: { lat, lng },
-          content
-        });
-      } else {
-        marker.position = { lat, lng };
-        marker.content = content;
-      }
-
-      gmap.panTo({ lat, lng });
-      setStatus(placeText ? `Pinned: ${placeText}` : `Pinned: ${lat.toFixed(5)}, ${lng.toFixed(5)}`, true);
-    }
-
-    function clearPicked(){
-      picked = { lat:null, lng:null, place:null };
-      if (marker) marker.map = null;
-      marker = null;
-      setStatus("No pin selected. Click the map or search an address.", false);
-    }
-
-    // Wait until Google Maps script is ready
-    function whenGoogleReady(){
-      return new Promise((resolve) => {
-        const tick = () => (window.google?.maps?.Map ? resolve() : setTimeout(tick, 30));
-        tick();
+        setPicked(lat, lng, label);
+        gmap.setZoom(15);
       });
     }
 
-    async function initMap(){
-      await whenGoogleReady();
-
-      // Default center (Ottawa)
-      const defaultCenter = { lat: 45.4215, lng: -75.6972 };
-
-      gmap = new google.maps.Map($("map"), {
-        center: defaultCenter,
-        zoom: 12,
-        mapId: "f4ab270f6c4fc6deeed4fa00", // IMPORTANT: required for cloud styling + advanced markers
-        disableDefaultUI: false,
-        clickableIcons: false
-      });
-
-      // Click to drop pin
-      gmap.addListener("click", (e) => {
-        if (!e?.latLng) return;
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        setPicked(lat, lng, null);
-      });
-
-      // Address autocomplete (Places)
-      autocomplete = new google.maps.places.Autocomplete($("locationInput"), {
-        fields: ["formatted_address", "geometry", "name"],
-      });
-
-      autocomplete.addListener("place_changed", () => {
-        const place = autocomplete.getPlace();
-        const loc = place?.geometry?.location;
-        if (!loc) return;
-        const lat = loc.lat();
-        const lng = loc.lng();
-        const text = place.formatted_address || place.name || null;
-        setPicked(lat, lng, text);
-      });
-
-      $("useMyLocBtn").addEventListener("click", () => {
+    // Optional: “use my location” button if you have one
+    const useMyLocBtn = $("useMyLocBtn");
+    if (useMyLocBtn) {
+      useMyLocBtn.addEventListener("click", () => {
         if (!navigator.geolocation) return alert("Geolocation not supported.");
         navigator.geolocation.getCurrentPosition(
-          (pos) => setPicked(pos.coords.latitude, pos.coords.longitude, "Your location"),
+          (pos) => {
+            setPicked(pos.coords.latitude, pos.coords.longitude, "Your location");
+            gmap.setZoom(15);
+          },
           () => alert("Couldn’t get your location.")
         );
       });
-
-      $("clearPinBtn").addEventListener("click", clearPicked);
     }
 
-    function parseTags(str){
-      return (str || "")
-        .split(",")
-        .map(s => s.trim())
-        .filter(Boolean)
-        .slice(0, 20);
+    // Optional: clear pin button if you have one
+    const clearPinBtn = $("clearPinBtn");
+    if (clearPinBtn) clearPinBtn.addEventListener("click", clearPicked);
+
+    setPinStatus("No pin selected. Search an address or click the map.", false);
+  }
+
+  async function postEvent(user) {
+    const name = nameEl?.value?.trim() || "";
+    const tags = parseTags(tagsEl?.value || "");
+    const startDate = startDateEl?.value || "";
+    const startTime = startTimeEl?.value || "";
+    const endDate = endDateEl?.value || null;
+    const endTime = endTimeEl?.value || null;
+    const description = descEl?.value?.trim() || null;
+    const inviteOnly = !!inviteOnlyEl?.checked;
+
+    if (!name) return alert("Please enter a motive name.");
+    if (!startDate || !startTime) return alert("Please choose a start date and time.");
+    if (!picked.lat || !picked.lng) return alert("Please search an address or drop a pin on the map.");
+
+    const payload = {
+      name,
+      tags,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      description,
+
+      // Location fields used by your map viewer page:
+      location: picked.label || null,
+      lat: picked.lat,
+      lng: picked.lng,
+
+      inviteOnly,
+
+      ownerUid: user.uid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    const ref = await addDoc(collection(db, "events"), payload);
+    window.location.href = `event.html?id=${encodeURIComponent(ref.id)}`;
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "index.html"; return; }
+    await initMap();
+
+    if (postBtn) {
+      postBtn.addEventListener("click", async () => {
+        postBtn.disabled = true;
+        try { await postEvent(user); }
+        catch (e) { console.error(e); alert("Failed to post event. Check console + Firestore rules."); }
+        finally { postBtn.disabled = false; }
+      });
     }
+  });
+</script>
 
-    function showMsg(text, good){
-      msg.textContent = text || "";
-      msg.style.color = good ? "rgba(80,255,160,.9)" : "rgba(255,120,160,.95)";
-    }
-
-    async function postEvent(user){
-      const name = $("name").value.trim();
-      const tags = parseTags($("tags").value);
-      const startDate = $("startDate").value || "";
-      const startTime = $("startTime").value || "";
-      const endDate = $("endDate").value || "";
-      const endTime = $("endTime").value || "";
-      const description = $("description").value.trim();
-      const inviteOnly = $("inviteOnly").checked;
-
-      if (!name) return showMsg("Please enter a motive name.", false);
-      if (!startDate || !startTime) return showMsg("Please choose a start date and time.", false);
-
-      // Require pin for open events. For invite-only, you can still require it, but you might later blur it on the map.
-      if (!picked.lat || !picked.lng) return showMsg("Please drop a pin or search an address.", false);
-
-      postBtn.disabled = true;
-      showMsg("Posting…", true);
-
-      try{
-        const payload = {
-          name,
-          tags,
-          startDate, startTime,
-          endDate: endDate || null,
-          endTime: endTime || null,
-          description: description || null,
-
-          // Store both:
-          location: picked.place || $("locationInput").value.trim() || null,  // human text
-          lat: picked.lat,
-          lng: picked.lng,
-
-          inviteOnly,
-
-          ownerUid: user.uid,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        };
-
-        const ref = await addDoc(collection(db, "events"), payload);
-
-        showMsg("Posted! Opening your motive…", true);
-        window.location.href = `event.html?id=${encodeURIComponent(ref.id)}`;
-      } catch(err){
-        console.error(err);
-        showMsg("Failed to post. Check console + Firestore rules.", false);
-      } finally {
-        postBtn.disabled = false;
-      }
-    }
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "index.html"; return; }
-      await initMap();
-      postBtn.addEventListener("click", () => postEvent(user));
-    });
-  </script>
-</body>
-</html>
+<style>
+/* Pulse keyframes if you used buildGlowPinEl() */
+@keyframes pulse{
+  0%{opacity:.85; transform: translate(-50%,-50%) scale(.35);}
+  100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
+}
+</style>
