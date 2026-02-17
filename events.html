@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Uzone • Umotives</title>
 
-  <!-- Tab icon -->
   <link rel="icon" type="image/png" href="logo.png" />
   <meta name="color-scheme" content="dark light" />
 
@@ -46,8 +45,6 @@
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-
-      /* match hub feel */
       position: sticky;
       top: 10px;
       z-index: 10;
@@ -63,7 +60,6 @@
     .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
-    /* Buttons: match hub/profile "glassy + accent glow" behavior */
     .btn{
       padding:10px 12px;
       border-radius:12px;
@@ -97,7 +93,6 @@
     }
     .btn:disabled{opacity:.65;cursor:not-allowed}
 
-    /* Primary accent button (Post Event, etc) */
     .btn.primary{
       border:1px solid rgba(176,11,85,.55);
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
@@ -108,9 +103,6 @@
       border-color: var(--accent);
       box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
       filter: brightness(1.08);
-    }
-    .btn.primary:active{
-      box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.20);
     }
 
     main{
@@ -163,7 +155,6 @@
       gap:14px;
     }
 
-    /* Event cards */
     .card{
       grid-column: span 6;
       border:1px solid var(--border);
@@ -296,7 +287,8 @@
     .tag.invite .tdot{background: rgba(255,210,80,.85);}
     .tag.open .tdot{background: rgba(80,255,160,.75);}
 
-    .ratingPill{
+    /* ✅ Cleaner rating */
+    .ratingBadge{
       display:inline-flex;
       align-items:center;
       gap:8px;
@@ -304,19 +296,42 @@
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
-      font-size:12px;
-      color: rgba(255,255,255,.86);
+      color: rgba(255,255,255,.88);
       white-space:nowrap;
+      backdrop-filter: blur(10px);
     }
-    .meter{
-      width:36px;height:36px;border-radius:999px;
-      background: conic-gradient(var(--accent) 0deg, rgba(255,255,255,.12) 0deg);
-      border:1px solid rgba(255,255,255,.14);
-      display:grid;
-      place-items:center;
-      font-weight:900;
-      font-size:11px;
-      color:rgba(255,255,255,.92);
+    .ratingBadge svg{
+      width:14px;height:14px;
+      flex:0 0 auto;
+      fill: rgba(255,255,255,.86);
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));
+    }
+    .ratingBadge .val{
+      font-weight:950;
+      letter-spacing:.2px;
+      color: rgba(255,255,255,.92);
+      font-size:12px;
+      line-height:1;
+    }
+    .ratingBadge .sub{
+      color: rgba(255,255,255,.66);
+      font-size:12px;
+      line-height:1;
+    }
+    .ratingBar{
+      width:64px;
+      height:6px;
+      border-radius:999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .ratingBar > span{
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(176,11,85,.95), rgba(176,11,85,.55));
+      border-radius:999px;
     }
 
     .empty{
@@ -340,11 +355,11 @@
       </div>
     </div>
     <div class="right">
-  <a class="btn" href="hub.html">Hub</a>
-  <a class="btn" href="map.html">Map</a>
-  <a class="btn" href="my_events.html">My Motives</a>
-  <a class="btn primary" href="post_event.html">Post Motive</a>
-</div>
+      <a class="btn" href="hub.html">Hub</a>
+      <a class="btn" href="map.html">Map</a>
+      <a class="btn" href="my_events.html">My Motives</a>
+      <a class="btn primary" href="post_event.html">Post Motive</a>
+    </div>
   </header>
 
   <main>
@@ -389,10 +404,8 @@
       }[m]));
     }
 
-    function ratingCircle(avg){
-      const v = Math.max(0, Math.min(10, Number(avg||0)));
-      const deg = (v/10) * 360;
-      return { v, deg };
+    function clamp10(avg){
+      return Math.max(0, Math.min(10, Number(avg || 0)));
     }
 
     function fmtDate(yyyyMmDd){
@@ -423,8 +436,8 @@
       empty.style.display = list.length ? "none" : "block";
 
       list.forEach(ev => {
-        const avg = ev.ratingAvg ?? 0;
-        const { v, deg } = ratingCircle(avg);
+        const v10 = clamp10(ev.ratingAvg);
+        const pct = (v10 / 10) * 100;
 
         const tags = Array.isArray(ev.tags) ? ev.tags : [];
         const inviteOnly = !!ev.inviteOnly;
@@ -456,8 +469,15 @@
                 Spots: <b>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</b>
                 • Venue: <b>${esc(ev.venueSize || "—")}</b>
               </div>
-              <div class="ratingPill" title="Average rating">
-                <div class="meter" style="background: conic-gradient(var(--accent) ${deg}deg, rgba(255,255,255,.12) 0deg);">${v.toFixed(1)}</div>
+
+              <!-- ✅ cleaner rating badge -->
+              <div class="ratingBadge" title="Average rating">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
+                </svg>
+                <span class="val">${v10.toFixed(1)}</span>
+                <span class="sub">/10</span>
+                <span class="ratingBar" aria-hidden="true"><span style="width:${pct.toFixed(0)}%"></span></span>
               </div>
             </div>
 
@@ -495,7 +515,6 @@
       empty.style.display = "none";
       allEvents = [];
 
-      // Prefer upcoming-ish ordering: startDate desc fallback to createdAt desc
       const qy = query(collection(db, "events"), orderBy("startDate", "desc"), limit(80));
       const snap = await getDocs(qy);
       allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
