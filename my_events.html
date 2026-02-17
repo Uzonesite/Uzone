@@ -59,7 +59,7 @@
     .title h1{margin:0;font-size:18px;letter-spacing:.2px}
     .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
-    /* Buttons: match events page "glassy + accent glow" behavior */
+
     .btn{
       padding:10px 12px;
       border-radius:12px;
@@ -93,7 +93,6 @@
     }
     .btn:disabled{opacity:.65;cursor:not-allowed}
 
-    /* Primary accent button */
     .btn.primary{
       border:1px solid rgba(176,11,85,.55);
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
@@ -505,6 +504,7 @@
 
     <div class="right">
       <a class="btn" href="hub.html">← Hub</a>
+      <a class="btn" href="map.html">Map</a>
       <a class="btn" href="events.html">Explore</a>
       <a class="btn primary" href="post_event.html">+ Post</a>
     </div>
@@ -612,12 +612,15 @@
     const eEst = document.getElementById("eEst");
 
     let currentUser = null;
-    let allMine = [];         // full event objects
-    let allRequests = [];     // aggregated pending requests
+    let allMine = [];
+    let allRequests = [];
 
     // modal state
     let editingEventId = null;
     let editingInviteOnly = false;
+
+    // cache names
+    const userNameCache = new Map(); // uid -> string
 
     function showMsg(el, text, kind=""){
       el.className = "msg" + (kind ? " " + kind : "");
@@ -635,7 +638,6 @@
     }
 
     function pickCreatedAtMs(d){
-      // Firestore Timestamp: {seconds, nanoseconds} OR Date OR number OR string
       const t = d.createdAt || d.updatedAt || d.timeCreated || null;
       if (!t) return 0;
       if (typeof t === "number") return t;
@@ -666,6 +668,23 @@
         .replaceAll(">","&gt;")
         .replaceAll('"',"&quot;")
         .replaceAll("'","&#039;");
+    }
+
+    async function getUserDisplayName(uid){
+      if (!uid) return "User";
+      if (userNameCache.has(uid)) return userNameCache.get(uid);
+
+      try{
+        const snap = await getDoc(doc(db, "users", uid));
+        const data = snap.exists() ? (snap.data() || {}) : {};
+        const name = safeStr(data.name || data.displayName || data.username || data.handle || "");
+        const finalName = name.trim() ? name.trim() : "User";
+        userNameCache.set(uid, finalName);
+        return finalName;
+      }catch{
+        userNameCache.set(uid, "User");
+        return "User";
+      }
     }
 
     // --- Modal helpers ---
@@ -729,16 +748,12 @@
       if (e.key === "Escape" && editOverlay.classList.contains("show")) closeEdit();
     });
 
-    async function confirmAndDelete(ev){
+    async function deleteEventNoConfirm(ev){
       if (!currentUser) return;
-
-      const ok = confirm(`Delete "${(ev.name || "this event")}"? This can’t be undone.`);
-      if (!ok) return;
 
       try{
         await deleteDoc(doc(db, "events", ev.id));
 
-        // optimistic UI update
         allMine = allMine.filter(x => x.id !== ev.id);
         renderMine();
         await loadInviteRequests(currentUser.uid).catch(() => {});
@@ -754,7 +769,7 @@
     deleteFromModalBtn.addEventListener("click", async () => {
       const ev = allMine.find(x => x.id === editingEventId);
       if (!ev) return;
-      await confirmAndDelete(ev);
+      await deleteEventNoConfirm(ev);
       closeEdit();
     });
 
@@ -799,7 +814,6 @@
 
         await updateDoc(doc(db, "events", editingEventId), patch);
 
-        // optimistic local update
         const local = allMine.find(x => x.id === editingEventId);
         if (local) Object.assign(local, patch);
 
@@ -833,7 +847,6 @@
 
       countText.textContent = String(filtered.length);
       mineGrid.innerHTML = "";
-
       emptyMine.style.display = (filtered.length === 0) ? "block" : "none";
 
       for (const e of filtered){
@@ -871,7 +884,6 @@
         mineGrid.appendChild(el);
       }
 
-      // Wire copy buttons
       mineGrid.querySelectorAll('button[data-copy]').forEach(btn => {
         btn.addEventListener("click", async () => {
           try{
@@ -886,7 +898,6 @@
         });
       });
 
-      // Wire edit buttons
       mineGrid.querySelectorAll('button[data-edit]').forEach(btn => {
         btn.addEventListener("click", () => {
           const id = btn.getAttribute("data-edit");
@@ -895,19 +906,17 @@
         });
       });
 
-      // Wire delete buttons
       mineGrid.querySelectorAll('button[data-del]').forEach(btn => {
         btn.addEventListener("click", async () => {
           const id = btn.getAttribute("data-del");
           const ev = allMine.find(x => x.id === id);
           if (!ev) return;
-          await confirmAndDelete(ev);
+          await deleteEventNoConfirm(ev); // no popup
         });
       });
     }
 
     async function loadMine(uid){
-      // IMPORTANT: no orderBy here -> avoids composite index requirements.
       const fields = ["hostUid","ownerUid","createdBy","creatorUid","uid"];
       const seen = new Map();
 
@@ -939,7 +948,6 @@
     }
 
     async function loadInviteRequests(uid){
-      // Aggregate pending applications across inviteOnly events you host.
       allRequests = [];
       reqList.innerHTML = "";
       emptyReq.style.display = "none";
@@ -953,9 +961,7 @@
         return;
       }
 
-      // Be reasonable: only scan the newest 40 invite-only motives to avoid too many reads.
       const scan = inviteMine.slice(0, 40);
-
       let total = 0;
 
       for (const ev of scan){
@@ -965,17 +971,26 @@
             where("status", "==", "pending")
           );
           const snap = await getDocs(appsQ);
-          snap.forEach(d => {
+
+          for (const d of snap.docs){
             total++;
+            const data = d.data() || {};
+            const applicantUid = d.id;
+
+            // prefer stored name in application; otherwise fetch from users/{uid}
+            const storedName = safeStr(data.applicantName || data.name || data.displayName || data.username || "");
+            const applicantName = storedName.trim() ? storedName.trim() : await getUserDisplayName(applicantUid);
+
             allRequests.push({
               eventId: ev.id,
               eventName: ev.name || "Untitled",
               eventWhen: fmtWhen(ev),
               eventLocation: ev.location || "—",
-              applicantUid: d.id,
-              ...d.data()
+              applicantUid,
+              applicantName,
+              ...data
             });
-          });
+          }
         }catch(err){
           console.warn("Failed reading applications for", ev.id, err);
         }
@@ -994,7 +1009,6 @@
         return;
       }
 
-      // Render
       reqList.innerHTML = "";
       allRequests.sort((a,b) => (pickCreatedAtMs(b) - pickCreatedAtMs(a)));
 
@@ -1010,9 +1024,9 @@
         el.innerHTML = `
           <div class="reqTop">
             <div>
-              <h3 class="reqTitle">${esc(r.eventName)} <span class="badge invite" style="margin-left:8px;">invite-only</span></h3>
+              <h3 class="reqTitle">${esc(r.eventName)}</h3>
               <div class="reqMeta">
-                <div><b>Applicant:</b> ${esc(r.applicantName || r.displayName || "User")}</div>
+                <div><b>Applicant:</b> ${esc(r.applicantName || "User")}</div>
                 <div><b>When:</b> ${esc(r.eventWhen)}</div>
                 <div><b>Requested:</b> ${esc(created || "—")}</div>
                 ${note ? `<div><b>Note:</b> ${esc(note)}</div>` : ""}
@@ -1021,12 +1035,11 @@
             <div class="reqBtns">
               <button class="mini ok" type="button" data-accept="1">Accept</button>
               <button class="mini no" type="button" data-deny="1">Deny</button>
-              <a class="mini" href="event.html?id=${encodeURIComponent(r.eventId)}">Open event</a>
+              <a class="mini" href="view_profile.html?uid=${encodeURIComponent(r.applicantUid)}">View profile</a>
             </div>
           </div>
         `;
 
-        // Wire buttons
         const acceptBtn = el.querySelector("button[data-accept]");
         const denyBtn = el.querySelector("button[data-deny]");
 
@@ -1046,7 +1059,6 @@
         const appRef = doc(db, "events", r.eventId, "applications", r.applicantUid);
 
         if (decision === "accepted"){
-          // mark as member
           const memRef = doc(db, "events", r.eventId, "members", r.applicantUid);
           await setDoc(memRef, {
             uid: r.applicantUid,
@@ -1066,7 +1078,6 @@
         setReqMsg(decision === "accepted" ? "Accepted request." : "Denied request.", "good");
         setTimeout(() => setReqMsg(""), 1200);
 
-        // Remove from UI quickly (refresh afterwards)
         await refreshAll();
       }catch(err){
         console.error(err);
@@ -1084,7 +1095,6 @@
       setTopMsg("");
     }
 
-    // Events
     refreshBtn.addEventListener("click", refreshAll);
     searchEl.addEventListener("input", renderMine);
 
