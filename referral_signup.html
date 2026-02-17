@@ -245,11 +245,11 @@
       <p>
         You’ve been invited to Uzone.
         <br /><br />
-        Sign up using this invite and you <b>both</b> get <b>+1 credit</b>.
+        Sign up using this invite. Once <b>both</b> accounts are <b>verified</b>, you’ll each receive <b>+1 credit</b>.
       </p>
 
       <div class="pillRow">
-        <span class="pill">+1 credit each</span>
+        <span class="pill">+1 credit after verification</span>
         <span class="pill">Students only</span>
         <span class="pill">Fast signup</span>
       </div>
@@ -268,7 +268,7 @@
         <h2>Create your account</h2>
       </div>
       <div class="sub">
-        This signup page is for referrals. If the invite is valid, credits will be applied automatically.
+        Referral will be recorded now, credits are awarded automatically once both accounts are verified.
       </div>
 
       <form id="signupForm" novalidate>
@@ -298,7 +298,7 @@
           <input id="confirmPassword" type="password" autocomplete="new-password" placeholder="••••••••" required />
         </label>
 
-        <button class="btn" id="submitBtn" type="submit" disabled>Create account + claim credits</button>
+        <button class="btn" id="submitBtn" type="submit" disabled>Create account</button>
 
         <div class="msg" id="msgBox" aria-live="polite"></div>
 
@@ -329,8 +329,7 @@
       collection,
       query,
       where,
-      getDocs,
-      increment
+      getDocs
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -395,7 +394,7 @@
     // --- Referral resolution ---
     let refRaw = getRefParam();
     let refUid = null;
-    let refDisplay = null; // name/publicId for UI
+    let refDisplay = null;
 
     async function resolveRef(raw){
       if (!raw) return { ok:false, reason:"Missing referral code." };
@@ -441,7 +440,7 @@
         refDisplay = res.label;
 
         submitBtn.disabled = false;
-        setInviteStatus(true, "Valid", `Invited by ${refDisplay}. When you sign up, you both get +1 credit.`);
+        setInviteStatus(true, "Valid", `Invited by ${refDisplay}. Credits are awarded after both accounts are verified.`);
       } catch (e){
         refUid = null;
         refDisplay = null;
@@ -452,14 +451,10 @@
 
     await initInvite();
 
-    // --- Signup & credit transaction ---
-    async function createUserWithReferralCredits({ user, displayName, refUid }){
-      // One Firestore transaction to:
-      // 1) allocate publicId counter
-      // 2) create the new user doc (with credits)
-      // 3) increment referrer's credits
+    // --- Create user + record referral (NO CREDIT AWARD HERE) ---
+    async function createUserWithPendingReferral({ user, displayName, refUid }){
       await runTransaction(db, async (tx) => {
-        // counter -> publicId
+        // Allocate publicId via counter
         const counterRef = doc(db, "meta", "counters");
         const counterSnap = await tx.get(counterRef);
         const current = counterSnap.exists() ? Number(counterSnap.data()?.userCounter || 0) : 0;
@@ -468,38 +463,26 @@
 
         tx.set(counterRef, { userCounter: next }, { merge: true });
 
-        // new user doc
+        // Create user doc (credits are NOT awarded here)
         const userRef = doc(db, "users", user.uid);
 
-        const newUserData = {
+        tx.set(userRef, {
           publicId,
           name: displayName || "",
           email: user.email || "",
           verified: false,
           createdAt: serverTimestamp(),
 
-          // Credits
-          credits: 1,
-          creditsUpdatedAt: serverTimestamp(),
+          // Credits: keep at 0 for now (or omit entirely if you prefer)
+          credits: 0,
 
-          // Referral
+          // Referral: recorded as pending
           referredBy: refUid,
-          referralApplied: true
-        };
+          referralStatus: "pending",
+          referralAwarded: false,
 
-        tx.set(userRef, newUserData, { merge: true });
-
-        // referrer gets +1 credit
-        const refUserRef = doc(db, "users", refUid);
-        const refSnap = await tx.get(refUserRef);
-        if (!refSnap.exists()) {
-          // If ref disappeared somehow, still allow signup, but don't crash the txn.
-          // We also flip the new user's credit back to 0 to keep things fair.
-          tx.set(userRef, { credits: 0, referredBy: null, referralApplied: false }, { merge: true });
-          return;
-        }
-
-        tx.set(refUserRef, { credits: increment(1), creditsUpdatedAt: serverTimestamp() }, { merge: true });
+          creditsUpdatedAt: serverTimestamp()
+        }, { merge: true });
       });
     }
 
@@ -543,9 +526,9 @@
 
         await updateProfile(user, { displayName });
 
-        await createUserWithReferralCredits({ user, displayName, refUid });
+        await createUserWithPendingReferral({ user, displayName, refUid });
 
-        setMsg("Account created! +1 credit applied to both of you. Redirecting…", "ok");
+        setMsg("Account created! Referral recorded. Credits will be awarded after both accounts are verified. Redirecting…", "ok");
         window.location.href = "hub.html";
       } catch (err){
         setMsg(friendlyAuthError(err), "error");
