@@ -5,9 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>Uzone • Post Motive</title>
 
-<!-- Tab icon -->
 <link rel="icon" type="image/png" href="logo.png" />
 <meta name="color-scheme" content="dark light" />
+
+<!-- Leaflet (map) -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
 
 <style>
   :root{
@@ -42,8 +54,6 @@
     background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-
-    /* match hub feel */
     position: sticky;
     top: 10px;
     z-index: 10;
@@ -56,7 +66,6 @@
   .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
-  /* Unified button system (same as hub/profile/events) */
   .btn{
     padding:10px 12px;
     border-radius:12px;
@@ -88,7 +97,6 @@
   }
   .btn:disabled{opacity:.6; cursor:not-allowed}
 
-  /* Primary button (Post Event action) */
   .btn.primary{
     border:1px solid rgba(176,11,85,.55);
     background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
@@ -105,6 +113,7 @@
   }
 
   main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+
   .card{
     border:1px solid var(--border);
     background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
@@ -115,7 +124,7 @@
   }
 
   .sectionHead{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
     margin:2px 0 12px 0;
   }
   .sectionHead h2{
@@ -124,16 +133,17 @@
     letter-spacing:.25px;
     color:rgba(255,255,255,.92);
   }
-  .hint{color:rgba(255,255,255,.60); font-size:12px;}
+  .hint{color:rgba(255,255,255,.60); font-size:12px; line-height:1.25;}
+  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
 
-  .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
-  .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;}
-  @media (max-width: 900px){ .row3{grid-template-columns:1fr;} }
-  @media (max-width: 860px){ .row{grid-template-columns:1fr;} }
+  .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
+  .grid3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;}
+  @media (max-width: 980px){ .grid3{grid-template-columns:1fr;} }
+  @media (max-width: 860px){ .grid2{grid-template-columns:1fr;} }
 
   label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
 
-  input, textarea{
+  input, textarea, select{
     width:100%;
     padding:12px 12px;
     border-radius:12px;
@@ -143,23 +153,18 @@
     outline:none;
     font-size:14px;
   }
-  input:focus, textarea:focus{
+  select{appearance:none}
+  input:focus, textarea:focus, select:focus{
     border-color: rgba(176,11,85,.60);
     box-shadow: 0 0 0 4px rgba(176,11,85,.20);
   }
+  input[type="date"], input[type="time"]{ color-scheme: dark; }
 
-  /* Make native date/time pickers look consistent */
-  input[type="date"], input[type="time"]{
-    color-scheme: dark;
-  }
-
-  /* Description sizing + spacing fix */
   .bioLabel{gap:8px;}
   .bioLabel textarea{
     min-height: 210px;
     line-height: 1.35;
   }
-
   .stack{display:grid; gap:12px; align-content:start;}
 
   /* Preview card */
@@ -285,7 +290,6 @@
     transform: translateY(0px) scale(.99);
     box-shadow: 0 0 10px rgba(176,11,85,.65), 0 10px 26px rgba(176,11,85,.18);
   }
-
   .fileName{
     color: rgba(255,255,255,.75);
     font-size:12px;
@@ -307,11 +311,7 @@
     width:0%;
     background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
   }
-  .mini{
-    color: rgba(255,255,255,.65);
-    font-size:12px;
-    line-height:1.35;
-  }
+  .mini{color: rgba(255,255,255,.65); font-size:12px; line-height:1.35;}
 
   /* Invite-only toggle */
   .togglePill{
@@ -361,6 +361,56 @@
     transform: translateY(-50%) translateX(20px);
   }
 
+  /* Map */
+  .mapWrap{
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+    border-radius:14px;
+    padding:12px;
+    display:grid;
+    gap:10px;
+  }
+  #map{
+    width:100%;
+    height:320px;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+  }
+  .mapRow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .mapRowLeft{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    flex: 1 1 auto;
+    min-width: 240px;
+  }
+  .mapHint{
+    color: rgba(255,255,255,.70);
+    font-size:12px;
+    line-height:1.3;
+  }
+  .pillMini{
+    display:inline-flex;
+    gap:6px;
+    align-items:center;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.22);
+    color: rgba(255,255,255,.82);
+    font-size:12px;
+  }
+  .pillMini b{color: rgba(255,255,255,.92)}
+
   .msg{
     display:none;
     padding:10px 12px;
@@ -375,16 +425,22 @@
   .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
   .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 
-  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
+  .subnote{
+    color: rgba(255,255,255,.60);
+    font-size:12px;
+    line-height:1.25;
+    margin-top:6px;
+  }
 </style>
 </head>
+
 <body>
 <header>
   <div class="left">
     <img src="logo.png" alt="Uzone logo" />
     <div class="title">
-      <h1>Post Event</h1>
-      <div class="sub">Make it clean. Make it real.</div>
+      <h1>Post Motive</h1>
+      <div class="sub">Clean structure • better posting flow</div>
     </div>
   </div>
   <div class="right">
@@ -396,46 +452,79 @@
 
 <main>
   <section class="card">
+    <!-- ===================== -->
+    <!-- BASIC INFO            -->
+    <!-- ===================== -->
     <div class="sectionHead">
-      <h2>Basics</h2>
-      <div class="hint">Start with what people care about.</div>
+      <div>
+        <h2>Basic info</h2>
+        <div class="hint">Name + public location + map pin.</div>
+      </div>
+      <div class="hint">Required: name, start date/time, map pin.</div>
     </div>
 
-    <div class="row">
-      <label>Event name
+    <div class="grid2">
+      <label>Motive name <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
         <input id="name" placeholder="e.g., Rooftop Chill Night" />
       </label>
-      <label>Location (public)
+      <label>Location (public) <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
         <input id="location" placeholder="e.g., Near uOttawa • Downtown • 123 King St" />
-      </label>
-    </div>
-
-    <div class="row" style="margin-top:12px;">
-      <label>Venue size (capacity / space)
-        <input id="venueSize" placeholder="e.g., 2-bedroom condo • house • 40-person capacity" />
-      </label>
-      <label>Spots available (host says)
-        <input id="spotsAvailable" type="number" min="0" placeholder="e.g., 15" />
       </label>
     </div>
 
     <div class="divider"></div>
 
     <div class="sectionHead">
-      <h2>Schedule</h2>
-      <div class="hint">Pick date/time.</div>
+      <div>
+        <h2>Map pin</h2>
+        <div class="hint">Search a place or tap the map to drop a pin.</div>
+      </div>
+      <div class="hint">Pin = lat/lng saved to the event.</div>
     </div>
 
-    <div class="row">
-      <label>Start date
+    <div class="mapWrap">
+      <div class="mapRow">
+        <div class="mapRowLeft">
+          <label style="margin:0; flex: 1 1 320px;">
+            Search place / address
+            <input id="mapSearch" placeholder="e.g., ByWard Market, Ottawa" autocomplete="off" />
+          </label>
+          <button class="btn" id="searchBtn" type="button">Search</button>
+          <button class="btn" id="useMyLoc" type="button">Use my location</button>
+        </div>
+      </div>
+
+      <div id="map" aria-label="Map picker"></div>
+
+      <div class="mapRow" style="justify-content:flex-start;">
+        <span class="pillMini"><b>Pin</b> <span id="pinStatus">Not set</span></span>
+        <span class="mapHint">Tip: click map to place/move pin. Drag pin to fine-tune.</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ===================== -->
+    <!-- DATE / TIME           -->
+    <!-- ===================== -->
+    <div class="sectionHead">
+      <div>
+        <h2>Date & time</h2>
+        <div class="hint">Start is required, end is optional.</div>
+      </div>
+      <div class="hint">Shows on preview card.</div>
+    </div>
+
+    <div class="grid2">
+      <label>Start date <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
         <input id="startDate" type="date" />
       </label>
-      <label>Start time
+      <label>Start time <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
         <input id="startTime" type="time" />
       </label>
     </div>
 
-    <div class="row" style="margin-top:12px;">
+    <div class="grid2" style="margin-top:12px;">
       <label>End date (optional)
         <input id="endDate" type="date" />
       </label>
@@ -446,48 +535,83 @@
 
     <div class="divider"></div>
 
+    <!-- ===================== -->
+    <!-- OTHER INFO            -->
+    <!-- ===================== -->
     <div class="sectionHead">
-      <h2>Details</h2>
-      <div class="hint">Tags + description cover the vibe. (optional)</div>
+      <div>
+        <h2>Other info</h2>
+        <div class="hint">Venue size, spots, estimated attendance, ratio, tags, and description.</div>
+      </div>
+      <div class="hint">Optional, but helps people decide.</div>
     </div>
 
-    <div class="row">
-      <label>Size estimate (# of people)
+    <div class="grid3">
+      <label>Venue size (capacity / space)
+        <input id="venueSize" placeholder="e.g., 2-bedroom condo • house • ~40 capacity" />
+      </label>
+      <label>Spots available (host says)
+        <input id="spotsAvailable" type="number" min="0" placeholder="e.g., 15" />
+      </label>
+      <label>Estimated attendance (expected)
         <input id="sizeEstimate" type="number" min="1" placeholder="e.g., 20" />
       </label>
-      <label>Ratio
-        <input id="ratio" placeholder="e.g., 50/50 or 60/40" />
-      </label>
     </div>
 
-    <div class="row" style="margin-top:12px;">
-      <label>Tags (comma separated)
-        <input id="tags" placeholder="e.g., music, chill, alcohol, games" />
+    <div class="grid2" style="margin-top:12px;">
+      <label>Ratio (text)
+        <input id="ratio" placeholder="e.g., 50/50 or 60/40" />
+        <div class="subnote" id="ratioHint">Tip: set a ratio preset below to auto-fill.</div>
       </label>
 
-      <div class="stack">
-        <input id="inviteOnly" type="checkbox" hidden />
-        <div class="togglePill" id="invitePill" role="switch" aria-checked="false" tabindex="0">
-          <div class="tTitle">
-            <b>Invite-only</b>
-            <span>Hide exact date/time/location until you accept applicants.</span>
+      <div class="stack" style="gap:10px;">
+        <label>Ratio preset (estimate)
+          <select id="ratioPreset">
+            <option value="">Pick a preset (optional)</option>
+            <option value="50/50">Balanced (50/50)</option>
+            <option value="60/40">Slightly mixed (60/40)</option>
+            <option value="70/30">Skewed (70/30)</option>
+            <option value="80/20">Heavily skewed (80/20)</option>
+          </select>
+        </label>
+
+        <div class="stack" style="gap:10px;">
+          <input id="inviteOnly" type="checkbox" hidden />
+          <div class="togglePill" id="invitePill" role="switch" aria-checked="false" tabindex="0">
+            <div class="tTitle">
+              <b>Invite-only</b>
+              <span>Hide exact date/time/location until you accept applicants.</span>
+            </div>
+            <div class="switch" aria-hidden="true"></div>
           </div>
-          <div class="switch" aria-hidden="true"></div>
         </div>
       </div>
     </div>
 
-    <div class="row" style="margin-top:্তা;">
+    <div class="grid2" style="margin-top:12px;">
+      <label>Tags (comma separated)
+        <input id="tags" placeholder="e.g., music, chill, alcohol, games" />
+      </label>
+      <label>Quick notes (optional)
+        <input id="quickNotes" placeholder="e.g., bring ID • BYOB • parking on street" />
+      </label>
+    </div>
+
+    <div class="grid2" style="margin-top:12px;">
       <label class="bioLabel">Description
         <textarea id="description" placeholder="Describe the vibe, what’s happening, who it’s for, what to bring, etc."></textarea>
       </label>
 
+      <!-- Preview column -->
       <div class="stack">
         <div class="sectionHead" style="margin:0;">
-          <h2 style="font-size:13px;">Preview</h2>
+          <div>
+            <h2 style="font-size:13px;">Preview</h2>
+            <div class="hint">What people will see at a glance.</div>
+          </div>
         </div>
 
-        <div class="previewCard" aria-label="Event preview">
+        <div class="previewCard" aria-label="Motive preview">
           <div class="previewImgWrap">
             <img id="previewImg" alt="Event image preview" />
             <div id="previewEmpty">No image selected</div>
@@ -555,28 +679,30 @@ const nameEl = document.getElementById("name");
 const locationEl = document.getElementById("location");
 const venueSizeEl = document.getElementById("venueSize");
 const spotsAvailableEl = document.getElementById("spotsAvailable");
+const sizeEstimateEl = document.getElementById("sizeEstimate");
+const ratioEl = document.getElementById("ratio");
+const ratioPresetEl = document.getElementById("ratioPreset");
+const ratioHintEl = document.getElementById("ratioHint");
+const tagsEl = document.getElementById("tags");
+const quickNotesEl = document.getElementById("quickNotes");
+const descriptionEl = document.getElementById("description");
 
 const startDateEl = document.getElementById("startDate");
 const startTimeEl = document.getElementById("startTime");
 const endDateEl = document.getElementById("endDate");
 const endTimeEl = document.getElementById("endTime");
 
-const sizeEstimateEl = document.getElementById("sizeEstimate");
-const ratioEl = document.getElementById("ratio");
-const tagsEl = document.getElementById("tags");
-const descriptionEl = document.getElementById("description");
-
 const inviteEl = document.getElementById("inviteOnly");
 const invitePill = document.getElementById("invitePill");
 
-/* Preview elements */
+/* Preview */
 const pTitle = document.getElementById("pTitle");
 const pWhen = document.getElementById("pWhen");
 const pWhere = document.getElementById("pWhere");
 const pChips = document.getElementById("pChips");
 const pBadge = document.getElementById("pBadge");
 
-/* Upload elements */
+/* Upload */
 const imageFileEl = document.getElementById("imageFile");
 const pickImageBtn = document.getElementById("pickImage");
 const fileNameEl = document.getElementById("fileName");
@@ -585,8 +711,18 @@ const previewEmpty = document.getElementById("previewEmpty");
 const progress = document.getElementById("progress");
 const progressBar = document.getElementById("progressBar");
 
+/* Map */
+const mapSearchEl = document.getElementById("mapSearch");
+const searchBtn = document.getElementById("searchBtn");
+const useMyLocBtn = document.getElementById("useMyLoc");
+const pinStatusEl = document.getElementById("pinStatus");
+
 let currentUser = null;
 let selectedFile = null;
+
+/* Stored pin */
+let picked = { lat:null, lng:null, label:"" };
+let map, marker;
 
 function setMsg(text, kind=""){
   msg.style.display = text ? "block" : "none";
@@ -594,16 +730,14 @@ function setMsg(text, kind=""){
   msg.className = "msg" + (kind ? " " + kind : "");
 }
 
+/* Invite-only toggle */
 function setInviteUI(){
   const on = !!inviteEl.checked;
   invitePill.classList.toggle("on", on);
   invitePill.setAttribute("aria-checked", on ? "true" : "false");
   pBadge.textContent = on ? "Invite-only" : "Public";
 }
-invitePill.addEventListener("click", ()=>{
-  inviteEl.checked = !inviteEl.checked;
-  setInviteUI();
-});
+invitePill.addEventListener("click", ()=>{ inviteEl.checked = !inviteEl.checked; setInviteUI(); });
 invitePill.addEventListener("keydown", (e)=>{
   if (e.key === "Enter" || e.key === " "){
     e.preventDefault();
@@ -613,7 +747,18 @@ invitePill.addEventListener("keydown", (e)=>{
 });
 setInviteUI();
 
-/* Preview formatting helpers */
+/* Ratio preset -> fills ratio input */
+ratioPresetEl.addEventListener("change", ()=>{
+  const v = ratioPresetEl.value || "";
+  if (v){
+    ratioEl.value = v;
+    ratioHintEl.textContent = `Estimated ratio set to ${v}. You can edit it.`;
+  } else {
+    ratioHintEl.textContent = "Tip: set a ratio preset below to auto-fill.";
+  }
+});
+
+/* Preview helpers */
 function fmtDate(yyyyMmDd){
   if (!yyyyMmDd) return "";
   const [y,m,d] = yyyyMmDd.split("-").map(Number);
@@ -621,55 +766,55 @@ function fmtDate(yyyyMmDd){
   const dt = new Date(y, m-1, d);
   return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
 }
-
 function fmtWhen(){
   const sd = startDateEl.value || "";
   const st = startTimeEl.value || "";
   const ed = endDateEl.value || "";
   const et = endTimeEl.value || "";
-
   const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
   const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
-
   if (!start && !end) return "Start date & time";
   if (start && !end) return start;
   if (!start && end) return end;
   return `${start} → ${end}`;
 }
-
 function parseTags(){
-  return (tagsEl.value || "")
+  const base = (tagsEl.value || "")
     .split(",")
     .map(s=>s.trim())
-    .filter(Boolean)
-    .slice(0, 8);
+    .filter(Boolean);
+
+  // Optional “quick notes” as extra chip(s) (keeps your tags clean)
+  const qn = (quickNotesEl.value || "").trim();
+  const chips = [...base];
+  if (qn) chips.push(qn);
+  return chips.slice(0, 8);
 }
 
 function renderPreview(){
   const name = (nameEl.value || "").trim();
   const loc = (locationEl.value || "").trim();
-  pTitle.textContent = name || "Your event name";
+
+  pTitle.textContent = name || "Your motive name";
   pWhere.textContent = loc || "Location";
   pWhen.textContent = fmtWhen();
 
-  const chips = parseTags();
   pChips.innerHTML = "";
-  for (const t of chips){
+  for (const t of parseTags()){
     const el = document.createElement("div");
     el.className = "chip";
     el.textContent = t;
     pChips.appendChild(el);
   }
 }
-
-[nameEl, locationEl, startDateEl, startTimeEl, endDateEl, endTimeEl, tagsEl].forEach(el=>{
-  el.addEventListener("input", renderPreview);
-});
+[
+  nameEl, locationEl, startDateEl, startTimeEl, endDateEl, endTimeEl,
+  tagsEl, quickNotesEl
+].forEach(el=> el.addEventListener("input", renderPreview));
 renderPreview();
 
-/* Image upload UI */
+/* Image upload */
 pickImageBtn.addEventListener("click", ()=> imageFileEl.click());
-
 imageFileEl.addEventListener("change", ()=>{
   const f = imageFileEl.files?.[0] || null;
   selectedFile = null;
@@ -733,10 +878,168 @@ async function uploadEventImage(eventId){
   return url;
 }
 
+/* =======================
+   MAP (Leaflet + Nominatim)
+   ======================= */
+function setPinStatus(){
+  if (picked.lat == null || picked.lng == null){
+    pinStatusEl.textContent = "Not set";
+    return;
+  }
+  pinStatusEl.textContent = `${Number(picked.lat).toFixed(5)}, ${Number(picked.lng).toFixed(5)}`;
+}
+
+function ensureMarker(lat, lng){
+  if (!map) return;
+  if (!marker){
+    marker = L.marker([lat, lng], { draggable:true }).addTo(map);
+    marker.on("dragend", async ()=>{
+      const p = marker.getLatLng();
+      picked.lat = p.lat;
+      picked.lng = p.lng;
+      setPinStatus();
+      const label = await reverseGeocode(p.lat, p.lng);
+      if (label){
+        picked.label = label;
+        if (!locationEl.value.trim()){
+          locationEl.value = label;
+          renderPreview();
+        }
+      }
+    });
+  } else {
+    marker.setLatLng([lat, lng]);
+  }
+}
+
+async function geocode(query){
+  const q = String(query || "").trim();
+  if (!q) return null;
+
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+  const res = await fetch(url, { headers: { "Accept":"application/json" } });
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  if (!Array.isArray(data) || !data.length) return null;
+
+  const r = data[0];
+  return { lat:Number(r.lat), lng:Number(r.lon), label:r.display_name || q };
+}
+
+async function reverseGeocode(lat, lng){
+  try{
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`;
+    const res = await fetch(url, { headers: { "Accept":"application/json" } });
+    if (!res.ok) return "";
+    const data = await res.json();
+    return (data && data.display_name) ? data.display_name : "";
+  } catch(_) {
+    return "";
+  }
+}
+
+function initMap(){
+  const defaultCenter = [45.4215, -75.6972]; // Ottawa-ish
+  map = L.map("map", { zoomControl:true }).setView(defaultCenter, 12);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+
+  map.on("click", async (e)=>{
+    picked.lat = e.latlng.lat;
+    picked.lng = e.latlng.lng;
+    ensureMarker(picked.lat, picked.lng);
+    setPinStatus();
+
+    const label = await reverseGeocode(picked.lat, picked.lng);
+    if (label){
+      picked.label = label;
+      if (!locationEl.value.trim()){
+        locationEl.value = label;
+        renderPreview();
+      }
+    }
+  });
+
+  setPinStatus();
+}
+
+searchBtn.addEventListener("click", async ()=>{
+  const q = mapSearchEl.value.trim();
+  if (!q) { setMsg("Type something to search (e.g., a place or address).", "error"); return; }
+
+  setMsg("");
+  try{
+    searchBtn.disabled = true;
+    const r = await geocode(q);
+    if (!r){
+      setMsg("No results found. Try a broader search.", "error");
+      return;
+    }
+
+    picked.lat = r.lat;
+    picked.lng = r.lng;
+    picked.label = r.label || q;
+
+    map.setView([r.lat, r.lng], 15);
+    ensureMarker(r.lat, r.lng);
+    setPinStatus();
+
+    locationEl.value = (r.label || q);
+    renderPreview();
+  } catch(e){
+    setMsg("Search failed. Try again.", "error");
+  } finally {
+    searchBtn.disabled = false;
+  }
+});
+
+mapSearchEl.addEventListener("keydown", (e)=>{
+  if (e.key === "Enter"){
+    e.preventDefault();
+    searchBtn.click();
+  }
+});
+
+useMyLocBtn.addEventListener("click", ()=>{
+  setMsg("");
+  if (!navigator.geolocation){
+    setMsg("Geolocation not supported in this browser.", "error");
+    return;
+  }
+  useMyLocBtn.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(async (pos)=>{
+    picked.lat = pos.coords.latitude;
+    picked.lng = pos.coords.longitude;
+
+    ensureMarker(picked.lat, picked.lng);
+    map.setView([picked.lat, picked.lng], 16);
+    setPinStatus();
+
+    const label = await reverseGeocode(picked.lat, picked.lng);
+    if (label){
+      picked.label = label;
+      if (!locationEl.value.trim()){
+        locationEl.value = label;
+        renderPreview();
+      }
+    }
+    useMyLocBtn.disabled = false;
+  }, ()=>{
+    setMsg("Couldn't access your location. Check permissions.", "error");
+    useMyLocBtn.disabled = false;
+  }, { enableHighAccuracy:true, timeout:10000 });
+});
+
 /* Auth */
 onAuthStateChanged(auth, async (user)=>{
   if (!user) { window.location.href="index.html"; return; }
   currentUser = user;
+  if (!map) initMap();
 });
 
 /* Submit */
@@ -750,7 +1053,10 @@ postBtn.addEventListener("click", async ()=>{
   if (!currentUser) return;
 
   const name = (nameEl.value||"").trim();
-  if (!name) { setMsg("Please enter an event name.", "error"); return; }
+  if (!name) { setMsg("Please enter a motive name.", "error"); return; }
+
+  const locationText = (locationEl.value||"").trim();
+  if (!locationText) { setMsg("Please enter a public location.", "error"); return; }
 
   const startDate = (startDateEl.value||"").trim();
   const startTime = (startTimeEl.value||"").trim();
@@ -764,6 +1070,11 @@ postBtn.addEventListener("click", async ()=>{
     return;
   }
 
+  if (picked.lat == null || picked.lng == null){
+    setMsg("Please drop a pin on the map (or search a place).", "error");
+    return;
+  }
+
   postBtn.disabled = true;
   setMsg("");
 
@@ -774,31 +1085,41 @@ postBtn.addEventListener("click", async ()=>{
       if (u.exists() && u.data()?.name) hostName = u.data().name;
     } catch(_) {}
 
-    const tags = parseTags();
-    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0;
-    const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
-    const venueSize = (venueSizeEl.value || "").trim();
+    const tags = (tagsEl.value || "")
+      .split(",")
+      .map(s=>s.trim())
+      .filter(Boolean)
+      .slice(0, 8);
 
-    const endDate = (endDateEl.value||"").trim();
-    const endTime = (endTimeEl.value||"").trim();
+    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0; // estimated attendance
+    const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
 
     const eventRef = await addDoc(collection(db,"events"), {
       name,
-      location: (locationEl.value||"").trim(),
+      location: locationText,
 
+      // map fields
+      lat: picked.lat,
+      lng: picked.lng,
+      locationLabel: picked.label || locationText || "",
+
+      // schedule
       startDate,
       startTime,
-      endDate: endDate || "",
-      endTime: endTime || "",
+      endDate: (endDateEl.value||"").trim() || "",
+      endTime: (endTimeEl.value||"").trim() || "",
 
-      venueSize,
+      // other info
+      venueSize: (venueSizeEl.value || "").trim(),
       spotsAvailable,
-
       sizeEstimate,
-      ratio: (ratioEl.value||"").trim(),
-      description: (descriptionEl.value||"").trim(),
+      ratio: (ratioEl.value || "").trim(),
+      ratioPreset: (ratioPresetEl.value || "").trim(),
+      quickNotes: (quickNotesEl.value || "").trim(),
+      description: (descriptionEl.value || "").trim(),
       tags,
 
+      // image (filled later)
       imageUrl: "",
       inviteOnly: !!inviteEl.checked,
 
@@ -813,11 +1134,11 @@ postBtn.addEventListener("click", async ()=>{
       await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
     }
 
-    setMsg("Event posted!", "ok");
+    setMsg("Motive posted!", "ok");
     setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventRef.id)}`; }, 650);
 
   } catch(e){
-    setMsg(e?.message || "Failed to post event.", "error");
+    setMsg(e?.message || "Failed to post motive.", "error");
   } finally {
     postBtn.disabled = false;
   }
