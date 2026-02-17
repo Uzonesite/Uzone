@@ -116,15 +116,39 @@
       backdrop-filter: blur(10px);
     }
 
+    .sectionHead{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin:0 0 12px 0;
+    }
+    .sectionHead .h{
+      margin:0;
+      font-size:15px;
+      letter-spacing:.2px;
+      font-weight:950;
+    }
+    .sectionHead .p{
+      margin:2px 0 0 0;
+      color: rgba(255,255,255,.72);
+      font-size:13px;
+      line-height:1.3;
+    }
+
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
       gap:14px;
     }
+    .col4{grid-column: span 4;}
+    .col5{grid-column: span 5;}
     .col6{grid-column: span 6;}
+    .col7{grid-column: span 7;}
+    .col8{grid-column: span 8;}
     .col12{grid-column: span 12;}
     @media (max-width: 920px){
-      .col6,.col12{grid-column: span 12;}
+      .col4,.col5,.col6,.col7,.col8,.col12{grid-column: span 12;}
     }
 
     label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px 2px;}
@@ -146,6 +170,101 @@
 
     .hint{font-size:13px; color:rgba(255,255,255,.75); line-height:1.35;}
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+
+    /* “Card inside a card” */
+    .subCard{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.16);
+      border-radius: 16px;
+      padding:12px;
+    }
+
+    /* Modern toggle */
+    .toggleRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.16);
+    }
+    .toggleText{
+      display:grid;
+      gap:4px;
+      min-width:0;
+    }
+    .toggleText b{
+      font-weight:950;
+      letter-spacing:.2px;
+    }
+    .toggleText span{
+      color: rgba(255,255,255,.72);
+      font-size:13px;
+      line-height:1.25;
+    }
+
+    .switch{
+      position:relative;
+      width:56px;
+      height:32px;
+      flex: 0 0 auto;
+    }
+    .switch input{ display:none; }
+    .track{
+      position:absolute; inset:0;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .thumb{
+      position:absolute;
+      top:50%;
+      left:4px;
+      width:24px;
+      height:24px;
+      border-radius:999px;
+      background: rgba(255,255,255,.92);
+      transform: translateY(-50%);
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      transition: left .18s ease, transform .18s ease;
+    }
+    .switch input:checked + .track{
+      background: rgba(176,11,85,.32);
+      border-color: rgba(176,11,85,.55);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.18), inset 0 0 0 1px rgba(0,0,0,.25);
+    }
+    .switch input:checked + .track .thumb{
+      left:28px;
+    }
+    .switch:active .thumb{
+      transform: translateY(-50%) scale(.98);
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(80,255,160,.75);
+      box-shadow: 0 0 0 4px rgba(80,255,160,.12);
+    }
+    .dot.lock{
+      background: rgba(255,210,80,.85);
+      box-shadow: 0 0 0 4px rgba(255,210,80,.12);
+    }
 
     /* Map */
     .mapShell{
@@ -226,7 +345,7 @@
       <img src="logo.png" alt="Uzone logo" />
       <div class="title">
         <h1>Post Motive</h1>
-        <div class="sub">Search an address or click the map to drop a ping</div>
+        <div class="sub">Fill the details, then pick a location</div>
       </div>
     </div>
     <div class="right">
@@ -238,7 +357,15 @@
   </header>
 
   <main>
+    <!-- DETAILS -->
     <section class="panel">
+      <div class="sectionHead">
+        <div>
+          <h2 class="h">Details</h2>
+          <div class="p">Name it, tag it, and write a clean description.</div>
+        </div>
+      </div>
+
       <div class="grid">
         <div class="col6">
           <label for="name">Motive name</label>
@@ -250,66 +377,124 @@
           <input id="tags" placeholder="e.g., party, uottawa, music" />
         </div>
 
-        <div class="col6">
-          <label for="startDate">Start date</label>
-          <input id="startDate" type="date" />
-        </div>
-        <div class="col6">
-          <label for="startTime">Start time</label>
-          <input id="startTime" type="time" />
-        </div>
-
-        <div class="col6">
-          <label for="endDate">End date (optional)</label>
-          <input id="endDate" type="date" />
-        </div>
-        <div class="col6">
-          <label for="endTime">End time (optional)</label>
-          <input id="endTime" type="time" />
-        </div>
-
         <div class="col12">
           <label for="description">Description</label>
           <textarea id="description" placeholder="What’s the vibe? What should people know?"></textarea>
-        </div>
-
-        <div class="col6">
-          <label for="spotsAvailable">Spots available</label>
-          <input id="spotsAvailable" type="number" min="0" inputmode="numeric" placeholder="e.g., 50" />
-        </div>
-
-        <div class="col6">
-          <label for="venueSize">Venue size</label>
-          <input id="venueSize" placeholder="e.g., Small house, Club, Rooftop" />
-        </div>
-
-        <div class="col6">
-          <label for="sizeEstimate">Estimated attendance size</label>
-          <input id="sizeEstimate" placeholder="e.g., 30–40 people" />
-        </div>
-
-        <div class="col6">
-          <label for="ratio">Ratio (optional)</label>
-          <input id="ratio" placeholder="e.g., 60% girls / 40% guys" />
-        </div>
-
-        <div class="col12">
-          <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer;">
-            <input id="inviteOnly" type="checkbox" style="width:18px;height:18px;" />
-            <span class="hint"><b>Invite-only</b> (you can hide exact location on the map)</span>
-          </label>
+          <div class="hint" style="margin-top:8px;">Tip: include entry info, what to bring, and any rules.</div>
         </div>
       </div>
     </section>
 
+    <!-- DATE & TIME -->
     <section class="panel">
+      <div class="sectionHead">
+        <div>
+          <h2 class="h">Date & Time</h2>
+          <div class="p">Start is required. End is optional.</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="col6 subCard">
+          <div class="grid">
+            <div class="col6">
+              <label for="startDate">Start date</label>
+              <input id="startDate" type="date" />
+            </div>
+            <div class="col6">
+              <label for="startTime">Start time</label>
+              <input id="startTime" type="time" />
+            </div>
+          </div>
+        </div>
+
+        <div class="col6 subCard">
+          <div class="grid">
+            <div class="col6">
+              <label for="endDate">End date (optional)</label>
+              <input id="endDate" type="date" />
+            </div>
+            <div class="col6">
+              <label for="endTime">End time (optional)</label>
+              <input id="endTime" type="time" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CROWD -->
+    <section class="panel">
+      <div class="sectionHead">
+        <div>
+          <h2 class="h">Crowd</h2>
+          <div class="p">Helps people decide fast (and helps the vibe).</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="col4">
+          <label for="spotsAvailable">Spots available</label>
+          <input id="spotsAvailable" type="number" min="0" inputmode="numeric" placeholder="e.g., 50" />
+        </div>
+
+        <div class="col4">
+          <label for="venueSize">Venue size</label>
+          <input id="venueSize" placeholder="e.g., Small house, Club, Rooftop" />
+        </div>
+
+        <div class="col4">
+          <label for="sizeEstimate">Estimated attendance size</label>
+          <input id="sizeEstimate" placeholder="e.g., 30–40 people" />
+        </div>
+
+        <div class="col12">
+          <label for="ratio">Ratio (optional)</label>
+          <input id="ratio" placeholder="e.g., 60% girls / 40% guys" />
+        </div>
+      </div>
+    </section>
+
+    <!-- VISIBILITY -->
+    <section class="panel">
+      <div class="sectionHead">
+        <div>
+          <h2 class="h">Visibility</h2>
+          <div class="p">Invite-only hides exact location + schedule unless accepted.</div>
+        </div>
+        <div class="chip" id="inviteChip" title="Current visibility">
+          <span class="dot" id="inviteDot"></span>
+          <span id="inviteLabel">Open</span>
+        </div>
+      </div>
+
+      <div class="toggleRow">
+        <div class="toggleText">
+          <b>Invite-only</b>
+          <span>Turn this on if you want people to apply before seeing the exact details.</span>
+        </div>
+
+        <label class="switch" aria-label="Invite-only toggle">
+          <input id="inviteOnly" type="checkbox" />
+          <span class="track"><span class="thumb"></span></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- LOCATION -->
+    <section class="panel">
+      <div class="sectionHead">
+        <div>
+          <h2 class="h">Location</h2>
+          <div class="p">Search an address or drop a pin on the map.</div>
+        </div>
+      </div>
+
       <div class="grid">
         <div class="col12">
           <label>Search address</label>
           <gmp-place-autocomplete id="locationInput"></gmp-place-autocomplete>
-          <div class="hint" style="margin-top:8px;">
-            You can also just click the map to drop a pin anywhere.
-          </div>
+          <div class="hint" style="margin-top:8px;">You can also click the map to drop a pin anywhere.</div>
         </div>
 
         <div class="col12 mapShell">
@@ -363,11 +548,16 @@
     const endDateEl = $("endDate");
     const endTimeEl = $("endTime");
     const descEl = $("description");
+
     const spotsEl = $("spotsAvailable");
     const venueEl = $("venueSize");
     const sizeEl = $("sizeEstimate");
     const ratioEl = $("ratio");
+
     const inviteOnlyEl = $("inviteOnly");
+    const inviteChip = $("inviteChip");
+    const inviteDot = $("inviteDot");
+    const inviteLabel = $("inviteLabel");
 
     const placeEl = $("locationInput");
     const mapEl = $("map");
@@ -388,6 +578,17 @@
     function setStatus(text, ok){
       pinStatus.textContent = text;
       pinStatus.classList.toggle("ok", !!ok);
+    }
+
+    function setInviteUI(){
+      const on = !!inviteOnlyEl.checked;
+      inviteLabel.textContent = on ? "Invite-only" : "Open";
+      inviteDot.classList.toggle("lock", on);
+      inviteDot.classList.toggle("dot", true);
+
+      // color tweak without hardcoding extra styles
+      inviteChip.style.borderColor = on ? "rgba(255,210,80,.30)" : "rgba(255,255,255,.14)";
+      inviteChip.style.background = on ? "rgba(255,210,80,.10)" : "rgba(0,0,0,.18)";
     }
 
     function whenGoogleReady(timeoutMs = 12000){
@@ -438,8 +639,6 @@
               : `Pinned: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
         true
       );
-
-      console.log("[PIN]", { label: picked.label, lat: picked.lat, lng: picked.lng });
     }
 
     function clearPicked(){
@@ -458,7 +657,6 @@
     }
 
     async function geocodeFallback(address){
-      // Fallback if the place object doesn’t include geometry for some reason.
       return new Promise((resolve) => {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ address }, (results, status) => {
@@ -481,16 +679,13 @@
         gestureHandling: "greedy",
       });
 
-      // click-to-drop-pin
       gmap.addListener("click", (e) => {
         if (!e?.latLng) return;
         setPicked(e.latLng.lat(), e.latLng.lng(), null);
       });
 
-      // Places address search (bulletproof)
       placeEl.addEventListener("gmp-select", async (e) => {
         try{
-          // Some versions emit placePrediction; convert it to a Place.
           const place = e.placePrediction?.toPlace?.() ?? e.place;
           if (!place) return;
 
@@ -506,7 +701,6 @@
             return;
           }
 
-          // Fallback if no location
           if (label){
             const ll = await geocodeFallback(label);
             if (ll){
@@ -557,6 +751,11 @@
       if (!startDate || !startTime) return setMsg("Please choose a start date and time.", false);
       if (!picked.lat || !picked.lng) return setMsg("Please search an address or click the map to drop a pin.", false);
 
+      // Small validation so we don't store NaN
+      if (spotsAvailable !== null && !Number.isFinite(spotsAvailable)) {
+        return setMsg("Spots available must be a number.", false);
+      }
+
       postBtn.disabled = true;
       setMsg("Posting…", true);
 
@@ -573,18 +772,19 @@
           lat: picked.lat,
           lng: picked.lng,
           inviteOnly,
+
           spotsAvailable,
           venueSize,
           sizeEstimate,
           ratio,
+
           hostUid: user.uid,
           hostName: user.displayName || "",
           ownerUid: user.uid,
+
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         };
-
-        console.log("[SAVE]", payload);
 
         const ref = await addDoc(collection(db, "events"), payload);
         setMsg("Posted! Opening…", true);
@@ -601,6 +801,10 @@
         window.location.href = "login.html";
         return;
       }
+
+      setInviteUI();
+      inviteOnlyEl.addEventListener("change", setInviteUI);
+
       initMap().catch(err => {
         console.error(err);
         setMsg(err.message || "Map init failed.", false);
