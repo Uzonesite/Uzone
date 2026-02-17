@@ -176,6 +176,31 @@
       padding:12px;
     }
 
+    /* Cover image */
+    .imgRow{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .imgPreview{
+      width:100%;
+      max-width: 420px;
+      aspect-ratio: 16/9;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      display:none;
+    }
+    .imgPreview img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
     /* Invite-only: make the whole bubble clickable */
     .toggleBtn{
       width:100%;
@@ -208,9 +233,7 @@
       box-shadow: 0 0 10px rgba(176,11,85,.25), 0 10px 28px rgba(176,11,85,.14);
       filter: brightness(1.0);
     }
-    .toggleBtn:focus-visible{
-      outline:none;
-    }
+    .toggleBtn:focus-visible{ outline:none; }
     .toggleBtn:focus-visible .toggleRow{
       box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
       border-color: rgba(176,11,85,.65);
@@ -264,9 +287,7 @@
       border-color: rgba(176,11,85,.55);
       box-shadow: 0 0 0 4px rgba(176,11,85,.18), inset 0 0 0 1px rgba(0,0,0,.25);
     }
-    .switch input:checked + .track .thumb{
-      left:28px;
-    }
+    .switch input:checked + .track .thumb{ left:28px; }
 
     .chip{
       display:inline-flex;
@@ -291,14 +312,8 @@
     }
 
     /* Location search: make it match inputs */
-    .placeWrap{
-      width:100%;
-      display:block;
-    }
-    gmp-place-autocomplete{
-      width:100%;
-      display:block;
-    }
+    .placeWrap{ width:100%; display:block; }
+    gmp-place-autocomplete{ width:100%; display:block; }
     gmp-place-autocomplete::part(input){
       width:100%;
       height:44px;
@@ -311,9 +326,7 @@
       font-size:14px;
       line-height: 1.2;
     }
-    gmp-place-autocomplete::part(input)::placeholder{
-      color: rgba(255,255,255,.55);
-    }
+    gmp-place-autocomplete::part(input)::placeholder{ color: rgba(255,255,255,.55); }
     gmp-place-autocomplete::part(input):focus{
       border-color: rgba(176,11,85,.60);
       box-shadow: 0 0 0 4px rgba(176,11,85,.20);
@@ -413,6 +426,20 @@
           <input id="tags" placeholder="e.g., party, uottawa, music" />
         </div>
 
+        <!-- ✅ COVER IMAGE (added back) -->
+        <div class="col12">
+          <label>Cover image (optional)</label>
+          <div class="imgRow">
+            <button class="btn" id="pickImgBtn" type="button">Add cover photo</button>
+            <button class="btn" id="clearImgBtn" type="button" style="display:none;">Remove photo</button>
+            <span class="hint" id="imgHint">JPG/PNG/WebP works best.</span>
+            <input id="eventImgInput" type="file" accept="image/*" style="display:none;" />
+          </div>
+          <div class="imgPreview" id="imgPreview">
+            <img id="imgPreviewEl" alt="Event cover preview" />
+          </div>
+        </div>
+
         <div class="col12">
           <label for="description">Description</label>
           <textarea id="description" placeholder="What’s the vibe? What should people know?"></textarea>
@@ -504,7 +531,6 @@
         </div>
       </div>
 
-      <!-- Whole bubble is a button now -->
       <button class="toggleBtn" id="inviteToggleBtn" type="button" aria-pressed="false">
         <div class="toggleRow">
           <div class="toggleText">
@@ -571,17 +597,36 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      doc,
+      updateDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+    import {
+      getStorage,
+      ref as sref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
       authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
       projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     const $ = (id) => document.getElementById(id);
 
@@ -612,6 +657,14 @@
     const clearPinBtn = $("clearPinBtn");
     const msg = $("msg");
 
+    // ✅ image UI
+    const pickImgBtn = $("pickImgBtn");
+    const clearImgBtn = $("clearImgBtn");
+    const eventImgInput = $("eventImgInput");
+    const imgPreview = $("imgPreview");
+    const imgPreviewEl = $("imgPreviewEl");
+
+    let selectedImageFile = null;
     let gmap, marker;
     let picked = { lat:null, lng:null, label:null };
 
@@ -718,19 +771,33 @@
       });
     }
 
-    function reverseGeocode(lat, lng){
-  return new Promise((resolve) => {
-    try{
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-        if (status !== "OK" || !results?.length) return resolve(null);
-        resolve(results[0].formatted_address || null);
+    // ✅ reverse-geocode coords → closest formatted address
+    async function reverseGeocode(lat, lng){
+      return new Promise((resolve) => {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+          if (status !== "OK" || !results?.length) return resolve(null);
+          resolve(results[0].formatted_address || null);
+        });
       });
-    }catch(_){
-      resolve(null);
     }
-  });
-}
+
+    // ✅ image helpers
+    function setImageFile(file){
+      selectedImageFile = file || null;
+
+      if (!selectedImageFile){
+        imgPreview.style.display = "none";
+        imgPreviewEl.src = "";
+        clearImgBtn.style.display = "none";
+        return;
+      }
+
+      const url = URL.createObjectURL(selectedImageFile);
+      imgPreviewEl.src = url;
+      imgPreview.style.display = "block";
+      clearImgBtn.style.display = "inline-flex";
+    }
 
     async function initMap(){
       await whenGoogleReady();
@@ -782,27 +849,36 @@
         }
       });
 
+      // ✅ Use my location → pin + closest address
       useMyLocBtn.addEventListener("click", () => {
-  if (!navigator.geolocation) return alert("Geolocation not supported.");
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
+        if (!navigator.geolocation) return alert("Geolocation not supported.");
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
 
-      // Try to turn coords into the closest address on the map
-      const addr = await reverseGeocode(lat, lng);
+            // try to label it with the closest address
+            let label = await reverseGeocode(lat, lng);
+            if (!label) label = "Your location";
 
-      // If reverse geocode fails, still save coords (label will just be coords)
-      setPicked(lat, lng, addr || null);
-      gmap.setZoom(15);
-    },
-    () => alert("Couldn’t get your location."),
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
-  );
-});
+            setPicked(lat, lng, label);
+            gmap.setZoom(15);
+          },
+          () => alert("Couldn’t get your location."),
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+        );
+      });
 
       clearPinBtn.addEventListener("click", clearPicked);
       setStatus("No pin selected. Search an address or click the map.", false);
+    }
+
+    async function uploadEventImage(eventId, file){
+      const safeName = (file.name || "cover").replace(/[^\w.\-]+/g, "_");
+      const path = `events/${eventId}/${Date.now()}_${safeName}`;
+      const r = sref(storage, path);
+      await uploadBytes(r, file);
+      return await getDownloadURL(r);
     }
 
     async function postEvent(user){
@@ -829,9 +905,12 @@
       }
 
       postBtn.disabled = true;
+      pickImgBtn.disabled = true;
+      clearImgBtn.disabled = true;
       setMsg("Posting…", true);
 
       try{
+        // 1) create event doc first
         const payload = {
           name,
           tags,
@@ -850,6 +929,8 @@
           sizeEstimate,
           ratio,
 
+          imageUrl: null, // ✅ will be filled if user chose an image
+
           hostUid: user.uid,
           hostName: user.displayName || "",
           ownerUid: user.uid,
@@ -858,15 +939,39 @@
           updatedAt: serverTimestamp(),
         };
 
-        const ref = await addDoc(collection(db, "events"), payload);
+        const newRef = await addDoc(collection(db, "events"), payload);
+
+        // 2) upload image (optional), then update doc with imageUrl
+        if (selectedImageFile){
+          setMsg("Uploading cover photo…", true);
+          const url = await uploadEventImage(newRef.id, selectedImageFile);
+          await updateDoc(doc(db, "events", newRef.id), {
+            imageUrl: url,
+            updatedAt: serverTimestamp()
+          });
+        }
+
         setMsg("Posted! Opening…", true);
-        window.location.href = `event.html?id=${encodeURIComponent(ref.id)}`;
+        window.location.href = `event.html?id=${encodeURIComponent(newRef.id)}`;
       } catch (err){
         console.error(err);
         setMsg(err?.message || "Failed to post.", false);
         postBtn.disabled = false;
+        pickImgBtn.disabled = false;
+        clearImgBtn.disabled = false;
       }
     }
+
+    // ✅ image UI events
+    pickImgBtn.addEventListener("click", () => eventImgInput.click());
+    eventImgInput.addEventListener("change", () => {
+      const f = eventImgInput.files && eventImgInput.files[0] ? eventImgInput.files[0] : null;
+      setImageFile(f);
+    });
+    clearImgBtn.addEventListener("click", () => {
+      eventImgInput.value = "";
+      setImageFile(null);
+    });
 
     onAuthStateChanged(auth, (user) => {
       if (!user){
@@ -874,10 +979,8 @@
         return;
       }
 
-      // Invite-only bubble click
       setInviteUI();
       inviteToggleBtn.addEventListener("click", toggleInviteOnly);
-      // also keep UI in sync if checkbox is toggled programmatically
       inviteOnlyEl.addEventListener("change", setInviteUI);
 
       initMap().catch(err => {
