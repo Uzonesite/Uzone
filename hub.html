@@ -84,6 +84,38 @@
       text-overflow:ellipsis;
     }
 
+    .heroActions{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+}
+
+.btn.small{
+  padding:10px 12px;
+  border-radius:12px;
+  font-weight:850;
+}
+
+.toast{
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.28);
+  backdrop-filter: blur(10px);
+  color: rgba(255,255,255,.92);
+  box-shadow: var(--shadow);
+  display:none;
+  max-width: min(92vw, 680px);
+  text-align:center;
+}
+.toast.show{ display:block; }
+
+
     .badge{
       display:inline-flex;
       align-items:center;
@@ -422,6 +454,17 @@
     const verifyBadge = document.getElementById("verifyBadge");
     const verifyText = document.getElementById("verifyText");
 
+    const referBtn = document.getElementById("referBtn");
+    const toastEl = document.getElementById("toast");
+
+    function toast(text){
+  if (!toastEl) return;
+  toastEl.textContent = text;
+  toastEl.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+}
+
     function setVerified(isVerified){
       verifyBadge.style.display = "inline-flex";
       if (isVerified){
@@ -456,6 +499,24 @@
 
       welcome.textContent = displayName ? `Welcome, ${displayName}` : "Welcome back";
       setVerified(verified);
+
+      referBtn.disabled = false;
+
+referBtn.onclick = async () => {
+  const url = new URL("referral_signup.html", window.location.href);
+  url.searchParams.set("ref", user.uid); // referral_signup.html?ref=UID
+
+  const link = url.toString();
+
+  try{
+    await navigator.clipboard.writeText(link);
+    toast("Referral link copied!");
+  } catch(_){
+    // fallback
+    prompt("Copy your referral link:", link);
+  }
+};
+
     });
 
     signOutBtn.addEventListener("click", async () => {
@@ -463,5 +524,8 @@
       window.location.href = "index.html";
     });
   </script>
+
+<div class="toast" id="toast"></div>
+  
 </body>
 </html>
