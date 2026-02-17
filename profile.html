@@ -608,39 +608,48 @@
     }
 
     async function loadProfile(user) {
-      const snap = await getDoc(doc(db, "users", user.uid));
+  const snap = await getDoc(doc(db, "users", user.uid));
 
-      if (!snap.exists()) {
-        subline.textContent = "Profile not found (no users doc yet).";
-        idText.textContent = "U—";
-        const credits = Number(data.credits || 0);
-creditsText.textContent = `${credits} Credit${credits === 1 ? "" : "s"}`;
-        setVerificationUI("none");
-        avatarImg.src = placeholderAvatarFromName("U");
-        return;
-      }
+  // Defaults (so UI always shows something)
+  idText.textContent = "U—";
+  creditsText.textContent = "0 Credits";
+  setVerificationUI("none");
+  avatarImg.src = placeholderAvatarFromName("U");
+  subline.textContent = "Edit your profile";
 
-      const data = snap.data();
-      idText.textContent = (data.publicId || "U—").toString();
+  if (!snap.exists()) {
+    subline.textContent = "Profile not found (no users doc yet).";
+    return;
+  }
 
-      const status =
-        data?.verification?.status ||
-        (data.verified === true ? "verified" : "none");
+  const data = snap.data();
 
-      setVerificationUI(status);
+  // U#
+  idText.textContent = (data.publicId || "U—").toString();
 
-      nameEl.value = data.name || "";
-      universityEl.value = data.university || "";
-      programEl.value = data.program || "";
-      bioEl.value = data.bio || "";
-      ageEl.value = data.age || "";
-      genderEl.value = data.gender || "";
+  // ✅ Credits (this is what you were missing)
+  const credits = Number(data.credits || 0);
+  creditsText.textContent = `${credits} Credit${credits === 1 ? "" : "s"}`;
 
-      const url = data.photoURL || "";
-      avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
+  // Verified badge
+  const status =
+    data?.verification?.status ||
+    (data.verified === true ? "verified" : "none");
+  setVerificationUI(status);
 
-      subline.textContent = "Edit your profile";
-    }
+  // Form fields
+  nameEl.value = data.name || "";
+  universityEl.value = data.university || "";
+  programEl.value = data.program || "";
+  bioEl.value = data.bio || "";
+  ageEl.value = data.age || "";
+  genderEl.value = data.gender || "";
+
+  // Avatar
+  const url = data.photoURL || "";
+  avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
+}
+
 
     async function saveProfile(){
       if (!currentUser) return;
