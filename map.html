@@ -240,6 +240,34 @@
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.65));
       color: #fff;
     }
+
+    /* Hide the default Google InfoWindow close (it’s white-on-white for you) */
+.gm-ui-hover-effect{
+  display:none !important;
+}
+
+/* Custom close button inside our popup */
+.closeBtn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:30px;
+  height:30px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.12);
+  background: rgba(255,255,255,.92);
+  color: rgba(20,20,24,.92);
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+.closeBtn:hover{ transform: translateY(-1px); }
+
+    
   </style>
 </head>
 
@@ -395,18 +423,26 @@
       const badgeText = ev.inviteOnly ? "Invite-only" : "Open";
 
       const html = `
-        <div class="card">
-          <div class="badge"><span class="dot"></span>${badgeText}</div>
-          <h3 title="${esc(ev.name || "Motive")}">${esc(ev.name || "Motive")}</h3>
-          <div class="meta"><b>When:</b> ${when}<br><b>Where:</b> ${where}</div>
-          <div class="actions">
-            <a class="aBtn primary" href="event.html?id=${encodeURIComponent(ev.id)}">Open</a>
-            <a class="aBtn" href="events.html">List view</a>
-          </div>
-        </div>
-      `;
-      info.setContent(html);
-      info.open({ map: gmap, anchor: marker });
+  <div class="card" style="position:relative;">
+    <button class="closeBtn" type="button" id="iwCloseBtn" aria-label="Close">✕</button>
+
+    <div class="badge"><span class="dot"></span>${badgeText}</div>
+    <h3 title="${esc(ev.name || "Motive")}">${esc(ev.name || "Motive")}</h3>
+    <div class="meta"><b>When:</b> ${when}<br><b>Where:</b> ${where}</div>
+    <div class="actions">
+      <a class="aBtn primary" href="event.html?id=${encodeURIComponent(ev.id)}">Open</a>
+      <a class="aBtn" href="events.html">List view</a>
+    </div>
+  </div>
+`;
+info.setContent(html);
+info.open({ map: gmap, anchor: marker });
+
+google.maps.event.addListenerOnce(info, "domready", () => {
+  const btn = document.getElementById("iwCloseBtn");
+  if (btn) btn.onclick = () => info.close();
+});
+
     }
 
     // ✅ after markers render, auto-open the focused event's popup
