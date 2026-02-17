@@ -54,25 +54,14 @@
       overflow:hidden;
     }
 
-    .brand{
-      padding:26px;
-      position:relative;
-    }
-    .logoRow{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
+    .brand{ padding:26px; position:relative; }
+    .logoRow{ display:flex; align-items:center; gap:12px; }
     .logoRow img{
       width:44px;height:44px;
       object-fit:contain;
       filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
     }
-    .brand h1{
-      margin:0;
-      font-size:28px;
-      letter-spacing:.2px;
-    }
+    .brand h1{ margin:0; font-size:28px; letter-spacing:.2px; }
     .brand p{
       margin:14px 0 0 0;
       color:var(--muted);
@@ -80,12 +69,7 @@
       max-width: 75ch;
     }
 
-    .pillRow{
-      margin-top:18px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
+    .pillRow{ margin-top:18px; display:flex; flex-wrap:wrap; gap:10px; }
     .pill{
       font-size:13px;
       color:rgba(255,255,255,.85);
@@ -112,10 +96,7 @@
       gap:10px;
       flex-wrap:wrap;
     }
-    .inviteTitle{
-      font-weight:850;
-      letter-spacing:.2px;
-    }
+    .inviteTitle{ font-weight:850; letter-spacing:.2px; }
     .inviteMeta{
       color:rgba(255,255,255,.72);
       font-size:13px;
@@ -139,33 +120,13 @@
 
     .card{ padding:22px; }
 
-    .headerRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .card h2{
-      margin:0;
-      font-size:20px;
-      letter-spacing:.2px;
-    }
-    .sub{
-      margin-top:6px;
-      color:var(--muted);
-      line-height:1.45;
-      font-size:13px;
-    }
+    .headerRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .card h2{ margin:0; font-size:20px; letter-spacing:.2px; }
+    .sub{ margin-top:6px; color:var(--muted); line-height:1.45; font-size:13px; }
 
     form{ margin-top:16px; display:grid; gap:12px; }
 
-    label{
-      display:grid;
-      gap:6px;
-      font-size:13px;
-      color:rgba(255,255,255,.78);
-    }
+    label{ display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78); }
     input{
       width:100%;
       padding:12px 12px;
@@ -224,12 +185,7 @@
     .msg.error{ border-color: rgba(255,80,120,.35); background: rgba(255,80,120,.10); }
     .msg.ok{ border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10); }
 
-    .tiny{
-      margin-top:10px;
-      color:rgba(255,255,255,.65);
-      font-size:13px;
-      line-height:1.4;
-    }
+    .tiny{ margin-top:10px; color:rgba(255,255,255,.65); font-size:13px; line-height:1.4; }
     a{color: rgba(255,255,255,.90)}
   </style>
 </head>
@@ -257,7 +213,9 @@
       <div class="inviteCard" aria-label="Invite status">
         <div class="inviteTop">
           <div class="inviteTitle">Invite status</div>
-          <span class="badge bad" id="inviteBadge"><span class="dot"></span><span id="inviteBadgeText">Checking…</span></span>
+          <span class="badge bad" id="inviteBadge">
+            <span class="dot"></span><span id="inviteBadgeText">Checking…</span>
+          </span>
         </div>
         <div class="inviteMeta" id="inviteMeta">Loading invite details…</div>
       </div>
@@ -268,7 +226,7 @@
         <h2>Create your account</h2>
       </div>
       <div class="sub">
-        Referral will be recorded now, credits are awarded automatically once both accounts are verified.
+        Referral will be recorded now. Credits are awarded when an admin verifies both accounts.
       </div>
 
       <form id="signupForm" novalidate>
@@ -345,11 +303,10 @@
 
     const app = initializeApp(firebaseConfig);
     try { if (await analyticsSupported()) getAnalytics(app); } catch(_) {}
-
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- UI ---
+    // UI
     const inviteBadge = document.getElementById("inviteBadge");
     const inviteBadgeText = document.getElementById("inviteBadgeText");
     const inviteMeta = document.getElementById("inviteMeta");
@@ -391,7 +348,7 @@
       return err?.message || "Something went wrong. Please try again.";
     }
 
-    // --- Referral resolution ---
+    // Referral resolution
     let refRaw = getRefParam();
     let refUid = null;
     let refDisplay = null;
@@ -399,35 +356,28 @@
     async function resolveRef(raw){
       if (!raw) return { ok:false, reason:"Missing referral code." };
 
-      // If it looks like a publicId ("U123"), resolve via query
+      // If it looks like publicId (U123), resolve
       if (/^U\d+$/i.test(raw)) {
         const qy = query(collection(db, "users"), where("publicId", "==", raw.toUpperCase()));
         const snap = await getDocs(qy);
         if (snap.empty) return { ok:false, reason:"Invite not found (bad referral code)." };
         const docSnap = snap.docs[0];
         const data = docSnap.data() || {};
-        return {
-          ok:true,
-          uid: docSnap.id,
-          label: (data.name || "").trim() || data.publicId || "a friend"
-        };
+        return { ok:true, uid: docSnap.id, label: (data.name || "").trim() || data.publicId || "a friend" };
       }
 
       // Otherwise treat as UID
       const refDoc = await getDoc(doc(db, "users", raw));
       if (!refDoc.exists()) return { ok:false, reason:"Invite not found (bad referral link)." };
       const data = refDoc.data() || {};
-      return {
-        ok:true,
-        uid: raw,
-        label: (data.name || "").trim() || data.publicId || "a friend"
-      };
+      return { ok:true, uid: raw, label: (data.name || "").trim() || data.publicId || "a friend" };
     }
 
     async function initInvite(){
       try{
         setInviteStatus(false, "Checking…", "Loading invite details…");
         const res = await resolveRef(refRaw);
+
         if (!res.ok){
           refUid = null;
           refDisplay = null;
@@ -441,7 +391,7 @@
 
         submitBtn.disabled = false;
         setInviteStatus(true, "Valid", `Invited by ${refDisplay}. Credits are awarded after both accounts are verified.`);
-      } catch (e){
+      } catch (_){
         refUid = null;
         refDisplay = null;
         submitBtn.disabled = true;
@@ -451,10 +401,8 @@
 
     await initInvite();
 
-    // --- Create user + record referral (NO CREDIT AWARD HERE) ---
     async function createUserWithPendingReferral({ user, displayName, refUid }){
       await runTransaction(db, async (tx) => {
-        // Allocate publicId via counter
         const counterRef = doc(db, "meta", "counters");
         const counterSnap = await tx.get(counterRef);
         const current = counterSnap.exists() ? Number(counterSnap.data()?.userCounter || 0) : 0;
@@ -463,7 +411,6 @@
 
         tx.set(counterRef, { userCounter: next }, { merge: true });
 
-        // Create user doc (credits are NOT awarded here)
         const userRef = doc(db, "users", user.uid);
 
         tx.set(userRef, {
@@ -473,15 +420,14 @@
           verified: false,
           createdAt: serverTimestamp(),
 
-          // Credits: keep at 0 for now (or omit entirely if you prefer)
+          // credits start at 0 (or keep existing if merge hits an existing doc)
           credits: 0,
+          creditsUpdatedAt: serverTimestamp(),
 
-          // Referral: recorded as pending
+          // referral recorded (pending)
           referredBy: refUid,
           referralStatus: "pending",
-          referralAwarded: false,
-
-          creditsUpdatedAt: serverTimestamp()
+          referralAwarded: false
         }, { merge: true });
       });
     }
@@ -525,10 +471,9 @@
         const user = cred.user;
 
         await updateProfile(user, { displayName });
-
         await createUserWithPendingReferral({ user, displayName, refUid });
 
-        setMsg("Account created! Referral recorded. Credits will be awarded after both accounts are verified. Redirecting…", "ok");
+        setMsg("Account created! Referral is pending until both accounts are verified. Redirecting…", "ok");
         window.location.href = "hub.html";
       } catch (err){
         setMsg(friendlyAuthError(err), "error");
