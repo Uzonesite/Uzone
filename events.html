@@ -287,7 +287,7 @@
     .tag.invite .tdot{background: rgba(255,210,80,.85);}
     .tag.open .tdot{background: rgba(80,255,160,.75);}
 
-    /* ✅ Cleaner rating */
+    /* Cleaner rating */
     .ratingBadge{
       display:inline-flex;
       align-items:center;
@@ -333,6 +333,31 @@
       background: linear-gradient(90deg, rgba(176,11,85,.95), rgba(176,11,85,.55));
       border-radius:999px;
     }
+
+    /* ✅ Map button on card */
+    .mapBtn{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.90);
+      font-weight:900;
+      font-size:12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+    }
+    .mapBtn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(176,11,85,.45);
+      filter: brightness(1.06);
+    }
+    .mapBtn:active{ transform: translateY(0px) scale(.99); }
+    .mapBtn:disabled{ opacity:.5; cursor:not-allowed; }
 
     .empty{
       border:1px dashed rgba(255,255,255,.20);
@@ -431,6 +456,11 @@
       return `${start} → ${end}`;
     }
 
+    function isFiniteNum(x){
+      const n = Number(x);
+      return Number.isFinite(n);
+    }
+
     function render(list){
       grid.innerHTML = "";
       empty.style.display = list.length ? "none" : "block";
@@ -444,6 +474,8 @@
 
         const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
         const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
+
+        const canMap = !inviteOnly && isFiniteNum(ev.lat) && isFiniteNum(ev.lng);
 
         const card = document.createElement("a");
         card.className = "card";
@@ -470,14 +502,25 @@
                 • Venue: <b>${esc(ev.venueSize || "—")}</b>
               </div>
 
-              <!-- ✅ cleaner rating badge -->
-              <div class="ratingBadge" title="Average rating">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
-                </svg>
-                <span class="val">${v10.toFixed(1)}</span>
-                <span class="sub">/10</span>
-                <span class="ratingBar" aria-hidden="true"><span style="width:${pct.toFixed(0)}%"></span></span>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <div class="ratingBadge" title="Average rating">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
+                  </svg>
+                  <span class="val">${v10.toFixed(1)}</span>
+                  <span class="sub">/10</span>
+                  <span class="ratingBar" aria-hidden="true"><span style="width:${pct.toFixed(0)}%"></span></span>
+                </div>
+
+                ${canMap ? `
+                  <button class="mapBtn" type="button"
+                    data-id="${esc(ev.id)}"
+                    data-lat="${esc(ev.lat)}"
+                    data-lng="${esc(ev.lng)}"
+                    data-label="${esc(ev.location || ev.name || '')}">
+                    Map
+                  </button>
+                ` : ``}
               </div>
             </div>
 
@@ -491,7 +534,25 @@
             </div>
           </div>
         `;
+
         grid.appendChild(card);
+
+        // ✅ Map button behavior (don’t open the event card)
+        const mapBtn = card.querySelector(".mapBtn");
+        if (mapBtn){
+          mapBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const id = mapBtn.dataset.id || "";
+            const lat = mapBtn.dataset.lat || "";
+            const lng = mapBtn.dataset.lng || "";
+            const label = mapBtn.dataset.label || "";
+
+            window.location.href =
+              `map.html?focus=${encodeURIComponent(id)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&label=${encodeURIComponent(label)}`;
+          });
+        }
       });
     }
 
