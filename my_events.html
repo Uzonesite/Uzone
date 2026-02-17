@@ -388,7 +388,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
-      getFirestore, collection, getDocs, query, orderBy, limit, doc, setDoc, updateDoc, where, serverTimestamp
+      getFirestore, collection, getDocs, query, doc, setDoc, updateDoc, where, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -686,11 +686,11 @@
 
         async function addMineBy(field){
           try{
+            // Avoid composite-index requirements by NOT using orderBy with where().
+            // We'll sort client-side after fetching.
             const qy = query(
               collection(db, "events"),
-              where(field, "==", currentUser.uid),
-              orderBy("createdAt", "desc"),
-              limit(500)
+              where(field, "==", currentUser.uid)
             );
             const snap = await getDocs(qy);
             snap.forEach(d => mineMap.set(d.id, { id: d.id, ...(d.data() || {}) }));
@@ -710,6 +710,24 @@
           .sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
 
         allMine = mine;
+        // Count + empty state
+        countChip.textContent = `${allMine.length} motives`;
+        if (!allMine.length){
+          empty.style.display = "block";
+          empty.innerHTML = `
+            <div style="font-weight:800;margin-bottom:6px">No motives found</div>
+            <div style="color:var(--muted);line-height:1.4">
+              If you posted motives before, this usually means those event docs use a different creator field.
+              I already check <b>hostUid</b>, <b>ownerUid</b>, <b>createdBy</b>, <b>creatorUid</b>, and <b>uid</b>.
+              If your older docs used something else, tell me the field name and I’ll add it.
+            </div>
+            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+              <a class="btn" href="post_event.html">Post a motive</a>
+              <a class="btn ghost" href="events.html">Browse motives</a>
+            </div>
+          `;
+        }
+
         await refreshRequests();
 
         subline.textContent = currentUser
