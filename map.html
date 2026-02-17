@@ -106,6 +106,27 @@
       gap:14px;
     }
 
+    gmp-place-autocomplete {
+  width:100%;
+}
+
+gmp-place-autocomplete::part(input) {
+  width:100%;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  outline:none;
+  font-size:14px;
+}
+
+gmp-place-autocomplete::part(input):focus {
+  border-color: rgba(176,11,85,.60);
+  box-shadow: 0 0 0 4px rgba(176,11,85,.20);
+}
+
+
     .panel{
       border:1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
@@ -273,7 +294,7 @@
     <section class="panel">
       <div class="bar">
         <div class="searchWrap">
-          <input id="search" placeholder="Search motives (name, tags, location…)" />
+          <gmp-place-autocomplete id="locationInput"></gmp-place-autocomplete>
           <button class="btn" id="nearMeBtn" type="button">Near me</button>
           <button class="btn" id="refreshBtn" type="button">Refresh</button>
         </div>
@@ -294,6 +315,7 @@
 
   <!-- Google Maps JS (replace key) -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt8UPeNwhR4mPoQgWUoYxUE2UrlKYL6UE&libraries=marker&v=weekly" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt8UPeNwhR4mPoQgWUoYxUE2UrlKYL6UE&libraries=places,marker&v=weekly" async defer></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -488,6 +510,27 @@
         clickableIcons: false,
         gestureHandling: "greedy"
       });
+
+      const addr = document.getElementById("locationInput");
+
+addr.addEventListener("gmp-select", async (e) => {
+  const place = e.place;
+
+  await place.fetchFields({
+    fields: ["displayName", "formattedAddress", "location"]
+  });
+
+  if (!place.location) return;
+
+  const lat = place.location.lat();
+  const lng = place.location.lng();
+
+  setPicked(lat, lng, place.formattedAddress || place.displayName);
+
+  gmap.panTo(place.location);
+  gmap.setZoom(15);
+});
+
 
       info = new google.maps.InfoWindow({});
 
