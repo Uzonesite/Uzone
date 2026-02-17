@@ -5,21 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>Uzone • Post Motive</title>
 
+<!-- Tab icon -->
 <link rel="icon" type="image/png" href="logo.png" />
 <meta name="color-scheme" content="dark light" />
-
-<!-- Leaflet -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-  crossorigin=""
-></script>
 
 <style>
   :root{
@@ -54,6 +42,8 @@
     background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+
+    /* match hub feel */
     position: sticky;
     top: 10px;
     z-index: 10;
@@ -66,6 +56,7 @@
   .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
+  /* Unified button system (same as hub/profile/events) */
   .btn{
     padding:10px 12px;
     border-radius:12px;
@@ -97,6 +88,7 @@
   }
   .btn:disabled{opacity:.6; cursor:not-allowed}
 
+  /* Primary button (Post Event action) */
   .btn.primary{
     border:1px solid rgba(176,11,85,.55);
     background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
@@ -135,6 +127,8 @@
   .hint{color:rgba(255,255,255,.60); font-size:12px;}
 
   .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
+  .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;}
+  @media (max-width: 900px){ .row3{grid-template-columns:1fr;} }
   @media (max-width: 860px){ .row{grid-template-columns:1fr;} }
 
   label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
@@ -153,12 +147,22 @@
     border-color: rgba(176,11,85,.60);
     box-shadow: 0 0 0 4px rgba(176,11,85,.20);
   }
-  input[type="date"], input[type="time"]{ color-scheme: dark; }
 
+  /* Make native date/time pickers look consistent */
+  input[type="date"], input[type="time"]{
+    color-scheme: dark;
+  }
+
+  /* Description sizing + spacing fix */
   .bioLabel{gap:8px;}
-  .bioLabel textarea{min-height:210px; line-height:1.35;}
+  .bioLabel textarea{
+    min-height: 210px;
+    line-height: 1.35;
+  }
+
   .stack{display:grid; gap:12px; align-content:start;}
 
+  /* Preview card */
   .previewCard{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.18);
@@ -249,6 +253,7 @@
     white-space:nowrap;
   }
 
+  /* Uploader */
   .uploader{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.16);
@@ -280,6 +285,7 @@
     transform: translateY(0px) scale(.99);
     box-shadow: 0 0 10px rgba(176,11,85,.65), 0 10px 26px rgba(176,11,85,.18);
   }
+
   .fileName{
     color: rgba(255,255,255,.75);
     font-size:12px;
@@ -301,15 +307,24 @@
     width:0%;
     background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
   }
-  .mini{color: rgba(255,255,255,.65); font-size:12px; line-height:1.35;}
+  .mini{
+    color: rgba(255,255,255,.65);
+    font-size:12px;
+    line-height:1.35;
+  }
 
+  /* Invite-only toggle */
   .togglePill{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
     padding:12px 12px;
     border-radius:14px;
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.18);
-    user-select:none; cursor:pointer;
+    user-select:none;
+    cursor:pointer;
   }
   .togglePill .tTitle{display:grid; gap:2px;}
   .togglePill .tTitle b{color: rgba(255,255,255,.92); font-size:13px;}
@@ -346,8 +361,6 @@
     transform: translateY(-50%) translateX(20px);
   }
 
-  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
-
   .msg{
     display:none;
     padding:10px 12px;
@@ -362,58 +375,9 @@
   .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
   .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 
-  /* Map */
-  .mapWrap{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.16);
-    border-radius:14px;
-    padding:12px;
-    display:grid;
-    gap:10px;
-  }
-  #map{
-    width:100%;
-    height:320px;
-    border-radius:14px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-  }
-  .mapRow{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .mapRowLeft{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-    flex: 1 1 auto;
-    min-width: 240px;
-  }
-  .mapHint{
-    color: rgba(255,255,255,.70);
-    font-size:12px;
-    line-height:1.3;
-  }
-  .pillMini{
-    display:inline-flex;
-    gap:6px;
-    align-items:center;
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.22);
-    color: rgba(255,255,255,.82);
-    font-size:12px;
-  }
-  .pillMini b{color: rgba(255,255,255,.92)}
+  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
 </style>
 </head>
-
 <body>
 <header>
   <div class="left">
@@ -458,33 +422,6 @@
     <div class="divider"></div>
 
     <div class="sectionHead">
-      <h2>Map</h2>
-      <div class="hint">Drop a pin so people can find it.</div>
-    </div>
-
-    <div class="mapWrap">
-      <div class="mapRow">
-        <div class="mapRowLeft">
-          <label style="margin:0; flex: 1 1 320px;">
-            Search place / address
-            <input id="mapSearch" placeholder="e.g., ByWard Market, Ottawa" autocomplete="off" />
-          </label>
-          <button class="btn" id="searchBtn" type="button">Search</button>
-          <button class="btn" id="useMyLoc" type="button">Use my location</button>
-        </div>
-      </div>
-
-      <div id="map" aria-label="Map picker"></div>
-
-      <div class="mapRow" style="justify-content:flex-start;">
-        <span class="pillMini"><b>Pin</b> <span id="pinStatus">Not set</span></span>
-        <span class="mapHint">Tip: click the map to place/move the pin. We’ll store lat/lng and a label.</span>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="sectionHead">
       <h2>Schedule</h2>
       <div class="hint">Pick date/time.</div>
     </div>
@@ -511,10 +448,9 @@
 
     <div class="sectionHead">
       <h2>Details</h2>
-      <div class="hint">Estimated size + ratio + tags + description. (optional)</div>
+      <div class="hint">Tags + description cover the vibe. (optional)</div>
     </div>
 
-    <!-- ✅ THESE ARE THE FIELDS YOU SAID WERE MISSING -->
     <div class="row">
       <label>Size estimate (# of people)
         <input id="sizeEstimate" type="number" min="1" placeholder="e.g., 20" />
@@ -541,7 +477,7 @@
       </div>
     </div>
 
-    <div class="row" style="margin-top:12px;">
+    <div class="row" style="margin-top:্তা;">
       <label class="bioLabel">Description
         <textarea id="description" placeholder="Describe the vibe, what’s happening, who it’s for, what to bring, etc."></textarea>
       </label>
@@ -592,8 +528,12 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+import {
+  getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, setDoc
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytesResumable, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -645,17 +585,8 @@ const previewEmpty = document.getElementById("previewEmpty");
 const progress = document.getElementById("progress");
 const progressBar = document.getElementById("progressBar");
 
-/* Map elements */
-const mapSearchEl = document.getElementById("mapSearch");
-const searchBtn = document.getElementById("searchBtn");
-const useMyLocBtn = document.getElementById("useMyLoc");
-const pinStatusEl = document.getElementById("pinStatus");
-
 let currentUser = null;
 let selectedFile = null;
-
-let picked = { lat:null, lng:null, label:"" };
-let map, marker;
 
 function setMsg(text, kind=""){
   msg.style.display = text ? "block" : "none";
@@ -663,20 +594,26 @@ function setMsg(text, kind=""){
   msg.className = "msg" + (kind ? " " + kind : "");
 }
 
-/* Invite-only toggle */
 function setInviteUI(){
   const on = !!inviteEl.checked;
   invitePill.classList.toggle("on", on);
   invitePill.setAttribute("aria-checked", on ? "true" : "false");
   pBadge.textContent = on ? "Invite-only" : "Public";
 }
-invitePill.addEventListener("click", ()=>{ inviteEl.checked = !inviteEl.checked; setInviteUI(); });
+invitePill.addEventListener("click", ()=>{
+  inviteEl.checked = !inviteEl.checked;
+  setInviteUI();
+});
 invitePill.addEventListener("keydown", (e)=>{
-  if (e.key === "Enter" || e.key === " "){ e.preventDefault(); inviteEl.checked = !inviteEl.checked; setInviteUI(); }
+  if (e.key === "Enter" || e.key === " "){
+    e.preventDefault();
+    inviteEl.checked = !inviteEl.checked;
+    setInviteUI();
+  }
 });
 setInviteUI();
 
-/* Preview helpers */
+/* Preview formatting helpers */
 function fmtDate(yyyyMmDd){
   if (!yyyyMmDd) return "";
   const [y,m,d] = yyyyMmDd.split("-").map(Number);
@@ -684,18 +621,22 @@ function fmtDate(yyyyMmDd){
   const dt = new Date(y, m-1, d);
   return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
 }
+
 function fmtWhen(){
   const sd = startDateEl.value || "";
   const st = startTimeEl.value || "";
   const ed = endDateEl.value || "";
   const et = endTimeEl.value || "";
+
   const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
   const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
+
   if (!start && !end) return "Start date & time";
   if (start && !end) return start;
   if (!start && end) return end;
   return `${start} → ${end}`;
 }
+
 function parseTags(){
   return (tagsEl.value || "")
     .split(",")
@@ -703,6 +644,7 @@ function parseTags(){
     .filter(Boolean)
     .slice(0, 8);
 }
+
 function renderPreview(){
   const name = (nameEl.value || "").trim();
   const loc = (locationEl.value || "").trim();
@@ -710,21 +652,24 @@ function renderPreview(){
   pWhere.textContent = loc || "Location";
   pWhen.textContent = fmtWhen();
 
+  const chips = parseTags();
   pChips.innerHTML = "";
-  for (const t of parseTags()){
+  for (const t of chips){
     const el = document.createElement("div");
     el.className = "chip";
     el.textContent = t;
     pChips.appendChild(el);
   }
 }
+
 [nameEl, locationEl, startDateEl, startTimeEl, endDateEl, endTimeEl, tagsEl].forEach(el=>{
   el.addEventListener("input", renderPreview);
 });
 renderPreview();
 
-/* Image upload */
+/* Image upload UI */
 pickImageBtn.addEventListener("click", ()=> imageFileEl.click());
+
 imageFileEl.addEventListener("change", ()=>{
   const f = imageFileEl.files?.[0] || null;
   selectedFile = null;
@@ -760,6 +705,7 @@ function sanitizeExt(filename){
   const ext = (filename.split(".").pop() || "jpg").toLowerCase();
   return ["png","jpg","jpeg","webp"].includes(ext) ? ext : "jpg";
 }
+
 async function uploadEventImage(eventId){
   if (!selectedFile) return "";
 
@@ -787,150 +733,10 @@ async function uploadEventImage(eventId){
   return url;
 }
 
-/* Map helpers */
-function setPinStatus(){
-  if (picked.lat == null || picked.lng == null){
-    pinStatusEl.textContent = "Not set";
-    return;
-  }
-  pinStatusEl.textContent = `${Number(picked.lat).toFixed(5)}, ${Number(picked.lng).toFixed(5)}`;
-}
-function ensureMarker(lat, lng){
-  if (!map) return;
-  if (!marker){
-    marker = L.marker([lat, lng], { draggable:true }).addTo(map);
-    marker.on("dragend", async ()=>{
-      const p = marker.getLatLng();
-      picked.lat = p.lat;
-      picked.lng = p.lng;
-      setPinStatus();
-      const label = await reverseGeocode(p.lat, p.lng);
-      if (label){
-        picked.label = label;
-        if (!locationEl.value.trim()){
-          locationEl.value = label;
-          renderPreview();
-        }
-      }
-    });
-  } else {
-    marker.setLatLng([lat, lng]);
-  }
-}
-
-async function geocode(query){
-  const q = String(query || "").trim();
-  if (!q) return null;
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-  const res = await fetch(url, { headers: { "Accept":"application/json" } });
-  if (!res.ok) return null;
-  const data = await res.json();
-  if (!Array.isArray(data) || !data.length) return null;
-  const r = data[0];
-  return { lat:Number(r.lat), lng:Number(r.lon), label:r.display_name || q };
-}
-
-async function reverseGeocode(lat, lng){
-  try{
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`;
-    const res = await fetch(url, { headers: { "Accept":"application/json" } });
-    if (!res.ok) return "";
-    const data = await res.json();
-    return (data && data.display_name) ? data.display_name : "";
-  } catch(_) {
-    return "";
-  }
-}
-
-function initMap(){
-  const defaultCenter = [45.4215, -75.6972];
-  map = L.map("map").setView(defaultCenter, 12);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors"
-  }).addTo(map);
-
-  map.on("click", async (e)=>{
-    picked.lat = e.latlng.lat;
-    picked.lng = e.latlng.lng;
-    ensureMarker(picked.lat, picked.lng);
-    setPinStatus();
-
-    const label = await reverseGeocode(picked.lat, picked.lng);
-    if (label){
-      picked.label = label;
-      if (!locationEl.value.trim()){
-        locationEl.value = label;
-        renderPreview();
-      }
-    }
-  });
-
-  setPinStatus();
-}
-
-searchBtn.addEventListener("click", async ()=>{
-  const q = mapSearchEl.value.trim();
-  if (!q) { setMsg("Type something to search (e.g., a place or address).", "error"); return; }
-  setMsg("");
-  try{
-    searchBtn.disabled = true;
-    const r = await geocode(q);
-    if (!r){
-      setMsg("No results found. Try a broader search.", "error");
-      return;
-    }
-    picked.lat = r.lat;
-    picked.lng = r.lng;
-    picked.label = r.label || q;
-
-    map.setView([r.lat, r.lng], 15);
-    ensureMarker(r.lat, r.lng);
-    setPinStatus();
-
-    locationEl.value = (r.label || q);
-    renderPreview();
-  } catch(e){
-    setMsg("Search failed. Try again.", "error");
-  } finally {
-    searchBtn.disabled = false;
-  }
-});
-mapSearchEl.addEventListener("keydown", (e)=>{ if (e.key==="Enter"){ e.preventDefault(); searchBtn.click(); } });
-
-useMyLocBtn.addEventListener("click", ()=>{
-  setMsg("");
-  if (!navigator.geolocation){ setMsg("Geolocation not supported in this browser.", "error"); return; }
-  useMyLocBtn.disabled = true;
-
-  navigator.geolocation.getCurrentPosition(async (pos)=>{
-    picked.lat = pos.coords.latitude;
-    picked.lng = pos.coords.longitude;
-    ensureMarker(picked.lat, picked.lng);
-    map.setView([picked.lat, picked.lng], 16);
-    setPinStatus();
-
-    const label = await reverseGeocode(picked.lat, picked.lng);
-    if (label){
-      picked.label = label;
-      if (!locationEl.value.trim()){
-        locationEl.value = label;
-        renderPreview();
-      }
-    }
-    useMyLocBtn.disabled = false;
-  }, ()=>{
-    setMsg("Couldn't access your location. Check permissions.", "error");
-    useMyLocBtn.disabled = false;
-  }, { enableHighAccuracy:true, timeout:10000 });
-});
-
 /* Auth */
 onAuthStateChanged(auth, async (user)=>{
   if (!user) { window.location.href="index.html"; return; }
   currentUser = user;
-  if (!map) initMap();
 });
 
 /* Submit */
@@ -958,11 +764,6 @@ postBtn.addEventListener("click", async ()=>{
     return;
   }
 
-  if (picked.lat == null || picked.lng == null){
-    setMsg("Please drop a pin on the map (or search a place).", "error");
-    return;
-  }
-
   postBtn.disabled = true;
   setMsg("");
 
@@ -974,24 +775,16 @@ postBtn.addEventListener("click", async ()=>{
     } catch(_) {}
 
     const tags = parseTags();
-    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0;   // ✅ kept
+    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0;
     const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
     const venueSize = (venueSizeEl.value || "").trim();
-    const ratio = (ratioEl.value || "").trim();                    // ✅ kept
 
     const endDate = (endDateEl.value||"").trim();
     const endTime = (endTimeEl.value||"").trim();
 
-    const locationText = (locationEl.value||"").trim();
-
     const eventRef = await addDoc(collection(db,"events"), {
       name,
-      location: locationText,
-
-      // map fields
-      lat: picked.lat,
-      lng: picked.lng,
-      locationLabel: picked.label || locationText || "",
+      location: (locationEl.value||"").trim(),
 
       startDate,
       startTime,
@@ -1001,8 +794,8 @@ postBtn.addEventListener("click", async ()=>{
       venueSize,
       spotsAvailable,
 
-      sizeEstimate,  // ✅ kept
-      ratio,         // ✅ kept
+      sizeEstimate,
+      ratio: (ratioEl.value||"").trim(),
       description: (descriptionEl.value||"").trim(),
       tags,
 
