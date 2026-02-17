@@ -1,827 +1,515 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Uzone • Post Motive</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Uzone • Post Motive</title>
 
-<!-- Tab icon -->
-<link rel="icon" type="image/png" href="logo.png" />
-<meta name="color-scheme" content="dark light" />
+  <link rel="icon" type="image/png" href="logo.png" :contentReference[oaicite:4]{index=4}r-scheme" content="dark light" />
 
-<style>
-  :root{
-    --accent:#b00b55;
-    --bg:#0b0b10;
-    --panel: rgba(255,255,255,.06);
-    --panel2: rgba(255,255,255,.10);
-    --border: rgba(255,255,255,.14);
-    --text: rgba(255,255,255,.92);
-    --muted: rgba(255,255,255,.70);
-    --shadow: 0 20px 60px rgba(0,0,0,.45);
-    --radius: 18px;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; min-height:100dvh;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    color:var(--text);
-    background:
-      radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
-      radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
-      radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
-      var(--bg);
-  }
+  <style>
+    :root{
+      --accent:#b00b55;
+      --bg:#0b0b10;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --border: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100dvh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
+        radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
+        var(--bg);
+    }
 
-  header{
-    width:min(1120px, 92vw);
-    margin:18px auto 0 auto;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:14px 16px;
-    border:1px solid var(--border);
-    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    header{
+      width:min(1120px, 92vw);
+      margin:18px auto 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .left{display:flex; align-items:center; gap:12px; min-width:0;}
+    .left img{
+      width:38px;height:38px;object-fit:contain;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+    }
+    .title{display:grid; gap:2px; min-width:0;}
+    .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
-    /* match hub feel */
-    position: sticky;
-    top: 10px;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-  }
-  .left{display:flex; align-items:center; gap:12px; min-width:0;}
-  .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
-  .title{display:grid; gap:2px; min-width:0;}
-  .title h1{margin:0;font-size:18px;letter-spacing:.2px}
-  .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+    .btn{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:rgba(255,255,255,.92);
+      font-weight:800;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      user-select:none;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+      filter: brightness(1.06);
+    }
+    .btn:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
+      filter: brightness(1.0);
+    }
+    .btn:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
+    }
+    .btn:disabled{opacity:.65;cursor:not-allowed}
 
-  /* Unified button system (same as hub/profile/events) */
-  .btn{
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    color:rgba(255,255,255,.92);
-    font-weight:800;
-    cursor:pointer;
-    text-decoration:none;
-    display:inline-flex; align-items:center; gap:8px;
-    white-space:nowrap;
-    user-select:none;
-    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
-  }
-  .btn:hover{
-    transform: translateY(-1px);
-    border-color: var(--accent);
-    box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
-    filter: brightness(1.06);
-  }
-  .btn:active{
-    transform: translateY(0px) scale(.99);
-    box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
-    filter: brightness(1.0);
-  }
-  .btn:focus-visible{
-    outline:none;
-    box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
-  }
-  .btn:disabled{opacity:.6; cursor:not-allowed}
+    .btn.primary{
+      border:1px solid rgba(176,11,85,.55);
+      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+      color:white;
+      box-shadow: 0 18px 40px rgba(176,11,85,.22);
+    }
+    .btn.primary:hover{
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
+      filter: brightness(1.08);
+    }
 
-  /* Primary button (Post Event action) */
-  .btn.primary{
-    border:1px solid rgba(176,11,85,.55);
-    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-    color:white;
-    box-shadow: 0 18px 40px rgba(176,11,85,.22);
-  }
-  .btn.primary:hover{
-    border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
-    filter: brightness(1.08);
-  }
-  .btn.primary:active{
-    box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.20);
-  }
+    main{
+      width:min(1120px, 92vw);
+      margin:16px auto 30px auto;
+      display:grid;
+      gap:14px;
+    }
 
-  main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
-  .card{
-    border:1px solid var(--border);
-    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding:14px;
-    backdrop-filter: blur(10px);
-  }
+    .panel{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      backdrop-filter: blur(10px);
+    }
 
-  .sectionHead{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    margin:2px 0 12px 0;
-  }
-  .sectionHead h2{
-    margin:0;
-    font-size:14px;
-    letter-spacing:.25px;
-    color:rgba(255,255,255,.92);
-  }
-  .hint{color:rgba(255,255,255,.60); font-size:12px;}
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+    }
+    .col6{grid-column: span 6;}
+    .col12{grid-column: span 12;}
+    @media (max-width: 920px){
+      .col6,.col12{grid-column: span 12;}
+    }
 
-  .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
-  .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;}
-  @media (max-width: 900px){ .row3{grid-template-columns:1fr;} }
-  @media (max-width: 860px){ .row{grid-template-columns:1fr;} }
+    label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px 2px;}
+    input, textarea, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+    }
+    input:focus, textarea:focus, select:focus{
+      border-color: rgba(176,11,85,.60);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
+    }
+    textarea{min-height:110px; resize:vertical;}
 
-  label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .hint{font-size:13px; color:rgba(255,255,255,.75); line-height:1.35;}
 
-  input, textarea{
-    width:100%;
-    padding:12px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.06);
-    color:var(--text);
-    outline:none;
-    font-size:14px;
-  }
-  input:focus, textarea:focus{
-    border-color: rgba(176,11,85,.60);
-    box-shadow: 0 0 0 4px rgba(176,11,85,.20);
-  }
+    /* Map */
+    #mapWrap{
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      overflow:hidden;
+      background: rgba(0,0,0,.20);
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    #map{
+      height: 360px;
+      width: 100%;
+    }
+    @media (max-width: 920px){
+      #map{height: 320px;}
+    }
 
-  /* Make native date/time pickers look consistent */
-  input[type="date"], input[type="time"]{
-    color-scheme: dark;
-  }
+    /* Custom glow marker (Advanced Marker uses HTML content) */
+    .glow-pin{
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow:
+        0 0 10px var(--accent),
+        0 0 22px rgba(176,11,85,.75),
+        0 0 46px rgba(176,11,85,.45);
+      transform: translate(-50%, -50%);
+    }
+    .glow-pulse{
+      position:absolute;
+      width: 46px; height: 46px;
+      border-radius: 999px;
+      border: 2px solid rgba(176,11,85,.35);
+      transform: translate(-50%, -50%);
+      animation: pulse 1.6s ease-out infinite;
+      pointer-events:none;
+    }
+    @keyframes pulse{
+      0%{opacity:.85; transform: translate(-50%,-50%) scale(.35);}
+      100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
+    }
 
-  /* Description sizing + spacing fix */
-  .bioLabel{gap:8px;}
-  .bioLabel textarea{
-    min-height: 210px;
-    line-height: 1.35;
-  }
-
-  .stack{display:grid; gap:12px; align-content:start;}
-
-  /* Preview card */
-  .previewCard{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    border-radius:14px;
-    overflow:hidden;
-  }
-  .previewImgWrap{
-    position:relative;
-    width:100%;
-    aspect-ratio: 16 / 9;
-    background: rgba(255,255,255,.06);
-    display:grid;
-    place-items:center;
-    color: rgba(255,255,255,.65);
-    font-size:13px;
-  }
-  .previewImgWrap img{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    object-fit:cover;
-    display:none;
-  }
-  .previewOverlay{
-    position:absolute; inset:0;
-    background:
-      linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.82) 100%),
-      radial-gradient(1000px 380px at 30% 10%, rgba(176,11,85,.18), transparent 55%);
-    pointer-events:none;
-  }
-  .previewTopBadge{
-    position:absolute; top:10px; left:10px;
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.35);
-    backdrop-filter: blur(10px);
-    font-size:12px;
-    color: rgba(255,255,255,.88);
-    display:flex; gap:8px; align-items:center;
-  }
-  .dot{
-    width:7px; height:7px; border-radius:999px;
-    background: rgba(176,11,85,.95);
-    box-shadow: 0 0 0 4px rgba(176,11,85,.22);
-  }
-  .previewBottom{
-    position:absolute; left:0; right:0; bottom:0;
-    padding:12px;
-    display:grid; gap:6px;
-  }
-  .pTitle{
-    font-weight:900;
-    letter-spacing:.2px;
-    font-size:16px;
-    line-height:1.15;
-    text-shadow: 0 10px 30px rgba(0,0,0,.55);
-    overflow:hidden;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-  }
-  .pMeta{
-    display:flex; flex-wrap:wrap; gap:8px;
-    color: rgba(255,255,255,.80);
-    font-size:12px;
-    align-items:center;
-  }
-  .pill{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.30);
-    padding:6px 10px;
-    border-radius:999px;
-    display:inline-flex; gap:6px; align-items:center;
-    backdrop-filter: blur(10px);
-  }
-  .pill b{font-weight:800; color: rgba(255,255,255,.92)}
-  .pChips{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;}
-  .chip{
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.82);
-    font-size:12px;
-    max-width: 100%;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-
-  /* Uploader */
-  .uploader{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.16);
-    border-radius:14px;
-    padding:12px;
-    display:grid;
-    gap:10px;
-  }
-  .fileRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-  .fileBtn{
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    color:rgba(255,255,255,.92);
-    cursor:pointer;
-    font-weight:800;
-    display:inline-flex; align-items:center; gap:8px;
-    user-select:none;
-    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
-  }
-  .fileBtn:hover{
-    transform: translateY(-1px);
-    border-color: var(--accent);
-    box-shadow: 0 0 14px rgba(176,11,85,.75), 0 14px 34px rgba(176,11,85,.24);
-    filter: brightness(1.06);
-  }
-  .fileBtn:active{
-    transform: translateY(0px) scale(.99);
-    box-shadow: 0 0 10px rgba(176,11,85,.65), 0 10px 26px rgba(176,11,85,.18);
-  }
-
-  .fileName{
-    color: rgba(255,255,255,.75);
-    font-size:12px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    max-width: 100%;
-  }
-  .progress{
-    height:8px;
-    border-radius:999px;
-    background: rgba(255,255,255,.10);
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.10);
-    display:none;
-  }
-  .progress > div{
-    height:100%;
-    width:0%;
-    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-  }
-  .mini{
-    color: rgba(255,255,255,.65);
-    font-size:12px;
-    line-height:1.35;
-  }
-
-  /* Invite-only toggle */
-  .togglePill{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    padding:12px 12px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    user-select:none;
-    cursor:pointer;
-  }
-  .togglePill .tTitle{display:grid; gap:2px;}
-  .togglePill .tTitle b{color: rgba(255,255,255,.92); font-size:13px;}
-  .togglePill .tTitle span{color: rgba(255,255,255,.65); font-size:12px; line-height:1.25;}
-  .switch{
-    width:46px; height:26px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.08);
-    position:relative;
-    flex:0 0 auto;
-  }
-  .switch::after{
-    content:"";
-    width:20px; height:20px;
-    border-radius:999px;
-    background: rgba(255,255,255,.88);
-    position:absolute;
-    top:50%;
-    left:3px;
-    transform: translateY(-50%);
-    transition: transform .18s ease;
-  }
-  .togglePill.on{
-    border-color: rgba(176,11,85,.55);
-    box-shadow: 0 0 0 4px rgba(176,11,85,.18);
-    background: linear-gradient(180deg, rgba(176,11,85,.18), rgba(0,0,0,.18));
-  }
-  .togglePill.on .switch{
-    border-color: rgba(176,11,85,.55);
-    background: rgba(176,11,85,.35);
-  }
-  .togglePill.on .switch::after{
-    transform: translateY(-50%) translateX(20px);
-  }
-
-  .msg{
-    display:none;
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.16);
-    color:rgba(255,255,255,.85);
-    font-size:13px;
-    white-space:pre-line;
-    margin-top:12px;
-  }
-  .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
-  .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
-
-  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
-</style>
+    .status{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:rgba(255,255,255,.86);
+      font-size:13px;
+      line-height:1.35;
+    }
+    .status b{color:rgba(255,255,255,.94)}
+    .danger{border-color: rgba(255,80,120,.35)}
+    .ok{border-color: rgba(80,255,160,.28)}
+  </style>
 </head>
 <body>
-<header>
-  <div class="left">
-    <img src="logo.png" alt="Uzone logo" />
-    <div class="title">
-      <h1>Post Event</h1>
-      <div class="sub">Make it clean. Make it real.</div>
-    </div>
-  </div>
-  <div class="right">
-    <a class="btn" href="hub.html">Uhub</a>
-    <a class="btn" href="events.html">Umotives</a>
-    <a class="btn" href="my_events.html">My Motives</a>
-  </div>
-</header>
-
-<main>
-  <section class="card">
-    <div class="sectionHead">
-      <h2>Basics</h2>
-      <div class="hint">Start with what people care about.</div>
-    </div>
-
-    <div class="row">
-      <label>Event name
-        <input id="name" placeholder="e.g., Rooftop Chill Night" />
-      </label>
-      <label>Location (public)
-        <input id="location" placeholder="e.g., Near uOttawa • Downtown • 123 King St" />
-      </label>
-    </div>
-
-    <div class="row" style="margin-top:12px;">
-      <label>Venue size (capacity / space)
-        <input id="venueSize" placeholder="e.g., 2-bedroom condo • house • 40-person capacity" />
-      </label>
-      <label>Spots available (host says)
-        <input id="spotsAvailable" type="number" min="0" placeholder="e.g., 15" />
-      </label>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="sectionHead">
-      <h2>Schedule</h2>
-      <div class="hint">Pick date/time.</div>
-    </div>
-
-    <div class="row">
-      <label>Start date
-        <input id="startDate" type="date" />
-      </label>
-      <label>Start time
-        <input id="startTime" type="time" />
-      </label>
-    </div>
-
-    <div class="row" style="margin-top:12px;">
-      <label>End date (optional)
-        <input id="endDate" type="date" />
-      </label>
-      <label>End time (optional)
-        <input id="endTime" type="time" />
-      </label>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="sectionHead">
-      <h2>Details</h2>
-      <div class="hint">Tags + description cover the vibe. (optional)</div>
-    </div>
-
-    <div class="row">
-      <label>Size estimate (# of people)
-        <input id="sizeEstimate" type="number" min="1" placeholder="e.g., 20" />
-      </label>
-      <label>Ratio
-        <input id="ratio" placeholder="e.g., 50/50 or 60/40" />
-      </label>
-    </div>
-
-    <div class="row" style="margin-top:12px;">
-      <label>Tags (comma separated)
-        <input id="tags" placeholder="e.g., music, chill, alcohol, games" />
-      </label>
-
-      <div class="stack">
-        <input id="inviteOnly" type="checkbox" hidden />
-        <div class="togglePill" id="invitePill" role="switch" aria-checked="false" tabindex="0">
-          <div class="tTitle">
-            <b>Invite-only</b>
-            <span>Hide exact date/time/location until you accept applicants.</span>
-          </div>
-          <div class="switch" aria-hidden="true"></div>
-        </div>
+  <header>
+    <div class="left">
+      <img src="logo.png" alt="Uzone logo" />
+      <div class="title">
+        <h1>Post Motive</h1>
+        <div class="sub">Drop a pin or search an address • saved to the map</div>
       </div>
     </div>
+    <div class="right">
+      <a class="btn" href="hub.html">Uhub</a>
+      <a class="btn" href="events.html">Umotives</a>
+      <a class="btn" href="my_events.html">My Motives</a>
+    </div>
+  </header>
 
-    <div class="row" style="margin-top:্তা;">
-      <label class="bioLabel">Description
-        <textarea id="description" placeholder="Describe the vibe, what’s happening, who it’s for, what to bring, etc."></textarea>
-      </label>
-
-      <div class="stack">
-        <div class="sectionHead" style="margin:0;">
-          <h2 style="font-size:13px;">Preview</h2>
+  <main>
+    <section class="panel">
+      <div class="grid">
+        <div class="col6">
+          <label for="name">Motive name</label>
+          <input id="name" placeholder="e.g., Rooftop pregame" />
         </div>
 
-        <div class="previewCard" aria-label="Event preview">
-          <div class="previewImgWrap">
-            <img id="previewImg" alt="Event image preview" />
-            <div id="previewEmpty">No image selected</div>
-            <div class="previewOverlay"></div>
-            <div class="previewTopBadge"><span class="dot"></span><span id="pBadge">Public</span></div>
+        <div class="col6">
+          <label for="tags">Tags (comma separated)</label>
+          <input id="tags" placeholder="e.g., party, uottawa, music" />
+        </div>
 
-            <div class="previewBottom">
-              <div class="pTitle" id="pTitle">Your motive name</div>
-              <div class="pMeta">
-                <span class="pill"><b>When</b> <span id="pWhen">Start date & time</span></span>
-                <span class="pill"><b>Where</b> <span id="pWhere">Location</span></span>
-              </div>
-              <div class="pChips" id="pChips"></div>
+        <div class="col6">
+          <label for="startDate">Start date</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div class="col6">
+          <label for="startTime">Start time</label>
+          <input id="startTime" type="time" />
+        </div>
+
+        <div class="col6">
+          <label for="endDate">End date (optional)</label>
+          <input id="endDate" type="date" />
+        </div>
+        <div class="col6">
+          <label for="endTime">End time (optional)</label>
+          <input id="endTime" type="time" />
+        </div>
+
+        <div class="col12">
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="What’s the vibe? What should people know?"></textarea>
+        </div>
+
+        <div class="col12">
+          <div class="row" style="justify-content:space-between;">
+            <div class="row" style="gap:12px;">
+              <label style="margin:0; display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input id="inviteOnly" type="checkbox" style="width:18px;height:18px;" />
+                <span class="hint"><b>Invite-only</b> (hide exact location on discovery map)</span>
+              </label>
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="uploader">
-          <div class="fileRow">
-            <input id="imageFile" type="file" accept="image/*" hidden />
-            <button class="fileBtn" id="pickImage" type="button">Upload image</button>
-            <div class="fileName" id="fileName">PNG/JPG/WebP • max 5MB</div>
+    <section class="panel">
+      <div class="grid">
+        <div class="col12">
+          <label for="locationInput">Search address (optional)</label>
+          <input id="locationInput" placeholder="Type an address or place name, or just click the map to drop a pin…" />
+          <div class="hint" style="margin-top:8px;">
+            Tip: Clicking the map drops a pin. Dragging the map is fine. You can also use “Use my location”.
           </div>
-          <div class="progress" id="progress"><div id="progressBar"></div></div>
-          <div class="mini">Tip: wide photo works best (16:9-ish).</div>
+        </div>
+
+        <div class="col12" id="mapWrap">
+          <div id="map"></div>
+        </div>
+
+        <div class="col12">
+          <div class="row" style="justify-content:space-between;">
+            <div class="row">
+              <button class="btn" id="useMyLocBtn" type="button">Use my location</button>
+              <button class="btn" id="clearPinBtn" type="button">Clear pin</button>
+            </div>
+            <div id="pinStatus" class="status danger">No pin selected. Click the map or search an address.</div>
+          </div>
+        </div>
+
+        <div class="col12">
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn primary" id="postBtn" type="button">Post Motive</button>
+          </div>
+          <div class="hint" id="msg" style="margin-top:10px;"></div>
         </div>
       </div>
-    </div>
+    </section>
+  </main>
 
-    <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin-top:14px;">
-      <button class="btn primary" id="postBtn" type="button">Post Motive</button>
-    </div>
+  <!-- Google Maps JS (replace key + map_id) -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places,marker&v=weekly"
+    async defer></script>
 
-    <div class="msg" id="msg"></div>
-  </section>
-</main>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, setDoc
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      projectId: "uzone-6148d",
+    };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app"
-};
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+    const $ = (id) => document.getElementById(id);
+    const msg = $("msg");
+    const postBtn = $("postBtn");
+    const pinStatus = $("pinStatus");
 
-/* Elements */
-const msg = document.getElementById("msg");
-const postBtn = document.getElementById("postBtn");
+    let gmap, marker, autocomplete;
+    let picked = { lat: null, lng: null, place: null };
 
-const nameEl = document.getElementById("name");
-const locationEl = document.getElementById("location");
-const venueSizeEl = document.getElementById("venueSize");
-const spotsAvailableEl = document.getElementById("spotsAvailable");
-
-const startDateEl = document.getElementById("startDate");
-const startTimeEl = document.getElementById("startTime");
-const endDateEl = document.getElementById("endDate");
-const endTimeEl = document.getElementById("endTime");
-
-const sizeEstimateEl = document.getElementById("sizeEstimate");
-const ratioEl = document.getElementById("ratio");
-const tagsEl = document.getElementById("tags");
-const descriptionEl = document.getElementById("description");
-
-const inviteEl = document.getElementById("inviteOnly");
-const invitePill = document.getElementById("invitePill");
-
-/* Preview elements */
-const pTitle = document.getElementById("pTitle");
-const pWhen = document.getElementById("pWhen");
-const pWhere = document.getElementById("pWhere");
-const pChips = document.getElementById("pChips");
-const pBadge = document.getElementById("pBadge");
-
-/* Upload elements */
-const imageFileEl = document.getElementById("imageFile");
-const pickImageBtn = document.getElementById("pickImage");
-const fileNameEl = document.getElementById("fileName");
-const previewImg = document.getElementById("previewImg");
-const previewEmpty = document.getElementById("previewEmpty");
-const progress = document.getElementById("progress");
-const progressBar = document.getElementById("progressBar");
-
-let currentUser = null;
-let selectedFile = null;
-
-function setMsg(text, kind=""){
-  msg.style.display = text ? "block" : "none";
-  msg.textContent = text || "";
-  msg.className = "msg" + (kind ? " " + kind : "");
-}
-
-function setInviteUI(){
-  const on = !!inviteEl.checked;
-  invitePill.classList.toggle("on", on);
-  invitePill.setAttribute("aria-checked", on ? "true" : "false");
-  pBadge.textContent = on ? "Invite-only" : "Public";
-}
-invitePill.addEventListener("click", ()=>{
-  inviteEl.checked = !inviteEl.checked;
-  setInviteUI();
-});
-invitePill.addEventListener("keydown", (e)=>{
-  if (e.key === "Enter" || e.key === " "){
-    e.preventDefault();
-    inviteEl.checked = !inviteEl.checked;
-    setInviteUI();
-  }
-});
-setInviteUI();
-
-/* Preview formatting helpers */
-function fmtDate(yyyyMmDd){
-  if (!yyyyMmDd) return "";
-  const [y,m,d] = yyyyMmDd.split("-").map(Number);
-  if (!y || !m || !d) return yyyyMmDd;
-  const dt = new Date(y, m-1, d);
-  return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
-}
-
-function fmtWhen(){
-  const sd = startDateEl.value || "";
-  const st = startTimeEl.value || "";
-  const ed = endDateEl.value || "";
-  const et = endTimeEl.value || "";
-
-  const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
-  const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
-
-  if (!start && !end) return "Start date & time";
-  if (start && !end) return start;
-  if (!start && end) return end;
-  return `${start} → ${end}`;
-}
-
-function parseTags(){
-  return (tagsEl.value || "")
-    .split(",")
-    .map(s=>s.trim())
-    .filter(Boolean)
-    .slice(0, 8);
-}
-
-function renderPreview(){
-  const name = (nameEl.value || "").trim();
-  const loc = (locationEl.value || "").trim();
-  pTitle.textContent = name || "Your event name";
-  pWhere.textContent = loc || "Location";
-  pWhen.textContent = fmtWhen();
-
-  const chips = parseTags();
-  pChips.innerHTML = "";
-  for (const t of chips){
-    const el = document.createElement("div");
-    el.className = "chip";
-    el.textContent = t;
-    pChips.appendChild(el);
-  }
-}
-
-[nameEl, locationEl, startDateEl, startTimeEl, endDateEl, endTimeEl, tagsEl].forEach(el=>{
-  el.addEventListener("input", renderPreview);
-});
-renderPreview();
-
-/* Image upload UI */
-pickImageBtn.addEventListener("click", ()=> imageFileEl.click());
-
-imageFileEl.addEventListener("change", ()=>{
-  const f = imageFileEl.files?.[0] || null;
-  selectedFile = null;
-
-  if (!f){
-    fileNameEl.textContent = "PNG/JPG/WebP • max 5MB";
-    previewImg.style.display = "none";
-    previewEmpty.style.display = "grid";
-    previewImg.src = "";
-    return;
-  }
-  if (!f.type.startsWith("image/")){
-    setMsg("Please choose an image file.", "error");
-    imageFileEl.value = "";
-    return;
-  }
-  if (f.size > 5 * 1024 * 1024){
-    setMsg("Image is too large. Max size is 5MB.", "error");
-    imageFileEl.value = "";
-    return;
-  }
-
-  selectedFile = f;
-  fileNameEl.textContent = f.name;
-
-  const url = URL.createObjectURL(f);
-  previewImg.src = url;
-  previewImg.style.display = "block";
-  previewEmpty.style.display = "none";
-});
-
-function sanitizeExt(filename){
-  const ext = (filename.split(".").pop() || "jpg").toLowerCase();
-  return ["png","jpg","jpeg","webp"].includes(ext) ? ext : "jpg";
-}
-
-async function uploadEventImage(eventId){
-  if (!selectedFile) return "";
-
-  progress.style.display = "block";
-  progressBar.style.width = "0%";
-
-  const safeExt = sanitizeExt(selectedFile.name);
-  const path = `event_images/${eventId}/${Date.now()}.${safeExt}`;
-  const storageRef = ref(storage, path);
-
-  const task = uploadBytesResumable(storageRef, selectedFile, { contentType: selectedFile.type });
-
-  const url = await new Promise((resolve, reject) => {
-    task.on("state_changed",
-      (snap) => {
-        const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
-        progressBar.style.width = `${Math.max(2, Math.min(100, pct))}%`;
-      },
-      (err) => reject(err),
-      async () => resolve(await getDownloadURL(task.snapshot.ref))
-    );
-  });
-
-  setTimeout(()=>{ progress.style.display = "none"; }, 450);
-  return url;
-}
-
-/* Auth */
-onAuthStateChanged(auth, async (user)=>{
-  if (!user) { window.location.href="index.html"; return; }
-  currentUser = user;
-});
-
-/* Submit */
-function maybePairError(a, b){
-  const A = (a.value || "").trim();
-  const B = (b.value || "").trim();
-  return (A && !B) || (!A && B);
-}
-
-postBtn.addEventListener("click", async ()=>{
-  if (!currentUser) return;
-
-  const name = (nameEl.value||"").trim();
-  if (!name) { setMsg("Please enter an event name.", "error"); return; }
-
-  const startDate = (startDateEl.value||"").trim();
-  const startTime = (startTimeEl.value||"").trim();
-  if (!startDate || !startTime){
-    setMsg("Please pick a Start date and Start time.", "error");
-    return;
-  }
-
-  if (maybePairError(endDateEl, endTimeEl)){
-    setMsg("If you add an end date, add an end time too (and vice versa).", "error");
-    return;
-  }
-
-  postBtn.disabled = true;
-  setMsg("");
-
-  try{
-    let hostName = currentUser.displayName || "";
-    try{
-      const u = await getDoc(doc(db,"users",currentUser.uid));
-      if (u.exists() && u.data()?.name) hostName = u.data().name;
-    } catch(_) {}
-
-    const tags = parseTags();
-    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0;
-    const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
-    const venueSize = (venueSizeEl.value || "").trim();
-
-    const endDate = (endDateEl.value||"").trim();
-    const endTime = (endTimeEl.value||"").trim();
-
-    const eventRef = await addDoc(collection(db,"events"), {
-      name,
-      location: (locationEl.value||"").trim(),
-
-      startDate,
-      startTime,
-      endDate: endDate || "",
-      endTime: endTime || "",
-
-      venueSize,
-      spotsAvailable,
-
-      sizeEstimate,
-      ratio: (ratioEl.value||"").trim(),
-      description: (descriptionEl.value||"").trim(),
-      tags,
-
-      imageUrl: "",
-      inviteOnly: !!inviteEl.checked,
-
-      ratingAvg: 0,
-      hostUid: currentUser.uid,
-      hostName: hostName || currentUser.email || "Host",
-      createdAt: serverTimestamp()
-    });
-
-    if (selectedFile){
-      const imageUrl = await uploadEventImage(eventRef.id);
-      await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
+    function esc(s){
+      return String(s||"").replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
     }
 
-    setMsg("Event posted!", "ok");
-    setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventRef.id)}`; }, 650);
+    function setStatus(text, ok){
+      pinStatus.textContent = text;
+      pinStatus.classList.toggle("ok", !!ok);
+      pinStatus.classList.toggle("danger", !ok);
+    }
 
-  } catch(e){
-    setMsg(e?.message || "Failed to post event.", "error");
-  } finally {
-    postBtn.disabled = false;
-  }
-});
-</script>
+    function setPicked(lat, lng, placeText){
+      picked.lat = lat;
+      picked.lng = lng;
+      picked.place = placeText || null;
+
+      const content = document.createElement("div");
+      content.style.position = "relative";
+      const dot = document.createElement("div");
+      dot.className = "glow-pin";
+      const pulse = document.createElement("div");
+      pulse.className = "glow-pulse";
+      content.appendChild(pulse);
+      content.appendChild(dot);
+
+      if (!marker){
+        marker = new google.maps.marker.AdvancedMarkerElement({
+          map: gmap,
+          position: { lat, lng },
+          content
+        });
+      } else {
+        marker.position = { lat, lng };
+        marker.content = content;
+      }
+
+      gmap.panTo({ lat, lng });
+      setStatus(placeText ? `Pinned: ${placeText}` : `Pinned: ${lat.toFixed(5)}, ${lng.toFixed(5)}`, true);
+    }
+
+    function clearPicked(){
+      picked = { lat:null, lng:null, place:null };
+      if (marker) marker.map = null;
+      marker = null;
+      setStatus("No pin selected. Click the map or search an address.", false);
+    }
+
+    // Wait until Google Maps script is ready
+    function whenGoogleReady(){
+      return new Promise((resolve) => {
+        const tick = () => (window.google?.maps?.Map ? resolve() : setTimeout(tick, 30));
+        tick();
+      });
+    }
+
+    async function initMap(){
+      await whenGoogleReady();
+
+      // Default center (Ottawa)
+      const defaultCenter = { lat: 45.4215, lng: -75.6972 };
+
+      gmap = new google.maps.Map($("map"), {
+        center: defaultCenter,
+        zoom: 12,
+        mapId: "YOUR_MAP_ID", // IMPORTANT: required for cloud styling + advanced markers
+        disableDefaultUI: false,
+        clickableIcons: false
+      });
+
+      // Click to drop pin
+      gmap.addListener("click", (e) => {
+        if (!e?.latLng) return;
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        setPicked(lat, lng, null);
+      });
+
+      // Address autocomplete (Places)
+      autocomplete = new google.maps.places.Autocomplete($("locationInput"), {
+        fields: ["formatted_address", "geometry", "name"],
+      });
+
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        const loc = place?.geometry?.location;
+        if (!loc) return;
+        const lat = loc.lat();
+        const lng = loc.lng();
+        const text = place.formatted_address || place.name || null;
+        setPicked(lat, lng, text);
+      });
+
+      $("useMyLocBtn").addEventListener("click", () => {
+        if (!navigator.geolocation) return alert("Geolocation not supported.");
+        navigator.geolocation.getCurrentPosition(
+          (pos) => setPicked(pos.coords.latitude, pos.coords.longitude, "Your location"),
+          () => alert("Couldn’t get your location.")
+        );
+      });
+
+      $("clearPinBtn").addEventListener("click", clearPicked);
+    }
+
+    function parseTags(str){
+      return (str || "")
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, 20);
+    }
+
+    function showMsg(text, good){
+      msg.textContent = text || "";
+      msg.style.color = good ? "rgba(80,255,160,.9)" : "rgba(255,120,160,.95)";
+    }
+
+    async function postEvent(user){
+      const name = $("name").value.trim();
+      const tags = parseTags($("tags").value);
+      const startDate = $("startDate").value || "";
+      const startTime = $("startTime").value || "";
+      const endDate = $("endDate").value || "";
+      const endTime = $("endTime").value || "";
+      const description = $("description").value.trim();
+      const inviteOnly = $("inviteOnly").checked;
+
+      if (!name) return showMsg("Please enter a motive name.", false);
+      if (!startDate || !startTime) return showMsg("Please choose a start date and time.", false);
+
+      // Require pin for open events. For invite-only, you can still require it, but you might later blur it on the map.
+      if (!picked.lat || !picked.lng) return showMsg("Please drop a pin or search an address.", false);
+
+      postBtn.disabled = true;
+      showMsg("Posting…", true);
+
+      try{
+        const payload = {
+          name,
+          tags,
+          startDate, startTime,
+          endDate: endDate || null,
+          endTime: endTime || null,
+          description: description || null,
+
+          // Store both:
+          location: picked.place || $("locationInput").value.trim() || null,  // human text
+          lat: picked.lat,
+          lng: picked.lng,
+
+          inviteOnly,
+
+          ownerUid: user.uid,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        const ref = await addDoc(collection(db, "events"), payload);
+
+        showMsg("Posted! Opening your motive…", true);
+        window.location.href = `event.html?id=${encodeURIComponent(ref.id)}`;
+      } catch(err){
+        console.error(err);
+        showMsg("Failed to post. Check console + Firestore rules.", false);
+      } finally {
+        postBtn.disabled = false;
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      await initMap();
+      postBtn.addEventListener("click", () => postEvent(user));
+    });
+  </script>
 </body>
 </html>
