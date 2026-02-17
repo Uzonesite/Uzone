@@ -183,11 +183,24 @@
       100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
     }
 
+    /* ✅ Make the Google InfoWindow fit mobile */
+    .gm-style-iw{ padding:0 !important; }
+    .gm-style-iw-d{ overflow:hidden !important; } /* prevents sideways scroll */
+    .gm-style-iw-c{
+      max-width: 86vw !important;
+      border-radius: 16px !important;
+    }
+    /* Hide default Google close button (white-on-white issue) */
+    .gm-ui-hover-effect{ display:none !important; }
+
     /* Popup card */
     .card{
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      width: 270px;
+      width: min(270px, 82vw);   /* ✅ responsive */
+      max-width: 82vw;
+      padding: 12px 12px 12px 12px;
       color: rgba(20,20,24,.92);
+      position: relative;
     }
     .badge{
       display:inline-flex; align-items:center; gap:8px;
@@ -198,26 +211,40 @@
       font-size:12px;
       color: rgba(20,20,24,.80);
       white-space:nowrap;
+      max-width: calc(100% - 44px); /* leave space for X */
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .dot{
       width:7px;height:7px;border-radius:999px;
       background: var(--accent);
       box-shadow: 0 0 0 4px rgba(176,11,85,.16);
+      flex:0 0 auto;
     }
     .card h3{
       margin:10px 0 6px 0;
       font-size:15px;
       line-height:1.2;
       font-weight:900;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      padding-right: 40px; /* don't run under X */
     }
     .meta{
       font-size:12px;
       color: rgba(20,20,24,.74);
       line-height:1.35;
+      word-break: break-word;
     }
+
     .actions{
       margin-top:12px;
-      display:flex; gap:10px; flex-wrap:wrap;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap; /* ✅ wraps on mobile */
     }
     .aBtn{
       display:inline-flex;
@@ -233,6 +260,8 @@
       text-decoration:none;
       cursor:pointer;
       transition: transform .12s ease, box-shadow .12s ease;
+      flex: 1 1 auto; /* ✅ buttons compress nicely */
+      min-width: 110px;
     }
     .aBtn:hover{ transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.12); }
     .aBtn.primary{
@@ -241,33 +270,27 @@
       color: #fff;
     }
 
-    /* Hide the default Google InfoWindow close (it’s white-on-white for you) */
-.gm-ui-hover-effect{
-  display:none !important;
-}
-
-/* Custom close button inside our popup */
-.closeBtn{
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:30px;
-  height:30px;
-  border-radius:999px;
-  border:1px solid rgba(0,0,0,.12);
-  background: rgba(255,255,255,.92);
-  color: rgba(20,20,24,.92);
-  font-weight:900;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-  box-shadow: 0 10px 24px rgba(0,0,0,.12);
-}
-.closeBtn:hover{ transform: translateY(-1px); }
-
-    
+    /* Custom close button inside popup */
+    .closeBtn{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:30px;
+      height:30px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.92);
+      color: rgba(20,20,24,.92);
+      font-weight:900;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1;
+      box-shadow: 0 10px 24px rgba(0,0,0,.12);
+      touch-action: manipulation;
+    }
+    .closeBtn:active{ transform: scale(.98); }
   </style>
 </head>
 
@@ -344,7 +367,7 @@
     const radius = $("radius");
     const radiusVal = $("radiusVal");
 
-    // ✅ focus support
+    // focus support: map.html?focus=<eventId>
     const params = new URLSearchParams(window.location.search);
     const focusId = (params.get("focus") || "").trim();
     let focusDone = false;
@@ -423,29 +446,28 @@
       const badgeText = ev.inviteOnly ? "Invite-only" : "Open";
 
       const html = `
-  <div class="card" style="position:relative;">
-    <button class="closeBtn" type="button" id="iwCloseBtn" aria-label="Close">✕</button>
+        <div class="card">
+          <button class="closeBtn" type="button" id="iwCloseBtn" aria-label="Close">✕</button>
 
-    <div class="badge"><span class="dot"></span>${badgeText}</div>
-    <h3 title="${esc(ev.name || "Motive")}">${esc(ev.name || "Motive")}</h3>
-    <div class="meta"><b>When:</b> ${when}<br><b>Where:</b> ${where}</div>
-    <div class="actions">
-      <a class="aBtn primary" href="event.html?id=${encodeURIComponent(ev.id)}">Open</a>
-      <a class="aBtn" href="events.html">List view</a>
-    </div>
-  </div>
-`;
-info.setContent(html);
-info.open({ map: gmap, anchor: marker });
+          <div class="badge"><span class="dot"></span>${badgeText}</div>
+          <h3 title="${esc(ev.name || "Motive")}">${esc(ev.name || "Motive")}</h3>
+          <div class="meta"><b>When:</b> ${when}<br><b>Where:</b> ${where}</div>
+          <div class="actions">
+            <a class="aBtn primary" href="event.html?id=${encodeURIComponent(ev.id)}">Open</a>
+            <a class="aBtn" href="events.html">List view</a>
+          </div>
+        </div>
+      `;
 
-google.maps.event.addListenerOnce(info, "domready", () => {
-  const btn = document.getElementById("iwCloseBtn");
-  if (btn) btn.onclick = () => info.close();
-});
+      info.setContent(html);
+      info.open({ map: gmap, anchor: marker });
 
+      google.maps.event.addListenerOnce(info, "domready", () => {
+        const btn = document.getElementById("iwCloseBtn");
+        if (btn) btn.onclick = () => info.close();
+      });
     }
 
-    // ✅ after markers render, auto-open the focused event's popup
     function tryFocusOpen(){
       if (focusDone) return;
       if (!focusId) return;
@@ -453,36 +475,30 @@ google.maps.event.addListenerOnce(info, "domready", () => {
       const ev = allEvents.find(x => x.id === focusId);
       if (!ev) return;
 
-      // don't ever "reveal" invite-only exact location from URL focus
+      // never reveal invite-only exact location via deep-link focus
       if (ev.inviteOnly) return;
 
-      const m = markerById.get(focusId);
       const pos = safeLatLng(ev);
+      if (!pos) return;
 
-      // if we don't have a marker yet (e.g. radius filter excluded it), add a one-off marker
-      if (!m && pos){
-        const marker = new google.maps.marker.AdvancedMarkerElement({
+      let m = markerById.get(focusId);
+
+      // If radius filter excluded it, add a one-off marker and open it
+      if (!m){
+        m = new google.maps.marker.AdvancedMarkerElement({
           map: gmap,
           position: pos,
           content: buildPinEl(),
         });
-        marker.addListener("gmp-click", () => openInfo(marker, ev));
-        markers.push(marker);
-        markerById.set(focusId, marker);
-
-        gmap.panTo(pos);
-        gmap.setZoom(16);
-        openInfo(marker, ev);
-        focusDone = true;
-        return;
+        m.addListener("gmp-click", () => openInfo(m, ev));
+        markers.push(m);
+        markerById.set(focusId, m);
       }
 
-      if (m && pos){
-        gmap.panTo(pos);
-        gmap.setZoom(16);
-        openInfo(m, ev);
-        focusDone = true;
-      }
+      gmap.panTo(pos);
+      gmap.setZoom(16);
+      openInfo(m, ev);
+      focusDone = true;
     }
 
     // Haversine distance (km)
@@ -531,14 +547,12 @@ google.maps.event.addListenerOnce(info, "domready", () => {
         gmap.setZoom(13);
       }
 
-      // ✅ now that markers exist, try to open the focused one
-      // (delay 0 makes sure map finished layout)
+      // once markers exist, open focused event popup
       setTimeout(tryFocusOpen, 0);
     }
 
     function applyNearFilter(){
       if (!userCenter){
-        // fallback: show everything we have coords for
         renderMarkers(allEvents);
         count.textContent = `${markers.length} motive${markers.length === 1 ? "" : "s"}`;
         subline.textContent = `Showing all motives (no location permission)`;
@@ -553,7 +567,6 @@ google.maps.event.addListenerOnce(info, "domready", () => {
       });
 
       renderMarkers(filtered);
-
       count.textContent = `${markers.length} motive${markers.length === 1 ? "" : "s"} within ${km} km`;
       subline.textContent = `Near you • ${km} km radius`;
     }
@@ -563,7 +576,6 @@ google.maps.event.addListenerOnce(info, "domready", () => {
       const snap = await getDocs(collection(db, "events"));
       allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       applyNearFilter();
-      // applyNearFilter -> renderMarkers -> tryFocusOpen
     }
 
     function whenGoogleReady(timeoutMs = 12000){
@@ -595,7 +607,6 @@ google.maps.event.addListenerOnce(info, "domready", () => {
       // Default Ottawa
       const fallback = { lat: 45.4215, lng: -75.6972 };
       userCenter = await getUserLocation();
-
       const center = userCenter || fallback;
 
       gmap = new google.maps.Map($("map"), {
@@ -608,11 +619,9 @@ google.maps.event.addListenerOnce(info, "domready", () => {
 
       info = new google.maps.InfoWindow({});
 
-      if (userCenter){
-        subline.textContent = "Near you • loading motives…";
-      } else {
-        subline.textContent = "Location blocked • showing all motives";
-      }
+      subline.textContent = userCenter
+        ? "Near you • loading motives…"
+        : "Location blocked • showing all motives";
 
       await loadEvents();
     }
@@ -635,7 +644,7 @@ google.maps.event.addListenerOnce(info, "domready", () => {
     });
 
     refreshBtn.addEventListener("click", () => {
-      focusDone = false; // allow focus again after refresh
+      focusDone = false;
       loadEvents();
     });
 
