@@ -142,13 +142,10 @@
       gap:14px;
     }
     .col4{grid-column: span 4;}
-    .col5{grid-column: span 5;}
     .col6{grid-column: span 6;}
-    .col7{grid-column: span 7;}
-    .col8{grid-column: span 8;}
     .col12{grid-column: span 12;}
     @media (max-width: 920px){
-      .col4,.col5,.col6,.col7,.col8,.col12{grid-column: span 12;}
+      .col4,.col6,.col12{grid-column: span 12;}
     }
 
     label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px 2px;}
@@ -161,6 +158,7 @@
       color:var(--text);
       outline:none;
       font-size:14px;
+      line-height: 1.2;
     }
     input:focus, textarea:focus{
       border-color: rgba(176,11,85,.60);
@@ -171,7 +169,6 @@
     .hint{font-size:13px; color:rgba(255,255,255,.75); line-height:1.35;}
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
 
-    /* “Card inside a card” */
     .subCard{
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.16);
@@ -179,7 +176,16 @@
       padding:12px;
     }
 
-    /* Modern toggle */
+    /* Invite-only: make the whole bubble clickable */
+    .toggleBtn{
+      width:100%;
+      border:none;
+      text-align:left;
+      cursor:pointer;
+      padding:0;
+      background: transparent;
+      color: inherit;
+    }
     .toggleRow{
       display:flex;
       align-items:center;
@@ -189,7 +195,27 @@
       border-radius: 16px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.16);
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, filter .12s ease;
     }
+    .toggleBtn:hover .toggleRow{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(176,11,85,.35), 0 16px 40px rgba(176,11,85,.18);
+      filter: brightness(1.04);
+    }
+    .toggleBtn:active .toggleRow{
+      transform: translateY(0px) scale(.995);
+      box-shadow: 0 0 10px rgba(176,11,85,.25), 0 10px 28px rgba(176,11,85,.14);
+      filter: brightness(1.0);
+    }
+    .toggleBtn:focus-visible{
+      outline:none;
+    }
+    .toggleBtn:focus-visible .toggleRow{
+      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
+      border-color: rgba(176,11,85,.65);
+    }
+
     .toggleText{
       display:grid;
       gap:4px;
@@ -210,6 +236,7 @@
       width:56px;
       height:32px;
       flex: 0 0 auto;
+      pointer-events:none; /* let the whole bubble handle clicks */
     }
     .switch input{ display:none; }
     .track{
@@ -240,9 +267,6 @@
     .switch input:checked + .track .thumb{
       left:28px;
     }
-    .switch:active .thumb{
-      transform: translateY(-50%) scale(.98);
-    }
 
     .chip{
       display:inline-flex;
@@ -264,6 +288,35 @@
     .dot.lock{
       background: rgba(255,210,80,.85);
       box-shadow: 0 0 0 4px rgba(255,210,80,.12);
+    }
+
+    /* Location search: make it match inputs */
+    .placeWrap{
+      width:100%;
+      display:block;
+    }
+    gmp-place-autocomplete{
+      width:100%;
+      display:block;
+    }
+    gmp-place-autocomplete::part(input){
+      width:100%;
+      height:44px;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      outline:none;
+      font-size:14px;
+      line-height: 1.2;
+    }
+    gmp-place-autocomplete::part(input)::placeholder{
+      color: rgba(255,255,255,.55);
+    }
+    gmp-place-autocomplete::part(input):focus{
+      border-color: rgba(176,11,85,.60);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
     }
 
     /* Map */
@@ -292,24 +345,7 @@
     }
     .status.ok{border-color: rgba(80,255,160,.28);}
 
-    /* Places component styling */
-    gmp-place-autocomplete{ width:100%; }
-    gmp-place-autocomplete::part(input){
-      width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      outline:none;
-      font-size:14px;
-    }
-    gmp-place-autocomplete::part(input):focus{
-      border-color: rgba(176,11,85,.60);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
-    }
-
-    /* Glow marker HTML for AdvancedMarker (FIXED positioning) */
+    /* Glow marker HTML for AdvancedMarker */
     .pinWrap{ position:relative; width:1px; height:1px; overflow:visible; }
     .glow-pin{
       position:absolute;
@@ -468,16 +504,22 @@
         </div>
       </div>
 
-      <div class="toggleRow">
-        <div class="toggleText">
-          <b>Invite-only</b>
-          <span>Turn this on if you want people to apply before seeing the exact details.</span>
-        </div>
+      <!-- Whole bubble is a button now -->
+      <button class="toggleBtn" id="inviteToggleBtn" type="button" aria-pressed="false">
+        <div class="toggleRow">
+          <div class="toggleText">
+            <b>Invite-only</b>
+            <span>People apply before seeing the exact details.</span>
+          </div>
 
-        <label class="switch" aria-label="Invite-only toggle">
-          <input id="inviteOnly" type="checkbox" />
-          <span class="track"><span class="thumb"></span></span>
-        </label>
+          <div class="switch" aria-hidden="true">
+            <input id="inviteOnly" type="checkbox" />
+            <span class="track"><span class="thumb"></span></span>
+          </div>
+        </div>
+      </button>
+      <div class="hint" style="margin-top:10px;">
+        You can still post with a hidden location (invite-only). Accepted users will see everything on the event page.
       </div>
     </section>
 
@@ -493,7 +535,9 @@
       <div class="grid">
         <div class="col12">
           <label>Search address</label>
-          <gmp-place-autocomplete id="locationInput"></gmp-place-autocomplete>
+          <div class="placeWrap">
+            <gmp-place-autocomplete id="locationInput"></gmp-place-autocomplete>
+          </div>
           <div class="hint" style="margin-top:8px;">You can also click the map to drop a pin anywhere.</div>
         </div>
 
@@ -555,6 +599,7 @@
     const ratioEl = $("ratio");
 
     const inviteOnlyEl = $("inviteOnly");
+    const inviteToggleBtn = $("inviteToggleBtn");
     const inviteChip = $("inviteChip");
     const inviteDot = $("inviteDot");
     const inviteLabel = $("inviteLabel");
@@ -582,13 +627,19 @@
 
     function setInviteUI(){
       const on = !!inviteOnlyEl.checked;
+
       inviteLabel.textContent = on ? "Invite-only" : "Open";
       inviteDot.classList.toggle("lock", on);
-      inviteDot.classList.toggle("dot", true);
 
-      // color tweak without hardcoding extra styles
       inviteChip.style.borderColor = on ? "rgba(255,210,80,.30)" : "rgba(255,255,255,.14)";
       inviteChip.style.background = on ? "rgba(255,210,80,.10)" : "rgba(0,0,0,.18)";
+
+      inviteToggleBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+
+    function toggleInviteOnly(){
+      inviteOnlyEl.checked = !inviteOnlyEl.checked;
+      setInviteUI();
     }
 
     function whenGoogleReady(timeoutMs = 12000){
@@ -751,7 +802,6 @@
       if (!startDate || !startTime) return setMsg("Please choose a start date and time.", false);
       if (!picked.lat || !picked.lng) return setMsg("Please search an address or click the map to drop a pin.", false);
 
-      // Small validation so we don't store NaN
       if (spotsAvailable !== null && !Number.isFinite(spotsAvailable)) {
         return setMsg("Spots available must be a number.", false);
       }
@@ -802,7 +852,10 @@
         return;
       }
 
+      // Invite-only bubble click
       setInviteUI();
+      inviteToggleBtn.addEventListener("click", toggleInviteOnly);
+      // also keep UI in sync if checkbox is toggled programmatically
       inviteOnlyEl.addEventListener("change", setInviteUI);
 
       initMap().catch(err => {
