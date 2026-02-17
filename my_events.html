@@ -78,81 +78,65 @@
     }
     .btn:hover{
       transform: translateY(-1px);
-      border-color: var(--accent);
-      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
-      filter: brightness(1.06);
-    }
-    .btn:active{
-      transform: translateY(0px) scale(.99);
-      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
-      filter: brightness(1.0);
+      border-color: rgba(176,11,85,.65);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.10), 0 18px 50px rgba(0,0,0,.35);
+      filter: brightness(1.05);
     }
     .btn.primary{
-      border:1px solid rgba(176,11,85,.55);
-      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-      color:white;
-      box-shadow: 0 18px 40px rgba(176,11,85,.22);
+      background: linear-gradient(180deg, rgba(176,11,85,.30), rgba(176,11,85,.14));
+      border-color: rgba(176,11,85,.55);
     }
-    .btn.primary:hover{
-      border-color: var(--accent);
-      box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
-      filter: brightness(1.08);
-    }
-    .btn:disabled{opacity:.65;cursor:not-allowed}
 
     main{
       width:min(1120px, 92vw);
-      margin:16px auto 30px auto;
+      margin:14px auto 60px auto;
       display:grid;
       gap:14px;
     }
 
-    .bar{
+    .card{
       border:1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
       border-radius: var(--radius);
       box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+
+    .toolbar{
       padding:14px;
       display:flex;
+      flex-wrap:wrap;
+      gap:10px;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.10);
     }
 
     .searchWrap{
       display:flex;
       gap:10px;
-      flex-wrap:wrap;
       align-items:center;
-      width:min(760px,100%);
-      flex:1;
-    }
-
-    input{
       flex:1;
       min-width: 240px;
-      height:46px;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color:var(--text);
-      outline:none;
-      font-size:14px;
     }
-    input:focus{
-      border-color: rgba(176,11,85,.60);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
+    input[type="search"]{
+      width:100%;
+      max-width:520px;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline: none;
+      transition: box-shadow .12s ease, border-color .12s ease;
+    }
+    input[type="search"]:focus{
+      border-color: rgba(176,11,85,.65);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
     }
 
-    .chips{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+    .chips{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;}
     .chip{
       display:inline-flex;
       align-items:center;
@@ -161,173 +145,198 @@
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.86);
+      color: rgba(255,255,255,.90);
       font-size:12px;
-      white-space:nowrap;
+      font-weight:900;
+      user-select:none;
     }
-    .dot{
-      width:8px;height:8px;border-radius:999px;
-      background: rgba(176,11,85,.95);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.18);
+    .dot{width:8px;height:8px;border-radius:50%; background: rgba(176,11,85,.9); box-shadow: 0 0 0 4px rgba(176,11,85,.12);}
+
+    .sectionHead{
+      padding:14px 14px 0 14px;
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:12px;
     }
-    .dot.open{ background: rgba(80,255,160,.75); box-shadow: 0 0 0 4px rgba(80,255,160,.12); }
-    .dot.invite{ background: rgba(255,210,80,.85); box-shadow: 0 0 0 4px rgba(255,210,80,.12); }
+    .sectionHead h2{
+      margin:0;
+      font-size:15px;
+      letter-spacing:.2px;
+    }
+    .sectionHead .muted{
+      color:var(--muted);
+      font-size:12px;
+    }
 
     .grid{
+      padding:14px;
       display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap:14px;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 620px){
+      .grid{ grid-template-columns: 1fr; }
+      header{ position: static; }
     }
 
-    .card{
-      grid-column: span 6;
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      text-decoration:none;
-      color:inherit;
-      display:grid;
-      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
-    }
-    .card:hover{
-      transform: translateY(-2px);
-      border-color: rgba(255,255,255,.20);
-      box-shadow: 0 26px 70px rgba(0,0,0,.50);
-    }
-    @media (max-width: 920px){
-      .card{grid-column: span 12;}
-    }
-
-    .imgWrap{
-      position:relative;
-      width:100%;
-      aspect-ratio: 16 / 9;
-      background: rgba(0,0,0,.20);
-    }
-    .imgWrap img{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    .overlay{
-      position:absolute; inset:0;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.82) 100%),
-        radial-gradient(1000px 380px at 30% 10%, rgba(176,11,85,.18), transparent 55%);
-      pointer-events:none;
-    }
-
-    .topBadge{
-      position:absolute; top:10px; left:10px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(10px);
-      font-size:12px;
-      color: rgba(255,255,255,.88);
-      display:flex; gap:8px; align-items:center;
-    }
-
-    .bottom{
-      position:absolute; left:0; right:0; bottom:0;
-      padding:12px;
-      display:grid; gap:8px;
-    }
-    .name{
-      font-size:16px;
-      font-weight:900;
-      letter-spacing:.2px;
-      line-height:1.15;
-      text-shadow: 0 10px 30px rgba(0,0,0,.55);
-      overflow:hidden;
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
-    }
-    .meta{
-      display:flex; flex-wrap:wrap; gap:8px;
-      color: rgba(255,255,255,.80);
-      font-size:12px;
-      align-items:center;
-    }
-    .pill{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.30);
-      padding:6px 10px;
-      border-radius:999px;
-      display:inline-flex; gap:6px; align-items:center;
-      backdrop-filter: blur(10px);
-      max-width: 100%;
-    }
-    .pill b{font-weight:800; color: rgba(255,255,255,.92)}
-    .pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width: 320px;}
-
-    .body{
-      padding:12px;
+    .event{
+      padding:14px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
       display:grid;
       gap:10px;
     }
-
-    .line{
+    .event:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.55);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.10), 0 18px 50px rgba(0,0,0,.35);
+      filter: brightness(1.04);
+    }
+    .eventTop{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+    .eventTitle{margin:0; font-size:15px; font-weight:950; letter-spacing:.2px;}
+    .badge{
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      font-size:11px;
+      font-weight:950;
+      white-space:nowrap;
+    }
+    .badge.invite{
+      border-color: rgba(176,11,85,.55);
+      background: rgba(176,11,85,.12);
+    }
+    .meta{
+      color: var(--muted);
+      font-size:12px;
+      line-height:1.35;
+      display:grid;
+      gap:4px;
+    }
+    .meta b{color: rgba(255,255,255,.88); font-weight:900;}
+    .desc{
+      font-size:12.5px;
+      color: rgba(255,255,255,.84);
+      line-height: 1.35;
+      opacity: .95;
+      display:-webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+    .actions{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
       justify-content:space-between;
+      margin-top:4px;
     }
-
+    .actions .leftA{display:flex; gap:10px; flex-wrap:wrap;}
     .mini{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-    }
-
-    .tagsRow{
-      display:flex;gap:8px;flex-wrap:wrap;
-    }
-    .tag{
+      padding:9px 11px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.16);
+      color: rgba(255,255,255,.92);
+      font-weight:950;
+      cursor:pointer;
+      text-decoration:none;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
       display:inline-flex;
       align-items:center;
-      gap:6px;
+      gap:8px;
+      user-select:none;
       font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
+    }
+    .mini:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.65);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.10);
+    }
+
+    .list{
+      padding:14px;
+      display:grid;
+      gap:10px;
+    }
+    .req{
+      border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.86);
-      max-width: 100%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
+      border-radius: 16px;
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
+    .reqTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .reqTitle{
+      margin:0;
+      font-size:13px;
+      font-weight:950;
+    }
+    .reqMeta{
+      color: var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+    .reqBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+    .mini.ok{
+      border-color: rgba(90, 255, 170, .35);
+      background: rgba(90, 255, 170, .10);
+    }
+    .mini.ok:hover{
+      box-shadow: 0 0 0 4px rgba(90, 255, 170, .10);
+      border-color: rgba(90, 255, 170, .55);
+    }
+    .mini.no{
+      border-color: rgba(255, 90, 120, .35);
+      background: rgba(255, 90, 120, .10);
+    }
+    .mini.no:hover{
+      box-shadow: 0 0 0 4px rgba(255, 90, 120, .10);
+      border-color: rgba(255, 90, 120, .55);
     }
 
     .empty{
-      border:1px dashed rgba(255,255,255,.20);
-      background: rgba(0,0,0,.14);
-      border-radius: var(--radius);
-      padding:14px 16px;
-      color:rgba(255,255,255,.78);
-      font-size:13px;
-      line-height:1.45;
-    }
-
-    .msg{
+      padding:16px;
+      color: var(--muted);
       display:none;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,80,120,.30);
-      background: rgba(255,80,120,.10);
-      color:rgba(255,255,255,.90);
-      font-size:13px;
-      white-space:pre-line;
     }
-    .msg.ok{
-      border-color: rgba(80,255,160,.25);
-      background: rgba(80,255,160,.10);
+    .msg{
+      margin: 0 14px 14px 14px;
+      display:none;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.88);
+      font-size:13px;
+    }
+    .msg.bad{
+      border-color: rgba(255, 90, 120, .40);
+      background: rgba(255, 90, 120, .10);
+    }
+    .msg.good{
+      border-color: rgba(90, 255, 170, .35);
+      background: rgba(90, 255, 170, .10);
     }
   </style>
 </head>
@@ -335,52 +344,58 @@
 <body>
   <header>
     <div class="left">
-      <img src="logo.png" alt="Uzone logo" />
+      <img src="logo.png" alt="Uzone" />
       <div class="title">
         <h1>My Motives</h1>
         <div class="sub" id="subline">Loading…</div>
       </div>
     </div>
+
     <div class="right">
-      <a class="btn" href="hub.html">Hub</a>
-      <a class="btn" href="events.html">Umotives</a>
-      <a class="btn" href="map.html">Map</a>
-      <a class="btn primary" href="post_event.html">Post Motive</a>
+      <a class="btn" href="hub.html">← Hub</a>
+      <a class="btn" href="events.html">Explore</a>
+      <a class="btn primary" href="post_event.html">+ Post</a>
     </div>
   </header>
 
   <main>
-    <section class="bar">
-      <div class="searchWrap">
-        <input id="search" placeholder="Search your motives (name, tags, description, location…)" />
-        <button class="btn" id="refreshBtn" type="button">Refresh</button>
+    <section class="card">
+      <div class="toolbar">
+        <div class="searchWrap">
+          <input id="search" type="search" placeholder="Search your motives (name, tags, location, description)…" />
+          <button class="btn" id="refreshBtn" type="button">Refresh</button>
+        </div>
+        <div class="chips">
+          <span class="chip" id="countChip"><span class="dot"></span><span id="countText">0</span> motives</span>
+          <span class="chip" id="reqChip" style="display:none;"><span class="dot"></span><span id="reqText">0</span> invite requests</span>
+        </div>
       </div>
-      <div class="chips">
-        <span class="chip"><span class="dot"></span><span id="countChip">0 motives</span></span>
-        <span class="chip"><span class="dot open"></span>Open</span>
-        <span class="chip"><span class="dot invite"></span>Invite-only</span>
+
+      <div class="sectionHead">
+        <div>
+          <h2>Your motives</h2>
+          <div class="muted">These are events you posted (across older + newer field versions).</div>
+        </div>
+        <div class="muted" id="hintText"></div>
       </div>
+
+      <div class="msg" id="msg"></div>
+      <div class="empty" id="emptyMine">No motives found.</div>
+      <div class="grid" id="mineGrid"></div>
     </section>
 
-    <div id="msg" class="msg"></div>
-
-    <section id="requestsPanel" class="bar" style="display:none;">
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <span class="chip"><span class="dot invite"></span><b>Invite requests</b></span>
-        <span class="chip" id="reqCountChip">0 pending</span>
+    <section class="card" id="reqCard" style="display:none;">
+      <div class="sectionHead">
+        <div>
+          <h2>Invite requests</h2>
+          <div class="muted">Pending applications for your invite-only motives.</div>
+        </div>
+        <div class="muted" id="reqSub">—</div>
       </div>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <button class="btn" id="reqRefreshBtn" type="button">Refresh requests</button>
-      </div>
-    </section>
 
-    <section id="reqList" class="grid" style="display:none;"></section>
-
-
-    <section id="grid" class="grid"></section>
-    <section id="empty" class="empty" style="display:none;">
-      You haven’t posted any motives yet.<br><br>
-      Hit <b>Post Motive</b> to create your first one.
+      <div class="msg" id="reqMsg"></div>
+      <div class="empty" id="emptyReq">No pending requests.</div>
+      <div class="list" id="reqList"></div>
     </section>
   </main>
 
@@ -388,7 +403,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
-      getFirestore, collection, getDocs, query, doc, setDoc, updateDoc, where, serverTimestamp
+      getFirestore,
+      collection, doc,
+      getDocs, getDoc,
+      query, where,
+      setDoc, updateDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -402,357 +422,341 @@
     const db = getFirestore(app);
 
     const subline = document.getElementById("subline");
-    const grid = document.getElementById("grid");
-    const empty = document.getElementById("empty");
-    const search = document.getElementById("search");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const countChip = document.getElementById("countChip");
     const msg = document.getElementById("msg");
+    const mineGrid = document.getElementById("mineGrid");
+    const emptyMine = document.getElementById("emptyMine");
+    const searchEl = document.getElementById("search");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const countText = document.getElementById("countText");
+    const hintText = document.getElementById("hintText");
 
-    const requestsPanel = document.getElementById("requestsPanel");
+    const reqCard = document.getElementById("reqCard");
     const reqList = document.getElementById("reqList");
-    const reqCountChip = document.getElementById("reqCountChip");
-    const reqRefreshBtn = document.getElementById("reqRefreshBtn");
+    const reqChip = document.getElementById("reqChip");
+    const reqText = document.getElementById("reqText");
+    const reqSub = document.getElementById("reqSub");
+    const reqMsg = document.getElementById("reqMsg");
+    const emptyReq = document.getElementById("emptyReq");
 
     let currentUser = null;
-    let allMine = [];
-    let pendingRequests = [];
+    let allMine = [];         // full event objects
+    let allRequests = [];     // aggregated pending requests
 
-    function setMsg(text, kind=""){
-      msg.style.display = text ? "block" : "none";
-      msg.textContent = text || "";
-      msg.className = "msg" + (kind ? " " + kind : "");
+    function showMsg(el, text, kind=""){
+      el.className = "msg" + (kind ? " " + kind : "");
+      el.style.display = text ? "block" : "none";
+      el.textContent = text || "";
+    }
+    function setTopMsg(text, kind=""){ showMsg(msg, text, kind); }
+    function setReqMsg(text, kind=""){ showMsg(reqMsg, text, kind); }
+
+    function safeStr(v){ return (v == null) ? "" : String(v); }
+    function lower(v){ return safeStr(v).toLowerCase(); }
+
+    function pickDescription(d){
+      return safeStr(d.description || d.desc || d.bio || d.about || "");
+    }
+
+    function pickCreatedAtMs(d){
+      // Firestore Timestamp: {seconds, nanoseconds} OR Date OR number OR string
+      const t = d.createdAt || d.updatedAt || d.timeCreated || null;
+      if (!t) return 0;
+      if (typeof t === "number") return t;
+      if (typeof t === "string"){
+        const ms = Date.parse(t);
+        return Number.isFinite(ms) ? ms : 0;
+      }
+      if (t?.toDate) return t.toDate().getTime();
+      if (typeof t?.seconds === "number") return (t.seconds * 1000);
+      return 0;
+    }
+
+    function fmtWhen(d){
+      const sd = safeStr(d.startDate);
+      const st = safeStr(d.startTime);
+      const ed = safeStr(d.endDate);
+      const et = safeStr(d.endTime);
+      const start = [sd, st].filter(Boolean).join(" ");
+      const end = [ed, et].filter(Boolean).join(" ");
+      if (start && end) return `${start} → ${end}`;
+      return start || end || "—";
     }
 
     function esc(s){
-      return String(s||"").replace(/[&<>"']/g, m => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-      }[m]));
+      return safeStr(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
-    function fmtDate(yyyyMmDd){
-      if (!yyyyMmDd) return "";
-      const parts = String(yyyyMmDd).split("-").map(Number);
-      if (parts.length !== 3) return String(yyyyMmDd);
-      const [y,m,d] = parts;
-      if (!y || !m || !d) return String(yyyyMmDd);
-      const dt = new Date(y, m-1, d);
-      return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+    function renderMine(){
+      const q = lower(searchEl.value.trim());
+      let filtered = allMine;
+
+      if (q){
+        filtered = allMine.filter(e => {
+          const hay = [
+            e.name, e.location, (e.tags || []).join(" "),
+            pickDescription(e),
+            e.hostName, e.hostUid, e.ownerUid
+          ].map(lower).join(" | ");
+          return hay.includes(q);
+        });
+      }
+
+      countText.textContent = String(filtered.length);
+      mineGrid.innerHTML = "";
+
+      emptyMine.style.display = (filtered.length === 0) ? "block" : "none";
+
+      for (const e of filtered){
+        const isInvite = !!e.inviteOnly;
+        const desc = pickDescription(e);
+        const tags = Array.isArray(e.tags) ? e.tags : [];
+        const tagLine = tags.length ? tags.slice(0,3).join(", ") : "—";
+        const when = fmtWhen(e);
+
+        const el = document.createElement("div");
+        el.className = "event";
+        el.innerHTML = `
+          <div class="eventTop">
+            <h3 class="eventTitle">${esc(e.name || "Untitled")}</h3>
+            <span class="badge ${isInvite ? "invite" : ""}">${isInvite ? "Invite-only" : "Public"}</span>
+          </div>
+
+          <div class="meta">
+            <div><b>When:</b> ${esc(when)}</div>
+            <div><b>Where:</b> ${esc(e.location || "—")}</div>
+            <div><b>Tags:</b> ${esc(tagLine)}</div>
+          </div>
+
+          ${desc ? `<div class="desc">${esc(desc)}</div>` : ""}
+
+          <div class="actions">
+            <div class="leftA">
+              <a class="mini" href="event.html?id=${encodeURIComponent(e.id)}">Open</a>
+              <button class="mini" type="button" data-copy="${esc(e.id)}">Copy link</button>
+            </div>
+            <span class="badge">${esc(e.id)}</span>
+          </div>
+        `;
+        mineGrid.appendChild(el);
+      }
+
+      // Wire copy buttons
+      mineGrid.querySelectorAll('button[data-copy]').forEach(btn => {
+        btn.addEventListener("click", async () => {
+          try{
+            const id = btn.getAttribute("data-copy");
+            const url = `${location.origin}${location.pathname.replace(/[^/]*$/, "")}event.html?id=${encodeURIComponent(id)}`;
+            await navigator.clipboard.writeText(url);
+            setTopMsg("Copied event link.", "good");
+            setTimeout(() => setTopMsg(""), 1200);
+          }catch{
+            setTopMsg("Couldn’t copy (browser blocked clipboard).", "bad");
+          }
+        });
+      });
     }
 
-    function fmtWhen(ev){
-      const sd = ev.startDate || "";
-      const st = ev.startTime || "";
-      const ed = ev.endDate || "";
-      const et = ev.endTime || "";
-      const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
-      const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
-      if (!start && !end) return "Time TBD";
-      if (start && !end) return start;
-      if (!start && end) return end;
-      
-    function tsToMs(ts){
-      try{
-        if (!ts) return 0;
-        if (typeof ts.toMillis === "function") return ts.toMillis();
-        if (typeof ts.seconds === "number") return ts.seconds * 1000;
-      }catch(_){}
-      return 0;
-    }
-    function fmtRelative(ms){
-      if (!ms) return "—";
-      const diff = Date.now() - ms;
-      const mins = Math.floor(diff/60000);
-      if (mins < 1) return "just now";
-      if (mins < 60) return `${mins}m ago`;
-      const hrs = Math.floor(mins/60);
-      if (hrs < 24) return `${hrs}h ago`;
-      const days = Math.floor(hrs/24);
-      return `${days}d ago`;
+    async function loadMine(uid){
+      // IMPORTANT: no orderBy here -> avoids composite index requirements.
+      const fields = ["hostUid","ownerUid","createdBy","creatorUid","uid"];
+      const seen = new Map();
+
+      for (const f of fields){
+        try{
+          const qy = query(collection(db, "events"), where(f, "==", uid));
+          const snap = await getDocs(qy);
+          snap.forEach(docSnap => {
+            if (!seen.has(docSnap.id)){
+              seen.set(docSnap.id, { id: docSnap.id, ...docSnap.data() });
+            }
+          });
+        }catch(err){
+          console.warn("Query failed for field:", f, err);
+        }
+      }
+
+      const arr = Array.from(seen.values());
+      arr.sort((a,b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
+
+      allMine = arr;
+      renderMine();
+
+      hintText.textContent = allMine.length
+        ? `Showing your newest motives first.`
+        : `No events matched your user yet.`;
+
+      return allMine;
     }
 
-    async function refreshRequests(){
-      pendingRequests = [];
-      if (!currentUser){ return; }
-      // Only for invite-only events you host
+    async function loadInviteRequests(uid){
+      // Aggregate pending applications across inviteOnly events you host.
+      allRequests = [];
+      reqList.innerHTML = "";
+      emptyReq.style.display = "none";
+      reqChip.style.display = "none";
+      reqCard.style.display = "none";
+      setReqMsg("");
+
       const inviteMine = allMine.filter(e => !!e.inviteOnly);
-
       if (!inviteMine.length){
-        requestsPanel.style.display = "none";
-        reqList.style.display = "none";
-        reqCountChip.textContent = "0 pending";
+        reqSub.textContent = "No invite-only motives.";
         return;
       }
 
-      try{
-        // For each event, load pending applications
-        for (const ev of inviteMine){
-          const qApps = query(
-            collection(db, "events", ev.id, "applications"),
-            where("status","==","pending"),
-            orderBy("createdAt","desc")
-          );
-          const snap = await getDocs(qApps);
-          const cnt = snap.size;
-          ev._pendingCount = cnt;
+      // Be reasonable: only scan the newest 40 invite-only motives to avoid too many reads.
+      const scan = inviteMine.slice(0, 40);
 
+      let total = 0;
+
+      for (const ev of scan){
+        try{
+          const appsQ = query(
+            collection(db, "events", ev.id, "applications"),
+            where("status", "==", "pending")
+          );
+          const snap = await getDocs(appsQ);
           snap.forEach(d => {
-            const a = d.data() || {};
-            pendingRequests.push({
+            total++;
+            allRequests.push({
               eventId: ev.id,
-              eventName: ev.name || "Motive",
-              applicantUid: a.uid || d.id,
-              applicantName: a.name || a.displayName || "User",
-              createdAtMs: tsToMs(a.createdAt),
+              eventName: ev.name || "Untitled",
+              eventWhen: fmtWhen(ev),
+              eventLocation: ev.location || "—",
+              applicantUid: d.id,
+              ...d.data()
             });
           });
+        }catch(err){
+          console.warn("Failed reading applications for", ev.id, err);
         }
-
-        // Update panel visibility + count
-        const total = pendingRequests.length;
-        reqCountChip.textContent = `${total} pending`;
-        requestsPanel.style.display = total ? "flex" : "none";
-        reqList.style.display = total ? "grid" : "none";
-
-        render(allMine); // refresh cards to show pending badge
-        renderRequestList();
-
-      }catch(e){
-        console.error(e);
-        requestsPanel.style.display = "flex";
-        reqList.style.display = "none";
-        reqCountChip.textContent = "—";
-        setMsg((e?.message || "Failed to load requests.") + "\nIf you recently changed Firestore rules, make sure hosts can read events/{eventId}/applications.", "error");
       }
-    }
 
-    function renderRequestList(){
-      reqList.innerHTML = "";
-      if (!pendingRequests.length){
-        reqList.style.display = "none";
+      reqText.textContent = String(total);
+
+      if (total > 0){
+        reqChip.style.display = "inline-flex";
+        reqCard.style.display = "block";
+        reqSub.textContent = `Pending across ${scan.length} invite-only motives (scanned).`;
+      }else{
+        reqCard.style.display = "block";
+        emptyReq.style.display = "block";
+        reqSub.textContent = `No pending requests found (scanned ${scan.length}).`;
         return;
       }
-      // Sort newest first (best-effort)
-      const sorted = [...pendingRequests].sort((a,b) => (b.createdAtMs||0) - (a.createdAtMs||0));
 
-      sorted.forEach(r => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.cursor = "default";
-        card.innerHTML = `
-          <div class="body" style="gap:12px;">
-            <div class="line" style="align-items:flex-start;">
-              <div style="display:grid; gap:4px;">
-                <div class="mini" style="color:rgba(255,255,255,.92); font-weight:900;">${esc(r.eventName)}</div>
-                <div class="mini">Applicant: <b>${esc(r.applicantName)}</b> <span style="color:rgba(255,255,255,.60);">(${esc(r.applicantUid)})</span></div>
-                <div class="mini" style="color:rgba(255,255,255,.65);">Requested ${esc(fmtRelative(r.createdAtMs))}</div>
+      // Render
+      reqList.innerHTML = "";
+      allRequests.sort((a,b) => (pickCreatedAtMs(b) - pickCreatedAtMs(a)));
+
+      for (const r of allRequests){
+        const el = document.createElement("div");
+        el.className = "req";
+
+        const note = safeStr(r.message || r.note || r.reason || "");
+        const created =
+          r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() :
+          (typeof r.createdAt?.seconds === "number" ? new Date(r.createdAt.seconds*1000).toLocaleString() : "");
+
+        el.innerHTML = `
+          <div class="reqTop">
+            <div>
+              <h3 class="reqTitle">${esc(r.eventName)} <span class="badge invite" style="margin-left:8px;">invite-only</span></h3>
+              <div class="reqMeta">
+                <div><b>Applicant:</b> ${esc(r.applicantUid)}</div>
+                <div><b>When:</b> ${esc(r.eventWhen)}</div>
+                <div><b>Requested:</b> ${esc(created || "—")}</div>
+                ${note ? `<div><b>Note:</b> ${esc(note)}</div>` : ""}
               </div>
-              <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
-                <a class="btn" href="event.html?id=${encodeURIComponent(r.eventId)}">Open motive</a>
-                <button class="btn primary" data-accept="${esc(r.eventId)}::${esc(r.applicantUid)}" type="button">Accept</button>
-                <button class="btn" data-deny="${esc(r.eventId)}::${esc(r.applicantUid)}" type="button">Deny</button>
-              </div>
+            </div>
+            <div class="reqBtns">
+              <button class="mini ok" type="button" data-accept="1">Accept</button>
+              <button class="mini no" type="button" data-deny="1">Deny</button>
+              <a class="mini" href="event.html?id=${encodeURIComponent(r.eventId)}">Open event</a>
             </div>
           </div>
         `;
-        reqList.appendChild(card);
-      });
 
-      // Wire buttons
-      reqList.querySelectorAll("button[data-accept]").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-          const key = btn.getAttribute("data-accept") || "";
-          const [eventId, uid] = key.split("::");
-          await decide(eventId, uid, true);
-        });
-      });
-      reqList.querySelectorAll("button[data-deny]").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-          const key = btn.getAttribute("data-deny") || "";
-          const [eventId, uid] = key.split("::");
-          await decide(eventId, uid, false);
-        });
-      });
+        // Wire buttons
+        const acceptBtn = el.querySelector("button[data-accept]");
+        const denyBtn = el.querySelector("button[data-deny]");
+
+        acceptBtn.addEventListener("click", () => handleDecision(r, "accepted", acceptBtn, denyBtn));
+        denyBtn.addEventListener("click", () => handleDecision(r, "denied", acceptBtn, denyBtn));
+
+        reqList.appendChild(el);
+      }
     }
 
-    async function decide(eventId, uid, accept){
-      if (!eventId || !uid) return;
-      setMsg("");
+    async function handleDecision(r, decision, acceptBtn, denyBtn){
+      if (!currentUser) return;
+      acceptBtn.disabled = true;
+      denyBtn.disabled = true;
+
       try{
-        // Create/Update member record if accepted
-        if (accept){
-          await setDoc(doc(db, "events", eventId, "members", uid), {
-            uid,
+        const appRef = doc(db, "events", r.eventId, "applications", r.applicantUid);
+
+        if (decision === "accepted"){
+          // mark as member
+          const memRef = doc(db, "events", r.eventId, "members", r.applicantUid);
+          await setDoc(memRef, {
+            uid: r.applicantUid,
             status: "accepted",
-            acceptedAt: serverTimestamp()
-          }, { merge:true });
+            decidedBy: currentUser.uid,
+            decidedAt: serverTimestamp(),
+            createdAt: serverTimestamp()
+          }, { merge: true });
         }
-        // Update application status
-        await updateDoc(doc(db, "events", eventId, "applications", uid), {
-          status: accept ? "accepted" : "denied",
+
+        await updateDoc(appRef, {
+          status: decision,
+          decidedBy: currentUser.uid,
           decidedAt: serverTimestamp()
         });
 
-        setMsg(accept ? "Accepted request." : "Denied request.", "ok");
-        await refreshRequests();
-      }catch(e){
-        console.error(e);
-        setMsg(e?.message || "Failed to update request.", "error");
+        setReqMsg(decision === "accepted" ? "Accepted request." : "Denied request.", "good");
+        setTimeout(() => setReqMsg(""), 1200);
+
+        // Remove from UI quickly (refresh afterwards)
+        await refreshAll();
+      }catch(err){
+        console.error(err);
+        setReqMsg(err?.message || "Could not update request (rules/index issue).", "bad");
+        acceptBtn.disabled = false;
+        denyBtn.disabled = false;
       }
     }
 
-
-    function render(list){
-      grid.innerHTML = "";
-      empty.style.display = list.length ? "none" : "block";
-      countChip.textContent = `${list.length} motive${list.length===1?"":"s"}`;
-
-      list.forEach(ev => {
-        const tags = Array.isArray(ev.tags) ? ev.tags : [];
-        const inviteOnly = !!ev.inviteOnly;
-
-        const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
-        const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
-
-        const card = document.createElement("a");
-        card.className = "card";
-        card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
-
-        card.innerHTML = `
-          <div class="imgWrap">
-            <img alt="Event image" src="${esc(ev.imageUrl || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=60')}" />
-            <div class="overlay"></div>
-            <div class="topBadge">
-              <span class="dot ${inviteOnly ? "invite" : "open"}"></span>
-              <span>${inviteOnly ? "Invite-only" : "Open"}</span>
-            </div>
-            <div class="bottom">
-              <div class="name">${esc(ev.name || "Motive")}</div>
-              <div class="meta">
-                <span class="pill"><b>When</b> <span>${esc(whenText)}</span></span>
-                <span class="pill"><b>Where</b> <span>${esc(whereText)}</span></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="body">
-            <div class="line">
-              <div class="mini">
-                Spots: <b>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</b>
-                • Venue: <b>${esc(ev.venueSize || "—")}</b>
-              </div>
-              <div class="mini">
-                Size: <b>${esc(ev.sizeEstimate ?? "—")}</b>
-              </div>
-            </div>
-
-            <div class="tagsRow">
-              ${(inviteOnly && (ev._pendingCount||0)>0) ? `<span class="tag" style="border-color: rgba(255,210,80,.35); background: rgba(255,210,80,.10);">⏳ ${ev._pendingCount} pending</span>` : ""}
-              ${tags.slice(0,6).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
+    async function refreshAll(){
+      if (!currentUser) return;
+      setTopMsg("Loading…");
+      await loadMine(currentUser.uid);
+      await loadInviteRequests(currentUser.uid);
+      setTopMsg("");
     }
 
-    function applySearch(){
-      const q = (search.value || "").trim().toLowerCase();
-      if (!q) { render(allMine); return; }
+    // Events
+    refreshBtn.addEventListener("click", refreshAll);
+    searchEl.addEventListener("input", renderMine);
 
-      const filtered = allMine.filter(ev => {
-        const hay = [
-          ev.name, ev.location, ev.description, ev.description,
-          ev.venueSize, ev.sizeEstimate, ev.ratio,
-          ev.startDate, ev.startTime, ev.endDate, ev.endTime,
-          ...(Array.isArray(ev.tags) ? ev.tags : [])
-        ].join(" ").toLowerCase();
-        return hay.includes(q);
-      });
-      render(filtered);
-    }
-
-    async function load(){
-      setMsg("");
-      grid.innerHTML = "";
-      empty.style.display = "none";
-      allMine = [];
-
-      try{
-        // NOTE: This avoids needing a Firestore composite index.
-        // Fetch *all* events created by you (avoid client-side limits / field drift).
-        // We try multiple legacy fields for compatibility.
-        const mineMap = new Map();
-
-        async function addMineBy(field){
-          try{
-            // Avoid composite-index requirements by NOT using orderBy with where().
-            // We'll sort client-side after fetching.
-            const qy = query(
-              collection(db, "events"),
-              where(field, "==", currentUser.uid)
-            );
-            const snap = await getDocs(qy);
-            snap.forEach(d => mineMap.set(d.id, { id: d.id, ...(d.data() || {}) }));
-          } catch (e){
-            // If an index is missing or field doesn't exist in some docs, skip quietly.
-            console.warn("Query failed for field:", field, e?.message || e);
-          }
-        }
-
-        await addMineBy("hostUid");
-        await addMineBy("ownerUid");
-        await addMineBy("createdBy");
-        await addMineBy("creatorUid");
-        await addMineBy("uid");
-
-        const mine = Array.from(mineMap.values())
-          .sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
-
-        allMine = mine;
-        // Count + empty state
-        countChip.textContent = `${allMine.length} motives`;
-        if (!allMine.length){
-          empty.style.display = "block";
-          empty.innerHTML = `
-            <div style="font-weight:800;margin-bottom:6px">No motives found</div>
-            <div style="color:var(--muted);line-height:1.4">
-              If you posted motives before, this usually means those event docs use a different creator field.
-              I already check <b>hostUid</b>, <b>ownerUid</b>, <b>createdBy</b>, <b>creatorUid</b>, and <b>uid</b>.
-              If your older docs used something else, tell me the field name and I’ll add it.
-            </div>
-            <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-              <a class="btn" href="post_event.html">Post a motive</a>
-              <a class="btn ghost" href="events.html">Browse motives</a>
-            </div>
-          `;
-        }
-
-        await refreshRequests();
-
-        subline.textContent = currentUser
-          ? `Showing motives posted by you (${currentUser.uid})`
-          : `My Motives`;
-
-        applySearch();
-      } catch (e){
-        console.error(e);
-        setMsg(e?.message || "Failed to load your motives.", "error");
-        empty.style.display = "block";
-      }
-    }
-
-    refreshBtn.addEventListener("click", load);
-    reqRefreshBtn.addEventListener("click", refreshRequests);
-    search.addEventListener("input", applySearch);
-
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user){
         window.location.href = "login.html";
         return;
       }
       currentUser = user;
-      load();
+      subline.textContent = `Signed in as ${user.displayName || "User"} • ${user.uid}`;
+
+      try{
+        await refreshAll();
+      }catch(err){
+        console.error(err);
+        setTopMsg(err?.message || "Failed to load your motives.", "bad");
+      }
     });
   </script>
 </body>
