@@ -1,1148 +1,553 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Uzone • Post Motive</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Uzone • My Motives</title>
 
-<link rel="icon" type="image/png" href="logo.png" />
-<meta name="color-scheme" content="dark light" />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <meta name="color-scheme" content="dark light" />
 
-<!-- Leaflet (map) -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-  crossorigin=""
-></script>
+  <style>
+    :root{
+      --accent:#b00b55;
+      --bg:#0b0b10;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --border: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100dvh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
+        radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
+        var(--bg);
+    }
 
-<style>
-  :root{
-    --accent:#b00b55;
-    --bg:#0b0b10;
-    --panel: rgba(255,255,255,.06);
-    --panel2: rgba(255,255,255,.10);
-    --border: rgba(255,255,255,.14);
-    --text: rgba(255,255,255,.92);
-    --muted: rgba(255,255,255,.70);
-    --shadow: 0 20px 60px rgba(0,0,0,.45);
-    --radius: 18px;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; min-height:100dvh;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    color:var(--text);
-    background:
-      radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
-      radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
-      radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
-      var(--bg);
-  }
+    header{
+      width:min(1120px, 92vw);
+      margin:18px auto 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 10px;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .left{display:flex; align-items:center; gap:12px; min-width:0;}
+    .left img{
+      width:38px;height:38px;object-fit:contain;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+    }
+    .title{display:grid; gap:2px; min-width:0;}
+    .title h1{margin:0;font-size:18px;letter-spacing:.2px}
+    .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
-  header{
-    width:min(1120px, 92vw);
-    margin:18px auto 0 auto;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:14px 16px;
-    border:1px solid var(--border);
-    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    position: sticky;
-    top: 10px;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-  }
-  .left{display:flex; align-items:center; gap:12px; min-width:0;}
-  .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
-  .title{display:grid; gap:2px; min-width:0;}
-  .title h1{margin:0;font-size:18px;letter-spacing:.2px}
-  .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+    .btn{
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color:rgba(255,255,255,.92);
+      font-weight:900;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      user-select:none;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+      filter: brightness(1.06);
+    }
+    .btn:active{
+      transform: translateY(0px) scale(.99);
+      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
+      filter: brightness(1.0);
+    }
+    .btn.primary{
+      border:1px solid rgba(176,11,85,.55);
+      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
+      color:white;
+      box-shadow: 0 18px 40px rgba(176,11,85,.22);
+    }
+    .btn.primary:hover{
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
+      filter: brightness(1.08);
+    }
+    .btn:disabled{opacity:.65;cursor:not-allowed}
 
-  .btn{
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    color:rgba(255,255,255,.92);
-    font-weight:800;
-    cursor:pointer;
-    text-decoration:none;
-    display:inline-flex; align-items:center; gap:8px;
-    white-space:nowrap;
-    user-select:none;
-    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease, background .12s ease;
-  }
-  .btn:hover{
-    transform: translateY(-1px);
-    border-color: var(--accent);
-    box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
-    filter: brightness(1.06);
-  }
-  .btn:active{
-    transform: translateY(0px) scale(.99);
-    box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
-    filter: brightness(1.0);
-  }
-  .btn:focus-visible{
-    outline:none;
-    box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
-  }
-  .btn:disabled{opacity:.6; cursor:not-allowed}
+    main{
+      width:min(1120px, 92vw);
+      margin:16px auto 30px auto;
+      display:grid;
+      gap:14px;
+    }
 
-  .btn.primary{
-    border:1px solid rgba(176,11,85,.55);
-    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-    color:white;
-    box-shadow: 0 18px 40px rgba(176,11,85,.22);
-  }
-  .btn.primary:hover{
-    border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
-    filter: brightness(1.08);
-  }
-  .btn.primary:active{
-    box-shadow: 0 0 14px var(--accent), 0 14px 34px rgba(176,11,85,.20);
-  }
+    .bar{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      backdrop-filter: blur(10px);
+    }
 
-  main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
+    .searchWrap{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      width:min(760px,100%);
+      flex:1;
+    }
 
-  .card{
-    border:1px solid var(--border);
-    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding:14px;
-    backdrop-filter: blur(10px);
-  }
+    input{
+      flex:1;
+      min-width: 240px;
+      height:46px;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+    }
+    input:focus{
+      border-color: rgba(176,11,85,.60);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
+    }
 
-  .sectionHead{
-    display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
-    margin:2px 0 12px 0;
-  }
-  .sectionHead h2{
-    margin:0;
-    font-size:14px;
-    letter-spacing:.25px;
-    color:rgba(255,255,255,.92);
-  }
-  .hint{color:rgba(255,255,255,.60); font-size:12px; line-height:1.25;}
-  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
+    .chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(176,11,85,.95);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.18);
+    }
+    .dot.open{ background: rgba(80,255,160,.75); box-shadow: 0 0 0 4px rgba(80,255,160,.12); }
+    .dot.invite{ background: rgba(255,210,80,.85); box-shadow: 0 0 0 4px rgba(255,210,80,.12); }
 
-  .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
-  .grid3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;}
-  @media (max-width: 980px){ .grid3{grid-template-columns:1fr;} }
-  @media (max-width: 860px){ .grid2{grid-template-columns:1fr;} }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:14px;
+    }
 
-  label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
+    .card{
+      grid-column: span 6;
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      text-decoration:none;
+      color:inherit;
+      display:grid;
+      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.20);
+      box-shadow: 0 26px 70px rgba(0,0,0,.50);
+    }
+    @media (max-width: 920px){
+      .card{grid-column: span 12;}
+    }
 
-  input, textarea, select{
-    width:100%;
-    padding:12px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.06);
-    color:var(--text);
-    outline:none;
-    font-size:14px;
-  }
-  select{appearance:none}
-  input:focus, textarea:focus, select:focus{
-    border-color: rgba(176,11,85,.60);
-    box-shadow: 0 0 0 4px rgba(176,11,85,.20);
-  }
-  input[type="date"], input[type="time"]{ color-scheme: dark; }
+    .imgWrap{
+      position:relative;
+      width:100%;
+      aspect-ratio: 16 / 9;
+      background: rgba(0,0,0,.20);
+    }
+    .imgWrap img{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .overlay{
+      position:absolute; inset:0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.82) 100%),
+        radial-gradient(1000px 380px at 30% 10%, rgba(176,11,85,.18), transparent 55%);
+      pointer-events:none;
+    }
 
-  .bioLabel{gap:8px;}
-  .bioLabel textarea{
-    min-height: 210px;
-    line-height: 1.35;
-  }
-  .stack{display:grid; gap:12px; align-content:start;}
+    .topBadge{
+      position:absolute; top:10px; left:10px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+      font-size:12px;
+      color: rgba(255,255,255,.88);
+      display:flex; gap:8px; align-items:center;
+    }
 
-  /* Preview card */
-  .previewCard{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    border-radius:14px;
-    overflow:hidden;
-  }
-  .previewImgWrap{
-    position:relative;
-    width:100%;
-    aspect-ratio: 16 / 9;
-    background: rgba(255,255,255,.06);
-    display:grid;
-    place-items:center;
-    color: rgba(255,255,255,.65);
-    font-size:13px;
-  }
-  .previewImgWrap img{
-    position:absolute; inset:0;
-    width:100%; height:100%;
-    object-fit:cover;
-    display:none;
-  }
-  .previewOverlay{
-    position:absolute; inset:0;
-    background:
-      linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.82) 100%),
-      radial-gradient(1000px 380px at 30% 10%, rgba(176,11,85,.18), transparent 55%);
-    pointer-events:none;
-  }
-  .previewTopBadge{
-    position:absolute; top:10px; left:10px;
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.35);
-    backdrop-filter: blur(10px);
-    font-size:12px;
-    color: rgba(255,255,255,.88);
-    display:flex; gap:8px; align-items:center;
-  }
-  .dot{
-    width:7px; height:7px; border-radius:999px;
-    background: rgba(176,11,85,.95);
-    box-shadow: 0 0 0 4px rgba(176,11,85,.22);
-  }
-  .previewBottom{
-    position:absolute; left:0; right:0; bottom:0;
-    padding:12px;
-    display:grid; gap:6px;
-  }
-  .pTitle{
-    font-weight:900;
-    letter-spacing:.2px;
-    font-size:16px;
-    line-height:1.15;
-    text-shadow: 0 10px 30px rgba(0,0,0,.55);
-    overflow:hidden;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-  }
-  .pMeta{
-    display:flex; flex-wrap:wrap; gap:8px;
-    color: rgba(255,255,255,.80);
-    font-size:12px;
-    align-items:center;
-  }
-  .pill{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.30);
-    padding:6px 10px;
-    border-radius:999px;
-    display:inline-flex; gap:6px; align-items:center;
-    backdrop-filter: blur(10px);
-  }
-  .pill b{font-weight:800; color: rgba(255,255,255,.92)}
-  .pChips{display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;}
-  .chip{
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.82);
-    font-size:12px;
-    max-width: 100%;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
+    .bottom{
+      position:absolute; left:0; right:0; bottom:0;
+      padding:12px;
+      display:grid; gap:8px;
+    }
+    .name{
+      font-size:16px;
+      font-weight:900;
+      letter-spacing:.2px;
+      line-height:1.15;
+      text-shadow: 0 10px 30px rgba(0,0,0,.55);
+      overflow:hidden;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+    }
+    .meta{
+      display:flex; flex-wrap:wrap; gap:8px;
+      color: rgba(255,255,255,.80);
+      font-size:12px;
+      align-items:center;
+    }
+    .pill{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.30);
+      padding:6px 10px;
+      border-radius:999px;
+      display:inline-flex; gap:6px; align-items:center;
+      backdrop-filter: blur(10px);
+      max-width: 100%;
+    }
+    .pill b{font-weight:800; color: rgba(255,255,255,.92)}
+    .pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width: 320px;}
 
-  /* Uploader */
-  .uploader{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.16);
-    border-radius:14px;
-    padding:12px;
-    display:grid;
-    gap:10px;
-  }
-  .fileRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-  .fileBtn{
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    color:rgba(255,255,255,.92);
-    cursor:pointer;
-    font-weight:800;
-    display:inline-flex; align-items:center; gap:8px;
-    user-select:none;
-    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
-  }
-  .fileBtn:hover{
-    transform: translateY(-1px);
-    border-color: var(--accent);
-    box-shadow: 0 0 14px rgba(176,11,85,.75), 0 14px 34px rgba(176,11,85,.24);
-    filter: brightness(1.06);
-  }
-  .fileBtn:active{
-    transform: translateY(0px) scale(.99);
-    box-shadow: 0 0 10px rgba(176,11,85,.65), 0 10px 26px rgba(176,11,85,.18);
-  }
-  .fileName{
-    color: rgba(255,255,255,.75);
-    font-size:12px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-    max-width: 100%;
-  }
-  .progress{
-    height:8px;
-    border-radius:999px;
-    background: rgba(255,255,255,.10);
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.10);
-    display:none;
-  }
-  .progress > div{
-    height:100%;
-    width:0%;
-    background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-  }
-  .mini{color: rgba(255,255,255,.65); font-size:12px; line-height:1.35;}
+    .body{
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
 
-  /* Invite-only toggle */
-  .togglePill{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    padding:12px 12px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.18);
-    user-select:none;
-    cursor:pointer;
-  }
-  .togglePill .tTitle{display:grid; gap:2px;}
-  .togglePill .tTitle b{color: rgba(255,255,255,.92); font-size:13px;}
-  .togglePill .tTitle span{color: rgba(255,255,255,.65); font-size:12px; line-height:1.25;}
-  .switch{
-    width:46px; height:26px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.08);
-    position:relative;
-    flex:0 0 auto;
-  }
-  .switch::after{
-    content:"";
-    width:20px; height:20px;
-    border-radius:999px;
-    background: rgba(255,255,255,.88);
-    position:absolute;
-    top:50%;
-    left:3px;
-    transform: translateY(-50%);
-    transition: transform .18s ease;
-  }
-  .togglePill.on{
-    border-color: rgba(176,11,85,.55);
-    box-shadow: 0 0 0 4px rgba(176,11,85,.18);
-    background: linear-gradient(180deg, rgba(176,11,85,.18), rgba(0,0,0,.18));
-  }
-  .togglePill.on .switch{
-    border-color: rgba(176,11,85,.55);
-    background: rgba(176,11,85,.35);
-  }
-  .togglePill.on .switch::after{
-    transform: translateY(-50%) translateX(20px);
-  }
+    .line{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
 
-  /* Map */
-  .mapWrap{
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.16);
-    border-radius:14px;
-    padding:12px;
-    display:grid;
-    gap:10px;
-  }
-  #map{
-    width:100%;
-    height:320px;
-    border-radius:14px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.06);
-  }
-  .mapRow{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .mapRowLeft{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-    flex: 1 1 auto;
-    min-width: 240px;
-  }
-  .mapHint{
-    color: rgba(255,255,255,.70);
-    font-size:12px;
-    line-height:1.3;
-  }
-  .pillMini{
-    display:inline-flex;
-    gap:6px;
-    align-items:center;
-    padding:6px 10px;
-    border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.22);
-    color: rgba(255,255,255,.82);
-    font-size:12px;
-  }
-  .pillMini b{color: rgba(255,255,255,.92)}
+    .mini{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+    }
 
-  .msg{
-    display:none;
-    padding:10px 12px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.16);
-    color:rgba(255,255,255,.85);
-    font-size:13px;
-    white-space:pre-line;
-    margin-top:12px;
-  }
-  .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
-  .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
+    .tagsRow{
+      display:flex;gap:8px;flex-wrap:wrap;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.86);
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
 
-  .subnote{
-    color: rgba(255,255,255,.60);
-    font-size:12px;
-    line-height:1.25;
-    margin-top:6px;
-  }
-</style>
+    .empty{
+      border:1px dashed rgba(255,255,255,.20);
+      background: rgba(0,0,0,.14);
+      border-radius: var(--radius);
+      padding:14px 16px;
+      color:rgba(255,255,255,.78);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .msg{
+      display:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,80,120,.30);
+      background: rgba(255,80,120,.10);
+      color:rgba(255,255,255,.90);
+      font-size:13px;
+      white-space:pre-line;
+    }
+    .msg.ok{
+      border-color: rgba(80,255,160,.25);
+      background: rgba(80,255,160,.10);
+    }
+  </style>
 </head>
 
 <body>
-<header>
-  <div class="left">
-    <img src="logo.png" alt="Uzone logo" />
-    <div class="title">
-      <h1>Post Motive</h1>
-      <div class="sub">Clean structure • better posting flow</div>
-    </div>
-  </div>
-  <div class="right">
-    <a class="btn" href="hub.html">Hub</a>
-    <a class="btn" href="events.html">Umotives</a>
-    <a class="btn" href="my_events.html">My Motives</a>
-  </div>
-</header>
-
-<main>
-  <section class="card">
-    <!-- ===================== -->
-    <!-- BASIC INFO            -->
-    <!-- ===================== -->
-    <div class="sectionHead">
-      <div>
-        <h2>Basic info</h2>
-        <div class="hint">Name + public location + map pin.</div>
-      </div>
-      <div class="hint">Required: name, start date/time, map pin.</div>
-    </div>
-
-    <div class="grid2">
-      <label>Motive name <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
-        <input id="name" placeholder="e.g., Rooftop Chill Night" />
-      </label>
-      <label>Location (public) <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
-        <input id="location" placeholder="e.g., Near uOttawa • Downtown • 123 King St" />
-      </label>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="sectionHead">
-      <div>
-        <h2>Map pin</h2>
-        <div class="hint">Search a place or tap the map to drop a pin.</div>
-      </div>
-      <div class="hint">Pin = lat/lng saved to the event.</div>
-    </div>
-
-    <div class="mapWrap">
-      <div class="mapRow">
-        <div class="mapRowLeft">
-          <label style="margin:0; flex: 1 1 320px;">
-            Search place / address
-            <input id="mapSearch" placeholder="e.g., ByWard Market, Ottawa" autocomplete="off" />
-          </label>
-          <button class="btn" id="searchBtn" type="button">Search</button>
-          <button class="btn" id="useMyLoc" type="button">Use my location</button>
-        </div>
-      </div>
-
-      <div id="map" aria-label="Map picker"></div>
-
-      <div class="mapRow" style="justify-content:flex-start;">
-        <span class="pillMini"><b>Pin</b> <span id="pinStatus">Not set</span></span>
-        <span class="mapHint">Tip: click map to place/move pin. Drag pin to fine-tune.</span>
+  <header>
+    <div class="left">
+      <img src="logo.png" alt="Uzone logo" />
+      <div class="title">
+        <h1>My Motives</h1>
+        <div class="sub" id="subline">Loading…</div>
       </div>
     </div>
+    <div class="right">
+      <a class="btn" href="hub.html">Hub</a>
+      <a class="btn" href="events.html">Umotives</a>
+      <a class="btn" href="map.html">Map</a>
+      <a class="btn primary" href="post_event.html">Post Motive</a>
+    </div>
+  </header>
 
-    <div class="divider"></div>
-
-    <!-- ===================== -->
-    <!-- DATE / TIME           -->
-    <!-- ===================== -->
-    <div class="sectionHead">
-      <div>
-        <h2>Date & time</h2>
-        <div class="hint">Start is required, end is optional.</div>
+  <main>
+    <section class="bar">
+      <div class="searchWrap">
+        <input id="search" placeholder="Search your motives (name, tags, description, location…)" />
+        <button class="btn" id="refreshBtn" type="button">Refresh</button>
       </div>
-      <div class="hint">Shows on preview card.</div>
-    </div>
-
-    <div class="grid2">
-      <label>Start date <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
-        <input id="startDate" type="date" />
-      </label>
-      <label>Start time <span class="hint" style="font-weight:700; color:rgba(255,255,255,.55)">(required)</span>
-        <input id="startTime" type="time" />
-      </label>
-    </div>
-
-    <div class="grid2" style="margin-top:12px;">
-      <label>End date (optional)
-        <input id="endDate" type="date" />
-      </label>
-      <label>End time (optional)
-        <input id="endTime" type="time" />
-      </label>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- ===================== -->
-    <!-- OTHER INFO            -->
-    <!-- ===================== -->
-    <div class="sectionHead">
-      <div>
-        <h2>Other info</h2>
-        <div class="hint">Venue size, spots, estimated attendance, ratio, tags, and description.</div>
+      <div class="chips">
+        <span class="chip"><span class="dot"></span><span id="countChip">0 motives</span></span>
+        <span class="chip"><span class="dot open"></span>Open</span>
+        <span class="chip"><span class="dot invite"></span>Invite-only</span>
       </div>
-      <div class="hint">Optional, but helps people decide.</div>
-    </div>
+    </section>
 
-    <div class="grid3">
-      <label>Venue size (capacity / space)
-        <input id="venueSize" placeholder="e.g., 2-bedroom condo • house • ~40 capacity" />
-      </label>
-      <label>Spots available (host says)
-        <input id="spotsAvailable" type="number" min="0" placeholder="e.g., 15" />
-      </label>
-      <label>Estimated attendance (expected)
-        <input id="sizeEstimate" type="number" min="1" placeholder="e.g., 20" />
-      </label>
-    </div>
+    <div id="msg" class="msg"></div>
 
-    <div class="grid2" style="margin-top:12px;">
-      <label>Ratio (text)
-        <input id="ratio" placeholder="e.g., 50/50 or 60/40" />
-        <div class="subnote" id="ratioHint">Tip: set a ratio preset below to auto-fill.</div>
-      </label>
+    <section id="grid" class="grid"></section>
+    <section id="empty" class="empty" style="display:none;">
+      You haven’t posted any motives yet.<br><br>
+      Hit <b>Post Motive</b> to create your first one.
+    </section>
+  </main>
 
-      <div class="stack" style="gap:10px;">
-        <label>Ratio preset (estimate)
-          <select id="ratioPreset">
-            <option value="">Pick a preset (optional)</option>
-            <option value="50/50">Balanced (50/50)</option>
-            <option value="60/40">Slightly mixed (60/40)</option>
-            <option value="70/30">Skewed (70/30)</option>
-            <option value="80/20">Heavily skewed (80/20)</option>
-          </select>
-        </label>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import {
+      getFirestore, collection, getDocs, query, orderBy, limit
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-        <div class="stack" style="gap:10px;">
-          <input id="inviteOnly" type="checkbox" hidden />
-          <div class="togglePill" id="invitePill" role="switch" aria-checked="false" tabindex="0">
-            <div class="tTitle">
-              <b>Invite-only</b>
-              <span>Hide exact date/time/location until you accept applicants.</span>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      projectId: "uzone-6148d",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const subline = document.getElementById("subline");
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("empty");
+    const search = document.getElementById("search");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const countChip = document.getElementById("countChip");
+    const msg = document.getElementById("msg");
+
+    let currentUser = null;
+    let allMine = [];
+
+    function setMsg(text, kind=""){
+      msg.style.display = text ? "block" : "none";
+      msg.textContent = text || "";
+      msg.className = "msg" + (kind ? " " + kind : "");
+    }
+
+    function esc(s){
+      return String(s||"").replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
+    }
+
+    function fmtDate(yyyyMmDd){
+      if (!yyyyMmDd) return "";
+      const parts = String(yyyyMmDd).split("-").map(Number);
+      if (parts.length !== 3) return String(yyyyMmDd);
+      const [y,m,d] = parts;
+      if (!y || !m || !d) return String(yyyyMmDd);
+      const dt = new Date(y, m-1, d);
+      return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+    }
+
+    function fmtWhen(ev){
+      const sd = ev.startDate || "";
+      const st = ev.startTime || "";
+      const ed = ev.endDate || "";
+      const et = ev.endTime || "";
+      const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
+      const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
+      if (!start && !end) return "Time TBD";
+      if (start && !end) return start;
+      if (!start && end) return end;
+      return `${start} → ${end}`;
+    }
+
+    function render(list){
+      grid.innerHTML = "";
+      empty.style.display = list.length ? "none" : "block";
+      countChip.textContent = `${list.length} motive${list.length===1?"":"s"}`;
+
+      list.forEach(ev => {
+        const tags = Array.isArray(ev.tags) ? ev.tags : [];
+        const inviteOnly = !!ev.inviteOnly;
+
+        const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
+        const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
+
+        const card = document.createElement("a");
+        card.className = "card";
+        card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
+
+        card.innerHTML = `
+          <div class="imgWrap">
+            <img alt="Event image" src="${esc(ev.imageUrl || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=60')}" />
+            <div class="overlay"></div>
+            <div class="topBadge">
+              <span class="dot ${inviteOnly ? "invite" : "open"}"></span>
+              <span>${inviteOnly ? "Invite-only" : "Open"}</span>
             </div>
-            <div class="switch" aria-hidden="true"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid2" style="margin-top:12px;">
-      <label>Tags (comma separated)
-        <input id="tags" placeholder="e.g., music, chill, alcohol, games" />
-      </label>
-      <label>Quick notes (optional)
-        <input id="quickNotes" placeholder="e.g., bring ID • BYOB • parking on street" />
-      </label>
-    </div>
-
-    <div class="grid2" style="margin-top:12px;">
-      <label class="bioLabel">Description
-        <textarea id="description" placeholder="Describe the vibe, what’s happening, who it’s for, what to bring, etc."></textarea>
-      </label>
-
-      <!-- Preview column -->
-      <div class="stack">
-        <div class="sectionHead" style="margin:0;">
-          <div>
-            <h2 style="font-size:13px;">Preview</h2>
-            <div class="hint">What people will see at a glance.</div>
-          </div>
-        </div>
-
-        <div class="previewCard" aria-label="Motive preview">
-          <div class="previewImgWrap">
-            <img id="previewImg" alt="Event image preview" />
-            <div id="previewEmpty">No image selected</div>
-            <div class="previewOverlay"></div>
-            <div class="previewTopBadge"><span class="dot"></span><span id="pBadge">Public</span></div>
-
-            <div class="previewBottom">
-              <div class="pTitle" id="pTitle">Your motive name</div>
-              <div class="pMeta">
-                <span class="pill"><b>When</b> <span id="pWhen">Start date & time</span></span>
-                <span class="pill"><b>Where</b> <span id="pWhere">Location</span></span>
+            <div class="bottom">
+              <div class="name">${esc(ev.name || "Motive")}</div>
+              <div class="meta">
+                <span class="pill"><b>When</b> <span>${esc(whenText)}</span></span>
+                <span class="pill"><b>Where</b> <span>${esc(whereText)}</span></span>
               </div>
-              <div class="pChips" id="pChips"></div>
             </div>
           </div>
-        </div>
 
-        <div class="uploader">
-          <div class="fileRow">
-            <input id="imageFile" type="file" accept="image/*" hidden />
-            <button class="fileBtn" id="pickImage" type="button">Upload image</button>
-            <div class="fileName" id="fileName">PNG/JPG/WebP • max 5MB</div>
+          <div class="body">
+            <div class="line">
+              <div class="mini">
+                Spots: <b>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</b>
+                • Venue: <b>${esc(ev.venueSize || "—")}</b>
+              </div>
+              <div class="mini">
+                Size: <b>${esc(ev.sizeEstimate ?? "—")}</b>
+              </div>
+            </div>
+
+            <div class="tagsRow">
+              ${tags.slice(0,6).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
+            </div>
           </div>
-          <div class="progress" id="progress"><div id="progressBar"></div></div>
-          <div class="mini">Tip: wide photo works best (16:9-ish).</div>
-        </div>
-      </div>
-    </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
-    <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; margin-top:14px;">
-      <button class="btn primary" id="postBtn" type="button">Post Motive</button>
-    </div>
+    function applySearch(){
+      const q = (search.value || "").trim().toLowerCase();
+      if (!q) { render(allMine); return; }
 
-    <div class="msg" id="msg"></div>
-  </section>
-</main>
+      const filtered = allMine.filter(ev => {
+        const hay = [
+          ev.name, ev.location, ev.description, ev.bio,
+          ev.venueSize, ev.sizeEstimate, ev.ratio,
+          ev.startDate, ev.startTime, ev.endDate, ev.endTime,
+          ...(Array.isArray(ev.tags) ? ev.tags : [])
+        ].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+      render(filtered);
+    }
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, setDoc
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+    async function load(){
+      setMsg("");
+      grid.innerHTML = "";
+      empty.style.display = "none";
+      allMine = [];
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-  authDomain: "uzone-6148d.firebaseapp.com",
-  projectId: "uzone-6148d",
-  storageBucket: "uzone-6148d.firebasestorage.app"
-};
+      try{
+        // NOTE: This avoids needing a Firestore composite index.
+        // We fetch recent events and filter client-side by hostUid/ownerUid.
+        const qy = query(collection(db, "events"), orderBy("createdAt", "desc"), limit(200));
+        const snap = await getDocs(qy);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+        const mine = [];
+        snap.forEach(d => {
+          const data = d.data() || {};
+          const host = data.hostUid || data.ownerUid || "";
+          if (currentUser && host === currentUser.uid){
+            mine.push({ id: d.id, ...data });
+          }
+        });
 
-/* Elements */
-const msg = document.getElementById("msg");
-const postBtn = document.getElementById("postBtn");
+        allMine = mine;
+        subline.textContent = currentUser
+          ? `Showing motives posted by you (${currentUser.uid})`
+          : `My Motives`;
 
-const nameEl = document.getElementById("name");
-const locationEl = document.getElementById("location");
-const venueSizeEl = document.getElementById("venueSize");
-const spotsAvailableEl = document.getElementById("spotsAvailable");
-const sizeEstimateEl = document.getElementById("sizeEstimate");
-const ratioEl = document.getElementById("ratio");
-const ratioPresetEl = document.getElementById("ratioPreset");
-const ratioHintEl = document.getElementById("ratioHint");
-const tagsEl = document.getElementById("tags");
-const quickNotesEl = document.getElementById("quickNotes");
-const descriptionEl = document.getElementById("description");
-
-const startDateEl = document.getElementById("startDate");
-const startTimeEl = document.getElementById("startTime");
-const endDateEl = document.getElementById("endDate");
-const endTimeEl = document.getElementById("endTime");
-
-const inviteEl = document.getElementById("inviteOnly");
-const invitePill = document.getElementById("invitePill");
-
-/* Preview */
-const pTitle = document.getElementById("pTitle");
-const pWhen = document.getElementById("pWhen");
-const pWhere = document.getElementById("pWhere");
-const pChips = document.getElementById("pChips");
-const pBadge = document.getElementById("pBadge");
-
-/* Upload */
-const imageFileEl = document.getElementById("imageFile");
-const pickImageBtn = document.getElementById("pickImage");
-const fileNameEl = document.getElementById("fileName");
-const previewImg = document.getElementById("previewImg");
-const previewEmpty = document.getElementById("previewEmpty");
-const progress = document.getElementById("progress");
-const progressBar = document.getElementById("progressBar");
-
-/* Map */
-const mapSearchEl = document.getElementById("mapSearch");
-const searchBtn = document.getElementById("searchBtn");
-const useMyLocBtn = document.getElementById("useMyLoc");
-const pinStatusEl = document.getElementById("pinStatus");
-
-let currentUser = null;
-let selectedFile = null;
-
-/* Stored pin */
-let picked = { lat:null, lng:null, label:"" };
-let map, marker;
-
-function setMsg(text, kind=""){
-  msg.style.display = text ? "block" : "none";
-  msg.textContent = text || "";
-  msg.className = "msg" + (kind ? " " + kind : "");
-}
-
-/* Invite-only toggle */
-function setInviteUI(){
-  const on = !!inviteEl.checked;
-  invitePill.classList.toggle("on", on);
-  invitePill.setAttribute("aria-checked", on ? "true" : "false");
-  pBadge.textContent = on ? "Invite-only" : "Public";
-}
-invitePill.addEventListener("click", ()=>{ inviteEl.checked = !inviteEl.checked; setInviteUI(); });
-invitePill.addEventListener("keydown", (e)=>{
-  if (e.key === "Enter" || e.key === " "){
-    e.preventDefault();
-    inviteEl.checked = !inviteEl.checked;
-    setInviteUI();
-  }
-});
-setInviteUI();
-
-/* Ratio preset -> fills ratio input */
-ratioPresetEl.addEventListener("change", ()=>{
-  const v = ratioPresetEl.value || "";
-  if (v){
-    ratioEl.value = v;
-    ratioHintEl.textContent = `Estimated ratio set to ${v}. You can edit it.`;
-  } else {
-    ratioHintEl.textContent = "Tip: set a ratio preset below to auto-fill.";
-  }
-});
-
-/* Preview helpers */
-function fmtDate(yyyyMmDd){
-  if (!yyyyMmDd) return "";
-  const [y,m,d] = yyyyMmDd.split("-").map(Number);
-  if (!y || !m || !d) return yyyyMmDd;
-  const dt = new Date(y, m-1, d);
-  return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
-}
-function fmtWhen(){
-  const sd = startDateEl.value || "";
-  const st = startTimeEl.value || "";
-  const ed = endDateEl.value || "";
-  const et = endTimeEl.value || "";
-  const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
-  const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
-  if (!start && !end) return "Start date & time";
-  if (start && !end) return start;
-  if (!start && end) return end;
-  return `${start} → ${end}`;
-}
-function parseTags(){
-  const base = (tagsEl.value || "")
-    .split(",")
-    .map(s=>s.trim())
-    .filter(Boolean);
-
-  // Optional “quick notes” as extra chip(s) (keeps your tags clean)
-  const qn = (quickNotesEl.value || "").trim();
-  const chips = [...base];
-  if (qn) chips.push(qn);
-  return chips.slice(0, 8);
-}
-
-function renderPreview(){
-  const name = (nameEl.value || "").trim();
-  const loc = (locationEl.value || "").trim();
-
-  pTitle.textContent = name || "Your motive name";
-  pWhere.textContent = loc || "Location";
-  pWhen.textContent = fmtWhen();
-
-  pChips.innerHTML = "";
-  for (const t of parseTags()){
-    const el = document.createElement("div");
-    el.className = "chip";
-    el.textContent = t;
-    pChips.appendChild(el);
-  }
-}
-[
-  nameEl, locationEl, startDateEl, startTimeEl, endDateEl, endTimeEl,
-  tagsEl, quickNotesEl
-].forEach(el=> el.addEventListener("input", renderPreview));
-renderPreview();
-
-/* Image upload */
-pickImageBtn.addEventListener("click", ()=> imageFileEl.click());
-imageFileEl.addEventListener("change", ()=>{
-  const f = imageFileEl.files?.[0] || null;
-  selectedFile = null;
-
-  if (!f){
-    fileNameEl.textContent = "PNG/JPG/WebP • max 5MB";
-    previewImg.style.display = "none";
-    previewEmpty.style.display = "grid";
-    previewImg.src = "";
-    return;
-  }
-  if (!f.type.startsWith("image/")){
-    setMsg("Please choose an image file.", "error");
-    imageFileEl.value = "";
-    return;
-  }
-  if (f.size > 5 * 1024 * 1024){
-    setMsg("Image is too large. Max size is 5MB.", "error");
-    imageFileEl.value = "";
-    return;
-  }
-
-  selectedFile = f;
-  fileNameEl.textContent = f.name;
-
-  const url = URL.createObjectURL(f);
-  previewImg.src = url;
-  previewImg.style.display = "block";
-  previewEmpty.style.display = "none";
-});
-
-function sanitizeExt(filename){
-  const ext = (filename.split(".").pop() || "jpg").toLowerCase();
-  return ["png","jpg","jpeg","webp"].includes(ext) ? ext : "jpg";
-}
-
-async function uploadEventImage(eventId){
-  if (!selectedFile) return "";
-
-  progress.style.display = "block";
-  progressBar.style.width = "0%";
-
-  const safeExt = sanitizeExt(selectedFile.name);
-  const path = `event_images/${eventId}/${Date.now()}.${safeExt}`;
-  const storageRef = ref(storage, path);
-
-  const task = uploadBytesResumable(storageRef, selectedFile, { contentType: selectedFile.type });
-
-  const url = await new Promise((resolve, reject) => {
-    task.on("state_changed",
-      (snap) => {
-        const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
-        progressBar.style.width = `${Math.max(2, Math.min(100, pct))}%`;
-      },
-      (err) => reject(err),
-      async () => resolve(await getDownloadURL(task.snapshot.ref))
-    );
-  });
-
-  setTimeout(()=>{ progress.style.display = "none"; }, 450);
-  return url;
-}
-
-/* =======================
-   MAP (Leaflet + Nominatim)
-   ======================= */
-function setPinStatus(){
-  if (picked.lat == null || picked.lng == null){
-    pinStatusEl.textContent = "Not set";
-    return;
-  }
-  pinStatusEl.textContent = `${Number(picked.lat).toFixed(5)}, ${Number(picked.lng).toFixed(5)}`;
-}
-
-function ensureMarker(lat, lng){
-  if (!map) return;
-  if (!marker){
-    marker = L.marker([lat, lng], { draggable:true }).addTo(map);
-    marker.on("dragend", async ()=>{
-      const p = marker.getLatLng();
-      picked.lat = p.lat;
-      picked.lng = p.lng;
-      setPinStatus();
-      const label = await reverseGeocode(p.lat, p.lng);
-      if (label){
-        picked.label = label;
-        if (!locationEl.value.trim()){
-          locationEl.value = label;
-          renderPreview();
-        }
+        applySearch();
+      } catch (e){
+        console.error(e);
+        setMsg(e?.message || "Failed to load your motives.", "error");
+        empty.style.display = "block";
       }
+    }
+
+    refreshBtn.addEventListener("click", load);
+    search.addEventListener("input", applySearch);
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user){
+        window.location.href = "login.html";
+        return;
+      }
+      currentUser = user;
+      load();
     });
-  } else {
-    marker.setLatLng([lat, lng]);
-  }
-}
-
-async function geocode(query){
-  const q = String(query || "").trim();
-  if (!q) return null;
-
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-  const res = await fetch(url, { headers: { "Accept":"application/json" } });
-  if (!res.ok) return null;
-
-  const data = await res.json();
-  if (!Array.isArray(data) || !data.length) return null;
-
-  const r = data[0];
-  return { lat:Number(r.lat), lng:Number(r.lon), label:r.display_name || q };
-}
-
-async function reverseGeocode(lat, lng){
-  try{
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`;
-    const res = await fetch(url, { headers: { "Accept":"application/json" } });
-    if (!res.ok) return "";
-    const data = await res.json();
-    return (data && data.display_name) ? data.display_name : "";
-  } catch(_) {
-    return "";
-  }
-}
-
-function initMap(){
-  const defaultCenter = [45.4215, -75.6972]; // Ottawa-ish
-  map = L.map("map", { zoomControl:true }).setView(defaultCenter, 12);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors"
-  }).addTo(map);
-
-  map.on("click", async (e)=>{
-    picked.lat = e.latlng.lat;
-    picked.lng = e.latlng.lng;
-    ensureMarker(picked.lat, picked.lng);
-    setPinStatus();
-
-    const label = await reverseGeocode(picked.lat, picked.lng);
-    if (label){
-      picked.label = label;
-      if (!locationEl.value.trim()){
-        locationEl.value = label;
-        renderPreview();
-      }
-    }
-  });
-
-  setPinStatus();
-}
-
-searchBtn.addEventListener("click", async ()=>{
-  const q = mapSearchEl.value.trim();
-  if (!q) { setMsg("Type something to search (e.g., a place or address).", "error"); return; }
-
-  setMsg("");
-  try{
-    searchBtn.disabled = true;
-    const r = await geocode(q);
-    if (!r){
-      setMsg("No results found. Try a broader search.", "error");
-      return;
-    }
-
-    picked.lat = r.lat;
-    picked.lng = r.lng;
-    picked.label = r.label || q;
-
-    map.setView([r.lat, r.lng], 15);
-    ensureMarker(r.lat, r.lng);
-    setPinStatus();
-
-    locationEl.value = (r.label || q);
-    renderPreview();
-  } catch(e){
-    setMsg("Search failed. Try again.", "error");
-  } finally {
-    searchBtn.disabled = false;
-  }
-});
-
-mapSearchEl.addEventListener("keydown", (e)=>{
-  if (e.key === "Enter"){
-    e.preventDefault();
-    searchBtn.click();
-  }
-});
-
-useMyLocBtn.addEventListener("click", ()=>{
-  setMsg("");
-  if (!navigator.geolocation){
-    setMsg("Geolocation not supported in this browser.", "error");
-    return;
-  }
-  useMyLocBtn.disabled = true;
-
-  navigator.geolocation.getCurrentPosition(async (pos)=>{
-    picked.lat = pos.coords.latitude;
-    picked.lng = pos.coords.longitude;
-
-    ensureMarker(picked.lat, picked.lng);
-    map.setView([picked.lat, picked.lng], 16);
-    setPinStatus();
-
-    const label = await reverseGeocode(picked.lat, picked.lng);
-    if (label){
-      picked.label = label;
-      if (!locationEl.value.trim()){
-        locationEl.value = label;
-        renderPreview();
-      }
-    }
-    useMyLocBtn.disabled = false;
-  }, ()=>{
-    setMsg("Couldn't access your location. Check permissions.", "error");
-    useMyLocBtn.disabled = false;
-  }, { enableHighAccuracy:true, timeout:10000 });
-});
-
-/* Auth */
-onAuthStateChanged(auth, async (user)=>{
-  if (!user) { window.location.href="index.html"; return; }
-  currentUser = user;
-  if (!map) initMap();
-});
-
-/* Submit */
-function maybePairError(a, b){
-  const A = (a.value || "").trim();
-  const B = (b.value || "").trim();
-  return (A && !B) || (!A && B);
-}
-
-postBtn.addEventListener("click", async ()=>{
-  if (!currentUser) return;
-
-  const name = (nameEl.value||"").trim();
-  if (!name) { setMsg("Please enter a motive name.", "error"); return; }
-
-  const locationText = (locationEl.value||"").trim();
-  if (!locationText) { setMsg("Please enter a public location.", "error"); return; }
-
-  const startDate = (startDateEl.value||"").trim();
-  const startTime = (startTimeEl.value||"").trim();
-  if (!startDate || !startTime){
-    setMsg("Please pick a Start date and Start time.", "error");
-    return;
-  }
-
-  if (maybePairError(endDateEl, endTimeEl)){
-    setMsg("If you add an end date, add an end time too (and vice versa).", "error");
-    return;
-  }
-
-  if (picked.lat == null || picked.lng == null){
-    setMsg("Please drop a pin on the map (or search a place).", "error");
-    return;
-  }
-
-  postBtn.disabled = true;
-  setMsg("");
-
-  try{
-    let hostName = currentUser.displayName || "";
-    try{
-      const u = await getDoc(doc(db,"users",currentUser.uid));
-      if (u.exists() && u.data()?.name) hostName = u.data().name;
-    } catch(_) {}
-
-    const tags = (tagsEl.value || "")
-      .split(",")
-      .map(s=>s.trim())
-      .filter(Boolean)
-      .slice(0, 8);
-
-    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0; // estimated attendance
-    const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
-
-    const eventRef = await addDoc(collection(db,"events"), {
-      name,
-      location: locationText,
-
-      // map fields
-      lat: picked.lat,
-      lng: picked.lng,
-      locationLabel: picked.label || locationText || "",
-
-      // schedule
-      startDate,
-      startTime,
-      endDate: (endDateEl.value||"").trim() || "",
-      endTime: (endTimeEl.value||"").trim() || "",
-
-      // other info
-      venueSize: (venueSizeEl.value || "").trim(),
-      spotsAvailable,
-      sizeEstimate,
-      ratio: (ratioEl.value || "").trim(),
-      ratioPreset: (ratioPresetEl.value || "").trim(),
-      quickNotes: (quickNotesEl.value || "").trim(),
-      description: (descriptionEl.value || "").trim(),
-      tags,
-
-      // image (filled later)
-      imageUrl: "",
-      inviteOnly: !!inviteEl.checked,
-
-      ratingAvg: 0,
-      hostUid: currentUser.uid,
-      hostName: hostName || currentUser.email || "Host",
-      createdAt: serverTimestamp()
-    });
-
-    if (selectedFile){
-      const imageUrl = await uploadEventImage(eventRef.id);
-      await setDoc(doc(db,"events",eventRef.id), { imageUrl }, { merge:true });
-    }
-
-    setMsg("Motive posted!", "ok");
-    setTimeout(()=>{ window.location.href = `event.html?id=${encodeURIComponent(eventRef.id)}`; }, 650);
-
-  } catch(e){
-    setMsg(e?.message || "Failed to post motive.", "error");
-  } finally {
-    postBtn.disabled = false;
-  }
-});
-</script>
+  </script>
 </body>
 </html>
