@@ -5,11 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>Uzone • Post Motive</title>
 
-<!-- Tab icon -->
 <link rel="icon" type="image/png" href="logo.png" />
 <meta name="color-scheme" content="dark light" />
 
-<!-- Leaflet (map) -->
+<!-- Leaflet -->
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -55,7 +54,6 @@
     background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-
     position: sticky;
     top: 10px;
     z-index: 10;
@@ -68,7 +66,6 @@
   .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
-  /* Unified button system */
   .btn{
     padding:10px 12px;
     border-radius:12px;
@@ -138,8 +135,6 @@
   .hint{color:rgba(255,255,255,.60); font-size:12px;}
 
   .row{display:grid; grid-template-columns: 1fr 1fr; gap:12px;}
-  .row3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;}
-  @media (max-width: 900px){ .row3{grid-template-columns:1fr;} }
   @media (max-width: 860px){ .row{grid-template-columns:1fr;} }
 
   label{display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78);}
@@ -161,14 +156,9 @@
   input[type="date"], input[type="time"]{ color-scheme: dark; }
 
   .bioLabel{gap:8px;}
-  .bioLabel textarea{
-    min-height: 210px;
-    line-height: 1.35;
-  }
-
+  .bioLabel textarea{min-height:210px; line-height:1.35;}
   .stack{display:grid; gap:12px; align-content:start;}
 
-  /* Preview card */
   .previewCard{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.18);
@@ -259,7 +249,6 @@
     white-space:nowrap;
   }
 
-  /* Uploader */
   .uploader{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.16);
@@ -291,7 +280,6 @@
     transform: translateY(0px) scale(.99);
     box-shadow: 0 0 10px rgba(176,11,85,.65), 0 10px 26px rgba(176,11,85,.18);
   }
-
   .fileName{
     color: rgba(255,255,255,.75);
     font-size:12px;
@@ -313,24 +301,15 @@
     width:0%;
     background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
   }
-  .mini{
-    color: rgba(255,255,255,.65);
-    font-size:12px;
-    line-height:1.35;
-  }
+  .mini{color: rgba(255,255,255,.65); font-size:12px; line-height:1.35;}
 
-  /* Invite-only toggle */
   .togglePill{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
     padding:12px 12px;
     border-radius:14px;
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.18);
-    user-select:none;
-    cursor:pointer;
+    user-select:none; cursor:pointer;
   }
   .togglePill .tTitle{display:grid; gap:2px;}
   .togglePill .tTitle b{color: rgba(255,255,255,.92); font-size:13px;}
@@ -367,6 +346,8 @@
     transform: translateY(-50%) translateX(20px);
   }
 
+  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
+
   .msg{
     display:none;
     padding:10px 12px;
@@ -381,9 +362,7 @@
   .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
   .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 
-  .divider{height:1px; background: rgba(255,255,255,.10); margin:12px 0;}
-
-  /* Map card */
+  /* Map */
   .mapWrap{
     border:1px solid rgba(255,255,255,.14);
     background: rgba(0,0,0,.16);
@@ -532,9 +511,10 @@
 
     <div class="sectionHead">
       <h2>Details</h2>
-      <div class="hint">Tags + description cover the vibe. (optional)</div>
+      <div class="hint">Estimated size + ratio + tags + description. (optional)</div>
     </div>
 
+    <!-- ✅ THESE ARE THE FIELDS YOU SAID WERE MISSING -->
     <div class="row">
       <label>Size estimate (# of people)
         <input id="sizeEstimate" type="number" min="1" placeholder="e.g., 20" />
@@ -561,7 +541,6 @@
       </div>
     </div>
 
-    <!-- FIXED: was margin-top: (broken). -->
     <div class="row" style="margin-top:12px;">
       <label class="bioLabel">Description
         <textarea id="description" placeholder="Describe the vibe, what’s happening, who it’s for, what to bring, etc."></textarea>
@@ -613,12 +592,8 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, setDoc
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytesResumable, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -679,12 +654,8 @@ const pinStatusEl = document.getElementById("pinStatus");
 let currentUser = null;
 let selectedFile = null;
 
-/* Stored pin */
-let picked = {
-  lat: null,
-  lng: null,
-  label: "" // friendly text label
-};
+let picked = { lat:null, lng:null, label:"" };
+let map, marker;
 
 function setMsg(text, kind=""){
   msg.style.display = text ? "block" : "none";
@@ -699,20 +670,13 @@ function setInviteUI(){
   invitePill.setAttribute("aria-checked", on ? "true" : "false");
   pBadge.textContent = on ? "Invite-only" : "Public";
 }
-invitePill.addEventListener("click", ()=>{
-  inviteEl.checked = !inviteEl.checked;
-  setInviteUI();
-});
+invitePill.addEventListener("click", ()=>{ inviteEl.checked = !inviteEl.checked; setInviteUI(); });
 invitePill.addEventListener("keydown", (e)=>{
-  if (e.key === "Enter" || e.key === " "){
-    e.preventDefault();
-    inviteEl.checked = !inviteEl.checked;
-    setInviteUI();
-  }
+  if (e.key === "Enter" || e.key === " "){ e.preventDefault(); inviteEl.checked = !inviteEl.checked; setInviteUI(); }
 });
 setInviteUI();
 
-/* Preview formatting helpers */
+/* Preview helpers */
 function fmtDate(yyyyMmDd){
   if (!yyyyMmDd) return "";
   const [y,m,d] = yyyyMmDd.split("-").map(Number);
@@ -720,22 +684,18 @@ function fmtDate(yyyyMmDd){
   const dt = new Date(y, m-1, d);
   return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
 }
-
 function fmtWhen(){
   const sd = startDateEl.value || "";
   const st = startTimeEl.value || "";
   const ed = endDateEl.value || "";
   const et = endTimeEl.value || "";
-
   const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
   const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
-
   if (!start && !end) return "Start date & time";
   if (start && !end) return start;
   if (!start && end) return end;
   return `${start} → ${end}`;
 }
-
 function parseTags(){
   return (tagsEl.value || "")
     .split(",")
@@ -743,7 +703,6 @@ function parseTags(){
     .filter(Boolean)
     .slice(0, 8);
 }
-
 function renderPreview(){
   const name = (nameEl.value || "").trim();
   const loc = (locationEl.value || "").trim();
@@ -751,24 +710,21 @@ function renderPreview(){
   pWhere.textContent = loc || "Location";
   pWhen.textContent = fmtWhen();
 
-  const chips = parseTags();
   pChips.innerHTML = "";
-  for (const t of chips){
+  for (const t of parseTags()){
     const el = document.createElement("div");
     el.className = "chip";
     el.textContent = t;
     pChips.appendChild(el);
   }
 }
-
 [nameEl, locationEl, startDateEl, startTimeEl, endDateEl, endTimeEl, tagsEl].forEach(el=>{
   el.addEventListener("input", renderPreview);
 });
 renderPreview();
 
-/* Image upload UI */
+/* Image upload */
 pickImageBtn.addEventListener("click", ()=> imageFileEl.click());
-
 imageFileEl.addEventListener("change", ()=>{
   const f = imageFileEl.files?.[0] || null;
   selectedFile = null;
@@ -804,7 +760,6 @@ function sanitizeExt(filename){
   const ext = (filename.split(".").pop() || "jpg").toLowerCase();
   return ["png","jpg","jpeg","webp"].includes(ext) ? ext : "jpg";
 }
-
 async function uploadEventImage(eventId){
   if (!selectedFile) return "";
 
@@ -832,36 +787,27 @@ async function uploadEventImage(eventId){
   return url;
 }
 
-/* =======================
-   MAP (Leaflet + Nominatim)
-   ======================= */
-let map, marker;
-
+/* Map helpers */
 function setPinStatus(){
   if (picked.lat == null || picked.lng == null){
     pinStatusEl.textContent = "Not set";
     return;
   }
-  const lat = Number(picked.lat).toFixed(5);
-  const lng = Number(picked.lng).toFixed(5);
-  pinStatusEl.textContent = `${lat}, ${lng}`;
+  pinStatusEl.textContent = `${Number(picked.lat).toFixed(5)}, ${Number(picked.lng).toFixed(5)}`;
 }
-
 function ensureMarker(lat, lng){
   if (!map) return;
   if (!marker){
-    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
-    marker.on("dragend", async () => {
+    marker = L.marker([lat, lng], { draggable:true }).addTo(map);
+    marker.on("dragend", async ()=>{
       const p = marker.getLatLng();
       picked.lat = p.lat;
       picked.lng = p.lng;
       setPinStatus();
-      // update label from reverse geocode
       const label = await reverseGeocode(p.lat, p.lng);
       if (label){
         picked.label = label;
-        // keep your "Location (public)" in sync, but don't overwrite if user is typing something custom
-        if (!locationEl.value.trim() || locationEl.value.trim() === picked.label){
+        if (!locationEl.value.trim()){
           locationEl.value = label;
           renderPreview();
         }
@@ -875,58 +821,43 @@ function ensureMarker(lat, lng){
 async function geocode(query){
   const q = String(query || "").trim();
   if (!q) return null;
-
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-  const res = await fetch(url, {
-    headers: {
-      "Accept": "application/json"
-    }
-  });
+  const res = await fetch(url, { headers: { "Accept":"application/json" } });
   if (!res.ok) return null;
   const data = await res.json();
   if (!Array.isArray(data) || !data.length) return null;
-
   const r = data[0];
-  return {
-    lat: Number(r.lat),
-    lng: Number(r.lon),
-    label: r.display_name || q
-  };
+  return { lat:Number(r.lat), lng:Number(r.lon), label:r.display_name || q };
 }
 
 async function reverseGeocode(lat, lng){
-  const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`;
   try{
-    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lng)}`;
+    const res = await fetch(url, { headers: { "Accept":"application/json" } });
     if (!res.ok) return "";
     const data = await res.json();
-    return (data && (data.display_name || "")) || "";
+    return (data && data.display_name) ? data.display_name : "";
   } catch(_) {
     return "";
   }
 }
 
 function initMap(){
-  // default center: Ottawa-ish (keeps it sensible for you)
   const defaultCenter = [45.4215, -75.6972];
-  map = L.map("map", {
-    zoomControl: true,
-    preferCanvas: true
-  }).setView(defaultCenter, 12);
+  map = L.map("map").setView(defaultCenter, 12);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
 
-  map.on("click", async (e) => {
-    const { lat, lng } = e.latlng;
-    picked.lat = lat;
-    picked.lng = lng;
-    ensureMarker(lat, lng);
+  map.on("click", async (e)=>{
+    picked.lat = e.latlng.lat;
+    picked.lng = e.latlng.lng;
+    ensureMarker(picked.lat, picked.lng);
     setPinStatus();
 
-    const label = await reverseGeocode(lat, lng);
+    const label = await reverseGeocode(picked.lat, picked.lng);
     if (label){
       picked.label = label;
       if (!locationEl.value.trim()){
@@ -937,9 +868,6 @@ function initMap(){
   });
 
   setPinStatus();
-
-  // if user types location manually, keep preview updated
-  locationEl.addEventListener("input", renderPreview);
 }
 
 searchBtn.addEventListener("click", async ()=>{
@@ -957,13 +885,10 @@ searchBtn.addEventListener("click", async ()=>{
     picked.lng = r.lng;
     picked.label = r.label || q;
 
-    if (map){
-      map.setView([r.lat, r.lng], 15);
-      ensureMarker(r.lat, r.lng);
-    }
+    map.setView([r.lat, r.lng], 15);
+    ensureMarker(r.lat, r.lng);
     setPinStatus();
 
-    // fill public location nicely (you can edit after)
     locationEl.value = (r.label || q);
     renderPreview();
   } catch(e){
@@ -972,32 +897,21 @@ searchBtn.addEventListener("click", async ()=>{
     searchBtn.disabled = false;
   }
 });
-
-mapSearchEl.addEventListener("keydown", (e)=>{
-  if (e.key === "Enter"){
-    e.preventDefault();
-    searchBtn.click();
-  }
-});
+mapSearchEl.addEventListener("keydown", (e)=>{ if (e.key==="Enter"){ e.preventDefault(); searchBtn.click(); } });
 
 useMyLocBtn.addEventListener("click", ()=>{
   setMsg("");
-  if (!navigator.geolocation){
-    setMsg("Geolocation not supported in this browser.", "error");
-    return;
-  }
+  if (!navigator.geolocation){ setMsg("Geolocation not supported in this browser.", "error"); return; }
   useMyLocBtn.disabled = true;
-  navigator.geolocation.getCurrentPosition(async (pos)=>{
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
 
-    picked.lat = lat;
-    picked.lng = lng;
-    ensureMarker(lat, lng);
-    map.setView([lat, lng], 16);
+  navigator.geolocation.getCurrentPosition(async (pos)=>{
+    picked.lat = pos.coords.latitude;
+    picked.lng = pos.coords.longitude;
+    ensureMarker(picked.lat, picked.lng);
+    map.setView([picked.lat, picked.lng], 16);
     setPinStatus();
 
-    const label = await reverseGeocode(lat, lng);
+    const label = await reverseGeocode(picked.lat, picked.lng);
     if (label){
       picked.label = label;
       if (!locationEl.value.trim()){
@@ -1016,8 +930,6 @@ useMyLocBtn.addEventListener("click", ()=>{
 onAuthStateChanged(auth, async (user)=>{
   if (!user) { window.location.href="index.html"; return; }
   currentUser = user;
-
-  // init map once we know we're signed in (keeps behavior consistent with rest of your pages)
   if (!map) initMap();
 });
 
@@ -1046,7 +958,6 @@ postBtn.addEventListener("click", async ()=>{
     return;
   }
 
-  // require a pin so map actually matters
   if (picked.lat == null || picked.lng == null){
     setMsg("Please drop a pin on the map (or search a place).", "error");
     return;
@@ -1063,9 +974,10 @@ postBtn.addEventListener("click", async ()=>{
     } catch(_) {}
 
     const tags = parseTags();
-    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0;
+    const sizeEstimate = Number(sizeEstimateEl.value || 0) || 0;   // ✅ kept
     const spotsAvailable = Math.max(0, Number(spotsAvailableEl.value || 0) || 0);
     const venueSize = (venueSizeEl.value || "").trim();
+    const ratio = (ratioEl.value || "").trim();                    // ✅ kept
 
     const endDate = (endDateEl.value||"").trim();
     const endTime = (endTimeEl.value||"").trim();
@@ -1076,7 +988,7 @@ postBtn.addEventListener("click", async ()=>{
       name,
       location: locationText,
 
-      // map fields (new)
+      // map fields
       lat: picked.lat,
       lng: picked.lng,
       locationLabel: picked.label || locationText || "",
@@ -1089,8 +1001,8 @@ postBtn.addEventListener("click", async ()=>{
       venueSize,
       spotsAvailable,
 
-      sizeEstimate,
-      ratio: (ratioEl.value||"").trim(),
+      sizeEstimate,  // ✅ kept
+      ratio,         // ✅ kept
       description: (descriptionEl.value||"").trim(),
       tags,
 
