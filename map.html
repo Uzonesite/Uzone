@@ -183,22 +183,22 @@
       100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
     }
 
-    /* ✅ Make the Google InfoWindow fit mobile */
+    /* ✅ Make InfoWindow fit mobile (no sideways scroll) */
     .gm-style-iw{ padding:0 !important; }
-    .gm-style-iw-d{ overflow:hidden !important; } /* prevents sideways scroll */
+    .gm-style-iw-d{ overflow:hidden !important; }
     .gm-style-iw-c{
       max-width: 86vw !important;
       border-radius: 16px !important;
     }
-    /* Hide default Google close button (white-on-white issue) */
+    /* Hide default Google close button (white-on-white) */
     .gm-ui-hover-effect{ display:none !important; }
 
     /* Popup card */
     .card{
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      width: min(270px, 82vw);   /* ✅ responsive */
+      width: min(270px, 82vw);
       max-width: 82vw;
-      padding: 12px 12px 12px 12px;
+      padding: 12px;
       color: rgba(20,20,24,.92);
       position: relative;
     }
@@ -211,7 +211,7 @@
       font-size:12px;
       color: rgba(20,20,24,.80);
       white-space:nowrap;
-      max-width: calc(100% - 44px); /* leave space for X */
+      max-width: calc(100% - 44px);
       overflow:hidden;
       text-overflow:ellipsis;
     }
@@ -231,7 +231,7 @@
       display:-webkit-box;
       -webkit-line-clamp:2;
       -webkit-box-orient:vertical;
-      padding-right: 40px; /* don't run under X */
+      padding-right: 40px;
     }
     .meta{
       font-size:12px;
@@ -239,12 +239,11 @@
       line-height:1.35;
       word-break: break-word;
     }
-
     .actions{
       margin-top:12px;
       display:flex;
       gap:10px;
-      flex-wrap:wrap; /* ✅ wraps on mobile */
+      flex-wrap:wrap;
     }
     .aBtn{
       display:inline-flex;
@@ -260,7 +259,7 @@
       text-decoration:none;
       cursor:pointer;
       transition: transform .12s ease, box-shadow .12s ease;
-      flex: 1 1 auto; /* ✅ buttons compress nicely */
+      flex: 1 1 auto;
       min-width: 110px;
     }
     .aBtn:hover{ transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,.12); }
@@ -270,7 +269,6 @@
       color: #fff;
     }
 
-    /* Custom close button inside popup */
     .closeBtn{
       position:absolute;
       top:10px;
@@ -329,7 +327,7 @@
       </div>
 
       <div class="hint" style="margin-top:10px;">
-        Showing motives near you (based on your device location). Invite-only motives can hide exact location.
+        Invite-only motives only show on the map after you’ve been accepted.
       </div>
     </section>
 
@@ -346,7 +344,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -373,10 +371,15 @@
     let focusDone = false;
 
     let gmap, info;
+    let currentUser = null;
+
     let allEvents = [];
     let markers = [];
     let markerById = new Map();
     let userCenter = null;
+
+    // invite-only visibility: only show pins if accepted (or host)
+    let acceptedInviteIds = new Set();
 
     function esc(s){
       return String(s||"").replace(/[&<>"']/g, m => ({
@@ -419,19 +422,21 @@
       return wrap;
     }
 
-    function safeLatLng(ev){
+    function canSeeOnMap(ev){
+      const inviteOnly = !!ev.inviteOnly;
+      if (!inviteOnly) return true;
+
+      const hostUid = ev.hostUid || ev.ownerUid || "";
+      if (currentUser && hostUid && currentUser.uid === hostUid) return true;
+
+      return currentUser ? acceptedInviteIds.has(ev.id) : false;
+    }
+
+    function exactLatLng(ev){
       const lat = Number(ev.lat);
       const lng = Number(ev.lng);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-
-      if (!ev.inviteOnly) return { lat, lng };
-
-      // jitter invite-only a bit
-      const j = 0.003;
-      return {
-        lat: lat + (Math.random()*2 - 1) * j,
-        lng: lng + (Math.random()*2 - 1) * j
-      };
+      return { lat, lng };
     }
 
     function clearMarkers(){
@@ -442,13 +447,12 @@
 
     function openInfo(marker, ev){
       const when = esc(fmtWhen(ev));
-      const where = esc(ev.inviteOnly ? "Location hidden" : (ev.location || "—"));
+      const where = esc((ev.location || "—"));
       const badgeText = ev.inviteOnly ? "Invite-only" : "Open";
 
       const html = `
         <div class="card">
           <button class="closeBtn" type="button" id="iwCloseBtn" aria-label="Close">✕</button>
-
           <div class="badge"><span class="dot"></span>${badgeText}</div>
           <h3 title="${esc(ev.name || "Motive")}">${esc(ev.name || "Motive")}</h3>
           <div class="meta"><b>When:</b> ${when}<br><b>Where:</b> ${where}</div>
@@ -466,39 +470,6 @@
         const btn = document.getElementById("iwCloseBtn");
         if (btn) btn.onclick = () => info.close();
       });
-    }
-
-    function tryFocusOpen(){
-      if (focusDone) return;
-      if (!focusId) return;
-
-      const ev = allEvents.find(x => x.id === focusId);
-      if (!ev) return;
-
-      // never reveal invite-only exact location via deep-link focus
-      if (ev.inviteOnly) return;
-
-      const pos = safeLatLng(ev);
-      if (!pos) return;
-
-      let m = markerById.get(focusId);
-
-      // If radius filter excluded it, add a one-off marker and open it
-      if (!m){
-        m = new google.maps.marker.AdvancedMarkerElement({
-          map: gmap,
-          position: pos,
-          content: buildPinEl(),
-        });
-        m.addListener("gmp-click", () => openInfo(m, ev));
-        markers.push(m);
-        markerById.set(focusId, m);
-      }
-
-      gmap.panTo(pos);
-      gmap.setZoom(16);
-      openInfo(m, ev);
-      focusDone = true;
     }
 
     // Haversine distance (km)
@@ -523,7 +494,9 @@
       let added = 0;
 
       list.forEach(ev => {
-        const pos = safeLatLng(ev);
+        if (!canSeeOnMap(ev)) return;
+
+        const pos = exactLatLng(ev);
         if (!pos) return;
 
         const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -547,7 +520,7 @@
         gmap.setZoom(13);
       }
 
-      // once markers exist, open focused event popup
+      // try auto-open focus after markers exist
       setTimeout(tryFocusOpen, 0);
     }
 
@@ -555,27 +528,89 @@
       if (!userCenter){
         renderMarkers(allEvents);
         count.textContent = `${markers.length} motive${markers.length === 1 ? "" : "s"}`;
-        subline.textContent = `Showing all motives (no location permission)`;
+        subline.textContent = `Showing all visible motives`;
         return;
       }
 
       const km = Number(radius.value || 15);
       const filtered = allEvents.filter(ev => {
-        const pos = safeLatLng(ev);
+        if (!canSeeOnMap(ev)) return false;
+        const pos = exactLatLng(ev);
         if (!pos) return false;
         return distKm(userCenter, pos) <= km;
       });
 
       renderMarkers(filtered);
+
       count.textContent = `${markers.length} motive${markers.length === 1 ? "" : "s"} within ${km} km`;
       subline.textContent = `Near you • ${km} km radius`;
+    }
+
+    async function hydrateAcceptedInvites(){
+      acceptedInviteIds = new Set();
+      if (!currentUser) return;
+
+      // check membership only for invite-only events
+      const inviteOnlyEvents = allEvents.filter(e => !!e.inviteOnly);
+
+      // run in parallel (small apps = fine)
+      await Promise.all(inviteOnlyEvents.map(async (ev) => {
+        try{
+          const hostUid = ev.hostUid || ev.ownerUid || "";
+          if (hostUid && currentUser.uid === hostUid){
+            acceptedInviteIds.add(ev.id);
+            return;
+          }
+
+          const memRef = doc(db, "events", ev.id, "members", currentUser.uid);
+          const memSnap = await getDoc(memRef);
+          if (memSnap.exists() && memSnap.data()?.status === "accepted"){
+            acceptedInviteIds.add(ev.id);
+          }
+        }catch(_){}
+      }));
     }
 
     async function loadEvents(){
       count.textContent = "Loading…";
       const snap = await getDocs(collection(db, "events"));
       allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      await hydrateAcceptedInvites();
       applyNearFilter();
+    }
+
+    function tryFocusOpen(){
+      if (focusDone) return;
+      if (!focusId) return;
+
+      const ev = allEvents.find(x => x.id === focusId);
+      if (!ev) return;
+
+      // must be visible on map (invite-only requires acceptance)
+      if (!canSeeOnMap(ev)) return;
+
+      const pos = exactLatLng(ev);
+      if (!pos) return;
+
+      let m = markerById.get(focusId);
+
+      // if radius filter excluded it, add a one-off marker just for focus
+      if (!m){
+        m = new google.maps.marker.AdvancedMarkerElement({
+          map: gmap,
+          position: pos,
+          content: buildPinEl(),
+        });
+        m.addListener("gmp-click", () => openInfo(m, ev));
+        markers.push(m);
+        markerById.set(focusId, m);
+      }
+
+      gmap.panTo(pos);
+      gmap.setZoom(16);
+      openInfo(m, ev);
+      focusDone = true;
     }
 
     function whenGoogleReady(timeoutMs = 12000){
@@ -604,7 +639,6 @@
     async function initMap(){
       await whenGoogleReady();
 
-      // Default Ottawa
       const fallback = { lat: 45.4215, lng: -75.6972 };
       userCenter = await getUserLocation();
       const center = userCenter || fallback;
@@ -621,7 +655,7 @@
 
       subline.textContent = userCenter
         ? "Near you • loading motives…"
-        : "Location blocked • showing all motives";
+        : "Location blocked • showing visible motives";
 
       await loadEvents();
     }
@@ -643,14 +677,17 @@
       applyNearFilter();
     });
 
-    refreshBtn.addEventListener("click", () => {
+    refreshBtn.addEventListener("click", async () => {
       focusDone = false;
-      loadEvents();
+      await loadEvents();
     });
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
+      currentUser = user;
+
       radiusVal.textContent = radius.value;
+
       try{
         await initMap();
       } catch (e){
