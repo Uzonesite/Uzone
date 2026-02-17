@@ -431,13 +431,13 @@
 
       const defaultCenter = { lat: 45.4215, lng: -75.6972 }; // Ottawa default
       gmap = new google.maps.Map(mapEl, {
-        center: defaultCenter,
-        zoom: 12,
-        // If you have a styled Map ID, set it here (optional):
-        // mapId: "YOUR_MAP_ID",
-        clickableIcons: false,
-        gestureHandling: "greedy",
-      });
+  center: defaultCenter,
+  zoom: 12,
+  mapId: "PASTE_YOUR_MAP_ID_HERE",
+  clickableIcons: false,
+  gestureHandling: "greedy",
+});
+
 
       // click-to-drop-pin
       gmap.addListener("click", (e) => {
