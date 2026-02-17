@@ -582,7 +582,189 @@
     const countText = document.getElementById("countText");
     const hintText = document.getElementById("hintText");
 
-    const reqCard = document.getElementById("reqCard");
+    
+
+    // ---- Edit / Delete (My Events) ----
+    const editOverlay = document.getElementById("editOverlay");
+    const closeEditBtn = document.getElementById("closeEditBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const saveEditBtn = document.getElementById("saveEditBtn");
+    const deleteFromModalBtn = document.getElementById("deleteFromModalBtn");
+    const editMsg = document.getElementById("editMsg");
+
+    const eName = document.getElementById("eName");
+    const eLocation = document.getElementById("eLocation");
+    const eStartDate = document.getElementById("eStartDate");
+    const eStartTime = document.getElementById("eStartTime");
+    const eEndDate = document.getElementById("eEndDate");
+    const eEndTime = document.getElementById("eEndTime");
+    const eTags = document.getElementById("eTags");
+    const eDesc = document.getElementById("eDesc");
+    const eInviteBtn = document.getElementById("eInviteBtn");
+    const eVenueSize = document.getElementById("eVenueSize");
+    const eSpots = document.getElementById("eSpots");
+    const eEst = document.getElementById("eEst");
+
+    let editingId = null;
+    let inviteOnlyState = false;
+
+    function safeStr(v){ return (v === null || v === undefined) ? "" : String(v); }
+
+    function showEditMsg(text="", cls=""){
+      if (!text){
+        editMsg.style.display="none";
+        editMsg.className="msg";
+        editMsg.textContent="";
+        return;
+      }
+      editMsg.style.display="block";
+      editMsg.className = "msg " + (cls || "");
+      editMsg.textContent = text;
+    }
+
+    function setInviteBtn(on){
+      inviteOnlyState = !!on;
+      eInviteBtn.classList.toggle("on", inviteOnlyState);
+      eInviteBtn.textContent = inviteOnlyState ? "Invite-only" : "Public";
+      eInviteBtn.setAttribute("aria-pressed", inviteOnlyState ? "true" : "false");
+    }
+
+    function parseTags(raw){
+      const parts = safeStr(raw).split(",").map(s => s.trim()).filter(Boolean);
+      const out = [];
+      const seen = new Set();
+      for (const t of parts){
+        const key = t.toLowerCase();
+        if (!seen.has(key)){
+          seen.add(key);
+          out.push(t);
+        }
+        if (out.length >= 12) break;
+      }
+      return out;
+    }
+
+    function openEdit(ev){
+      editingId = ev.id;
+
+      eName.value = safeStr(ev.name || "");
+      eLocation.value = safeStr(ev.location || "");
+      eStartDate.value = safeStr(ev.startDate || ev.date || "");
+      eStartTime.value = safeStr(ev.startTime || ev.time || "");
+      eEndDate.value = safeStr(ev.endDate || "");
+      eEndTime.value = safeStr(ev.endTime || "");
+      eTags.value = Array.isArray(ev.tags) ? ev.tags.join(", ") : safeStr(ev.tags || "");
+      eDesc.value = safeStr(ev.description || ev.desc || ev.bio || "");
+      eVenueSize.value = safeStr(ev.venueSize ?? ev.venue_capacity ?? "");
+      eSpots.value = safeStr(ev.spotsAvailable ?? ev.spots ?? "");
+      eEst.value = safeStr(ev.estimatedAttendance ?? ev.estAttendance ?? "");
+
+      setInviteBtn(!!ev.inviteOnly);
+      showEditMsg("");
+
+      editOverlay.classList.add("show");
+      editOverlay.setAttribute("aria-hidden","false");
+      setTimeout(() => eName.focus(), 10);
+    }
+
+    function closeEdit(){
+      editOverlay.classList.remove("show");
+      editOverlay.setAttribute("aria-hidden","true");
+      editingId = null;
+      showEditMsg("");
+    }
+
+    async function saveEdit(){
+      if (!editingId) return;
+
+      const name = safeStr(eName.value).trim();
+      if (!name){
+        showEditMsg("Title is required.", "bad");
+        eName.focus();
+        return;
+      }
+
+      const vs = safeStr(eVenueSize.value).trim();
+      const sp = safeStr(eSpots.value).trim();
+      const est = safeStr(eEst.value).trim();
+
+      const payload = {
+        name,
+        location: safeStr(eLocation.value).trim(),
+        startDate: safeStr(eStartDate.value).trim(),
+        startTime: safeStr(eStartTime.value).trim(),
+        endDate: safeStr(eEndDate.value).trim(),
+        endTime: safeStr(eEndTime.value).trim(),
+        tags: parseTags(eTags.value),
+        description: safeStr(eDesc.value).trim(),
+        inviteOnly: inviteOnlyState,
+        updatedAt: serverTimestamp(),
+      };
+
+      // store numbers if present, otherwise clear
+      payload.venueSize = (vs === "") ? null : Number(vs);
+      payload.spotsAvailable = (sp === "") ? null : Number(sp);
+      payload.estimatedAttendance = (est === "") ? null : Number(est);
+
+      try{
+        saveEditBtn.disabled = true;
+        showEditMsg("Saving…");
+        await updateDoc(doc(db, "events", editingId), payload);
+
+        // refresh local cache
+        const idx = allMine.findIndex(x => x.id === editingId);
+        if (idx >= 0) allMine[idx] = { ...allMine[idx], ...payload, id: editingId };
+
+        renderMine();
+        showEditMsg("Saved.", "good");
+        setTimeout(() => closeEdit(), 450);
+      }catch(e){
+        console.error(e);
+        showEditMsg("Couldn’t save changes (permissions or network).", "bad");
+      }finally{
+        saveEditBtn.disabled = false;
+      }
+    }
+
+    async function confirmAndDelete(ev){
+      const ok = confirm(`Delete "${ev.name || "this event"}"?
+
+This can’t be undone.`);
+      if (!ok) return;
+      try{
+        setTopMsg("Deleting…");
+        await deleteDoc(doc(db, "events", ev.id));
+        allMine = allMine.filter(x => x.id !== ev.id);
+        renderMine();
+        setTopMsg("Deleted.", "good");
+        setTimeout(() => setTopMsg(""), 1000);
+      }catch(e){
+        console.error(e);
+        setTopMsg("Couldn’t delete (permissions or network).", "bad");
+      }
+    }
+
+    // Modal UX
+    closeEditBtn?.addEventListener("click", closeEdit);
+    cancelEditBtn?.addEventListener("click", closeEdit);
+    eInviteBtn?.addEventListener("click", () => setInviteBtn(!inviteOnlyState));
+    saveEditBtn?.addEventListener("click", saveEdit);
+    deleteFromModalBtn?.addEventListener("click", async () => {
+      if (!editingId) return;
+      const ev = allMine.find(x => x.id === editingId);
+      if (!ev) return;
+      await confirmAndDelete(ev);
+      closeEdit();
+    });
+
+    editOverlay?.addEventListener("click", (e) => {
+      if (e.target === editOverlay) closeEdit();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && editOverlay.classList.contains("show")) closeEdit();
+    });
+
+const reqCard = document.getElementById("reqCard");
     const reqList = document.getElementById("reqList");
     const reqChip = document.getElementById("reqChip");
     const reqText = document.getElementById("reqText");
