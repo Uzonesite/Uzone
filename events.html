@@ -200,12 +200,6 @@
       min-width:0;
     }
     .mini{color:var(--muted); font-size:13px; line-height:1.35; min-width:0;}
-    .mini .subMini{
-      margin-top:4px;
-      color: rgba(255,255,255,.70);
-      font-size:12px;
-      line-height:1.2;
-    }
 
     .chips{display:flex;gap:8px;flex-wrap:wrap}
     .tag{
@@ -280,7 +274,12 @@
       border-radius: 14px;
       padding:10px;
     }
-    .actionBtns{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
+    .actionBtns{display:flex; flex-direction:column; gap:6px; align-items:flex-end; justify-content:flex-end;}
+    .estRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .estPill{display:inline-flex; gap:6px; align-items:baseline; font-size:12px; color:rgba(255,255,255,.78); padding:6px 10px; border:1px solid rgba(255,255,255,.12); border-radius:999px; background: rgba(0,0,0,.18);}
+    .estPill b{color:rgba(255,255,255,.92); font-weight:900;}
+    .miniTop{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .miniSub{margin-top:4px; font-size:12px; color:rgba(255,255,255,.72);}
     .attendBtn,.peopleBtn,.applyBtn{
       padding:9px 11px;
       border-radius:999px;
@@ -400,55 +399,24 @@
       color: rgba(255,255,255,.92);
       font-weight:950;
       font-size:12px;
-      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
       white-space:nowrap;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
     }
-    .viewBtn:hover{
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      box-shadow: 0 0 14px rgba(176,11,85,.45);
-      filter: brightness(1.06);
-    }
-    .closeX{
-      width:34px;height:34px;border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.92);
-      font-weight:950;
-      cursor:pointer;
-    }
-    .whoEmpty{
-      display:none;
-      border:1px dashed rgba(255,255,255,.18);
-      background: rgba(0,0,0,.14);
-      border-radius: 14px;
-      padding:12px 12px;
-      color: rgba(255,255,255,.76);
-      font-size:13px;
-      line-height:1.35;
-    }
-    .whoMsg{
-      display:none;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.16);
-      color:rgba(255,255,255,.85);
-      white-space:pre-line;
-      font-size:13px;
-    }
-    .whoMsg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
+    .viewBtn:hover{transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 0 14px rgba(176,11,85,.45); filter: brightness(1.06);}
+    .tinyMuted{color: rgba(255,255,255,.70); font-size:12px; padding:8px 2px;}
   </style>
 </head>
-
 <body>
   <header>
     <div class="left">
       <img src="logo.png" alt="Uzone logo" />
       <div class="title">
         <h1>Umotives</h1>
-        <div class="sub" id="subline">Loading…</div>
+        <div class="sub" id="subline">Discover what’s happening</div>
       </div>
     </div>
     <div class="right">
@@ -460,38 +428,37 @@
   </header>
 
   <main>
-    <section class="bar" aria-label="Search bar">
+    <section class="bar">
       <div class="searchWrap">
-        <input id="search" placeholder="Search motives (name, tags, date, location…)" />
+        <input id="search" placeholder="Search motives (name, tags, description, location…)" />
         <button class="btn" id="refreshBtn" type="button">Refresh</button>
       </div>
-      <div class="sub" id="count">—</div>
     </section>
 
-    <section class="grid" id="grid" aria-label="Motive results"></section>
-
-    <div class="empty" id="empty" style="display:none;">
-      No motives found. Try refreshing or change your search.
-    </div>
+    <section id="grid" class="grid"></section>
+    <section id="empty" class="empty" style="display:none;">No motives found.</section>
   </main>
 
-  <!-- Who’s going modal -->
+  <!-- Who’s going Modal -->
   <div class="modalOverlay" id="whoOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="Who’s going">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="whoTitle">
       <div class="modalHead">
         <div class="hwrap">
           <h3 id="whoTitle">Who’s going</h3>
-          <div class="sub" id="whoCount">—</div>
+          <div class="sub" id="whoSub">—</div>
         </div>
-        <button class="closeX" id="whoClose" type="button" aria-label="Close">✕</button>
+        <button class="btn" type="button" id="closeWhoBtn">Close</button>
       </div>
+
       <div class="modalBody">
         <div class="modalSearch">
-          <input id="whoSearch" placeholder="Search members…" />
+          <input id="whoSearch" type="search" placeholder="Search people…" />
+          <div class="tinyMuted" id="whoCount">0 going</div>
         </div>
-        <div class="whoMsg" id="whoMsg" aria-live="polite"></div>
-        <div class="whoEmpty" id="whoEmpty">No one yet.</div>
+
+        <div class="tinyMuted" id="whoMsg" style="display:none;"></div>
         <div class="list" id="whoList"></div>
+        <div class="tinyMuted" id="whoEmpty" style="display:none;">No one is going yet.</div>
       </div>
     </div>
   </div>
@@ -501,14 +468,10 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
       getFirestore,
-      collection,
-      doc,
-      getDocs,
-      getDoc,
-      setDoc,
-      deleteDoc,
-      query,
-      orderBy,
+      collection, doc,
+      getDocs, getDoc,
+      query, orderBy, limit,
+      setDoc, deleteDoc,
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
@@ -522,24 +485,20 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const $ = (id) => document.getElementById(id);
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("empty");
+    const search = document.getElementById("search");
+    const refreshBtn = document.getElementById("refreshBtn");
 
-    const grid = $("grid");
-    const empty = $("empty");
-    const search = $("search");
-    const refreshBtn = $("refreshBtn");
-    const count = $("count");
-    const subline = $("subline");
-
-    // Who’s going modal elements
-    const whoOverlay = $("whoOverlay");
-    const whoClose = $("whoClose");
-    const whoTitle = $("whoTitle");
-    const whoCount = $("whoCount");
-    const whoSearch = $("whoSearch");
-    const whoMsg = $("whoMsg");
-    const whoEmpty = $("whoEmpty");
-    const whoList = $("whoList");
+    // modal refs
+    const whoOverlay = document.getElementById("whoOverlay");
+    const closeWhoBtn = document.getElementById("closeWhoBtn");
+    const whoSub = document.getElementById("whoSub");
+    const whoSearch = document.getElementById("whoSearch");
+    const whoCount = document.getElementById("whoCount");
+    const whoMsg = document.getElementById("whoMsg");
+    const whoList = document.getElementById("whoList");
+    const whoEmpty = document.getElementById("whoEmpty");
 
     let currentUser = null;
     let allEvents = [];
@@ -551,67 +510,60 @@
 
     // cache: eventId -> members array (with resolved names)
     const membersCache = new Map();
-
-    // cache: eventId -> number (members count)
     const attendingCountCache = new Map();
 
     // users/{uid} name cache
     const userNameCache = new Map();
 
-    function setAttendingCountUI(eventId, n){
-      const el = document.getElementById(`attCount-${eventId}`);
-      if (el) el.textContent = (typeof n === "number" && isFinite(n)) ? String(n) : "—";
-    }
-
-    async function fetchAttendingCount(eventId){
-      if (!eventId) return;
-      try{
-        const snap = await getDocs(collection(db, "events", eventId, "members"));
-        const n = snap.size || 0;
-        attendingCountCache.set(eventId, n);
-        setAttendingCountUI(eventId, n);
-      } catch {
-        // ignore
-      }
-    }
-
     function esc(s){
-      return (s ?? "").toString()
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+      return String(s||"").replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
     }
-    function isFiniteNum(v){
-      const n = Number(v);
-      return Number.isFinite(n);
-    }
-    function clamp10(v){
-      const n = Number(v);
-      if (!Number.isFinite(n)) return 0;
-      return Math.max(0, Math.min(10, n));
+    function clamp10(avg){ return Math.max(0, Math.min(10, Number(avg || 0))); }
+    function isFiniteNum(x){ const n = Number(x); return Number.isFinite(n); }
+
+    function fmtDate(yyyyMmDd){
+      if (!yyyyMmDd) return "";
+      const parts = yyyyMmDd.split("-").map(Number);
+      if (parts.length !== 3) return yyyyMmDd;
+      const [y,m,d] = parts;
+      if (!y || !m || !d) return yyyyMmDd;
+      const dt = new Date(y, m-1, d);
+      return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
     }
     function fmtWhen(ev){
-      const sd = (ev.startDate || "").toString().trim();
-      const st = (ev.startTime || "").toString().trim();
-      const ed = (ev.endDate || "").toString().trim();
-      const et = (ev.endTime || "").toString().trim();
-
-      let out = "";
-      if (sd) out += sd;
-      if (st) out += (out ? " " : "") + st;
-      if (ed || et){
-        out += " →";
-        if (ed) out += " " + ed;
-        if (et) out += (ed ? " " : " ") + et;
-      }
-      return out || "—";
+      const sd = ev.startDate || "";
+      const st = ev.startTime || "";
+      const ed = ev.endDate || "";
+      const et = ev.endTime || "";
+      const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
+      const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
+      if (!start && !end) return "Time TBD";
+      if (start && !end) return start;
+      if (!start && end) return end;
+      return `${start} → ${end}`;
+    }
+    function initials(name){
+      const s = (name || "").toString().trim();
+      if (!s) return "U";
+      const parts = s.split(/\s+/).filter(Boolean);
+      const a = (parts[0] || "U")[0] || "U";
+      const b = (parts[1] || "")[0] || "";
+      return (a + b).toUpperCase();
     }
 
-    function pickNameFromUsersDoc(u){
-      const name = (u?.name || u?.displayName || u?.fullName || u?.username || u?.userName || "").toString().trim();
-      return name || "";
+    function pickNameFromUsersDoc(data){
+      if (!data) return "";
+      return (
+        data.name ||
+        data.displayName ||
+        data.fullName ||
+        data.username ||
+        data.userName ||
+        data.firstName ||
+        ""
+      ).toString().trim();
     }
 
     async function resolveName(uid, memberData){
@@ -670,15 +622,6 @@
             appliedMap.set(ev.id, false);
             goingMap.set(ev.id, false);
           }
-        } else {
-          try{
-            const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
-            const mSnap = await getDoc(mRef);
-            goingMap.set(ev.id, mSnap.exists());
-          } catch {
-            goingMap.set(ev.id, false);
-          }
-          appliedMap.set(ev.id, false);
         }
       });
 
@@ -696,35 +639,41 @@
         const tags = Array.isArray(ev.tags) ? ev.tags : [];
         const inviteOnly = !!ev.inviteOnly;
 
-        const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
-        const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
-
-        const canMap = !inviteOnly && isFiniteNum(ev.lat) && isFiniteNum(ev.lng);
         const isGoing = goingMap.get(ev.id) === true;
         const isApplied = appliedMap.get(ev.id) === true;
 
+        const estAtt = (ev.sizeEstimate ?? ev.estimatedAttendance ?? ev.estimated ?? ev.size ?? null);
+        const estRatio = (ev.ratio ?? ev.estimatedRatio ?? null);
+        const estimatesHtml = (estAtt || estRatio) ? `
+          <div class="estRow">
+            ${estAtt ? `<span class="estPill">Estimated Attendance: <b>${esc(estAtt)}</b></span>` : ``}
+            ${estRatio ? `<span class="estPill">Estimated ratio: <b>${esc(estRatio)}</b></span>` : ``}
+          </div>
+        ` : ``;
+
+        const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
+        const whereText = (inviteOnly && !isGoing) ? "Location hidden" : (ev.location || "—");
+
+        // ✅ map button for open events OR invite-only when accepted
+        const canMap = isFiniteNum(ev.lat) && isFiniteNum(ev.lng) && (!inviteOnly || isGoing);
+
         const actionText = inviteOnly
-          ? (isApplied ? "Application sent." : "Apply to join this private motive.")
+          ? (isGoing
+              ? "You’re accepted. Tap Going to leave."
+              : (isApplied ? "Application sent. Tap Applied to cancel." : "Apply to join this private motive."))
           : (isGoing ? "You’re marked as going." : "Tap attend to show up in the list.");
 
         const card = document.createElement("a");
         card.className = "card";
         card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
 
-        const cover = (ev.coverURL || ev.imageURL || ev.imgURL || "").toString().trim();
-        const showImg = !!cover;
-
         card.innerHTML = `
           <div class="imgWrap">
-            ${showImg ? `<img src="${esc(cover)}" alt="Motive cover" loading="lazy" referrerpolicy="no-referrer" />` : ``}
+            <img alt="Event image" src="${esc(ev.imageUrl || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=60')}" />
             <div class="overlay"></div>
-            <div class="topBadge">
-              <span class="dot"></span>
-              <span>${inviteOnly ? "Invite-only" : "Open"}</span>
-            </div>
-
+            <div class="topBadge"><span class="dot"></span><span>${inviteOnly ? "Invite-only" : "Open"}</span></div>
             <div class="bottom">
-              <div class="name">${esc(ev.name || "Untitled motive")}</div>
+              <div class="name">${esc(ev.name || "Event")}</div>
               <div class="meta">
                 <span class="pill"><b>When</b> <span>${esc(whenText)}</span></span>
                 <span class="pill"><b>Where</b> <span>${esc(whereText)}</span></span>
@@ -735,46 +684,56 @@
           <div class="body">
             <div class="line">
               <div class="mini">
-                Spots Available: <b>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</b>
-                <div class="subMini">Attending: <b><span id="attCount-${ev.id}">—</span></b></div>
-                <div class="subMini" style="margin-top:6px; color: rgba(255,255,255,.78);">
-                  Estimated Attendance: <b>${esc(ev.venueSize || "—")}</b> • Estimated Ratio: <b>${esc(ev.ratio || "—")}</b>
+                <div class="miniTop">
+                  Spots available: <b>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</b>
+                  • Venue: <b>${esc(ev.venueSize || "—")}</b>
                 </div>
+                <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b></div>
               </div>
 
               <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
-                <div class="ratingBadge" title="Motive rating (out of 10)">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17.3l-6.18 3.25 1.18-6.9L1.99 8.9l6.92-1 3.09-6.27L15.09 7.9l6.92 1-5.01 4.75 1.18 6.9z"/></svg>
-                  <span class="val">${v10 ? v10.toFixed(1) : "—"}</span>
+                <div class="ratingBadge" title="Average rating">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
+                  </svg>
+                  <span class="val">${v10.toFixed(1)}</span>
                   <span class="sub">/10</span>
-                  <span class="ratingBar" aria-hidden="true"><span style="width:${pct}%"></span></span>
+                  <span class="ratingBar" aria-hidden="true"><span style="width:${pct.toFixed(0)}%"></span></span>
                 </div>
 
-                ${canMap ? `<button class="mapBtn" type="button" data-id="${esc(ev.id)}">📍 Map</button>` : ``}
+                ${canMap ? `
+                  <button class="mapBtn" type="button"
+                    data-id="${esc(ev.id)}"
+                    data-lat="${esc(ev.lat)}"
+                    data-lng="${esc(ev.lng)}"
+                    data-label="${esc(ev.location || ev.name || '')}">
+                    Map
+                  </button>
+                ` : ``}
               </div>
             </div>
 
             <div class="actionRow">
-              <div style="display:grid; gap:4px; min-width:0;">
-                <div style="font-weight:900; color:rgba(255,255,255,.88); font-size:13px;">${esc(actionText)}</div>
-              </div>
-
+              <div class="mini">${esc(actionText)}</div>
               <div class="actionBtns">
                 ${
                   inviteOnly
                     ? (isGoing
                         ? `<button class="attendBtn on" type="button" data-id="${esc(ev.id)}">Going</button>`
-                        : `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}">${isApplied ? "Applied" : "Apply"}</button>`
+                        : `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
+                             ${isApplied ? "Applied" : "Apply"}
+                           </button>`
                       )
-                    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}">${isGoing ? "Going" : "Attend"}</button>`
+                    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
+                         ${isGoing ? "Going" : "Attend"}
+                       </button>`
                 }
 
-                <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Who’s going")}">
+                <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Motive")}">
                   Who’s going
                 </button>
               </div>
             </div>
-
             <div class="chips">
               <span class="tag ${inviteOnly ? "invite" : "open"}"><span class="tdot"></span>${inviteOnly ? "Invite-only" : "Open"}</span>
               ${tags.slice(0,5).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
@@ -782,20 +741,21 @@
           </div>
         `;
 
-        grid.appendChild(card);
+        // attending count
+        const attEl = card.querySelector('.attCount');
+        if (attEl) ensureAttendingCount(ev.id, attEl);
 
-        // Attending count (members)
-        if (!attendingCountCache.has(ev.id)) {
-          fetchAttendingCount(ev.id);
-        } else {
-          setAttendingCountUI(ev.id, attendingCountCache.get(ev.id));
-        }
+        grid.appendChild(card);
 
         const mapBtn = card.querySelector(".mapBtn");
         if (mapBtn){
           mapBtn.addEventListener("click", (e) => {
             e.preventDefault(); e.stopPropagation();
-            window.location.href = `map.html?focus=${encodeURIComponent(ev.id)}`;
+            const id = mapBtn.dataset.id || "";
+            const lat = mapBtn.dataset.lat || "";
+            const lng = mapBtn.dataset.lng || "";
+            const label = mapBtn.dataset.label || "";
+            window.location.href = `map.html?focus=${encodeURIComponent(id)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&label=${encodeURIComponent(label)}`;
           });
         }
 
@@ -852,13 +812,7 @@
         if (already){
           await deleteDoc(mRef);
           goingMap.set(eventId, false);
-
-          // optimistic attending count
-          if (attendingCountCache.has(eventId)){
-            const n = Math.max(0, Number(attendingCountCache.get(eventId) || 0) - 1);
-            attendingCountCache.set(eventId, n);
-            setAttendingCountUI(eventId, n);
-          }
+          if (attendingCountCache.has(eventId)) attendingCountCache.set(eventId, Math.max(0, Number(attendingCountCache.get(eventId)) - 1));
 
           // If this was an invite-only motive you were accepted to, clear any old application
           if (inviteOnly){
@@ -876,13 +830,7 @@
             createdAt: serverTimestamp()
           }, { merge: true });
           goingMap.set(eventId, true);
-
-          // optimistic attending count
-          if (attendingCountCache.has(eventId)){
-            const n = Math.max(0, Number(attendingCountCache.get(eventId) || 0) + 1);
-            attendingCountCache.set(eventId, n);
-            setAttendingCountUI(eventId, n);
-          }
+          if (attendingCountCache.has(eventId)) attendingCountCache.set(eventId, Number(attendingCountCache.get(eventId)) + 1);
         }
 
         // prevent stale modal list
@@ -928,61 +876,103 @@
       }
     }
 
-    function setWhoMsg(txt="", type=""){
-      whoMsg.style.display = txt ? "block" : "none";
-      whoMsg.textContent = txt || "";
-      whoMsg.className = "whoMsg" + (type ? " " + type : "");
-    }
-
-    function openWhoModal(){
+    function openModal(){
       whoOverlay.classList.add("show");
-      whoOverlay.setAttribute("aria-hidden","false");
+      whoOverlay.setAttribute("aria-hidden", "false");
       whoSearch.value = "";
       whoSearch.focus();
     }
-    function closeWhoModal(){
+    function closeModal(){
       whoOverlay.classList.remove("show");
-      whoOverlay.setAttribute("aria-hidden","true");
+      whoOverlay.setAttribute("aria-hidden", "true");
+      whoList.innerHTML = "";
+      whoMsg.style.display = "none";
+      whoEmpty.style.display = "none";
+      whoCount.textContent = "0 going";
+      whoSub.textContent = "—";
+    }
+    function setWhoMsg(text){
+      whoMsg.style.display = text ? "block" : "none";
+      whoMsg.textContent = text || "";
     }
 
-    whoClose.addEventListener("click", closeWhoModal);
-    whoOverlay.addEventListener("click", (e) => {
-      if (e.target === whoOverlay) closeWhoModal();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && whoOverlay.classList.contains("show")) closeWhoModal();
-    });
+    function renderRows(rows){
+      const q = (whoSearch.value || "").trim().toLowerCase();
+      const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
 
-    async function openWhosGoing(eventId, title){
-      if (!eventId) return;
-
-      whoTitle.textContent = title || "Who’s going";
-      whoCount.textContent = "Loading…";
-      whoEmpty.style.display = "none";
       whoList.innerHTML = "";
-      setWhoMsg("");
+      whoEmpty.style.display = filtered.length ? "none" : "block";
 
-      openWhoModal();
+      for (const r of filtered){
+        const nm = (r.name || "User").toString();
+        const isMe = currentUser && r.uid === currentUser.uid;
+
+        const row = document.createElement("div");
+        row.className = "personRow";
+        row.innerHTML = `
+          <div class="pLeft">
+            <div class="avatar">${esc(initials(nm))}</div>
+            <div class="pName">${esc(nm)} ${isMe ? `<span class="youBadge">You</span>` : ``}</div>
+          </div>
+          <div class="pActions">
+            <a class="viewBtn" href="view_profile.html?uid=${encodeURIComponent(r.uid || "")}">View profile</a>
+          </div>
+        `;
+        whoList.appendChild(row);
+      }
+    }
+
+    // list reads members, but resolves names from users/{uid} if needed
+
+    async function ensureAttendingCount(eventId, el){
+      if (!eventId || !el) return;
+      if (attendingCountCache.has(eventId)){
+        el.textContent = String(attendingCountCache.get(eventId));
+        return;
+      }
+      el.textContent = "…";
+      try{
+        const snap = await getDocs(query(collection(db, "events", eventId, "members"), limit(500)));
+        const n = snap.size;
+        attendingCountCache.set(eventId, n);
+        el.textContent = String(n);
+      }catch(_){
+        el.textContent = "—";
+      }
+    }
+
+    async function openWhosGoing(eventId, eventName){
+      if (!currentUser || !eventId) return;
+
+      whoSub.textContent = (eventName || "Motive").toString();
+      setWhoMsg("Loading…");
+      whoList.innerHTML = "";
+      whoEmpty.style.display = "none";
+      whoCount.textContent = "0 going";
+
+      openModal();
 
       try{
         let rows = membersCache.get(eventId);
 
         if (!rows){
-          const snap = await getDocs(collection(db, "events", eventId, "members"));
-          const raw = [];
-          snap.forEach(d => raw.push({ __id: d.id, ...(d.data() || {}) }));
+          const qy = query(
+            collection(db, "events", eventId, "members"),
+            orderBy("createdAt", "desc"),
+            limit(250)
+          );
+          const snap = await getDocs(qy);
 
           rows = await Promise.all(
-            raw.map(async (m) => {
-              const uid = m.uid || m.__id;
-              const name = await resolveName(uid, m);
-              return { uid, name };
+            snap.docs.map(async (d) => {
+              const uid = d.id;
+              const data = d.data();
+              const name = await resolveName(uid, data); // ✅ users/{uid} fallback
+              return { uid, ...data, name };
             })
           );
 
           membersCache.set(eventId, rows);
-          attendingCountCache.set(eventId, rows.length);
-          setAttendingCountUI(eventId, rows.length);
         }
 
         setWhoMsg("");
@@ -990,97 +980,44 @@
         renderRows(rows);
 
         whoSearch.oninput = () => renderRows(rows);
-
       } catch(err){
         console.error(err);
-        setWhoMsg("Could not load members (check Firestore rules).", "error");
-        whoCount.textContent = "—";
-        whoEmpty.style.display = "block";
-        whoEmpty.textContent = "Could not load members.";
-      }
-
-      function renderRows(rows){
-        const q = (whoSearch.value || "").trim().toLowerCase();
-        const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
-
-        whoList.innerHTML = "";
-        whoEmpty.style.display = filtered.length ? "none" : "block";
-        if (!filtered.length){
-          whoEmpty.textContent = q ? "No matches." : "No one yet.";
-          return;
-        }
-
-        const frag = document.createDocumentFragment();
-        filtered.forEach(r => {
-          const row = document.createElement("div");
-          row.className = "personRow";
-          const initial = (r.name || "U").trim().charAt(0).toUpperCase() || "U";
-
-          row.innerHTML = `
-            <div class="pLeft">
-              <div class="avatar">${esc(initial)}</div>
-              <div class="pName">
-                ${esc(r.name || "User")}
-                ${currentUser && r.uid === currentUser.uid ? `<span class="youBadge">you</span>` : ``}
-              </div>
-            </div>
-            <button class="viewBtn" type="button">View profile</button>
-          `;
-
-          row.querySelector(".viewBtn").addEventListener("click", (e) => {
-            e.preventDefault(); e.stopPropagation();
-            window.location.href = `view_profile.html?uid=${encodeURIComponent(r.uid)}`;
-          });
-
-          frag.appendChild(row);
-        });
-
-        whoList.appendChild(frag);
+        setWhoMsg(err?.message || "Could not load list.");
       }
     }
 
-    async function loadEvents(){
-      count.textContent = "Loading…";
-      subline.textContent = "Loading motives…";
-      empty.style.display = "none";
+    async function load(){
       grid.innerHTML = "";
+      empty.style.display = "none";
+      allEvents = [];
+      goingMap.clear();
+      appliedMap.clear();
+      membersCache.clear();
 
-      try{
-        const snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
-        const list = [];
-        snap.forEach(d => list.push({ id: d.id, ...(d.data() || {}) }));
+      const qy = query(collection(db, "events"), orderBy("startDate", "desc"), limit(80));
+      const snap = await getDocs(qy);
+      allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        allEvents = list;
-        count.textContent = `${allEvents.length} motive${allEvents.length === 1 ? "" : "s"}`;
+      await preloadMyStates(allEvents);
 
-        await preloadMyStates(allEvents);
-
-        // render (search applied)
-        applySearch();
-
-        subline.textContent = "Browse motives near you";
-
-      } catch(err){
-        console.error(err);
-        count.textContent = "0 motives";
-        subline.textContent = "Could not load motives";
-        empty.style.display = "block";
-        empty.textContent = "Could not load motives (check Firestore rules).";
-      }
+      render(allEvents);
+      applySearch();
     }
 
-    refreshBtn.addEventListener("click", loadEvents);
-    search.addEventListener("input", applySearch);
+    closeWhoBtn.addEventListener("click", closeModal);
+    whoOverlay.addEventListener("click", (e) => { if (e.target === whoOverlay) closeModal(); });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && whoOverlay.classList.contains("show")) closeModal();
+    });
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user){
-        window.location.href = "index.html";
-        return;
-      }
+      if (!user) { window.location.href = "index.html"; return; }
       currentUser = user;
-      subline.textContent = `Signed in as ${user.displayName || "User"}`;
-      await loadEvents();
+      await load();
     });
+
+    search.addEventListener("input", applySearch);
+    refreshBtn.addEventListener("click", load);
   </script>
 </body>
 </html>
