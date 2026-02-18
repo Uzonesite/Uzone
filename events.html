@@ -731,7 +731,7 @@
             <div class="line">
               <div class="mini">
                 <div class="miniTop">
-                  Spots left: <b><span class="spotsLeft" data-ev="${esc(ev.id)}" data-total="${esc((ev.spotsAvailable ?? "") === "" ? "" : ev.spotsAvailable)}">—</span></b>
+                  Spots: <b><span>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</span></b>
                   • Venue: <b>${esc(ev.venueSize || "—")}</b>
                 </div>
                 <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b></div>
@@ -790,7 +790,7 @@
           </div>
         `;
 
-        // attending count + spots left calc
+        // attending count
         const attEl = card.querySelector('.attCount');
         if (attEl) ensureAttendingCount(ev.id, attEl);
 
@@ -944,23 +944,8 @@
     async function ensureAttendingCount(eventId, el){
       if (!eventId || !el) return;
 
-      const applySpotsLeft = (n) => {
-        const spotsEls = document.querySelectorAll(`.spotsLeft[data-ev="${eventId}"]`);
-        spotsEls.forEach(sl => {
-          const totalRaw = (sl.dataset.total || "").toString().trim();
-          const total = totalRaw === "" ? NaN : Number(totalRaw);
-          if (!Number.isFinite(total)) {
-            sl.textContent = "—";
-            return;
-          }
-          sl.textContent = String(Math.max(0, total - n));
-        });
-      };
-
       if (attendingCountCache.has(eventId)){
-        const n = Number(attendingCountCache.get(eventId) || 0);
-        el.textContent = String(n);
-        applySpotsLeft(n);
+        el.textContent = String(Number(attendingCountCache.get(eventId) || 0));
         return;
       }
 
@@ -970,10 +955,8 @@
         const n = snap.size || 0;
         attendingCountCache.set(eventId, n);
         el.textContent = String(n);
-        applySpotsLeft(n);
       }catch(_){
         el.textContent = "—";
-        applySpotsLeft(0);
       }
     }
 
