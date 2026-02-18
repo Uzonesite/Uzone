@@ -413,14 +413,24 @@
 
         const userRef = doc(db, "users", user.uid);
 
+        // ✅ Updated: same fields as your older accounts (merge-safe)
         tx.set(userRef, {
           publicId,
           name: displayName || "",
           email: user.email || "",
-          verified: false,
-          createdAt: serverTimestamp(),
 
-          // credits start at 0 (or keep existing if merge hits an existing doc)
+          age: "",
+          bio: "",
+          program: "",
+          university: "",
+          gender: "",
+
+          verified: false,
+          verification: { status: "none", updatedAt: serverTimestamp() },
+
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+
           credits: 0,
           creditsUpdatedAt: serverTimestamp(),
 
