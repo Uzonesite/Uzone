@@ -343,7 +343,7 @@
     </div>
     <div class="right">
       <a class="btn" href="hub.html">Uhub</a>
-      <a class="btn" href="directory.html">Udirectory</a>
+      <!-- Removed Udirectory button -->
     </div>
   </header>
 
@@ -362,8 +362,7 @@
 
             <div class="actions">
               <button class="btn primary" id="messageBtn" type="button">Message</button>
-              <button class="btn good" id="addBtn" type="button">Add Friend</button>
-              <button class="btn bad" id="removeBtn" type="button" style="display:none;">Unadd</button>
+              <!-- Removed Add Friend / Unadd buttons -->
             </div>
           </div>
 
@@ -433,8 +432,6 @@
       meta: document.getElementById("meta"),
       about: document.getElementById("about"),
       messageBtn: document.getElementById("messageBtn"),
-      addBtn: document.getElementById("addBtn"),
-      removeBtn: document.getElementById("removeBtn"),
       postsGrid: document.getElementById("postsGrid"),
       postsEmpty: document.getElementById("postsEmpty"),
       postsHint: document.getElementById("postsHint"),
@@ -501,15 +498,6 @@
     function fmtDate(d){
       if (!d) return "";
       return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
-    }
-
-    function escapeHtml(s){
-      return (s ?? "").toString()
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
     }
 
     // ✅ profile.html posts use field "url"
@@ -603,26 +591,6 @@
         els.about.textContent = "Could not load this profile.";
         showMsg("Could not load profile (check Firestore rules / internet).", "error");
         return null;
-      }
-    }
-
-    async function isFriend(meUid, targetUid){
-      try{
-        const fSnap = await getDoc(doc(db, "users", meUid, "friends", targetUid));
-        return fSnap.exists();
-      } catch(err){
-        console.error(err);
-        return false;
-      }
-    }
-
-    function setFriendUI(friend){
-      if (friend){
-        els.addBtn.style.display = "none";
-        els.removeBtn.style.display = "inline-flex";
-      } else {
-        els.addBtn.style.display = "inline-flex";
-        els.removeBtn.style.display = "none";
       }
     }
 
@@ -743,8 +711,6 @@
         els.name.textContent = "Missing UID";
         els.about.textContent = "Open this page from the Directory list.";
         els.messageBtn.disabled = true;
-        els.addBtn.disabled = true;
-        els.removeBtn.disabled = true;
         els.postsHint.textContent = "";
         els.postsEmpty.style.display = "block";
         return;
@@ -758,8 +724,6 @@
       const profile = await loadProfile(targetUid);
       if (!profile){
         els.messageBtn.disabled = true;
-        els.addBtn.disabled = true;
-        els.removeBtn.disabled = true;
         return;
       }
 
@@ -767,46 +731,6 @@
 
       // ✅ Message: open messages page AND open the specific chat
       els.messageBtn.addEventListener("click", () => goToChat(meUid, targetUid));
-
-      // Friend state
-      let friend = await isFriend(meUid, targetUid);
-      setFriendUI(friend);
-
-      els.addBtn.addEventListener("click", async () => {
-        hideMsg();
-        els.addBtn.disabled = true;
-        try{
-          await setDoc(doc(db, "users", meUid, "friends", targetUid), {
-            uid: targetUid,
-            createdAt: serverTimestamp()
-          }, { merge: true });
-
-          friend = true;
-          setFriendUI(friend);
-          showMsg("Friend added.", "ok");
-        } catch(err){
-          console.error(err);
-          showMsg("Could not add friend (check Firestore rules).", "error");
-        } finally{
-          els.addBtn.disabled = false;
-        }
-      });
-
-      els.removeBtn.addEventListener("click", async () => {
-        hideMsg();
-        els.removeBtn.disabled = true;
-        try{
-          await deleteDoc(doc(db, "users", meUid, "friends", targetUid));
-          friend = false;
-          setFriendUI(friend);
-          showMsg("Friend removed.", "ok");
-        } catch(err){
-          console.error(err);
-          showMsg("Could not remove friend (check Firestore rules).", "error");
-        } finally{
-          els.removeBtn.disabled = false;
-        }
-      });
     });
   </script>
 </body>
