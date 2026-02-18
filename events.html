@@ -12,8 +12,6 @@
     :root{
       --accent:#b00b55;
       --bg:#0b0b10;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
       --border: rgba(255,255,255,.14);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.70);
@@ -51,10 +49,7 @@
       backdrop-filter: blur(10px);
     }
     .left{display:flex; align-items:center; gap:12px; min-width:0;}
-    .left img{
-      width:38px;height:38px;object-fit:contain;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
-    }
+    .left img{width:38px;height:38px;object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));}
     .title{display:grid; gap:2px; min-width:0;}
     .title h1{margin:0;font-size:18px;letter-spacing:.2px}
     .title .sub{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -82,35 +77,15 @@
       box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
       filter: brightness(1.06);
     }
-    .btn:active{
-      transform: translateY(0px) scale(.99);
-      box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
-      filter: brightness(1.0);
-    }
-    .btn:focus-visible{
-      outline:none;
-      box-shadow: 0 0 0 4px rgba(176,11,85,.26), 0 0 18px var(--accent);
-    }
-    .btn:disabled{opacity:.65;cursor:not-allowed}
-
+    .btn:active{transform: translateY(0px) scale(.99);}
     .btn.primary{
       border:1px solid rgba(176,11,85,.55);
       background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
       color:white;
       box-shadow: 0 18px 40px rgba(176,11,85,.22);
     }
-    .btn.primary:hover{
-      border-color: var(--accent);
-      box-shadow: 0 0 20px var(--accent), 0 22px 55px rgba(176,11,85,.35);
-      filter: brightness(1.08);
-    }
 
-    main{
-      width:min(1120px, 92vw);
-      margin:16px auto 30px auto;
-      display:grid;
-      gap:14px;
-    }
+    main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
 
     .bar{
       border:1px solid var(--border);
@@ -144,16 +119,9 @@
       outline:none;
       font-size:14px;
     }
-    input:focus{
-      border-color: rgba(176,11,85,.60);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
-    }
+    input:focus{border-color: rgba(176,11,85,.60); box-shadow: 0 0 0 4px rgba(176,11,85,.20);}
 
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap:14px;
-    }
+    .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:14px;}
 
     .card{
       grid-column: span 6;
@@ -168,27 +136,11 @@
       transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
       min-width:0;
     }
-    .card:hover{
-      transform: translateY(-2px);
-      border-color: rgba(255,255,255,.20);
-      box-shadow: 0 26px 70px rgba(0,0,0,.50);
-    }
-    @media (max-width: 920px){
-      .card{grid-column: span 12;}
-    }
+    .card:hover{transform: translateY(-2px); border-color: rgba(255,255,255,.20); box-shadow: 0 26px 70px rgba(0,0,0,.50);}
+    @media (max-width: 920px){ .card{grid-column: span 12;} }
 
-    .imgWrap{
-      position:relative;
-      width:100%;
-      aspect-ratio: 16 / 9;
-      background: rgba(0,0,0,.20);
-    }
-    .imgWrap img{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover;
-      display:block;
-    }
+    .imgWrap{position:relative; width:100%; aspect-ratio: 16 / 9; background: rgba(0,0,0,.20);}
+    .imgWrap img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
     .overlay{
       position:absolute; inset:0;
       background:
@@ -208,17 +160,9 @@
       color: rgba(255,255,255,.88);
       display:flex; gap:8px; align-items:center;
     }
-    .dot{
-      width:7px; height:7px; border-radius:999px;
-      background: rgba(176,11,85,.95);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.22);
-    }
+    .dot{width:7px; height:7px; border-radius:999px; background: rgba(176,11,85,.95); box-shadow: 0 0 0 4px rgba(176,11,85,.22);}
 
-    .bottom{
-      position:absolute; left:0; right:0; bottom:0;
-      padding:12px;
-      display:grid; gap:8px;
-    }
+    .bottom{position:absolute; left:0; right:0; bottom:0; padding:12px; display:grid; gap:8px;}
     .name{
       font-size:16px;
       font-weight:900;
@@ -230,12 +174,7 @@
       -webkit-line-clamp:2;
       -webkit-box-orient:vertical;
     }
-    .meta{
-      display:flex; flex-wrap:wrap; gap:8px;
-      color: rgba(255,255,255,.80);
-      font-size:12px;
-      align-items:center;
-    }
+    .meta{display:flex; flex-wrap:wrap; gap:8px; color: rgba(255,255,255,.80); font-size:12px; align-items:center;}
     .pill{
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.30);
@@ -249,14 +188,9 @@
     .pill b{font-weight:800; color: rgba(255,255,255,.92)}
     .pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width: 320px;}
 
-    .body{
-      padding:12px;
-      display:grid;
-      gap:10px;
-      min-width:0;
-    }
+    .body{padding:12px; display:grid; gap:10px; min-width:0;}
 
-    /* ✅ Fix overflow on desktop: allow wrapping + constrain */
+    /* desktop overflow fix */
     .line{
       display:flex;
       gap:10px;
@@ -265,35 +199,22 @@
       justify-content:space-between;
       min-width:0;
     }
-
-    .mini{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-      min-width:0;
-    }
+    .mini{color:var(--muted); font-size:13px; line-height:1.35; min-width:0;}
 
     .chips{display:flex;gap:8px;flex-wrap:wrap}
     .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:12px; padding:6px 10px;
+      border-radius:999px; border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
       color: rgba(255,255,255,.86);
-      max-width: 100%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
+      max-width:100%;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     }
     .tag .tdot{width:8px;height:8px;border-radius:999px;background: rgba(255,255,255,.45);}
     .tag.invite .tdot{background: rgba(255,210,80,.85);}
     .tag.open .tdot{background: rgba(80,255,160,.75);}
 
-    /* Cleaner rating */
     .ratingBadge{
       display:inline-flex;
       align-items:center;
@@ -308,42 +229,21 @@
       max-width:100%;
       min-width:0;
     }
-    .ratingBadge svg{
-      width:14px;height:14px;
-      flex:0 0 auto;
-      fill: rgba(255,255,255,.86);
-      filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));
-    }
-    .ratingBadge .val{
-      font-weight:950;
-      letter-spacing:.2px;
-      color: rgba(255,255,255,.92);
-      font-size:12px;
-      line-height:1;
-    }
-    .ratingBadge .sub{
-      color: rgba(255,255,255,.66);
-      font-size:12px;
-      line-height:1;
-    }
+    .ratingBadge svg{width:14px;height:14px; flex:0 0 auto; fill: rgba(255,255,255,.86); filter: drop-shadow(0 6px 14px rgba(0,0,0,.35));}
+    .ratingBadge .val{font-weight:950; letter-spacing:.2px; color: rgba(255,255,255,.92); font-size:12px; line-height:1;}
+    .ratingBadge .sub{color: rgba(255,255,255,.66); font-size:12px; line-height:1;}
     .ratingBar{
-      width:64px;
-      height:6px;
-      border-radius:999px;
+      width:64px; height:6px; border-radius:999px;
       background: rgba(255,255,255,.10);
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden; border:1px solid rgba(255,255,255,.10);
       flex:0 0 auto;
     }
     .ratingBar > span{
-      display:block;
-      height:100%;
-      width:0%;
+      display:block; height:100%; width:0%;
       background: linear-gradient(90deg, rgba(176,11,85,.95), rgba(176,11,85,.55));
       border-radius:999px;
     }
 
-    /* Map button on card */
     .mapBtn{
       padding:8px 10px;
       border-radius:999px;
@@ -360,16 +260,9 @@
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
       flex:0 0 auto;
     }
-    .mapBtn:hover{
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      box-shadow: 0 0 14px rgba(176,11,85,.45);
-      filter: brightness(1.06);
-    }
-    .mapBtn:active{ transform: translateY(0px) scale(.99); }
-    .mapBtn:disabled{ opacity:.5; cursor:not-allowed; }
+    .mapBtn:hover{transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 0 14px rgba(176,11,85,.45); filter: brightness(1.06);}
 
-    /* ✅ Attend/Apply + Who’s going row (higher in card now) */
+    /* action row (higher) */
     .actionRow{
       display:flex;
       gap:10px;
@@ -381,16 +274,8 @@
       border-radius: 14px;
       padding:10px;
     }
-    .actionBtns{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
-    }
-    .attendBtn,
-    .peopleBtn,
-    .applyBtn{
+    .actionBtns{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
+    .attendBtn,.peopleBtn,.applyBtn{
       padding:9px 11px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
@@ -406,18 +291,12 @@
       user-select:none;
       white-space:nowrap;
     }
-    .attendBtn:hover,
-    .peopleBtn:hover,
-    .applyBtn:hover{
+    .attendBtn:hover,.peopleBtn:hover,.applyBtn:hover{
       transform: translateY(-1px);
       border-color: var(--accent);
       box-shadow: 0 0 14px rgba(176,11,85,.45);
       filter: brightness(1.06);
     }
-    .attendBtn:active,
-    .peopleBtn:active,
-    .applyBtn:active{ transform: translateY(0px) scale(.99); }
-
     .attendBtn.on{
       border-color: rgba(176,11,85,.65);
       background: linear-gradient(135deg, rgba(176,11,85,.92), rgba(176,11,85,.42));
@@ -428,10 +307,7 @@
       background: linear-gradient(135deg, rgba(255,210,80,.36), rgba(0,0,0,.14));
       box-shadow: 0 0 18px rgba(255,210,80,.22);
     }
-
-    .attendBtn:disabled,
-    .peopleBtn:disabled,
-    .applyBtn:disabled{opacity:.55; cursor:not-allowed}
+    .attendBtn:disabled,.peopleBtn:disabled,.applyBtn:disabled{opacity:.55; cursor:not-allowed}
 
     .empty{
       border:1px dashed rgba(255,255,255,.20);
@@ -443,10 +319,9 @@
       line-height:1.45;
     }
 
-    /* ✅ Who’s going modal */
+    /* modal */
     .modalOverlay{
-      position:fixed;
-      inset:0;
+      position:fixed; inset:0;
       background: rgba(0,0,0,.62);
       display:none;
       align-items:center;
@@ -454,7 +329,7 @@
       padding:14px;
       z-index: 1000;
     }
-    .modalOverlay.show{ display:flex; }
+    .modalOverlay.show{display:flex;}
     .modal{
       width:min(720px, 96vw);
       max-height: min(78vh, 720px);
@@ -477,79 +352,30 @@
       background: rgba(255,255,255,.03);
     }
     .modalHead .hwrap{min-width:0}
-    .modalHead h3{
-      margin:0;
-      font-size:14px;
-      letter-spacing:.2px;
-      font-weight:950;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .modalHead .sub{
-      margin-top:3px;
-      color: rgba(255,255,255,.70);
-      font-size:12px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .modalBody{
-      padding:14px 16px 16px;
-      display:grid;
-      gap:12px;
-      overflow:auto;
-    }
-    .modalSearch{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-    .modalSearch input{
-      min-width: 220px;
-    }
-    .list{
-      display:grid;
-      gap:10px;
-    }
+    .modalHead h3{margin:0; font-size:14px; letter-spacing:.2px; font-weight:950; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .modalHead .sub{margin-top:3px; color: rgba(255,255,255,.70); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .modalBody{padding:14px 16px 16px; display:grid; gap:12px; overflow:auto;}
+    .modalSearch{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .modalSearch input{min-width: 220px;}
+    .list{display:grid; gap:10px;}
     .personRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding:10px 10px;
       border-radius:14px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.14);
     }
-    .pLeft{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
+    .pLeft{display:flex; align-items:center; gap:10px; min-width:0;}
     .avatar{
-      width:34px;height:34px;
-      border-radius:999px;
+      width:34px;height:34px; border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(176,11,85,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:950;
-      color: rgba(255,255,255,.92);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:950; color: rgba(255,255,255,.92);
       flex:0 0 auto;
       box-shadow: 0 10px 22px rgba(0,0,0,.25);
     }
-    .pName{
-      font-weight:900;
-      font-size:13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 360px;
-    }
+    .pName{font-weight:900; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 360px;}
     .youBadge{
       margin-left:8px;
       font-size:11px;
@@ -558,12 +384,6 @@
       border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.06);
       color: rgba(255,255,255,.78);
-      flex:0 0 auto;
-    }
-    .pActions{
-      display:flex;
-      align-items:center;
-      gap:10px;
       flex:0 0 auto;
     }
     .viewBtn{
@@ -578,20 +398,11 @@
       display:inline-flex;
       align-items:center;
       gap:8px;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
       white-space:nowrap;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
     }
-    .viewBtn:hover{
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      box-shadow: 0 0 14px rgba(176,11,85,.45);
-      filter: brightness(1.06);
-    }
-    .tinyMuted{
-      color: rgba(255,255,255,.70);
-      font-size:12px;
-      padding:8px 2px;
-    }
+    .viewBtn:hover{transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 0 14px rgba(176,11,85,.45); filter: brightness(1.06);}
+    .tinyMuted{color: rgba(255,255,255,.70); font-size:12px; padding:8px 2px;}
   </style>
 </head>
 <body>
@@ -623,26 +434,26 @@
     <section id="empty" class="empty" style="display:none;">No motives found.</section>
   </main>
 
-  <!-- ✅ Who’s going Modal -->
-  <div class="modalOverlay" id="attOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="attTitle">
+  <!-- Who’s going Modal -->
+  <div class="modalOverlay" id="whoOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="whoTitle">
       <div class="modalHead">
         <div class="hwrap">
-          <h3 id="attTitle">Who’s going</h3>
-          <div class="sub" id="attSub">—</div>
+          <h3 id="whoTitle">Who’s going</h3>
+          <div class="sub" id="whoSub">—</div>
         </div>
-        <button class="btn" type="button" id="closeAttBtn">Close</button>
+        <button class="btn" type="button" id="closeWhoBtn">Close</button>
       </div>
 
       <div class="modalBody">
         <div class="modalSearch">
-          <input id="attSearch" type="search" placeholder="Search people…" />
-          <div class="tinyMuted" id="attCount">0 going</div>
+          <input id="whoSearch" type="search" placeholder="Search people…" />
+          <div class="tinyMuted" id="whoCount">0 going</div>
         </div>
 
-        <div class="tinyMuted" id="attMsg" style="display:none;"></div>
-        <div class="list" id="attList"></div>
-        <div class="tinyMuted" id="attEmpty" style="display:none;">No one is marked as going yet.</div>
+        <div class="tinyMuted" id="whoMsg" style="display:none;"></div>
+        <div class="list" id="whoList"></div>
+        <div class="tinyMuted" id="whoEmpty" style="display:none;">No one is going yet.</div>
       </div>
     </div>
   </div>
@@ -675,36 +486,34 @@
     const refreshBtn = document.getElementById("refreshBtn");
 
     // modal refs
-    const attOverlay = document.getElementById("attOverlay");
-    const closeAttBtn = document.getElementById("closeAttBtn");
-    const attTitle = document.getElementById("attTitle");
-    const attSub = document.getElementById("attSub");
-    const attSearch = document.getElementById("attSearch");
-    const attCount = document.getElementById("attCount");
-    const attMsg = document.getElementById("attMsg");
-    const attList = document.getElementById("attList");
-    const attEmpty = document.getElementById("attEmpty");
+    const whoOverlay = document.getElementById("whoOverlay");
+    const closeWhoBtn = document.getElementById("closeWhoBtn");
+    const whoTitle = document.getElementById("whoTitle");
+    const whoSub = document.getElementById("whoSub");
+    const whoSearch = document.getElementById("whoSearch");
+    const whoCount = document.getElementById("whoCount");
+    const whoMsg = document.getElementById("whoMsg");
+    const whoList = document.getElementById("whoList");
+    const whoEmpty = document.getElementById("whoEmpty");
 
     let currentUser = null;
     let allEvents = [];
 
-    // open: events/{id}/attendees/{uid}
-    const goingMap = new Map();       // eventId -> boolean (going)
-    // private apply: events/{id}/applications/{uid}
-    const appliedMap = new Map();     // eventId -> boolean (applied)
+    // OPEN "going" uses members
+    const goingMap = new Map();    // eventId -> boolean (is current user in members)
+    // PRIVATE apply uses applications
+    const appliedMap = new Map();  // eventId -> boolean (has application)
 
-    // eventId -> attendees array cache (accepted-only)
-    const attendeesCache = new Map();
+    // cache: eventId -> members array
+    const membersCache = new Map();
 
     function esc(s){
       return String(s||"").replace(/[&<>"']/g, m => ({
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
       }[m]));
     }
-
-    function clamp10(avg){
-      return Math.max(0, Math.min(10, Number(avg || 0)));
-    }
+    function clamp10(avg){ return Math.max(0, Math.min(10, Number(avg || 0))); }
+    function isFiniteNum(x){ const n = Number(x); return Number.isFinite(n); }
 
     function fmtDate(yyyyMmDd){
       if (!yyyyMmDd) return "";
@@ -715,7 +524,6 @@
       const dt = new Date(y, m-1, d);
       return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
     }
-
     function fmtWhen(ev){
       const sd = ev.startDate || "";
       const st = ev.startTime || "";
@@ -728,12 +536,6 @@
       if (!start && end) return end;
       return `${start} → ${end}`;
     }
-
-    function isFiniteNum(x){
-      const n = Number(x);
-      return Number.isFinite(n);
-    }
-
     function initials(name){
       const s = (name || "").toString().trim();
       if (!s) return "U";
@@ -746,33 +548,28 @@
     async function preloadMyStates(list){
       if (!currentUser) return;
 
-      const tasks = [];
-
-      for (const ev of list){
+      const tasks = list.map(async (ev) => {
         const inviteOnly = !!ev.inviteOnly;
 
         if (inviteOnly){
-          tasks.push((async () => {
-            try{
-              const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
-              const snap = await getDoc(aRef);
-              appliedMap.set(ev.id, snap.exists());
-            } catch {
-              appliedMap.set(ev.id, false);
-            }
-          })());
+          try{
+            const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
+            const snap = await getDoc(aRef);
+            appliedMap.set(ev.id, snap.exists());
+          } catch {
+            appliedMap.set(ev.id, false);
+          }
         } else {
-          tasks.push((async () => {
-            try{
-              const gRef = doc(db, "events", ev.id, "attendees", currentUser.uid);
-              const snap = await getDoc(gRef);
-              goingMap.set(ev.id, snap.exists());
-            } catch {
-              goingMap.set(ev.id, false);
-            }
-          })());
+          // ✅ open going = membership
+          try{
+            const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
+            const snap = await getDoc(mRef);
+            goingMap.set(ev.id, snap.exists());
+          } catch {
+            goingMap.set(ev.id, false);
+          }
         }
-      }
+      });
 
       await Promise.all(tasks);
     }
@@ -795,13 +592,13 @@
         const isGoing = goingMap.get(ev.id) === true;
         const isApplied = appliedMap.get(ev.id) === true;
 
-        const card = document.createElement("a");
-        card.className = "card";
-        card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
-
         const actionText = inviteOnly
           ? (isApplied ? "Application sent." : "Apply to join this private motive.")
           : (isGoing ? "You’re marked as going." : "Tap attend to show up in the list.");
+
+        const card = document.createElement("a");
+        card.className = "card";
+        card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
 
         card.innerHTML = `
           <div class="imgWrap">
@@ -846,20 +643,19 @@
               </div>
             </div>
 
-            <!-- ✅ moved higher (especially better on phone) -->
             <div class="actionRow">
               <div class="mini">${esc(actionText)}</div>
               <div class="actionBtns">
                 ${
                   inviteOnly
-                    ? `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                    ? `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
                          ${isApplied ? "Applied" : "Apply"}
                        </button>`
-                    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
                          ${isGoing ? "Going" : "Attend"}
                        </button>`
                 }
-                <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Motive")}">
                   Who’s going
                 </button>
               </div>
@@ -878,50 +674,39 @@
 
         grid.appendChild(card);
 
-        // Map button: don’t open card
         const mapBtn = card.querySelector(".mapBtn");
         if (mapBtn){
           mapBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
+            e.preventDefault(); e.stopPropagation();
             const id = mapBtn.dataset.id || "";
             const lat = mapBtn.dataset.lat || "";
             const lng = mapBtn.dataset.lng || "";
             const label = mapBtn.dataset.label || "";
-
-            window.location.href =
-              `map.html?focus=${encodeURIComponent(id)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&label=${encodeURIComponent(label)}`;
+            window.location.href = `map.html?focus=${encodeURIComponent(id)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&label=${encodeURIComponent(label)}`;
           });
         }
 
-        // Open: Attend toggle
         const attendBtn = card.querySelector(".attendBtn");
         if (attendBtn){
           attendBtn.addEventListener("click", async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            await toggleGoing(attendBtn.dataset.id || "", attendBtn);
+            e.preventDefault(); e.stopPropagation();
+            await toggleGoing(ev.id, attendBtn);
           });
         }
 
-        // Private: Apply
         const applyBtn = card.querySelector(".applyBtn");
         if (applyBtn){
           applyBtn.addEventListener("click", async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            await applyToPrivate(applyBtn.dataset.id || "", applyBtn);
+            e.preventDefault(); e.stopPropagation();
+            await applyToPrivate(ev.id, applyBtn);
           });
         }
 
-        // Who’s going modal
         const peopleBtn = card.querySelector(".peopleBtn");
         if (peopleBtn){
           peopleBtn.addEventListener("click", async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            await openWhosGoing(peopleBtn.dataset.id || "", peopleBtn.dataset.name || "Who’s going");
+            e.preventDefault(); e.stopPropagation();
+            await openWhosGoing(ev.id, peopleBtn.dataset.name || "Who’s going");
           });
         }
       });
@@ -942,20 +727,20 @@
       render(filtered);
     }
 
+    // ✅ OPEN: add/remove from members
     async function toggleGoing(eventId, btnEl){
       if (!currentUser || !eventId) return;
-
       btnEl.disabled = true;
 
       try{
-        const gRef = doc(db, "events", eventId, "attendees", currentUser.uid);
+        const mRef = doc(db, "events", eventId, "members", currentUser.uid);
         const already = goingMap.get(eventId) === true;
 
         if (already){
-          await deleteDoc(gRef);
+          await deleteDoc(mRef);
           goingMap.set(eventId, false);
         } else {
-          await setDoc(gRef, {
+          await setDoc(mRef, {
             uid: currentUser.uid,
             name: (currentUser.displayName || "User").toString(),
             photoURL: (currentUser.photoURL || "").toString(),
@@ -964,8 +749,8 @@
           goingMap.set(eventId, true);
         }
 
-        // ✅ important: don’t show stale list after toggling
-        attendeesCache.delete(eventId);
+        // ✅ prevent stale modal list
+        membersCache.delete(eventId);
 
         applySearch();
       } catch(err){
@@ -975,16 +760,15 @@
       }
     }
 
+    // ✅ PRIVATE: apply only (pending)
     async function applyToPrivate(eventId, btnEl){
       if (!currentUser || !eventId) return;
-
       btnEl.disabled = true;
 
       try{
         const aRef = doc(db, "events", eventId, "applications", currentUser.uid);
         const already = appliedMap.get(eventId) === true;
 
-        // keep it simple: tap again does nothing (no “unapply”)
         if (!already){
           await setDoc(aRef, {
             uid: currentUser.uid,
@@ -1005,42 +789,38 @@
     }
 
     function openModal(){
-      attOverlay.classList.add("show");
-      attOverlay.setAttribute("aria-hidden", "false");
-      attSearch.value = "";
-      attSearch.focus();
+      whoOverlay.classList.add("show");
+      whoOverlay.setAttribute("aria-hidden", "false");
+      whoSearch.value = "";
+      whoSearch.focus();
     }
-
     function closeModal(){
-      attOverlay.classList.remove("show");
-      attOverlay.setAttribute("aria-hidden", "true");
-      attList.innerHTML = "";
-      attMsg.style.display = "none";
-      attEmpty.style.display = "none";
-      attCount.textContent = "0 going";
-      attSub.textContent = "—";
-      attTitle.textContent = "Who’s going";
+      whoOverlay.classList.remove("show");
+      whoOverlay.setAttribute("aria-hidden", "true");
+      whoList.innerHTML = "";
+      whoMsg.style.display = "none";
+      whoEmpty.style.display = "none";
+      whoCount.textContent = "0 going";
+      whoSub.textContent = "—";
+      whoTitle.textContent = "Who’s going";
     }
-
-    function setAttMsg(text){
-      attMsg.style.display = text ? "block" : "none";
-      attMsg.textContent = text || "";
+    function setWhoMsg(text){
+      whoMsg.style.display = text ? "block" : "none";
+      whoMsg.textContent = text || "";
     }
-
     function renderRows(rows){
-      const q = (attSearch.value || "").trim().toLowerCase();
+      const q = (whoSearch.value || "").trim().toLowerCase();
       const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
 
-      attList.innerHTML = "";
-      attEmpty.style.display = filtered.length ? "none" : "block";
+      whoList.innerHTML = "";
+      whoEmpty.style.display = filtered.length ? "none" : "block";
 
       for (const r of filtered){
-        const row = document.createElement("div");
-        row.className = "personRow";
-
         const nm = (r.name || "User").toString();
         const isMe = currentUser && r.uid === currentUser.uid;
 
+        const row = document.createElement("div");
+        row.className = "personRow";
         row.innerHTML = `
           <div class="pLeft">
             <div class="avatar">${esc(initials(nm))}</div>
@@ -1050,45 +830,44 @@
             <a class="viewBtn" href="view_profile.html?uid=${encodeURIComponent(r.uid || "")}">View profile</a>
           </div>
         `;
-        attList.appendChild(row);
+        whoList.appendChild(row);
       }
     }
 
+    // ✅ list reads members (accepted/going)
     async function openWhosGoing(eventId, eventName){
       if (!currentUser || !eventId) return;
 
-      attTitle.textContent = "Who’s going";
-      attSub.textContent = (eventName || "Motive").toString();
-      setAttMsg("Loading…");
-      attList.innerHTML = "";
-      attEmpty.style.display = "none";
-      attCount.textContent = "0 going";
+      whoTitle.textContent = "Who’s going";
+      whoSub.textContent = (eventName || "Motive").toString();
+      setWhoMsg("Loading…");
+      whoList.innerHTML = "";
+      whoEmpty.style.display = "none";
+      whoCount.textContent = "0 going";
 
       openModal();
 
       try{
-        // ✅ always refresh if cache cleared (e.g. after un-going)
-        let rows = attendeesCache.get(eventId);
+        let rows = membersCache.get(eventId);
         if (!rows){
           const qy = query(
-            collection(db, "events", eventId, "attendees"),
+            collection(db, "events", eventId, "members"),
             orderBy("createdAt", "desc"),
             limit(250)
           );
           const snap = await getDocs(qy);
           rows = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
-          attendeesCache.set(eventId, rows);
+          membersCache.set(eventId, rows);
         }
 
-        setAttMsg("");
-        attCount.textContent = `${rows.length} going`;
-
+        setWhoMsg("");
+        whoCount.textContent = `${rows.length} going`;
         renderRows(rows);
 
-        attSearch.oninput = () => renderRows(rows);
+        whoSearch.oninput = () => renderRows(rows);
       } catch(err){
         console.error(err);
-        setAttMsg(err?.message || "Could not load list.");
+        setWhoMsg(err?.message || "Could not load list.");
       }
     }
 
@@ -1098,7 +877,7 @@
       allEvents = [];
       goingMap.clear();
       appliedMap.clear();
-      attendeesCache.clear();
+      membersCache.clear();
 
       const qy = query(collection(db, "events"), orderBy("startDate", "desc"), limit(80));
       const snap = await getDocs(qy);
@@ -1110,10 +889,10 @@
       applySearch();
     }
 
-    closeAttBtn.addEventListener("click", closeModal);
-    attOverlay.addEventListener("click", (e) => { if (e.target === attOverlay) closeModal(); });
+    closeWhoBtn.addEventListener("click", closeModal);
+    whoOverlay.addEventListener("click", (e) => { if (e.target === whoOverlay) closeModal(); });
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && attOverlay.classList.contains("show")) closeModal();
+      if (e.key === "Escape" && whoOverlay.classList.contains("show")) closeModal();
     });
 
     onAuthStateChanged(auth, async (user) => {
