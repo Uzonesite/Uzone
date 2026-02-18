@@ -309,7 +309,7 @@
     }
     .attendBtn:disabled,.peopleBtn:disabled,.applyBtn:disabled{opacity:.55; cursor:not-allowed}
 
-    .estRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .estRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-start; margin-top:6px;}
     .estPill{
       border:1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.16);
@@ -683,6 +683,7 @@
         const isGoing = goingMap.get(ev.id) === true;
         const isApplied = appliedMap.get(ev.id) === true;
 
+        // estimates (from post_event.html: sizeEstimate + ratio)
         const estAtt = (ev.sizeEstimate ?? ev.estimatedAttendance ?? ev.estimated ?? ev.size ?? null);
         const estRatio = (ev.ratio ?? ev.estimatedRatio ?? null);
         const estimatesHtml = (estAtt || estRatio) ? `
@@ -710,7 +711,11 @@
 
         card.innerHTML = `
           <div class="imgWrap">
-            <img alt="Event image" src="${esc(ev.imageUrl || 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=60')}" />
+            ${
+              (ev.imageUrl || "").toString().trim()
+                ? `<img alt="Event image" src="${esc(ev.imageUrl)}" loading="lazy" referrerpolicy="no-referrer" />`
+                : ``
+            }
             <div class="overlay"></div>
             <div class="topBadge"><span class="dot"></span><span>${inviteOnly ? "Invite-only" : "Open"}</span></div>
             <div class="bottom">
@@ -730,6 +735,7 @@
                   • Venue: <b>${esc(ev.venueSize || "—")}</b>
                 </div>
                 <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b></div>
+                ${estimatesHtml}
               </div>
 
               <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
@@ -756,8 +762,8 @@
 
             <div class="actionRow">
               <div class="mini">${esc(actionText)}</div>
-              <div class="actionBtnsWrap" style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-                <div class="actionBtns">
+
+              <div class="actionBtns">
                 ${
                   inviteOnly
                     ? (isGoing
@@ -774,8 +780,6 @@
                 <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Motive")}">
                   Who’s going
                 </button>
-                </div>
-                ${estimatesHtml}
               </div>
             </div>
 
