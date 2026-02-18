@@ -596,23 +596,28 @@
         const inviteOnly = !!ev.inviteOnly;
 
         if (inviteOnly){
-          try{
-            const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
-            const snap = await getDoc(aRef);
-            appliedMap.set(ev.id, snap.exists());
-          } catch {
-            appliedMap.set(ev.id, false);
-          }
-        } else {
-          // open going = membership
-          try{
-            const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
-            const snap = await getDoc(mRef);
-            goingMap.set(ev.id, snap.exists());
-          } catch {
-            goingMap.set(ev.id, false);
-          }
-        }
+  try{
+    // Check if user is accepted member
+    const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
+    const mSnap = await getDoc(mRef);
+
+    if (mSnap.exists() && mSnap.data()?.status === "accepted"){
+      goingMap.set(ev.id, true);
+      appliedMap.set(ev.id, false);
+    } else {
+      // Otherwise check if applied
+      const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
+      const aSnap = await getDoc(aRef);
+      appliedMap.set(ev.id, aSnap.exists());
+      goingMap.set(ev.id, false);
+    }
+
+  } catch {
+    appliedMap.set(ev.id, false);
+    goingMap.set(ev.id, false);
+  }
+}
+
       });
 
       await Promise.all(tasks);
@@ -690,15 +695,21 @@
             <div class="actionRow">
               <div class="mini">${esc(actionText)}</div>
               <div class="actionBtns">
-                ${
-                  inviteOnly
-                    ? `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
-                         ${isApplied ? "Applied" : "Apply"}
-                       </button>`
-                    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
-                         ${isGoing ? "Going" : "Attend"}
-                       </button>`
-                }
+               ${
+  inviteOnly
+    ? (isGoing
+        ? `<button class="attendBtn on" type="button" data-id="${esc(ev.id)}">
+             Going
+           </button>`
+        : `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
+             ${isApplied ? "Applied" : "Apply"}
+           </button>`
+      )
+    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
+         ${isGoing ? "Going" : "Attend"}
+       </button>`
+}
+
                 <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Motive")}">
                   Who’s going
                 </button>
