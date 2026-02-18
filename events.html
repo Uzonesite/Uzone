@@ -334,7 +334,7 @@
       border-radius:999px;
     }
 
-    /* ✅ Map button on card */
+    /* Map button on card */
     .mapBtn{
       padding:8px 10px;
       border-radius:999px;
@@ -359,6 +359,55 @@
     .mapBtn:active{ transform: translateY(0px) scale(.99); }
     .mapBtn:disabled{ opacity:.5; cursor:not-allowed; }
 
+    /* ✅ Attend / Attendees */
+    .actionRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .actionBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .attendBtn,
+    .peopleBtn{
+      padding:9px 11px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      font-weight:950;
+      font-size:12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .attendBtn:hover,
+    .peopleBtn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(176,11,85,.45);
+      filter: brightness(1.06);
+    }
+    .attendBtn:active,
+    .peopleBtn:active{ transform: translateY(0px) scale(.99); }
+    .attendBtn.on{
+      border-color: rgba(176,11,85,.65);
+      background: linear-gradient(135deg, rgba(176,11,85,.92), rgba(176,11,85,.42));
+      box-shadow: 0 0 18px rgba(176,11,85,.45);
+    }
+    .attendBtn:disabled,
+    .peopleBtn:disabled{opacity:.55; cursor:not-allowed}
+
     .empty{
       border:1px dashed rgba(255,255,255,.20);
       background: rgba(0,0,0,.14);
@@ -367,6 +416,156 @@
       color:rgba(255,255,255,.78);
       font-size:13px;
       line-height:1.45;
+    }
+
+    /* ✅ Attendees modal */
+    .modalOverlay{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.62);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+      z-index: 1000;
+    }
+    .modalOverlay.show{ display:flex; }
+    .modal{
+      width:min(720px, 96vw);
+      max-height: min(78vh, 720px);
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: 0 30px 90px rgba(0,0,0,.55);
+      overflow:hidden;
+      backdrop-filter: blur(12px);
+      display:flex;
+      flex-direction:column;
+    }
+    .modalHead{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .modalHead .hwrap{min-width:0}
+    .modalHead h3{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.2px;
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .modalHead .sub{
+      margin-top:3px;
+      color: rgba(255,255,255,.70);
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .modalBody{
+      padding:14px 16px 16px;
+      display:grid;
+      gap:12px;
+      overflow:auto;
+    }
+    .modalSearch{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .modalSearch input{
+      min-width: 220px;
+    }
+    .list{
+      display:grid;
+      gap:10px;
+    }
+    .personRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+    }
+    .pLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .avatar{
+      width:34px;height:34px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(176,11,85,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:950;
+      color: rgba(255,255,255,.92);
+      flex:0 0 auto;
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+    }
+    .pName{
+      font-weight:900;
+      font-size:13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 360px;
+    }
+    .youBadge{
+      margin-left:8px;
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.78);
+      flex:0 0 auto;
+    }
+    .pActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:0 0 auto;
+    }
+    .viewBtn{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      font-weight:950;
+      font-size:12px;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      white-space:nowrap;
+    }
+    .viewBtn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(176,11,85,.45);
+      filter: brightness(1.06);
+    }
+    .tinyMuted{
+      color: rgba(255,255,255,.70);
+      font-size:12px;
+      padding:8px 2px;
     }
   </style>
 </head>
@@ -399,11 +598,40 @@
     <section id="empty" class="empty" style="display:none;">No motives found.</section>
   </main>
 
+  <!-- ✅ Attendees Modal -->
+  <div class="modalOverlay" id="attOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="attTitle">
+      <div class="modalHead">
+        <div class="hwrap">
+          <h3 id="attTitle">Attendees</h3>
+          <div class="sub" id="attSub">—</div>
+        </div>
+        <button class="btn" type="button" id="closeAttBtn">Close</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="modalSearch">
+          <input id="attSearch" type="search" placeholder="Search attendees…" />
+          <div class="tinyMuted" id="attCount">0 attending</div>
+        </div>
+
+        <div class="tinyMuted" id="attMsg" style="display:none;"></div>
+        <div class="list" id="attList"></div>
+        <div class="tinyMuted" id="attEmpty" style="display:none;">No one is marked as attending yet.</div>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
-      getFirestore, collection, getDocs, query, orderBy, limit
+      getFirestore,
+      collection, doc,
+      getDocs, getDoc,
+      query, orderBy, limit,
+      setDoc, deleteDoc,
+      serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -421,7 +649,24 @@
     const search = document.getElementById("search");
     const refreshBtn = document.getElementById("refreshBtn");
 
+    // modal refs
+    const attOverlay = document.getElementById("attOverlay");
+    const closeAttBtn = document.getElementById("closeAttBtn");
+    const attTitle = document.getElementById("attTitle");
+    const attSub = document.getElementById("attSub");
+    const attSearch = document.getElementById("attSearch");
+    const attCount = document.getElementById("attCount");
+    const attMsg = document.getElementById("attMsg");
+    const attList = document.getElementById("attList");
+    const attEmpty = document.getElementById("attEmpty");
+
+    let currentUser = null;
     let allEvents = [];
+
+    // eventId -> boolean
+    const attendingMap = new Map();
+    // eventId -> attendees array cache
+    const attendeesCache = new Map();
 
     function esc(s){
       return String(s||"").replace(/[&<>"']/g, m => ({
@@ -461,6 +706,30 @@
       return Number.isFinite(n);
     }
 
+    function initials(name){
+      const s = (name || "").toString().trim();
+      if (!s) return "U";
+      const parts = s.split(/\s+/).filter(Boolean);
+      const a = (parts[0] || "U")[0] || "U";
+      const b = (parts[1] || "")[0] || "";
+      return (a + b).toUpperCase();
+    }
+
+    async function preloadMyAttendance(list){
+      if (!currentUser) return;
+
+      const openEvents = list.filter(ev => !ev.inviteOnly);
+      await Promise.all(openEvents.map(async (ev) => {
+        try{
+          const aRef = doc(db, "events", ev.id, "attendees", currentUser.uid);
+          const snap = await getDoc(aRef);
+          attendingMap.set(ev.id, snap.exists());
+        }catch{
+          attendingMap.set(ev.id, false);
+        }
+      }));
+    }
+
     function render(list){
       grid.innerHTML = "";
       empty.style.display = list.length ? "none" : "block";
@@ -476,10 +745,14 @@
         const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
 
         const canMap = !inviteOnly && isFiniteNum(ev.lat) && isFiniteNum(ev.lng);
+        const isGoing = attendingMap.get(ev.id) === true;
 
         const card = document.createElement("a");
         card.className = "card";
         card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
+
+        // Only show attend/attendees for OPEN events (keeps invite-only private on the browse page)
+        const showAttendUI = !inviteOnly;
 
         card.innerHTML = `
           <div class="imgWrap">
@@ -532,12 +805,26 @@
               <span class="tag ${inviteOnly ? "invite" : "open"}"><span class="tdot"></span>${inviteOnly ? "Invite-only" : "Open"}</span>
               ${tags.slice(0,5).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
             </div>
+
+            ${showAttendUI ? `
+              <div class="actionRow">
+                <div class="mini">${isGoing ? "You’re marked as attending." : "Tap attend to show up in the list."}</div>
+                <div class="actionBtns">
+                  <button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                    ${isGoing ? "Going" : "Attend"}
+                  </button>
+                  <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                    Attendees
+                  </button>
+                </div>
+              </div>
+            ` : ``}
           </div>
         `;
 
         grid.appendChild(card);
 
-        // ✅ Map button behavior (don’t open the event card)
+        // Map button: don’t open card
         const mapBtn = card.querySelector(".mapBtn");
         if (mapBtn){
           mapBtn.addEventListener("click", (e) => {
@@ -551,6 +838,26 @@
 
             window.location.href =
               `map.html?focus=${encodeURIComponent(id)}&lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&label=${encodeURIComponent(label)}`;
+          });
+        }
+
+        // Attend toggle
+        const attendBtn = card.querySelector(".attendBtn");
+        if (attendBtn){
+          attendBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await toggleAttend(attendBtn.dataset.id || "", attendBtn);
+          });
+        }
+
+        // Attendees modal
+        const peopleBtn = card.querySelector(".peopleBtn");
+        if (peopleBtn){
+          peopleBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await openAttendees(peopleBtn.dataset.id || "", peopleBtn.dataset.name || "Attendees");
           });
         }
       });
@@ -571,21 +878,151 @@
       render(filtered);
     }
 
+    async function toggleAttend(eventId, btnEl){
+      if (!currentUser || !eventId) return;
+
+      btnEl.disabled = true;
+
+      try{
+        const aRef = doc(db, "events", eventId, "attendees", currentUser.uid);
+        const already = attendingMap.get(eventId) === true;
+
+        if (already){
+          await deleteDoc(aRef);
+          attendingMap.set(eventId, false);
+        } else {
+          await setDoc(aRef, {
+            uid: currentUser.uid,
+            name: (currentUser.displayName || "User").toString(),
+            photoURL: (currentUser.photoURL || "").toString(),
+            createdAt: serverTimestamp()
+          }, { merge: true });
+          attendingMap.set(eventId, true);
+        }
+
+        // re-render only current filtered view
+        applySearch();
+      } catch(err){
+        console.error(err);
+      } finally {
+        btnEl.disabled = false;
+      }
+    }
+
+    function openModal(){
+      attOverlay.classList.add("show");
+      attOverlay.setAttribute("aria-hidden", "false");
+      attSearch.value = "";
+      attSearch.focus();
+    }
+
+    function closeModal(){
+      attOverlay.classList.remove("show");
+      attOverlay.setAttribute("aria-hidden", "true");
+      attList.innerHTML = "";
+      attMsg.style.display = "none";
+      attEmpty.style.display = "none";
+      attCount.textContent = "0 attending";
+      attSub.textContent = "—";
+      attTitle.textContent = "Attendees";
+    }
+
+    function setAttMsg(text){
+      attMsg.style.display = text ? "block" : "none";
+      attMsg.textContent = text || "";
+    }
+
+    function renderAttendeesRows(rows){
+      const q = (attSearch.value || "").trim().toLowerCase();
+      const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
+
+      attList.innerHTML = "";
+      attEmpty.style.display = filtered.length ? "none" : "block";
+
+      for (const r of filtered){
+        const row = document.createElement("div");
+        row.className = "personRow";
+
+        const nm = (r.name || "User").toString();
+        const isMe = currentUser && r.uid === currentUser.uid;
+
+        row.innerHTML = `
+          <div class="pLeft">
+            <div class="avatar">${esc(initials(nm))}</div>
+            <div class="pName">${esc(nm)} ${isMe ? `<span class="youBadge">You</span>` : ``}</div>
+          </div>
+          <div class="pActions">
+            <a class="viewBtn" href="view_profile.html?uid=${encodeURIComponent(r.uid || "")}">View profile</a>
+          </div>
+        `;
+        attList.appendChild(row);
+      }
+    }
+
+    async function openAttendees(eventId, eventName){
+      if (!currentUser || !eventId) return;
+
+      attTitle.textContent = "Attendees";
+      attSub.textContent = (eventName || "Event").toString();
+      setAttMsg("Loading…");
+      attList.innerHTML = "";
+      attEmpty.style.display = "none";
+      attCount.textContent = "0 attending";
+
+      openModal();
+
+      try{
+        let rows = attendeesCache.get(eventId);
+        if (!rows){
+          const qy = query(
+            collection(db, "events", eventId, "attendees"),
+            orderBy("createdAt", "desc"),
+            limit(250)
+          );
+          const snap = await getDocs(qy);
+          rows = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+          attendeesCache.set(eventId, rows);
+        }
+
+        setAttMsg("");
+        attCount.textContent = `${rows.length} attending`;
+
+        renderAttendeesRows(rows);
+
+        // live filter in modal
+        attSearch.oninput = () => renderAttendeesRows(rows);
+      } catch(err){
+        console.error(err);
+        setAttMsg(err?.message || "Could not load attendees.");
+      }
+    }
+
     async function load(){
       grid.innerHTML = "";
       empty.style.display = "none";
       allEvents = [];
+      attendingMap.clear();
 
       const qy = query(collection(db, "events"), orderBy("startDate", "desc"), limit(80));
       const snap = await getDocs(qy);
       allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+      // preload "Going" state for open events
+      await preloadMyAttendance(allEvents);
+
       render(allEvents);
       applySearch();
     }
 
+    closeAttBtn.addEventListener("click", closeModal);
+    attOverlay.addEventListener("click", (e) => { if (e.target === attOverlay) closeModal(); });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && attOverlay.classList.contains("show")) closeModal();
+    });
+
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
+      currentUser = user;
       await load();
     });
 
