@@ -488,7 +488,6 @@
     // modal refs
     const whoOverlay = document.getElementById("whoOverlay");
     const closeWhoBtn = document.getElementById("closeWhoBtn");
-    const whoTitle = document.getElementById("whoTitle");
     const whoSub = document.getElementById("whoSub");
     const whoSearch = document.getElementById("whoSearch");
     const whoCount = document.getElementById("whoCount");
@@ -504,8 +503,11 @@
     // PRIVATE apply uses applications
     const appliedMap = new Map();  // eventId -> boolean (has application)
 
-    // cache: eventId -> members array
+    // cache: eventId -> members array (with resolved names)
     const membersCache = new Map();
+
+    // users/{uid} name cache
+    const userNameCache = new Map();
 
     function esc(s){
       return String(s||"").replace(/[&<>"']/g, m => ({
@@ -545,6 +547,48 @@
       return (a + b).toUpperCase();
     }
 
+    function pickNameFromUsersDoc(data){
+      if (!data) return "";
+      return (
+        data.name ||
+        data.displayName ||
+        data.fullName ||
+        data.username ||
+        data.userName ||
+        data.firstName ||
+        ""
+      ).toString().trim();
+    }
+
+    async function resolveName(uid, memberData){
+      // member doc may have name already (open events when user tapped attend)
+      const fromMember = (
+        memberData?.name ||
+        memberData?.displayName ||
+        memberData?.fullName ||
+        memberData?.username ||
+        memberData?.userName ||
+        ""
+      ).toString().trim();
+      if (fromMember) return fromMember;
+
+      if (userNameCache.has(uid)) return userNameCache.get(uid);
+
+      try{
+        const uSnap = await getDoc(doc(db, "users", uid));
+        if (uSnap.exists()){
+          const nm = pickNameFromUsersDoc(uSnap.data());
+          if (nm){
+            userNameCache.set(uid, nm);
+            return nm;
+          }
+        }
+      }catch{}
+
+      userNameCache.set(uid, "User");
+      return "User";
+    }
+
     async function preloadMyStates(list){
       if (!currentUser) return;
 
@@ -560,7 +604,7 @@
             appliedMap.set(ev.id, false);
           }
         } else {
-          // ✅ open going = membership
+          // open going = membership
           try{
             const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
             const snap = await getDoc(mRef);
@@ -727,7 +771,7 @@
       render(filtered);
     }
 
-    // ✅ OPEN: add/remove from members
+    // OPEN: add/remove from members
     async function toggleGoing(eventId, btnEl){
       if (!currentUser || !eventId) return;
       btnEl.disabled = true;
@@ -742,14 +786,15 @@
         } else {
           await setDoc(mRef, {
             uid: currentUser.uid,
-            name: (currentUser.displayName || "User").toString(),
+            // keep writing name too (helps performance / no extra user doc fetch)
+            name: (currentUser.displayName || "").toString(),
             photoURL: (currentUser.photoURL || "").toString(),
             createdAt: serverTimestamp()
           }, { merge: true });
           goingMap.set(eventId, true);
         }
 
-        // ✅ prevent stale modal list
+        // prevent stale modal list
         membersCache.delete(eventId);
 
         applySearch();
@@ -760,7 +805,7 @@
       }
     }
 
-    // ✅ PRIVATE: apply only (pending)
+    // PRIVATE: apply only (pending)
     async function applyToPrivate(eventId, btnEl){
       if (!currentUser || !eventId) return;
       btnEl.disabled = true;
@@ -772,7 +817,7 @@
         if (!already){
           await setDoc(aRef, {
             uid: currentUser.uid,
-            name: (currentUser.displayName || "User").toString(),
+            name: (currentUser.displayName || "").toString(),
             photoURL: (currentUser.photoURL || "").toString(),
             status: "pending",
             createdAt: serverTimestamp()
@@ -802,12 +847,12 @@
       whoEmpty.style.display = "none";
       whoCount.textContent = "0 going";
       whoSub.textContent = "—";
-      whoTitle.textContent = "Who’s going";
     }
     function setWhoMsg(text){
       whoMsg.style.display = text ? "block" : "none";
       whoMsg.textContent = text || "";
     }
+
     function renderRows(rows){
       const q = (whoSearch.value || "").trim().toLowerCase();
       const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
@@ -834,11 +879,10 @@
       }
     }
 
-    // ✅ list reads members (accepted/going)
+    // list reads members, but resolves names from users/{uid} if needed
     async function openWhosGoing(eventId, eventName){
       if (!currentUser || !eventId) return;
 
-      whoTitle.textContent = "Who’s going";
       whoSub.textContent = (eventName || "Motive").toString();
       setWhoMsg("Loading…");
       whoList.innerHTML = "";
@@ -849,6 +893,7 @@
 
       try{
         let rows = membersCache.get(eventId);
+
         if (!rows){
           const qy = query(
             collection(db, "events", eventId, "members"),
@@ -856,7 +901,16 @@
             limit(250)
           );
           const snap = await getDocs(qy);
-          rows = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+
+          rows = await Promise.all(
+            snap.docs.map(async (d) => {
+              const uid = d.id;
+              const data = d.data();
+              const name = await resolveName(uid, data); // ✅ users/{uid} fallback
+              return { uid, ...data, name };
+            })
+          );
+
           membersCache.set(eventId, rows);
         }
 
