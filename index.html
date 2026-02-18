@@ -356,35 +356,61 @@
       return err?.message || "Something went wrong. Please try again.";
     }
 
+    // ✅ Updated: still allocates publicId the same way, but now also ensures default fields exist
     async function ensurePublicId(user, displayName="") {
       const userRef = doc(db, "users", user.uid);
-      const snap = await getDoc(userRef);
-
-      if (snap.exists() && snap.data()?.publicId) {
-        return snap.data().publicId;
-      }
 
       const publicId = await runTransaction(db, async (transaction) => {
-        const counterRef = doc(db, "meta", "counters");
-        const counterSnap = await transaction.get(counterRef);
+        const snap = await transaction.get(userRef);
+        const existing = snap.exists() ? (snap.data() || {}) : {};
 
-        let current = 0;
-        if (counterSnap.exists()) {
-          current = Number(counterSnap.data()?.userCounter || 0);
+        let pid = (existing.publicId || "").toString().trim();
+
+        // allocate a new publicId only if missing
+        if (!pid) {
+          const counterRef = doc(db, "meta", "counters");
+          const counterSnap = await transaction.get(counterRef);
+
+          let current = 0;
+          if (counterSnap.exists()) {
+            current = Number(counterSnap.data()?.userCounter || 0);
+          }
+          const next = current + 1;
+
+          transaction.set(counterRef, { userCounter: next }, { merge: true });
+          pid = "U" + next;
         }
-        const next = current + 1;
 
-        transaction.set(counterRef, { userCounter: next }, { merge: true });
-        return "U" + next;
+        // build defaults (merge-safe)
+        const hasVerificationMap = existing.verification && typeof existing.verification === "object";
+        const isVerified = !!existing.verified;
+
+        const payload = {
+          publicId: pid,
+          name: (displayName || existing.name || "").toString(),
+          email: (user.email || existing.email || "").toString(),
+
+          age: (existing.age ?? "").toString(),
+          bio: (existing.bio ?? "").toString(),
+          program: (existing.program ?? "").toString(),
+          university: (existing.university ?? "").toString(),
+          gender: (existing.gender ?? "").toString(),
+
+          credits: Number.isFinite(Number(existing.credits)) ? Number(existing.credits) : 0,
+          creditsUpdatedAt: existing.creditsUpdatedAt || serverTimestamp(),
+
+          verified: isVerified,
+          verification: hasVerificationMap
+            ? existing.verification
+            : { status: (isVerified ? "verified" : "none"), updatedAt: serverTimestamp() },
+
+          createdAt: existing.createdAt || serverTimestamp(),
+          updatedAt: serverTimestamp()
+        };
+
+        transaction.set(userRef, payload, { merge: true });
+        return pid;
       });
-
-      await setDoc(userRef, {
-        publicId,
-        name: displayName || (snap.exists() ? (snap.data()?.name || "") : ""),
-        email: user.email || "",
-        verified: false,
-        createdAt: serverTimestamp()
-      }, { merge: true });
 
       return publicId;
     }
