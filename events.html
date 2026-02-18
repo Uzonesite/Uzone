@@ -596,28 +596,27 @@
         const inviteOnly = !!ev.inviteOnly;
 
         if (inviteOnly){
-  try{
-    // Check if user is accepted member
-    const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
-    const mSnap = await getDoc(mRef);
+          try{
+            // Check if user is accepted member
+            const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
+            const mSnap = await getDoc(mRef);
 
-    if (mSnap.exists() && mSnap.data()?.status === "accepted"){
-      goingMap.set(ev.id, true);
-      appliedMap.set(ev.id, false);
-    } else {
-      // Otherwise check if applied
-      const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
-      const aSnap = await getDoc(aRef);
-      appliedMap.set(ev.id, aSnap.exists());
-      goingMap.set(ev.id, false);
-    }
+            if (mSnap.exists() && mSnap.data()?.status === "accepted"){
+              goingMap.set(ev.id, true);
+              appliedMap.set(ev.id, false);
+            } else {
+              // Otherwise check if applied
+              const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
+              const aSnap = await getDoc(aRef);
+              appliedMap.set(ev.id, aSnap.exists());
+              goingMap.set(ev.id, false);
+            }
 
-  } catch {
-    appliedMap.set(ev.id, false);
-    goingMap.set(ev.id, false);
-  }
-}
-
+          } catch {
+            appliedMap.set(ev.id, false);
+            goingMap.set(ev.id, false);
+          }
+        }
       });
 
       await Promise.all(tasks);
@@ -634,15 +633,19 @@
         const tags = Array.isArray(ev.tags) ? ev.tags : [];
         const inviteOnly = !!ev.inviteOnly;
 
-        const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
-        const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
-
-        const canMap = !inviteOnly && isFiniteNum(ev.lat) && isFiniteNum(ev.lng);
         const isGoing = goingMap.get(ev.id) === true;
         const isApplied = appliedMap.get(ev.id) === true;
 
+        const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
+        const whereText = (inviteOnly && !isGoing) ? "Location hidden" : (ev.location || "—");
+
+        // ✅ map button for open events OR invite-only when accepted
+        const canMap = isFiniteNum(ev.lat) && isFiniteNum(ev.lng) && (!inviteOnly || isGoing);
+
         const actionText = inviteOnly
-          ? (isApplied ? "Application sent." : "Apply to join this private motive.")
+          ? (isGoing
+              ? "You’re accepted. Tap Going to leave."
+              : (isApplied ? "Application sent. Tap Applied to cancel." : "Apply to join this private motive."))
           : (isGoing ? "You’re marked as going." : "Tap attend to show up in the list.");
 
         const card = document.createElement("a");
@@ -695,20 +698,18 @@
             <div class="actionRow">
               <div class="mini">${esc(actionText)}</div>
               <div class="actionBtns">
-               ${
-  inviteOnly
-    ? (isGoing
-        ? `<button class="attendBtn on" type="button" data-id="${esc(ev.id)}">
-             Going
-           </button>`
-        : `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
-             ${isApplied ? "Applied" : "Apply"}
-           </button>`
-      )
-    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
-         ${isGoing ? "Going" : "Attend"}
-       </button>`
-}
+                ${
+                  inviteOnly
+                    ? (isGoing
+                        ? `<button class="attendBtn on" type="button" data-id="${esc(ev.id)}">Going</button>`
+                        : `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
+                             ${isApplied ? "Applied" : "Apply"}
+                           </button>`
+                      )
+                    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}">
+                         ${isGoing ? "Going" : "Attend"}
+                       </button>`
+                }
 
                 <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Motive")}">
                   Who’s going
@@ -745,7 +746,7 @@
         if (attendBtn){
           attendBtn.addEventListener("click", async (e) => {
             e.preventDefault(); e.stopPropagation();
-            await toggleGoing(ev.id, attendBtn);
+            await toggleGoing(ev.id, inviteOnly, attendBtn);
           });
         }
 
@@ -783,7 +784,7 @@
     }
 
     // OPEN: add/remove from members
-    async function toggleGoing(eventId, btnEl){
+    async function toggleGoing(eventId, inviteOnly, btnEl){
       if (!currentUser || !eventId) return;
       btnEl.disabled = true;
 
@@ -794,6 +795,14 @@
         if (already){
           await deleteDoc(mRef);
           goingMap.set(eventId, false);
+
+          // If this was an invite-only motive you were accepted to, clear any old application
+          if (inviteOnly){
+            try{
+              await deleteDoc(doc(db, "events", eventId, "applications", currentUser.uid));
+            }catch{}
+            appliedMap.set(eventId, false);
+          }
         } else {
           await setDoc(mRef, {
             uid: currentUser.uid,
@@ -816,7 +825,7 @@
       }
     }
 
-    // PRIVATE: apply only (pending)
+    // PRIVATE: apply toggle (pending) — Applied click cancels
     async function applyToPrivate(eventId, btnEl){
       if (!currentUser || !eventId) return;
       btnEl.disabled = true;
@@ -825,7 +834,11 @@
         const aRef = doc(db, "events", eventId, "applications", currentUser.uid);
         const already = appliedMap.get(eventId) === true;
 
-        if (!already){
+        if (already){
+          // cancel application
+          await deleteDoc(aRef);
+          appliedMap.set(eventId, false);
+        } else {
           await setDoc(aRef, {
             uid: currentUser.uid,
             name: (currentUser.displayName || "").toString(),
