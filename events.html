@@ -190,7 +190,6 @@
 
     .body{padding:12px; display:grid; gap:10px; min-width:0;}
 
-    /* desktop overflow fix */
     .line{
       display:flex;
       gap:10px;
@@ -200,6 +199,8 @@
       min-width:0;
     }
     .mini{color:var(--muted); font-size:13px; line-height:1.35; min-width:0;}
+    .miniTop{color: rgba(255,255,255,.88); font-weight:900}
+    .miniSub{margin-top:4px; color: rgba(255,255,255,.70); font-size:12px;}
 
     .chips{display:flex;gap:8px;flex-wrap:wrap}
     .tag{
@@ -262,7 +263,6 @@
     }
     .mapBtn:hover{transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 0 14px rgba(176,11,85,.45); filter: brightness(1.06);}
 
-    /* action row (higher) */
     .actionRow{
       display:flex;
       gap:10px;
@@ -274,12 +274,7 @@
       border-radius: 14px;
       padding:10px;
     }
-    .actionBtns{display:flex; flex-direction:column; gap:6px; align-items:flex-end; justify-content:flex-end;}
-    .estRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
-    .estPill{display:inline-flex; gap:6px; align-items:baseline; font-size:12px; color:rgba(255,255,255,.78); padding:6px 10px; border:1px solid rgba(255,255,255,.12); border-radius:999px; background: rgba(0,0,0,.18);}
-    .estPill b{color:rgba(255,255,255,.92); font-weight:900;}
-    .miniTop{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .miniSub{margin-top:4px; font-size:12px; color:rgba(255,255,255,.72);}
+    .actionBtns{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
     .attendBtn,.peopleBtn,.applyBtn{
       padding:9px 11px;
       border-radius:999px;
@@ -313,6 +308,18 @@
       box-shadow: 0 0 18px rgba(255,210,80,.22);
     }
     .attendBtn:disabled,.peopleBtn:disabled,.applyBtn:disabled{opacity:.55; cursor:not-allowed}
+
+    .estRow{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .estPill{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      color: rgba(255,255,255,.82);
+      white-space:nowrap;
+    }
+    .estPill b{color: rgba(255,255,255,.92)}
 
     .empty{
       border:1px dashed rgba(255,255,255,.20);
@@ -399,24 +406,55 @@
       color: rgba(255,255,255,.92);
       font-weight:950;
       font-size:12px;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
+      cursor:pointer;
       white-space:nowrap;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
     }
-    .viewBtn:hover{transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 0 14px rgba(176,11,85,.45); filter: brightness(1.06);}
-    .tinyMuted{color: rgba(255,255,255,.70); font-size:12px; padding:8px 2px;}
+    .viewBtn:hover{
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(176,11,85,.45);
+      filter: brightness(1.06);
+    }
+    .closeX{
+      width:34px;height:34px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      font-weight:950;
+      cursor:pointer;
+    }
+    .whoEmpty{
+      display:none;
+      border:1px dashed rgba(255,255,255,.18);
+      background: rgba(0,0,0,.14);
+      border-radius: 14px;
+      padding:12px 12px;
+      color: rgba(255,255,255,.76);
+      font-size:13px;
+      line-height:1.35;
+    }
+    .whoMsg{
+      display:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.16);
+      color:rgba(255,255,255,.85);
+      white-space:pre-line;
+      font-size:13px;
+    }
+    .whoMsg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
   </style>
 </head>
+
 <body>
   <header>
     <div class="left">
       <img src="logo.png" alt="Uzone logo" />
       <div class="title">
         <h1>Umotives</h1>
-        <div class="sub" id="subline">Discover what’s happening</div>
+        <div class="sub" id="subline">Loading…</div>
       </div>
     </div>
     <div class="right">
@@ -428,37 +466,38 @@
   </header>
 
   <main>
-    <section class="bar">
+    <section class="bar" aria-label="Search bar">
       <div class="searchWrap">
-        <input id="search" placeholder="Search motives (name, tags, description, location…)" />
+        <input id="search" placeholder="Search motives (name, tags, date, location…)" />
         <button class="btn" id="refreshBtn" type="button">Refresh</button>
       </div>
+      <div class="sub" id="count">—</div>
     </section>
 
-    <section id="grid" class="grid"></section>
-    <section id="empty" class="empty" style="display:none;">No motives found.</section>
+    <section class="grid" id="grid" aria-label="Motive results"></section>
+
+    <div class="empty" id="empty" style="display:none;">
+      No motives found. Try refreshing or change your search.
+    </div>
   </main>
 
-  <!-- Who’s going Modal -->
+  <!-- Who’s going modal -->
   <div class="modalOverlay" id="whoOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="whoTitle">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Who’s going">
       <div class="modalHead">
         <div class="hwrap">
           <h3 id="whoTitle">Who’s going</h3>
-          <div class="sub" id="whoSub">—</div>
+          <div class="sub" id="whoCount">—</div>
         </div>
-        <button class="btn" type="button" id="closeWhoBtn">Close</button>
+        <button class="closeX" id="whoClose" type="button" aria-label="Close">✕</button>
       </div>
-
       <div class="modalBody">
         <div class="modalSearch">
-          <input id="whoSearch" type="search" placeholder="Search people…" />
-          <div class="tinyMuted" id="whoCount">0 going</div>
+          <input id="whoSearch" placeholder="Search members…" />
         </div>
-
-        <div class="tinyMuted" id="whoMsg" style="display:none;"></div>
+        <div class="whoMsg" id="whoMsg" aria-live="polite"></div>
+        <div class="whoEmpty" id="whoEmpty">No one yet.</div>
         <div class="list" id="whoList"></div>
-        <div class="tinyMuted" id="whoEmpty" style="display:none;">No one is going yet.</div>
       </div>
     </div>
   </div>
@@ -468,11 +507,16 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
       getFirestore,
-      collection, doc,
-      getDocs, getDoc,
-      query, orderBy, limit,
-      setDoc, deleteDoc,
-      serverTimestamp
+      collection,
+      doc,
+      getDocs,
+      getDoc,
+      setDoc,
+      deleteDoc,
+      query,
+      orderBy,
+      serverTimestamp,
+      limit
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -485,20 +529,24 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const grid = document.getElementById("grid");
-    const empty = document.getElementById("empty");
-    const search = document.getElementById("search");
-    const refreshBtn = document.getElementById("refreshBtn");
+    const $ = (id) => document.getElementById(id);
 
-    // modal refs
-    const whoOverlay = document.getElementById("whoOverlay");
-    const closeWhoBtn = document.getElementById("closeWhoBtn");
-    const whoSub = document.getElementById("whoSub");
-    const whoSearch = document.getElementById("whoSearch");
-    const whoCount = document.getElementById("whoCount");
-    const whoMsg = document.getElementById("whoMsg");
-    const whoList = document.getElementById("whoList");
-    const whoEmpty = document.getElementById("whoEmpty");
+    const grid = $("grid");
+    const empty = $("empty");
+    const search = $("search");
+    const refreshBtn = $("refreshBtn");
+    const count = $("count");
+    const subline = $("subline");
+
+    // Who’s going modal elements
+    const whoOverlay = $("whoOverlay");
+    const whoClose = $("whoClose");
+    const whoTitle = $("whoTitle");
+    const whoCount = $("whoCount");
+    const whoSearch = $("whoSearch");
+    const whoMsg = $("whoMsg");
+    const whoEmpty = $("whoEmpty");
+    const whoList = $("whoList");
 
     let currentUser = null;
     let allEvents = [];
@@ -510,64 +558,51 @@
 
     // cache: eventId -> members array (with resolved names)
     const membersCache = new Map();
+    // cache: eventId -> number (members count)
     const attendingCountCache = new Map();
-
     // users/{uid} name cache
     const userNameCache = new Map();
 
     function esc(s){
-      return String(s||"").replace(/[&<>"']/g, m => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-      }[m]));
+      return (s ?? "").toString()
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
-    function clamp10(avg){ return Math.max(0, Math.min(10, Number(avg || 0))); }
-    function isFiniteNum(x){ const n = Number(x); return Number.isFinite(n); }
-
-    function fmtDate(yyyyMmDd){
-      if (!yyyyMmDd) return "";
-      const parts = yyyyMmDd.split("-").map(Number);
-      if (parts.length !== 3) return yyyyMmDd;
-      const [y,m,d] = parts;
-      if (!y || !m || !d) return yyyyMmDd;
-      const dt = new Date(y, m-1, d);
-      return dt.toLocaleDateString(undefined, { month:"short", day:"numeric" });
+    function isFiniteNum(v){
+      const n = Number(v);
+      return Number.isFinite(n);
+    }
+    function clamp10(v){
+      const n = Number(v);
+      if (!Number.isFinite(n)) return 0;
+      return Math.max(0, Math.min(10, n));
     }
     function fmtWhen(ev){
-      const sd = ev.startDate || "";
-      const st = ev.startTime || "";
-      const ed = ev.endDate || "";
-      const et = ev.endTime || "";
-      const start = [fmtDate(sd), st].filter(Boolean).join(" • ");
-      const end = [fmtDate(ed), et].filter(Boolean).join(" • ");
-      if (!start && !end) return "Time TBD";
-      if (start && !end) return start;
-      if (!start && end) return end;
-      return `${start} → ${end}`;
-    }
-    function initials(name){
-      const s = (name || "").toString().trim();
-      if (!s) return "U";
-      const parts = s.split(/\s+/).filter(Boolean);
-      const a = (parts[0] || "U")[0] || "U";
-      const b = (parts[1] || "")[0] || "";
-      return (a + b).toUpperCase();
+      const sd = (ev.startDate || "").toString().trim();
+      const st = (ev.startTime || "").toString().trim();
+      const ed = (ev.endDate || "").toString().trim();
+      const et = (ev.endTime || "").toString().trim();
+
+      let out = "";
+      if (sd) out += sd;
+      if (st) out += (out ? " " : "") + st;
+      if (ed || et){
+        out += " →";
+        if (ed) out += " " + ed;
+        if (et) out += (ed ? " " : " ") + et;
+      }
+      return out || "—";
     }
 
-    function pickNameFromUsersDoc(data){
-      if (!data) return "";
-      return (
-        data.name ||
-        data.displayName ||
-        data.fullName ||
-        data.username ||
-        data.userName ||
-        data.firstName ||
-        ""
-      ).toString().trim();
+    function pickNameFromUsersDoc(u){
+      const name = (u?.name || u?.displayName || u?.fullName || u?.username || u?.userName || "").toString().trim();
+      return name || "";
     }
 
     async function resolveName(uid, memberData){
-      // member doc may have name already (open events when user tapped attend)
       const fromMember = (
         memberData?.name ||
         memberData?.displayName ||
@@ -603,7 +638,6 @@
 
         if (inviteOnly){
           try{
-            // Check if user is accepted member
             const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
             const mSnap = await getDoc(mRef);
 
@@ -611,17 +645,24 @@
               goingMap.set(ev.id, true);
               appliedMap.set(ev.id, false);
             } else {
-              // Otherwise check if applied
               const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
               const aSnap = await getDoc(aRef);
               appliedMap.set(ev.id, aSnap.exists());
               goingMap.set(ev.id, false);
             }
-
           } catch {
             appliedMap.set(ev.id, false);
             goingMap.set(ev.id, false);
           }
+        } else {
+          try{
+            const mRef = doc(db, "events", ev.id, "members", currentUser.uid);
+            const mSnap = await getDoc(mRef);
+            goingMap.set(ev.id, mSnap.exists());
+          } catch {
+            goingMap.set(ev.id, false);
+          }
+          appliedMap.set(ev.id, false);
         }
       });
 
@@ -654,7 +695,7 @@
         const whenText = inviteOnly ? "Invite-only" : fmtWhen(ev);
         const whereText = (inviteOnly && !isGoing) ? "Location hidden" : (ev.location || "—");
 
-        // ✅ map button for open events OR invite-only when accepted
+        // Map shows for open events OR invite-only when accepted
         const canMap = isFiniteNum(ev.lat) && isFiniteNum(ev.lng) && (!inviteOnly || isGoing);
 
         const actionText = inviteOnly
@@ -685,7 +726,7 @@
             <div class="line">
               <div class="mini">
                 <div class="miniTop">
-                  Spots available: <b>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</b>
+                  Spots left: <b><span class="spotsLeft" data-ev="${esc(ev.id)}" data-total="${esc((ev.spotsAvailable ?? "") === "" ? "" : ev.spotsAvailable)}">—</span></b>
                   • Venue: <b>${esc(ev.venueSize || "—")}</b>
                 </div>
                 <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b></div>
@@ -715,7 +756,8 @@
 
             <div class="actionRow">
               <div class="mini">${esc(actionText)}</div>
-              <div class="actionBtns">
+              <div class="actionBtnsWrap" style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                <div class="actionBtns">
                 ${
                   inviteOnly
                     ? (isGoing
@@ -732,8 +774,11 @@
                 <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Motive")}">
                   Who’s going
                 </button>
+                </div>
+                ${estimatesHtml}
               </div>
             </div>
+
             <div class="chips">
               <span class="tag ${inviteOnly ? "invite" : "open"}"><span class="tdot"></span>${inviteOnly ? "Invite-only" : "Open"}</span>
               ${tags.slice(0,5).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
@@ -741,7 +786,7 @@
           </div>
         `;
 
-        // attending count
+        // attending count + spots left calc
         const attEl = card.querySelector('.attCount');
         if (attEl) ensureAttendingCount(ev.id, attEl);
 
@@ -779,7 +824,7 @@
         if (peopleBtn){
           peopleBtn.addEventListener("click", async (e) => {
             e.preventDefault(); e.stopPropagation();
-            await openWhosGoing(ev.id, peopleBtn.dataset.name || "Who’s going");
+            await openWhosGoing(ev.id, peopleBtn.dataset.name || "Motive");
           });
         }
       });
@@ -791,7 +836,7 @@
 
       const filtered = allEvents.filter(ev => {
         const hay = [
-          ev.name, ev.location, ev.description, ev.ratio, ev.venueSize,
+          ev.name, ev.location, ev.description, ev.ratio, ev.venueSize, ev.sizeEstimate,
           ev.startDate, ev.startTime, ev.endDate, ev.endTime,
           ...(Array.isArray(ev.tags) ? ev.tags : [])
         ].join(" ").toLowerCase();
@@ -800,7 +845,6 @@
       render(filtered);
     }
 
-    // OPEN: add/remove from members
     async function toggleGoing(eventId, inviteOnly, btnEl){
       if (!currentUser || !eventId) return;
       btnEl.disabled = true;
@@ -812,29 +856,27 @@
         if (already){
           await deleteDoc(mRef);
           goingMap.set(eventId, false);
-          if (attendingCountCache.has(eventId)) attendingCountCache.set(eventId, Math.max(0, Number(attendingCountCache.get(eventId)) - 1));
 
-          // If this was an invite-only motive you were accepted to, clear any old application
           if (inviteOnly){
-            try{
-              await deleteDoc(doc(db, "events", eventId, "applications", currentUser.uid));
-            }catch{}
+            try{ await deleteDoc(doc(db, "events", eventId, "applications", currentUser.uid)); }catch{}
             appliedMap.set(eventId, false);
           }
         } else {
           await setDoc(mRef, {
             uid: currentUser.uid,
-            // keep writing name too (helps performance / no extra user doc fetch)
             name: (currentUser.displayName || "").toString(),
             photoURL: (currentUser.photoURL || "").toString(),
             createdAt: serverTimestamp()
           }, { merge: true });
           goingMap.set(eventId, true);
-          if (attendingCountCache.has(eventId)) attendingCountCache.set(eventId, Number(attendingCountCache.get(eventId)) + 1);
         }
 
-        // prevent stale modal list
         membersCache.delete(eventId);
+
+        // refresh counts quickly
+        attendingCountCache.delete(eventId);
+        const attEl = document.querySelector(`.attCount[data-ev="${eventId}"]`);
+        if (attEl) ensureAttendingCount(eventId, attEl);
 
         applySearch();
       } catch(err){
@@ -844,7 +886,6 @@
       }
     }
 
-    // PRIVATE: apply toggle (pending) — Applied click cancels
     async function applyToPrivate(eventId, btnEl){
       if (!currentUser || !eventId) return;
       btnEl.disabled = true;
@@ -854,7 +895,6 @@
         const already = appliedMap.get(eventId) === true;
 
         if (already){
-          // cancel application
           await deleteDoc(aRef);
           appliedMap.set(eventId, false);
         } else {
@@ -876,79 +916,71 @@
       }
     }
 
+    function setWhoMsg(txt="", type=""){
+      whoMsg.style.display = txt ? "block" : "none";
+      whoMsg.textContent = txt || "";
+      whoMsg.className = "whoMsg" + (type ? " " + type : "");
+    }
+
     function openModal(){
       whoOverlay.classList.add("show");
-      whoOverlay.setAttribute("aria-hidden", "false");
+      whoOverlay.setAttribute("aria-hidden","false");
       whoSearch.value = "";
       whoSearch.focus();
     }
     function closeModal(){
       whoOverlay.classList.remove("show");
-      whoOverlay.setAttribute("aria-hidden", "true");
-      whoList.innerHTML = "";
-      whoMsg.style.display = "none";
-      whoEmpty.style.display = "none";
-      whoCount.textContent = "0 going";
-      whoSub.textContent = "—";
-    }
-    function setWhoMsg(text){
-      whoMsg.style.display = text ? "block" : "none";
-      whoMsg.textContent = text || "";
+      whoOverlay.setAttribute("aria-hidden","true");
     }
 
-    function renderRows(rows){
-      const q = (whoSearch.value || "").trim().toLowerCase();
-      const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
-
-      whoList.innerHTML = "";
-      whoEmpty.style.display = filtered.length ? "none" : "block";
-
-      for (const r of filtered){
-        const nm = (r.name || "User").toString();
-        const isMe = currentUser && r.uid === currentUser.uid;
-
-        const row = document.createElement("div");
-        row.className = "personRow";
-        row.innerHTML = `
-          <div class="pLeft">
-            <div class="avatar">${esc(initials(nm))}</div>
-            <div class="pName">${esc(nm)} ${isMe ? `<span class="youBadge">You</span>` : ``}</div>
-          </div>
-          <div class="pActions">
-            <a class="viewBtn" href="view_profile.html?uid=${encodeURIComponent(r.uid || "")}">View profile</a>
-          </div>
-        `;
-        whoList.appendChild(row);
-      }
-    }
-
-    // list reads members, but resolves names from users/{uid} if needed
+    whoClose.addEventListener("click", closeModal);
+    whoOverlay.addEventListener("click", (e) => { if (e.target === whoOverlay) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && whoOverlay.classList.contains("show")) closeModal(); });
 
     async function ensureAttendingCount(eventId, el){
       if (!eventId || !el) return;
+
+      const applySpotsLeft = (n) => {
+        const spotsEls = document.querySelectorAll(`.spotsLeft[data-ev="${eventId}"]`);
+        spotsEls.forEach(sl => {
+          const totalRaw = (sl.dataset.total || "").toString().trim();
+          const total = totalRaw === "" ? NaN : Number(totalRaw);
+          if (!Number.isFinite(total)) {
+            sl.textContent = "—";
+            return;
+          }
+          sl.textContent = String(Math.max(0, total - n));
+        });
+      };
+
       if (attendingCountCache.has(eventId)){
-        el.textContent = String(attendingCountCache.get(eventId));
+        const n = Number(attendingCountCache.get(eventId) || 0);
+        el.textContent = String(n);
+        applySpotsLeft(n);
         return;
       }
+
       el.textContent = "…";
       try{
         const snap = await getDocs(query(collection(db, "events", eventId, "members"), limit(500)));
-        const n = snap.size;
+        const n = snap.size || 0;
         attendingCountCache.set(eventId, n);
         el.textContent = String(n);
+        applySpotsLeft(n);
       }catch(_){
         el.textContent = "—";
+        applySpotsLeft(0);
       }
     }
 
     async function openWhosGoing(eventId, eventName){
       if (!currentUser || !eventId) return;
 
-      whoSub.textContent = (eventName || "Motive").toString();
-      setWhoMsg("Loading…");
-      whoList.innerHTML = "";
+      whoTitle.textContent = "Who’s going";
+      whoCount.textContent = "Loading…";
       whoEmpty.style.display = "none";
-      whoCount.textContent = "0 going";
+      whoList.innerHTML = "";
+      setWhoMsg("");
 
       openModal();
 
@@ -956,68 +988,111 @@
         let rows = membersCache.get(eventId);
 
         if (!rows){
-          const qy = query(
-            collection(db, "events", eventId, "members"),
-            orderBy("createdAt", "desc"),
-            limit(250)
-          );
-          const snap = await getDocs(qy);
-
+          const snap = await getDocs(query(collection(db, "events", eventId, "members"), orderBy("createdAt","desc"), limit(250)));
           rows = await Promise.all(
             snap.docs.map(async (d) => {
               const uid = d.id;
-              const data = d.data();
-              const name = await resolveName(uid, data); // ✅ users/{uid} fallback
-              return { uid, ...data, name };
+              const data = d.data() || {};
+              const name = await resolveName(uid, data);
+              return { uid, name };
             })
           );
-
           membersCache.set(eventId, rows);
         }
 
         setWhoMsg("");
         whoCount.textContent = `${rows.length} going`;
         renderRows(rows);
-
         whoSearch.oninput = () => renderRows(rows);
+
       } catch(err){
         console.error(err);
-        setWhoMsg(err?.message || "Could not load list.");
+        setWhoMsg("Could not load members (check Firestore rules).", "error");
+        whoCount.textContent = "—";
+        whoEmpty.style.display = "block";
+        whoEmpty.textContent = "Could not load members.";
+      }
+
+      function renderRows(rows){
+        const q = (whoSearch.value || "").trim().toLowerCase();
+        const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
+
+        whoList.innerHTML = "";
+        whoEmpty.style.display = filtered.length ? "none" : "block";
+        if (!filtered.length){
+          whoEmpty.textContent = q ? "No matches." : "No one yet.";
+          return;
+        }
+
+        const frag = document.createDocumentFragment();
+        filtered.forEach(r => {
+          const row = document.createElement("div");
+          row.className = "personRow";
+          const initial = (r.name || "U").trim().charAt(0).toUpperCase() || "U";
+
+          row.innerHTML = `
+            <div class="pLeft">
+              <div class="avatar">${esc(initial)}</div>
+              <div class="pName">
+                ${esc(r.name || "User")}
+                ${currentUser && r.uid === currentUser.uid ? `<span class="youBadge">you</span>` : ``}
+              </div>
+            </div>
+            <button class="viewBtn" type="button">View profile</button>
+          `;
+
+          row.querySelector(".viewBtn").addEventListener("click", (e) => {
+            e.preventDefault(); e.stopPropagation();
+            window.location.href = `view_profile.html?uid=${encodeURIComponent(r.uid)}`;
+          });
+
+          frag.appendChild(row);
+        });
+
+        whoList.appendChild(frag);
       }
     }
 
-    async function load(){
-      grid.innerHTML = "";
+    async function loadEvents(){
+      count.textContent = "Loading…";
+      subline.textContent = "Loading motives…";
       empty.style.display = "none";
-      allEvents = [];
-      goingMap.clear();
-      appliedMap.clear();
-      membersCache.clear();
+      grid.innerHTML = "";
 
-      const qy = query(collection(db, "events"), orderBy("startDate", "desc"), limit(80));
-      const snap = await getDocs(qy);
-      allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      try{
+        const snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
+        const list = [];
+        snap.forEach(d => list.push({ id: d.id, ...(d.data() || {}) }));
 
-      await preloadMyStates(allEvents);
+        allEvents = list;
+        count.textContent = `${allEvents.length} motive${allEvents.length === 1 ? "" : "s"}`;
 
-      render(allEvents);
-      applySearch();
+        await preloadMyStates(allEvents);
+
+        applySearch();
+        subline.textContent = "Browse motives near you";
+
+      } catch(err){
+        console.error(err);
+        count.textContent = "0 motives";
+        subline.textContent = "Could not load motives";
+        empty.style.display = "block";
+        empty.textContent = "Could not load motives (check Firestore rules).";
+      }
     }
 
-    closeWhoBtn.addEventListener("click", closeModal);
-    whoOverlay.addEventListener("click", (e) => { if (e.target === whoOverlay) closeModal(); });
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && whoOverlay.classList.contains("show")) closeModal();
-    });
+    refreshBtn.addEventListener("click", loadEvents);
+    search.addEventListener("input", applySearch);
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "index.html"; return; }
+      if (!user){
+        window.location.href = "index.html";
+        return;
+      }
       currentUser = user;
-      await load();
+      subline.textContent = `Signed in as ${user.displayName || "User"}`;
+      await loadEvents();
     });
-
-    search.addEventListener("input", applySearch);
-    refreshBtn.addEventListener("click", load);
   </script>
 </body>
 </html>
