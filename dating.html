@@ -920,7 +920,9 @@
             revealed: !!v.revealed,
             type: (v.type || "like"),
             createdAt: v.createdAt || null,
-            revealedAt: v.revealedAt || null
+            revealedAt: v.revealedAt || null,
+            hidden: !!v.hidden,
+            hiddenAt: v.hiddenAt || null
           });
         });
 
@@ -980,7 +982,7 @@
     function renderLikedYou(){
       if (!likedList) return;
       likedList.innerHTML = "";
-      const items = [...likedMap.values()];
+      const items = [...likedMap.values()].filter(x => !x.hidden);
 
       if (!items.length) {
         likedList.appendChild(likedEmpty);
@@ -1013,7 +1015,7 @@
         const sub = document.createElement("div");
         sub.className = "matchSub";
         sub.textContent = it.revealed
-          ? "View / Pass / Match"
+          ? "View / Hide / Match"
           : ((it.type === "superlike") ? "Someone super liked you" : "Someone liked you");
 
         meta.appendChild(n);
@@ -1035,16 +1037,15 @@
             window.location.href = `view_profile.html?uid=${encodeURIComponent(it.uid)}`;
           });
 
-          const passBtn = document.createElement("button");
-          passBtn.className = "miniBtn bad";
-          passBtn.type = "button";
-          passBtn.textContent = "Pass";
-          passBtn.addEventListener("click", async (e)=>{
+          const hideBtn = document.createElement("button");
+          hideBtn.className = "miniBtn bad";
+          hideBtn.type = "button";
+          hideBtn.textContent = "Hide";
+          hideBtn.addEventListener("click", async (e)=>{
             e.stopPropagation();
-            await decideOnRevealedLike(it.uid, "dislike");
+            await hideLikedUser(it.uid);
           });
-
-          const matchBtn = document.createElement("button");
+const matchBtn = document.createElement("button");
           matchBtn.className = "miniBtn good";
           matchBtn.type = "button";
           matchBtn.textContent = "Match";
@@ -1054,7 +1055,7 @@
           });
 
           btns.appendChild(viewBtn);
-          btns.appendChild(passBtn);
+          btns.appendChild(hideBtn);
           btns.appendChild(matchBtn);
 
           row.addEventListener("click", ()=> {
@@ -1068,8 +1069,48 @@
       });
     }
 
-    async function revealNextLike(){
-      const locked = [...likedMap.values()].filter(x => !x.revealed);
+    
+    async function hideLikedUser(targetUid){
+      if (!currentUser || !targetUid) return;
+      try{
+        await setDoc(doc(db, "users", currentUser.uid, "likedBy", targetUid), {
+          hidden: true,
+          hiddenAt: serverTimestamp()
+        }, { merge:true });
+
+        const it = likedMap.get(targetUid);
+        if (it) likedMap.set(targetUid, { ...it, hidden: true, hiddenAt: new Date() });
+        renderLikedYou();
+      } catch(err){
+        console.error(err);
+        setMsg("Couldn’t hide that like.", "error");
+      }
+    }
+
+    async function removeLikedYouEntry(targetUid){
+      // Used when you MATCH with someone who was in your liked-you list.
+      if (!currentUser || !targetUid) return;
+      try{
+        await deleteDoc(doc(db, "users", currentUser.uid, "likedBy", targetUid));
+        likedMap.delete(targetUid);
+        renderLikedYou();
+      } catch(err){
+        // If delete is blocked by rules, fall back to hiding it.
+        try{
+          await setDoc(doc(db, "users", currentUser.uid, "likedBy", targetUid), {
+            hidden: true,
+            hiddenAt: serverTimestamp()
+          }, { merge:true });
+          const it = likedMap.get(targetUid);
+          if (it) likedMap.set(targetUid, { ...it, hidden: true, hiddenAt: new Date() });
+          renderLikedYou();
+        } catch(e){
+          console.error(e);
+        }
+      }
+    }
+async function revealNextLike(){
+      const locked = [...likedMap.values()].filter(x => !x.revealed && !x.hidden);
       if (!locked.length){
         setMsg("No locked likes to reveal.", "ok");
         return;
@@ -1526,6 +1567,12 @@
           const chatId = await ensureChat(currentUser.uid, otherUid);
           await ensureMatch(currentUser.uid, otherUid);
 
+          // If they were in your "Liked you" list, remove them once you match.
+          await removeLikedYouEntry(otherUid);
+
+          // If they were in your "Liked you" list, remove them once you match.
+          await removeLikedYouEntry(otherUid);
+
           meBubble.src = mePhoto;
           themBubble.src = themPhoto;
           matchName.textContent = (them?.name || "Student").toString().trim();
@@ -1582,6 +1629,9 @@
 
             const chatId = await ensureChat(myUid, otherUid);
             await ensureMatch(myUid, otherUid);
+
+            // If they were in your "Liked you" list, remove them once you match.
+            await removeLikedYouEntry(otherUid);
 
             meBubble.src = mePhoto;
             themBubble.src = themPhoto;
@@ -1678,6 +1728,12 @@
 
           const chatId = await ensureChat(currentUser.uid, otherUid);
           await ensureMatch(currentUser.uid, otherUid);
+
+          // If they were in your "Liked you" list, remove them once you match.
+          await removeLikedYouEntry(otherUid);
+
+          // If they were in your "Liked you" list, remove them once you match.
+          await removeLikedYouEntry(otherUid);
 
           meBubble.src = mePhoto;
           themBubble.src = themPhoto;
