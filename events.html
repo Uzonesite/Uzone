@@ -166,6 +166,7 @@
       color:inherit;
       display:grid;
       transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
+      min-width:0;
     }
     .card:hover{
       transform: translateY(-2px);
@@ -243,6 +244,7 @@
       display:inline-flex; gap:6px; align-items:center;
       backdrop-filter: blur(10px);
       max-width: 100%;
+      min-width:0;
     }
     .pill b{font-weight:800; color: rgba(255,255,255,.92)}
     .pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width: 320px;}
@@ -251,20 +253,24 @@
       padding:12px;
       display:grid;
       gap:10px;
+      min-width:0;
     }
 
+    /* ✅ Fix overflow on desktop: allow wrapping + constrain */
     .line{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
+      min-width:0;
     }
 
     .mini{
       color:var(--muted);
       font-size:13px;
       line-height:1.35;
+      min-width:0;
     }
 
     .chips{display:flex;gap:8px;flex-wrap:wrap}
@@ -299,6 +305,8 @@
       color: rgba(255,255,255,.88);
       white-space:nowrap;
       backdrop-filter: blur(10px);
+      max-width:100%;
+      min-width:0;
     }
     .ratingBadge svg{
       width:14px;height:14px;
@@ -325,6 +333,7 @@
       background: rgba(255,255,255,.10);
       overflow:hidden;
       border:1px solid rgba(255,255,255,.10);
+      flex:0 0 auto;
     }
     .ratingBar > span{
       display:block;
@@ -349,6 +358,7 @@
       gap:8px;
       white-space:nowrap;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+      flex:0 0 auto;
     }
     .mapBtn:hover{
       transform: translateY(-1px);
@@ -359,13 +369,17 @@
     .mapBtn:active{ transform: translateY(0px) scale(.99); }
     .mapBtn:disabled{ opacity:.5; cursor:not-allowed; }
 
-    /* ✅ Attend / Attendees */
+    /* ✅ Attend/Apply + Who’s going row (higher in card now) */
     .actionRow{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
       justify-content:space-between;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      border-radius: 14px;
+      padding:10px;
     }
     .actionBtns{
       display:flex;
@@ -375,7 +389,8 @@
       justify-content:flex-end;
     }
     .attendBtn,
-    .peopleBtn{
+    .peopleBtn,
+    .applyBtn{
       padding:9px 11px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
@@ -392,21 +407,31 @@
       white-space:nowrap;
     }
     .attendBtn:hover,
-    .peopleBtn:hover{
+    .peopleBtn:hover,
+    .applyBtn:hover{
       transform: translateY(-1px);
       border-color: var(--accent);
       box-shadow: 0 0 14px rgba(176,11,85,.45);
       filter: brightness(1.06);
     }
     .attendBtn:active,
-    .peopleBtn:active{ transform: translateY(0px) scale(.99); }
+    .peopleBtn:active,
+    .applyBtn:active{ transform: translateY(0px) scale(.99); }
+
     .attendBtn.on{
       border-color: rgba(176,11,85,.65);
       background: linear-gradient(135deg, rgba(176,11,85,.92), rgba(176,11,85,.42));
       box-shadow: 0 0 18px rgba(176,11,85,.45);
     }
+    .applyBtn.on{
+      border-color: rgba(255,210,80,.55);
+      background: linear-gradient(135deg, rgba(255,210,80,.36), rgba(0,0,0,.14));
+      box-shadow: 0 0 18px rgba(255,210,80,.22);
+    }
+
     .attendBtn:disabled,
-    .peopleBtn:disabled{opacity:.55; cursor:not-allowed}
+    .peopleBtn:disabled,
+    .applyBtn:disabled{opacity:.55; cursor:not-allowed}
 
     .empty{
       border:1px dashed rgba(255,255,255,.20);
@@ -418,7 +443,7 @@
       line-height:1.45;
     }
 
-    /* ✅ Attendees modal */
+    /* ✅ Who’s going modal */
     .modalOverlay{
       position:fixed;
       inset:0;
@@ -598,12 +623,12 @@
     <section id="empty" class="empty" style="display:none;">No motives found.</section>
   </main>
 
-  <!-- ✅ Attendees Modal -->
+  <!-- ✅ Who’s going Modal -->
   <div class="modalOverlay" id="attOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="attTitle">
       <div class="modalHead">
         <div class="hwrap">
-          <h3 id="attTitle">Attendees</h3>
+          <h3 id="attTitle">Who’s going</h3>
           <div class="sub" id="attSub">—</div>
         </div>
         <button class="btn" type="button" id="closeAttBtn">Close</button>
@@ -611,13 +636,13 @@
 
       <div class="modalBody">
         <div class="modalSearch">
-          <input id="attSearch" type="search" placeholder="Search attendees…" />
-          <div class="tinyMuted" id="attCount">0 attending</div>
+          <input id="attSearch" type="search" placeholder="Search people…" />
+          <div class="tinyMuted" id="attCount">0 going</div>
         </div>
 
         <div class="tinyMuted" id="attMsg" style="display:none;"></div>
         <div class="list" id="attList"></div>
-        <div class="tinyMuted" id="attEmpty" style="display:none;">No one is marked as attending yet.</div>
+        <div class="tinyMuted" id="attEmpty" style="display:none;">No one is marked as going yet.</div>
       </div>
     </div>
   </div>
@@ -663,9 +688,12 @@
     let currentUser = null;
     let allEvents = [];
 
-    // eventId -> boolean
-    const attendingMap = new Map();
-    // eventId -> attendees array cache
+    // open: events/{id}/attendees/{uid}
+    const goingMap = new Map();       // eventId -> boolean (going)
+    // private apply: events/{id}/applications/{uid}
+    const appliedMap = new Map();     // eventId -> boolean (applied)
+
+    // eventId -> attendees array cache (accepted-only)
     const attendeesCache = new Map();
 
     function esc(s){
@@ -715,19 +743,38 @@
       return (a + b).toUpperCase();
     }
 
-    async function preloadMyAttendance(list){
+    async function preloadMyStates(list){
       if (!currentUser) return;
 
-      const openEvents = list.filter(ev => !ev.inviteOnly);
-      await Promise.all(openEvents.map(async (ev) => {
-        try{
-          const aRef = doc(db, "events", ev.id, "attendees", currentUser.uid);
-          const snap = await getDoc(aRef);
-          attendingMap.set(ev.id, snap.exists());
-        }catch{
-          attendingMap.set(ev.id, false);
+      const tasks = [];
+
+      for (const ev of list){
+        const inviteOnly = !!ev.inviteOnly;
+
+        if (inviteOnly){
+          tasks.push((async () => {
+            try{
+              const aRef = doc(db, "events", ev.id, "applications", currentUser.uid);
+              const snap = await getDoc(aRef);
+              appliedMap.set(ev.id, snap.exists());
+            } catch {
+              appliedMap.set(ev.id, false);
+            }
+          })());
+        } else {
+          tasks.push((async () => {
+            try{
+              const gRef = doc(db, "events", ev.id, "attendees", currentUser.uid);
+              const snap = await getDoc(gRef);
+              goingMap.set(ev.id, snap.exists());
+            } catch {
+              goingMap.set(ev.id, false);
+            }
+          })());
         }
-      }));
+      }
+
+      await Promise.all(tasks);
     }
 
     function render(list){
@@ -745,14 +792,16 @@
         const whereText = inviteOnly ? "Location hidden" : (ev.location || "—");
 
         const canMap = !inviteOnly && isFiniteNum(ev.lat) && isFiniteNum(ev.lng);
-        const isGoing = attendingMap.get(ev.id) === true;
+        const isGoing = goingMap.get(ev.id) === true;
+        const isApplied = appliedMap.get(ev.id) === true;
 
         const card = document.createElement("a");
         card.className = "card";
         card.href = `event.html?id=${encodeURIComponent(ev.id)}`;
 
-        // Only show attend/attendees for OPEN events (keeps invite-only private on the browse page)
-        const showAttendUI = !inviteOnly;
+        const actionText = inviteOnly
+          ? (isApplied ? "Application sent." : "Apply to join this private motive.")
+          : (isGoing ? "You’re marked as going." : "Tap attend to show up in the list.");
 
         card.innerHTML = `
           <div class="imgWrap">
@@ -775,7 +824,7 @@
                 • Venue: <b>${esc(ev.venueSize || "—")}</b>
               </div>
 
-              <div style="display:flex; gap:10px; align-items:center;">
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
                 <div class="ratingBadge" title="Average rating">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
@@ -797,6 +846,25 @@
               </div>
             </div>
 
+            <!-- ✅ moved higher (especially better on phone) -->
+            <div class="actionRow">
+              <div class="mini">${esc(actionText)}</div>
+              <div class="actionBtns">
+                ${
+                  inviteOnly
+                    ? `<button class="applyBtn ${isApplied ? "on" : ""}" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                         ${isApplied ? "Applied" : "Apply"}
+                       </button>`
+                    : `<button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                         ${isGoing ? "Going" : "Attend"}
+                       </button>`
+                }
+                <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
+                  Who’s going
+                </button>
+              </div>
+            </div>
+
             <div class="mini">
               Size: <b>${esc(ev.sizeEstimate ?? "—")}</b> • Ratio: <b>${esc(ev.ratio || "—")}</b>
             </div>
@@ -805,20 +873,6 @@
               <span class="tag ${inviteOnly ? "invite" : "open"}"><span class="tdot"></span>${inviteOnly ? "Invite-only" : "Open"}</span>
               ${tags.slice(0,5).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
             </div>
-
-            ${showAttendUI ? `
-              <div class="actionRow">
-                <div class="mini">${isGoing ? "You’re marked as attending." : "Tap attend to show up in the list."}</div>
-                <div class="actionBtns">
-                  <button class="attendBtn ${isGoing ? "on" : ""}" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
-                    ${isGoing ? "Going" : "Attend"}
-                  </button>
-                  <button class="peopleBtn" type="button" data-id="${esc(ev.id)}" data-name="${esc(ev.name || "Event")}">
-                    Attendees
-                  </button>
-                </div>
-              </div>
-            ` : ``}
           </div>
         `;
 
@@ -841,23 +895,33 @@
           });
         }
 
-        // Attend toggle
+        // Open: Attend toggle
         const attendBtn = card.querySelector(".attendBtn");
         if (attendBtn){
           attendBtn.addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            await toggleAttend(attendBtn.dataset.id || "", attendBtn);
+            await toggleGoing(attendBtn.dataset.id || "", attendBtn);
           });
         }
 
-        // Attendees modal
+        // Private: Apply
+        const applyBtn = card.querySelector(".applyBtn");
+        if (applyBtn){
+          applyBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await applyToPrivate(applyBtn.dataset.id || "", applyBtn);
+          });
+        }
+
+        // Who’s going modal
         const peopleBtn = card.querySelector(".peopleBtn");
         if (peopleBtn){
           peopleBtn.addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            await openAttendees(peopleBtn.dataset.id || "", peopleBtn.dataset.name || "Attendees");
+            await openWhosGoing(peopleBtn.dataset.id || "", peopleBtn.dataset.name || "Who’s going");
           });
         }
       });
@@ -878,29 +942,60 @@
       render(filtered);
     }
 
-    async function toggleAttend(eventId, btnEl){
+    async function toggleGoing(eventId, btnEl){
       if (!currentUser || !eventId) return;
 
       btnEl.disabled = true;
 
       try{
-        const aRef = doc(db, "events", eventId, "attendees", currentUser.uid);
-        const already = attendingMap.get(eventId) === true;
+        const gRef = doc(db, "events", eventId, "attendees", currentUser.uid);
+        const already = goingMap.get(eventId) === true;
 
         if (already){
-          await deleteDoc(aRef);
-          attendingMap.set(eventId, false);
+          await deleteDoc(gRef);
+          goingMap.set(eventId, false);
         } else {
-          await setDoc(aRef, {
+          await setDoc(gRef, {
             uid: currentUser.uid,
             name: (currentUser.displayName || "User").toString(),
             photoURL: (currentUser.photoURL || "").toString(),
             createdAt: serverTimestamp()
           }, { merge: true });
-          attendingMap.set(eventId, true);
+          goingMap.set(eventId, true);
         }
 
-        // re-render only current filtered view
+        // ✅ important: don’t show stale list after toggling
+        attendeesCache.delete(eventId);
+
+        applySearch();
+      } catch(err){
+        console.error(err);
+      } finally {
+        btnEl.disabled = false;
+      }
+    }
+
+    async function applyToPrivate(eventId, btnEl){
+      if (!currentUser || !eventId) return;
+
+      btnEl.disabled = true;
+
+      try{
+        const aRef = doc(db, "events", eventId, "applications", currentUser.uid);
+        const already = appliedMap.get(eventId) === true;
+
+        // keep it simple: tap again does nothing (no “unapply”)
+        if (!already){
+          await setDoc(aRef, {
+            uid: currentUser.uid,
+            name: (currentUser.displayName || "User").toString(),
+            photoURL: (currentUser.photoURL || "").toString(),
+            status: "pending",
+            createdAt: serverTimestamp()
+          }, { merge: true });
+          appliedMap.set(eventId, true);
+        }
+
         applySearch();
       } catch(err){
         console.error(err);
@@ -922,9 +1017,9 @@
       attList.innerHTML = "";
       attMsg.style.display = "none";
       attEmpty.style.display = "none";
-      attCount.textContent = "0 attending";
+      attCount.textContent = "0 going";
       attSub.textContent = "—";
-      attTitle.textContent = "Attendees";
+      attTitle.textContent = "Who’s going";
     }
 
     function setAttMsg(text){
@@ -932,7 +1027,7 @@
       attMsg.textContent = text || "";
     }
 
-    function renderAttendeesRows(rows){
+    function renderRows(rows){
       const q = (attSearch.value || "").trim().toLowerCase();
       const filtered = !q ? rows : rows.filter(r => (r.name || "").toLowerCase().includes(q));
 
@@ -959,19 +1054,20 @@
       }
     }
 
-    async function openAttendees(eventId, eventName){
+    async function openWhosGoing(eventId, eventName){
       if (!currentUser || !eventId) return;
 
-      attTitle.textContent = "Attendees";
-      attSub.textContent = (eventName || "Event").toString();
+      attTitle.textContent = "Who’s going";
+      attSub.textContent = (eventName || "Motive").toString();
       setAttMsg("Loading…");
       attList.innerHTML = "";
       attEmpty.style.display = "none";
-      attCount.textContent = "0 attending";
+      attCount.textContent = "0 going";
 
       openModal();
 
       try{
+        // ✅ always refresh if cache cleared (e.g. after un-going)
         let rows = attendeesCache.get(eventId);
         if (!rows){
           const qy = query(
@@ -985,15 +1081,14 @@
         }
 
         setAttMsg("");
-        attCount.textContent = `${rows.length} attending`;
+        attCount.textContent = `${rows.length} going`;
 
-        renderAttendeesRows(rows);
+        renderRows(rows);
 
-        // live filter in modal
-        attSearch.oninput = () => renderAttendeesRows(rows);
+        attSearch.oninput = () => renderRows(rows);
       } catch(err){
         console.error(err);
-        setAttMsg(err?.message || "Could not load attendees.");
+        setAttMsg(err?.message || "Could not load list.");
       }
     }
 
@@ -1001,14 +1096,15 @@
       grid.innerHTML = "";
       empty.style.display = "none";
       allEvents = [];
-      attendingMap.clear();
+      goingMap.clear();
+      appliedMap.clear();
+      attendeesCache.clear();
 
       const qy = query(collection(db, "events"), orderBy("startDate", "desc"), limit(80));
       const snap = await getDocs(qy);
       allEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-      // preload "Going" state for open events
-      await preloadMyAttendance(allEvents);
+      await preloadMyStates(allEvents);
 
       render(allEvents);
       applySearch();
