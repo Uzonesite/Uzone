@@ -801,16 +801,21 @@ if (canSeeDetails) {
 
   // Apply button / status
   if (isInviteOnly && !isHost && !isAccepted){
-    applyBtn.style.display = "inline-flex";
-    statusChip.style.display = "inline-flex";
+  applyBtn.style.display = "inline-flex";
+  statusChip.style.display = "inline-flex";
 
-    const appSnap = await getDoc(doc(db, "events", eventId, "applications", currentUser.uid));
-    if (!appSnap.exists()){
-      statusText.textContent = "Not applied";
-    } else {
-      statusText.textContent = "Status: " + (appSnap.data()?.status || "pending");
-    }
+  const appSnap = await getDoc(doc(db, "events", eventId, "applications", currentUser.uid));
+
+  if (!appSnap.exists()){
+    statusText.textContent = "Not applied";
   } else {
+    statusText.textContent = "Status: " + (appSnap.data()?.status || "pending");
+    applyBtn.classList.add("on");  // 🔥 glow when applied
+  }
+}
+
+  
+  else {
     applyBtn.style.display = "none";
     statusChip.style.display = "none";
   }
@@ -819,23 +824,27 @@ if (canSeeDetails) {
   // - Invite-only: accepted guests see Map + Abandon; otherwise they see Apply.
   // - Open: users see Attend, which becomes Abandon when attending.
   attendBtn.style.display = "none";
-  abandonBtn.style.display = "none";
+abandonBtn.style.display = "none";
 
-  if (!isHost){
-    if (isInviteOnly){
-      if (isAccepted){
-        // accepted: show abandon beside map (map already handled by canSeeDetails)
-        abandonBtn.style.display = "inline-flex";
-      }
+attendBtn.classList.remove("on");
+applyBtn.classList.remove("on");
+
+if (!isHost){
+  if (isInviteOnly){
+    if (isAccepted){
+      abandonBtn.style.display = "inline-flex";
+      abandonBtn.classList.add("on");   // 🔥 glow for accepted
+    }
+  } else {
+    if (isAttending){
+      abandonBtn.style.display = "inline-flex";
+      abandonBtn.classList.add("on");   // 🔥 glow when going
     } else {
-      // open event
-      if (isAttending){
-        abandonBtn.style.display = "inline-flex";
-      } else {
-        attendBtn.style.display = "inline-flex";
-      }
+      attendBtn.style.display = "inline-flex";
     }
   }
+}
+
 
   // Ratings + comments lock
   const canInteract = !isInviteOnly || isHost || isAccepted;
