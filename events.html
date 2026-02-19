@@ -685,7 +685,8 @@
 
         // estimates (from post_event.html: sizeEstimate + ratio)
         const estAtt = (ev.sizeEstimate ?? ev.estimatedAttendance ?? ev.estimated ?? ev.size ?? null);
-        const estRatio = (ev.ratio ?? ev.estimatedRatio ?? null);
+        const ratioOn = !!(ev.useRatio ?? ev.use_ratio);
+        const estRatio = ratioOn ? (ev.ratio ?? ev.estimatedRatio ?? null) : null;
         const estimatesHtml = (estAtt || estRatio) ? `
           <div class="estRow">
             ${estAtt ? `<span class="estPill">Estimated Attendance: <b>${esc(estAtt)}</b></span>` : ``}
