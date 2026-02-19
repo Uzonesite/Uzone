@@ -868,22 +868,44 @@ if (!isHost){
 async function apply(){
   setMsg("");
   applyBtn.disabled = true;
-  try{
-    await setDoc(doc(db, "events", eventId, "applications", currentUser.uid), {
-      uid: currentUser.uid,
-      name: currentUser.displayName || "",
-      status: "pending",
-      createdAt: serverTimestamp()
-    }, { merge: true });
 
-    statusText.textContent = "Status: pending";
-    setMsg("Applied! The host will review your request.", "ok");
+  const appRef = doc(db, "events", eventId, "applications", currentUser.uid);
+
+  try{
+    const snap = await getDoc(appRef);
+
+    if (!snap.exists()){
+      // APPLY
+      await setDoc(appRef, {
+        uid: currentUser.uid,
+        name: currentUser.displayName || "",
+        status: "pending",
+        createdAt: serverTimestamp()
+      }, { merge: true });
+
+      // 🔥 Yellow state like events.html
+      applyBtn.classList.add("on");
+      applyBtn.textContent = "Applied";
+      statusText.textContent = "Status: pending";
+      setMsg("Application sent.", "ok");
+
+    } else {
+      // CANCEL application
+      await deleteDoc(appRef);
+
+      applyBtn.classList.remove("on");
+      applyBtn.textContent = "Apply";
+      statusText.textContent = "Not applied";
+      setMsg("Application cancelled.", "ok");
+    }
+
   } catch(e){
-    setMsg(e.message || "Failed to apply.", "error");
+    setMsg(e.message || "Failed.", "error");
   } finally {
     applyBtn.disabled = false;
   }
 }
+
 
 async function attendOpen(){
   if (!currentUser || !eventId) return;
