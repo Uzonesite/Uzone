@@ -581,12 +581,6 @@ function renderAttendance(list, canSeeDetails){
   const going = list.length;
   goingCountEl.textContent = String(going);
 
-  if (!canSeeDetails && isInviteOnly){
-    guestHintEl.textContent = "Hidden";
-    attendeesEl.innerHTML = "";
-    return;
-  }
-
   guestHintEl.textContent = going ? "Tap names to see profiles soon" : "No one yet";
   attendeesEl.innerHTML = "";
 
