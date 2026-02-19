@@ -576,28 +576,6 @@ function initialsFromName(name){
   return (a + b).toUpperCase();
 }
 
-/* Attendance (added) */
-function renderAttendance(list, canSeeDetails){
-  const going = list.length;
-  goingCountEl.textContent = String(going);
-
-  guestHintEl.textContent = going ? "Tap names to see profiles soon" : "No one yet";
-  attendeesEl.innerHTML = "";
-
-  list.forEach(p=>{
-    const div = document.createElement("div");
-    div.className = "attendee";
-    div.innerHTML = `
-      <div class="avatar">${esc(initialsFromName(p.name))}</div>
-      <div class="attendeeInfo">
-        <div class="attendeeName">${esc(p.name || "User")}</div>
-        <div class="attendeeMeta">${esc(p.status || "")}</div>
-      </div>
-    `;
-    attendeesEl.appendChild(div);
-  });
-}
-
 async function loadAttendance(canSeeDetails){
   try{
     const snap = await getDocs(collection(db, "events", eventId, "members"));
@@ -615,11 +593,8 @@ async function loadAttendance(canSeeDetails){
     const going = people.length;
     goingCountEl.textContent = String(going);
 
-    if (!canSeeDetails && isInviteOnly){
-      attendeesEl.innerHTML = "";
-      return;
-    }
-
+    // CHANGE: always show attendees, even if invite-only / can't see details.
+    // (We still hide location/schedule/etc elsewhere via canSeeDetails.)
     people.sort((a,b)=>{
       const an = (a.name || "").toLowerCase();
       const bn = (b.name || "").toLowerCase();
@@ -643,7 +618,7 @@ async function loadAttendance(canSeeDetails){
           <div class="attendeeName">${esc(p.name || "User")}</div>
         </div>
         <div style="margin-left:auto;">
-          <a href="profile.html?uid=${esc(p.uid)}" class="btn secondary" style="padding:6px 10px;font-size:12px;">
+          <a href="view_profile.html?uid=${esc(p.uid)}" class="btn secondary" style="padding:6px 10px;font-size:12px;">
             View Profile
           </a>
         </div>
@@ -657,8 +632,6 @@ async function loadAttendance(canSeeDetails){
     attendeesEl.innerHTML = "";
   }
 }
-
-
 
 async function loadEvent(){
   const snap = await getDoc(doc(db, "events", eventId));
@@ -890,5 +863,6 @@ onAuthStateChanged(auth, async (user) => {
   await loadEvent();
 });
 </script>
+
 </body>
 </html>
