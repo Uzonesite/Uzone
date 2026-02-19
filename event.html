@@ -563,7 +563,6 @@ const stars = document.getElementById("stars");
 const commentLock = document.getElementById("commentLock");
 const commentInput = document.getElementById("commentInput");
 const postComment = document.getElementById("postComment");
-const syncMyRatingBtn = document.getElementById("syncMyRating");
 const comments = document.getElementById("comments");
 
 /* Attendance (added) */
@@ -854,7 +853,6 @@ if (!isHost){
   commentLock.style.display = canInteract ? "none" : "block";
   commentInput.disabled = !canInteract;
   postComment.disabled = !canInteract;
-  syncMyRatingBtn.disabled = !canInteract;
 
   // Attendance (added)
   await loadAttendance(canSeeDetails);
@@ -1014,12 +1012,6 @@ async function loadComments(){
     `;
     comments.appendChild(div);
   });
-}
-
-async function syncMyRating(){
-  await loadMyRating();
-  setMsg(`Synced. Your current rating is ${myRating ? myRating : 0}/10.`, "ok");
-  setTimeout(()=>setMsg(""), 1200);
 }
 
 async function postAComment(){
