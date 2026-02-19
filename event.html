@@ -55,8 +55,8 @@
   font-weight:800;
   cursor:pointer;
   text-decoration:none;
-  display:inline-flex; 
-  align-items:center; 
+  display:inline-flex;
+  align-items:center;
   gap:8px;
   white-space:nowrap;
   user-select:none;
@@ -69,7 +69,7 @@
   box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
   filter: brightness(1.06);
 }
-  
+
 .btn:active{
   transform: translateY(0px) scale(.99);
   box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
@@ -87,7 +87,7 @@
   filter: brightness(1.06);
   transform: translateY(-1px);
 }
-  
+
   .btn:disabled{opacity:.6; cursor:not-allowed}
 
   main{width:min(1120px, 92vw); margin:16px auto 30px auto; display:grid; gap:14px;}
@@ -331,7 +331,8 @@
 
       <div style="margin-top:10px;" class="row">
         <div class="box"><b>Size</b><br><span id="size">—</span></div>
-        <div class="box"><b>Ratio</b><br><span id="ratio">—</span></div>
+        <!-- ONLY CHANGE: add id so we can hide this whole box when ratio is off -->
+        <div class="box" id="ratioBox"><b>Ratio</b><br><span id="ratio">—</span></div>
       </div>
 
       <div style="margin-top:10px;" class="box"><b>Description</b><br><span id="description">—</span></div>
@@ -433,6 +434,7 @@ const spotsEl = document.getElementById("spots");
 const venueEl = document.getElementById("venue");
 const sizeEl = document.getElementById("size");
 const ratioEl = document.getElementById("ratio");
+const ratioBox = document.getElementById("ratioBox"); // ONLY CHANGE: grab the box so we can hide it
 const descEl = document.getElementById("description");
 
 const locationEl = document.getElementById("location");
@@ -547,7 +549,16 @@ async function loadEvent(){
   spotsEl.textContent = (eventData.spotsAvailable ?? "") === "" ? "—" : String(eventData.spotsAvailable);
   venueEl.textContent = eventData.venueSize || "—";
   sizeEl.textContent = eventData.sizeEstimate ?? "—";
-  ratioEl.textContent = eventData.ratio || "—";
+
+  // ONLY CHANGE: hide ratio box unless toggle is on
+  const ratioOn = !!(eventData.useRatio ?? eventData.use_ratio);
+  if (ratioOn){
+    ratioBox.style.display = "";
+    ratioEl.textContent = eventData.ratio || "—";
+  } else {
+    ratioBox.style.display = "none";
+  }
+
   descEl.textContent = eventData.description || eventData.bio || "—";
 
   // Tags
