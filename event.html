@@ -605,20 +605,36 @@ function renderAttendance(list, canSeeDetails){
 async function loadAttendance(canSeeDetails){
   try{
     const snap = await getDocs(collection(db, "events", eventId, "members"));
+
     const people = [];
     snap.forEach(d=>{
       const m = d.data() || {};
-      const status = String(m.status || "").toLowerCase();
-      if (status === "accepted" || status === "going"){
-        people.push({
-          uid: m.uid || d.id,
-          name: m.name || m.displayName || m.username || "",
-          status: m.status || "accepted"
-        });
-      }
+      people.push({
+        uid: m.uid || d.id,
+        name: m.name || m.displayName || m.username || "",
+        photoURL: m.photoURL || ""
+      });
     });
 
-    // Keep stable ordering (name first, then uid)
+    // Going = everyone in members
+    const going = people.length;
+    goingCountEl.textContent = String(going);
+
+    // Guests = remaining spots (if numeric)
+    const spotsRaw = eventData?.spotsAvailable;
+    const spotsNum = Number(spotsRaw);
+    if (Number.isFinite(spotsNum) && spotsNum >= 0){
+      guestHintEl.textContent = String(Math.max(0, Math.floor(spotsNum) - going));
+    } else {
+      guestHintEl.textContent = "—";
+    }
+
+    // If event is invite-only and user can't see details, hide list (optional behavior)
+    if (!canSeeDetails && isInviteOnly){
+      attendeesEl.innerHTML = "";
+      return;
+    }
+
     people.sort((a,b)=>{
       const an = (a.name || "").toLowerCase();
       const bn = (b.name || "").toLowerCase();
@@ -627,13 +643,32 @@ async function loadAttendance(canSeeDetails){
       return String(a.uid || "").localeCompare(String(b.uid || ""));
     });
 
-    renderAttendance(people, canSeeDetails);
+    attendeesEl.innerHTML = "";
+    people.forEach(p=>{
+      const div = document.createElement("div");
+      div.className = "attendee";
+
+      const avatar = p.photoURL
+        ? `<img src="${esc(p.photoURL)}" alt="" style="width:34px;height:34px;border-radius:999px;object-fit:cover;border:1px solid rgba(255,255,255,.14);" />`
+        : `<div class="avatar">${esc(initialsFromName(p.name))}</div>`;
+
+      div.innerHTML = `
+        ${avatar}
+        <div class="attendeeInfo">
+          <div class="attendeeName">${esc(p.name || "User")}</div>
+          <div class="attendeeMeta">${esc(p.uid || "")}</div>
+        </div>
+      `;
+      attendeesEl.appendChild(div);
+    });
+
   } catch(_){
     goingCountEl.textContent = "0";
     guestHintEl.textContent = "—";
     attendeesEl.innerHTML = "";
   }
 }
+
 
 async function loadEvent(){
   const snap = await getDoc(doc(db, "events", eventId));
