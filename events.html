@@ -195,19 +195,11 @@
       gap:10px;
       flex-wrap:wrap;
       align-items:flex-start;
-      justify-content:space-between;
+      /* CHANGED: was space-between (causes desktop clipping when left side changes) */
+      justify-content:flex-start;
       min-width:0;
     }
-
-    /* CHANGED: allow left column to shrink + wrap properly on desktop */
-    .mini{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-      min-width:0;
-      flex: 1 1 0;
-    }
-
+    .mini{color:var(--muted); font-size:13px; line-height:1.35; min-width:0;}
     .miniTop{color: rgba(255,255,255,.88); font-weight:900}
     .miniSub{margin-top:4px; color: rgba(255,255,255,.70); font-size:12px;}
 
@@ -272,34 +264,41 @@
     }
     .mapBtn:hover{transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 0 14px rgba(176,11,85,.45); filter: brightness(1.06);}
 
+    /* CHANGED: new class to push rating/map to the right WITHOUT space-between */
+    .rightWrap{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-left:auto;   /* key */
+      min-width:0;
+      max-width:100%;
+    }
+
     .actionRow{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
-      justify-content:space-between;
+      /* CHANGED: was space-between */
+      justify-content:flex-start;
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.14);
       border-radius: 14px;
       padding:10px;
       min-width:0;
     }
-
-    /* CHANGED: ensure action text can shrink/wrap and not push buttons off */
-    .actionRow .mini{
-      min-width:0;
-      flex: 1 1 240px;
-    }
-
-    /* CHANGED: min-width so wrapping behaves on desktop */
     .actionBtns{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       align-items:center;
       justify-content:flex-end;
+      /* CHANGED: push buttons right safely */
+      margin-left:auto;
+      max-width:100%;
       min-width:0;
-      flex: 0 0 auto;
     }
 
     .attendBtn,.peopleBtn,.applyBtn{
@@ -802,8 +801,8 @@
                 ${estimatesHtml}
               </div>
 
-              <!-- CHANGED: added flex:1 1 auto so it wraps instead of clipping on desktop -->
-              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:0; flex:1 1 auto;">
+              <!-- CHANGED: was inline style div; now uses .rightWrap so it never clips -->
+              <div class="rightWrap">
                 <div class="ratingBadge" title="Average rating">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
