@@ -427,9 +427,12 @@
   <section class="card section" id="attendanceCard">
     <h2 class="h">Attendance</h2>
     <div class="row">
-      <div class="box"><b>Going</b><br><span id="goingCount">0</span></div>
-      <div class="box"><b>Guests</b><br><span id="guestHint">—</span></div>
-    </div>
+  <div class="box">
+    <b>Going</b><br>
+    <span id="goingCount" style="font-size:18px;font-weight:900;color:var(--accent);">0</span>
+  </div>
+</div>
+
     <div id="attendees" style="margin-top:10px; display:grid; gap:10px;"></div>
   </section>
 
@@ -506,7 +509,6 @@ const comments = document.getElementById("comments");
 
 /* Attendance (added) */
 const goingCountEl = document.getElementById("goingCount");
-const guestHintEl = document.getElementById("guestHint");
 const attendeesEl = document.getElementById("attendees");
 
 function setMsg(text, kind=""){
@@ -616,20 +618,9 @@ async function loadAttendance(canSeeDetails){
       });
     });
 
-    // Going = everyone in members
     const going = people.length;
     goingCountEl.textContent = String(going);
 
-    // Guests = remaining spots (if numeric)
-    const spotsRaw = eventData?.spotsAvailable;
-    const spotsNum = Number(spotsRaw);
-    if (Number.isFinite(spotsNum) && spotsNum >= 0){
-      guestHintEl.textContent = String(Math.max(0, Math.floor(spotsNum) - going));
-    } else {
-      guestHintEl.textContent = "—";
-    }
-
-    // If event is invite-only and user can't see details, hide list (optional behavior)
     if (!canSeeDetails && isInviteOnly){
       attendeesEl.innerHTML = "";
       return;
@@ -640,7 +631,7 @@ async function loadAttendance(canSeeDetails){
       const bn = (b.name || "").toLowerCase();
       if (an < bn) return -1;
       if (an > bn) return 1;
-      return String(a.uid || "").localeCompare(String(b.uid || ""));
+      return 0;
     });
 
     attendeesEl.innerHTML = "";
@@ -656,18 +647,23 @@ async function loadAttendance(canSeeDetails){
         ${avatar}
         <div class="attendeeInfo">
           <div class="attendeeName">${esc(p.name || "User")}</div>
-          <div class="attendeeMeta">${esc(p.uid || "")}</div>
+        </div>
+        <div style="margin-left:auto;">
+          <a href="profile.html?uid=${esc(p.uid)}" class="btn secondary" style="padding:6px 10px;font-size:12px;">
+            View Profile
+          </a>
         </div>
       `;
+
       attendeesEl.appendChild(div);
     });
 
   } catch(_){
     goingCountEl.textContent = "0";
-    guestHintEl.textContent = "—";
     attendeesEl.innerHTML = "";
   }
 }
+
 
 
 async function loadEvent(){
