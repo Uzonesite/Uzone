@@ -198,6 +198,7 @@
   box-shadow: 0 0 18px rgba(255,210,80,.22);
 }
 
+
 .attendBtn:disabled,
 .applyBtn:disabled,
 .abandonBtn:disabled{
@@ -807,11 +808,14 @@ if (canSeeDetails) {
   const appSnap = await getDoc(doc(db, "events", eventId, "applications", currentUser.uid));
 
   if (!appSnap.exists()){
-    statusText.textContent = "Not applied";
-  } else {
-    statusText.textContent = "Status: " + (appSnap.data()?.status || "pending");
-    applyBtn.classList.add("on");  // 🔥 glow when applied
-  }
+  statusText.textContent = "Not applied";
+  applyBtn.classList.remove("on");
+  applyBtn.textContent = "Apply";
+} else {
+  statusText.textContent = "Status: " + (appSnap.data()?.status || "pending");
+  applyBtn.classList.add("on");
+  applyBtn.textContent = "Applied";  // 🔥 matches events.html
+}
 }
 
   
