@@ -580,21 +580,41 @@ async function loadAttendance(canSeeDetails){
   try{
     const snap = await getDocs(collection(db, "events", eventId, "members"));
 
+    // first pull what we have in members
     const people = [];
     snap.forEach(d=>{
       const m = d.data() || {};
       people.push({
         uid: m.uid || d.id,
+        // keep member-stored fields as fallback
         name: m.name || m.displayName || m.username || "",
         photoURL: m.photoURL || ""
       });
     });
 
+    // hydrate from /users/{uid} so everyone sees name + pic for invite-only + open
+    await Promise.all(people.map(async (p) => {
+      try{
+        const uSnap = await getDoc(doc(db, "users", p.uid));
+        if (!uSnap.exists()) return;
+
+        const u = uSnap.data() || {};
+
+        const bestName =
+          u.name || u.displayName || u.username || u.fullName || "";
+
+        const bestPhoto =
+          u.photoURL || u.photoUrl || u.photo || u.pfp || u.profilePic || u.avatar || "";
+
+        // only overwrite if we actually found something
+        if (bestName) p.name = bestName;
+        if (bestPhoto) p.photoURL = bestPhoto;
+      } catch(_) {}
+    }));
+
     const going = people.length;
     goingCountEl.textContent = String(going);
 
-    // CHANGE: always show attendees, even if invite-only / can't see details.
-    // (We still hide location/schedule/etc elsewhere via canSeeDetails.)
     people.sort((a,b)=>{
       const an = (a.name || "").toLowerCase();
       const bn = (b.name || "").toLowerCase();
@@ -632,6 +652,7 @@ async function loadAttendance(canSeeDetails){
     attendeesEl.innerHTML = "";
   }
 }
+
 
 async function loadEvent(){
   const snap = await getDoc(doc(db, "events", eventId));
