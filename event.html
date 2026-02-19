@@ -153,6 +153,62 @@
     line-height:1.35;
   }
 
+
+
+/* Action buttons (match events.html theme) */
+.attendBtn,
+.applyBtn,
+.abandonBtn {
+  padding:9px 11px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  color: rgba(255,255,255,.92);
+  font-weight:950;
+  font-size:12px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+  user-select:none;
+  white-space:nowrap;
+}
+
+.attendBtn:hover,
+.applyBtn:hover,
+.abandonBtn:hover{
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(176,11,85,.45);
+  filter: brightness(1.06);
+}
+
+/* Active / Going state */
+.attendBtn.on{
+  border-color: rgba(176,11,85,.65);
+  background: linear-gradient(135deg, rgba(176,11,85,.92), rgba(176,11,85,.42));
+  box-shadow: 0 0 18px rgba(176,11,85,.45);
+}
+
+/* Applied (private event pending) */
+.applyBtn.on{
+  border-color: rgba(255,210,80,.55);
+  background: linear-gradient(135deg, rgba(255,210,80,.36), rgba(0,0,0,.14));
+  box-shadow: 0 0 18px rgba(255,210,80,.22);
+}
+
+.attendBtn:disabled,
+.applyBtn:disabled,
+.abandonBtn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+
+  
+  
+
   /* Clean rating UI (no pie) */
   .ratingTop{
     display:flex;
@@ -377,9 +433,9 @@
       </div>
 
       <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn" id="applyBtn" type="button" style="display:none;">Apply</button>
-        <button class="btn" id="attendBtn" type="button" style="display:none;">Attend</button>
-        <button class="btn secondary" id="abandonBtn" type="button" style="display:none;">Abandon</button>
+        <button class="applyBtn" id="applyBtn" type="button">Apply</button>
+<button class="attendBtn" id="attendBtn" type="button">Attend</button>
+<button class="attendBtn" id="abandonBtn" type="button">Going</button>
         <a class="btn secondary" id="mapBtn" href="#" style="display:none;">View on Map</a>
         <span class="tag" id="statusChip" style="display:none;"><span class="dot"></span><span id="statusText">—</span></span>
       </div>
