@@ -313,9 +313,10 @@
     </div>
 
     <div class="right">
-      <a class="btn" href="hub.html" aria-label="Back to hub">Hub</a>
-      <!-- Sign out removed -->
-    </div>
+  <a class="btn" href="hub.html" aria-label="Back to hub">Hub</a>
+  <a class="btn" href="messages.html" aria-label="Chat">Chat</a>
+</div>
+
   </header>
 
   <main>
@@ -793,45 +794,56 @@
     function setVerifyMsg(text, kind=""){ setMsg(verifyMsg, text, kind); }
 
     async function submitVerification(){
-      if (!currentUser) return;
-      setVerifyMsg("");
+  if (!currentUser) return;
+  setVerifyMsg("");
 
-      if (!selectedIdFile || !selectedSelfieFile) {
-        setVerifyMsg("Please select BOTH a student ID photo and a selfie.", "error");
-        return;
-      }
+  if (!selectedIdFile || !selectedSelfieFile) {
+    setVerifyMsg("Please select BOTH a student ID photo and a selfie.", "error");
+    return;
+  }
 
-      submitVerifyBtn.disabled = true;
+  submitVerifyBtn.disabled = true;
+  const originalText = submitVerifyBtn.textContent;
+  submitVerifyBtn.textContent = "Submitting…";
+  setVerifyMsg("Uploading files… please wait.", "");
 
-      try{
-        const idPath = `verification/${currentUser.uid}/id.jpg`;
-        const selfiePath = `verification/${currentUser.uid}/selfie.jpg`;
+  try{
+    const idPath = `verification/${currentUser.uid}/id.jpg`;
+    const selfiePath = `verification/${currentUser.uid}/selfie.jpg`;
 
-        await uploadBytes(ref(storage, idPath), selectedIdFile, { contentType: selectedIdFile.type || "image/jpeg" });
-        await uploadBytes(ref(storage, selfiePath), selectedSelfieFile, { contentType: selectedSelfieFile.type || "image/jpeg" });
+    await uploadBytes(ref(storage, idPath), selectedIdFile, {
+      contentType: selectedIdFile.type || "image/jpeg"
+    });
 
-        await setDoc(doc(db, "verification_requests", currentUser.uid), {
-          uid: currentUser.uid,
-          status: "pending",
-          idImagePath: idPath,
-          selfieImagePath: selfiePath,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        }, { merge: true });
+    await uploadBytes(ref(storage, selfiePath), selectedSelfieFile, {
+      contentType: selectedSelfieFile.type || "image/jpeg"
+    });
 
-        await setDoc(doc(db, "users", currentUser.uid), {
-          verification: { status: "pending", updatedAt: serverTimestamp() },
-          updatedAt: serverTimestamp()
-        }, { merge: true });
+    await setDoc(doc(db, "verification_requests", currentUser.uid), {
+      uid: currentUser.uid,
+      status: "pending",
+      idImagePath: idPath,
+      selfieImagePath: selfiePath,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
 
-        setVerificationUI("pending");
-        setVerifyMsg("Submitted! An admin will review it.", "ok");
-      } catch(err){
-        setVerifyMsg(err?.message || "Verification submission failed.", "error");
-      } finally{
-        submitVerifyBtn.disabled = false;
-      }
-    }
+    await setDoc(doc(db, "users", currentUser.uid), {
+      verification: { status: "pending", updatedAt: serverTimestamp() },
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    setVerificationUI("pending");
+    setVerifyMsg("✅ Submitted! An admin will review it shortly.", "ok");
+
+    submitVerifyBtn.textContent = "Submitted";
+  } catch(err){
+    setVerifyMsg(err?.message || "Verification submission failed.", "error");
+    submitVerifyBtn.disabled = false;
+    submitVerifyBtn.textContent = originalText;
+  }
+}
+
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
