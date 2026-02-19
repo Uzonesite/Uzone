@@ -511,8 +511,26 @@
           <input id="sizeEstimate" placeholder="e.g., 30–40 people" />
         </div>
 
+        <!-- Ratio toggle + input -->
         <div class="col12">
-          <label for="ratio">Ratio (optional)</label>
+          <button class="toggleBtn" id="ratioToggleBtn" type="button" aria-pressed="false">
+            <div class="toggleRow">
+              <div class="toggleText">
+                <b>Use ratio</b>
+                <span>Optionally set a crowd ratio requirement.</span>
+              </div>
+
+              <div class="switch" aria-hidden="true">
+                <input id="useRatio" type="checkbox" />
+                <span class="track"><span class="thumb"></span></span>
+              </div>
+            </div>
+          </button>
+          <div class="hint" style="margin-top:10px;">If off, ratio won’t be saved or displayed.</div>
+        </div>
+
+        <div class="col12" id="ratioRow" style="display:none;">
+          <label for="ratio">Ratio</label>
           <input id="ratio" placeholder="e.g., 60% girls / 40% guys" />
         </div>
       </div>
@@ -643,6 +661,10 @@
     const sizeEl = $("sizeEstimate");
     const ratioEl = $("ratio");
 
+    const useRatioEl = $("useRatio");
+    const ratioToggleBtn = $("ratioToggleBtn");
+    const ratioRow = $("ratioRow");
+
     const inviteOnlyEl = $("inviteOnly");
     const inviteToggleBtn = $("inviteToggleBtn");
     const inviteChip = $("inviteChip");
@@ -693,6 +715,19 @@
     function toggleInviteOnly(){
       inviteOnlyEl.checked = !inviteOnlyEl.checked;
       setInviteUI();
+    }
+
+    function setRatioUI(){
+      const on = !!(useRatioEl && useRatioEl.checked);
+      if (ratioRow) ratioRow.style.display = on ? "block" : "none";
+      if (ratioToggleBtn) ratioToggleBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      if (!on && ratioEl) ratioEl.value = "";
+    }
+
+    function toggleUseRatio(){
+      if (!useRatioEl) return;
+      useRatioEl.checked = !useRatioEl.checked;
+      setRatioUI();
     }
 
     function whenGoogleReady(timeoutMs = 12000){
@@ -891,10 +926,12 @@
       const description = descEl.value.trim() || null;
       const inviteOnly = !!inviteOnlyEl.checked;
 
+      const useRatio = !!(useRatioEl && useRatioEl.checked);
+
       const spotsAvailable = (spotsEl?.value ?? "").toString().trim() === "" ? null : Number(spotsEl.value);
       const venueSize = venueEl.value.trim() || null;
       const sizeEstimate = sizeEl.value.trim() || null;
-      const ratio = ratioEl.value.trim() || null;
+      const ratio = useRatio ? (ratioEl.value.trim() || null) : null;
 
       if (!name) return setMsg("Please enter a motive name.", false);
       if (!startDate || !startTime) return setMsg("Please choose a start date and time.", false);
@@ -927,6 +964,8 @@
           spotsAvailable,
           venueSize,
           sizeEstimate,
+          useRatio,
+
           ratio,
 
           imageUrl: null, // ✅ will be filled if user chose an image
@@ -982,6 +1021,10 @@
       setInviteUI();
       inviteToggleBtn.addEventListener("click", toggleInviteOnly);
       inviteOnlyEl.addEventListener("change", setInviteUI);
+
+      setRatioUI();
+      if (ratioToggleBtn) ratioToggleBtn.addEventListener("click", toggleUseRatio);
+      if (useRatioEl) useRatioEl.addEventListener("change", setRatioUI);
 
       initMap().catch(err => {
         console.error(err);
