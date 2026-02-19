@@ -503,7 +503,6 @@
     <div style="display:grid; gap:10px; margin-top:10px;">
       <textarea id="commentInput" placeholder="Write a comment…"></textarea>
       <div style="display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap;">
-        <button class="btn secondary" id="syncMyRating" type="button">Sync my rating</button>
         <button class="btn" id="postComment" type="button">Post Comment</button>
       </div>
     </div>
@@ -1063,7 +1062,6 @@ onAuthStateChanged(auth, async (user) => {
   attendBtn.addEventListener("click", attendOpen);
   abandonBtn.addEventListener("click", abandon);
   postComment.addEventListener("click", postAComment);
-  syncMyRatingBtn.addEventListener("click", syncMyRating);
 
   await loadEvent();
 });
