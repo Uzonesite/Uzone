@@ -198,10 +198,6 @@
       justify-content:space-between;
       min-width:0;
     }
-    @media (max-width: 520px){
-      .line{flex-direction:column; align-items:stretch;}
-      .line > div:last-child{justify-content:flex-start;}
-    }
     .mini{color:var(--muted); font-size:13px; line-height:1.35; min-width:0;}
     .miniTop{color: rgba(255,255,255,.88); font-weight:900}
     .miniSub{margin-top:4px; color: rgba(255,255,255,.70); font-size:12px;}
@@ -564,10 +560,74 @@
     const membersCache = new Map();
     // cache: eventId -> number (members count)
     const attendingCountCache = new Map();
-    // cache: eventId -> string (attending ratio)
-    const attendingRatioCache = new Map();
     // users/{uid} name cache
     const userNameCache = new Map();
+
+    // gender cache: uid -> "Male" | "Female" | null
+    const userGenderCache = new Map();
+    // cache: eventId -> { f:number, m:number }
+    const attendingGenderCache = new Map();
+
+    function gcd(a,b){
+      a = Math.abs(a|0); b = Math.abs(b|0);
+      while (b){ const t = a % b; a = b; b = t; }
+      return a || 1;
+    }
+
+    function formatGenderRatio(f, m){
+      const F = Number(f) || 0;
+      const M = Number(m) || 0;
+      const base = `Female${F}:Male${M}`;
+      if (F === 0 && M === 0) return base;
+      if (F === 0) return `${base} • 0:1`;
+      if (M === 0) return `${base} • 1:0`;
+      const g = gcd(F, M);
+      return `${base} • ${(F/g)}:${(M/g)}`;
+    }
+
+    async function resolveGender(uid){
+      if (!uid) return null;
+      if (userGenderCache.has(uid)) return userGenderCache.get(uid);
+      try{
+        const snap = await getDoc(doc(db, "users", uid));
+        const g = (snap.exists() ? (snap.data()?.gender ?? null) : null);
+        const norm = (g === "Male" || g === "Female") ? g : null;
+        userGenderCache.set(uid, norm);
+        return norm;
+      }catch(_){
+        userGenderCache.set(uid, null);
+        return null;
+      }
+    }
+
+    function setAttRatioText(eventId, text){
+      const el = document.getElementById(`attRatio-${eventId}`);
+      if (el) el.textContent = text;
+    }
+
+    async function ensureAttendingRatio(eventId){
+      if (!eventId) return;
+      if (attendingGenderCache.has(eventId)){
+        const cached = attendingGenderCache.get(eventId);
+        setAttRatioText(eventId, formatGenderRatio(cached.f, cached.m));
+        return;
+      }
+      setAttRatioText(eventId, "…");
+      try{
+        const snap = await getDocs(query(collection(db, "events", eventId, "members"), limit(500)));
+        let f = 0, m = 0;
+        await Promise.all(snap.docs.map(async (d) => {
+          const uid = d.id;
+          const g = await resolveGender(uid);
+          if (g === "Female") f++;
+          else if (g === "Male") m++;
+        }));
+        attendingGenderCache.set(eventId, { f, m });
+        setAttRatioText(eventId, formatGenderRatio(f, m));
+      }catch(_){
+        setAttRatioText(eventId, "—");
+      }
+    }
 
     function esc(s){
       return (s ?? "").toString()
@@ -690,13 +750,15 @@
         const isApplied = appliedMap.get(ev.id) === true;
 
         // estimates (from post_event.html: sizeEstimate + ratio)
+        const ratioOn = !!(ev.ratioEnabled ?? ev.showRatio ?? ev.ratioToggle ?? false);
         const estAtt = (ev.sizeEstimate ?? ev.estimatedAttendance ?? ev.estimated ?? ev.size ?? null);
-        const ratioOn = !!(ev.useRatio ?? ev.use_ratio);
-        const estRatio = ratioOn ? (ev.ratio ?? ev.estimatedRatio ?? null) : null;
-        const estimatesHtml = (estAtt || estRatio) ? `
+        const estRatio = (ev.ratio ?? ev.estimatedRatio ?? null);
+
+        const estimatesHtml = (estAtt || (ratioOn && (estRatio))) ? `
           <div class="estRow">
             ${estAtt ? `<span class="estPill">Estimated Attendance: <b>${esc(estAtt)}</b></span>` : ``}
-            ${estRatio ? `<span class="estPill">Estimated ratio: <b>${esc(estRatio)}</b></span>` : ``}
+            ${(ratioOn && estRatio) ? `<span class="estPill">Estimated ratio: <b>${esc(estRatio)}</b></span>` : ``}
+            ${ratioOn ? `<span class="estPill">Attending ratio: <b id="attRatio-${ev.id}">…</b></span>` : ``}
           </div>
         ` : ``;
 
@@ -741,7 +803,7 @@
                   Spots: <b><span>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</span></b>
                   • Venue: <b>${esc(ev.venueSize || "—")}</b>
                 </div>
-                <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b>${ratioOn ? ` • Ratio: <b><span class="attRatio" data-ev="${esc(ev.id)}">—</span></b>` : ``}</div>
+                <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b></div>
                 ${estimatesHtml}
               </div>
 
@@ -799,10 +861,11 @@
 
         // attending count
         const attEl = card.querySelector('.attCount');
-        const ratioEl = card.querySelector('.attRatio');
-        if (attEl) ensureAttendingCount(ev.id, attEl, ratioEl);
+        if (attEl) ensureAttendingCount(ev.id, attEl);
 
         grid.appendChild(card);
+
+        if (ratioOn) ensureAttendingRatio(ev.id);
 
         const mapBtn = card.querySelector(".mapBtn");
         if (mapBtn){
@@ -949,54 +1012,26 @@
     whoOverlay.addEventListener("click", (e) => { if (e.target === whoOverlay) closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && whoOverlay.classList.contains("show")) closeModal(); });
 
-    async function ensureAttendingCount(eventId, el, ratioEl){
+    async function ensureAttendingCount(eventId, el){
       if (!eventId || !el) return;
 
       if (attendingCountCache.has(eventId)){
         el.textContent = String(Number(attendingCountCache.get(eventId) || 0));
-        if (ratioEl){
-          ratioEl.textContent = attendingRatioCache.has(eventId) ? String(attendingRatioCache.get(eventId) || "—") : "—";
-        }
         return;
       }
 
       el.textContent = "…";
-      if (ratioEl) ratioEl.textContent = "…";
-
       try{
         const snap = await getDocs(query(collection(db, "events", eventId, "members"), limit(500)));
         const n = snap.size || 0;
         attendingCountCache.set(eventId, n);
         el.textContent = String(n);
-
-        // If ratio is requested, compute it from members docs (best-effort)
-        if (ratioEl){
-          let male = 0, female = 0;
-          snap.forEach(d => {
-            const data = d.data() || {};
-            const g = (data.gender ?? data.sex ?? data.Gender ?? data.Sex ?? "").toString().trim().toLowerCase();
-            if (!g) return;
-            if (g.startsWith("m")) male++;
-            else if (g.startsWith("f")) female++;
-          });
-
-          const tot = male + female;
-          let txt = "—";
-          if (tot > 0){
-            const fp = Math.round((female / tot) * 100);
-            const mp = 100 - fp;
-            txt = `${fp}% girls / ${mp}% guys`;
-          }
-          attendingRatioCache.set(eventId, txt);
-          ratioEl.textContent = txt;
-        }
       }catch(_){
         el.textContent = "—";
-        if (ratioEl) ratioEl.textContent = "—";
       }
     }
 
-    async function openWhosGoingasync function openWhosGoing(eventId, eventName){
+    async function openWhosGoing(eventId, eventName){
       if (!currentUser || !eventId) return;
 
       whoTitle.textContent = "Who’s going";
