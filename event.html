@@ -47,46 +47,46 @@
   .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
 
   .btn{
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.18);
-  color:rgba(255,255,255,.92);
-  font-weight:800;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  white-space:nowrap;
-  user-select:none;
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
-}
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.18);
+    color:rgba(255,255,255,.92);
+    font-weight:800;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    white-space:nowrap;
+    user-select:none;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, filter .12s ease;
+  }
 
-.btn:hover{
-  transform: translateY(-1px);
-  border-color: var(--accent);
-  box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
-  filter: brightness(1.06);
-}
+  .btn:hover{
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+    filter: brightness(1.06);
+  }
 
-.btn:active{
-  transform: translateY(0px) scale(.99);
-  box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
-}
+  .btn:active{
+    transform: translateY(0px) scale(.99);
+    box-shadow: 0 0 10px var(--accent), 0 10px 28px rgba(176,11,85,.20);
+  }
 
-.btn.secondary{
-  background: rgba(0,0,0,.18);
-  border:1px solid rgba(255,255,255,.14);
-  box-shadow:none;
-}
+  .btn.secondary{
+    background: rgba(0,0,0,.18);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:none;
+  }
 
   .btn.secondary:hover{
-  border-color: var(--accent);
-  box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-}
+    border-color: var(--accent);
+    box-shadow: 0 0 16px var(--accent), 0 16px 40px rgba(176,11,85,.30);
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
 
   .btn:disabled{opacity:.6; cursor:not-allowed}
 
@@ -292,6 +292,42 @@
     background: rgba(176,11,85,.95);
     box-shadow: 0 0 0 4px rgba(176,11,85,.18);
   }
+
+  /* Attendance UI */
+  .attendee{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(0,0,0,.16);
+  }
+  .avatar{
+    width:34px;height:34px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.10);
+    display:grid;
+    place-items:center;
+    font-weight:900;
+    color: rgba(255,255,255,.90);
+    flex: 0 0 auto;
+  }
+  .attendeeInfo{min-width:0; display:grid; gap:2px;}
+  .attendeeName{
+    font-size:13px;
+    font-weight:800;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .attendeeMeta{
+    font-size:12px;
+    color: rgba(255,255,255,.70);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
 </style>
 </head>
 <body>
@@ -331,7 +367,6 @@
 
       <div style="margin-top:10px;" class="row">
         <div class="box"><b>Size</b><br><span id="size">—</span></div>
-        <!-- ONLY CHANGE: add id so we can hide this whole box when ratio is off -->
         <div class="box" id="ratioBox"><b>Ratio</b><br><span id="ratio">—</span></div>
       </div>
 
@@ -388,6 +423,16 @@
     </section>
   </section>
 
+  <!-- Attendance (added) -->
+  <section class="card section" id="attendanceCard">
+    <h2 class="h">Attendance</h2>
+    <div class="row">
+      <div class="box"><b>Going</b><br><span id="goingCount">0</span></div>
+      <div class="box"><b>Guests</b><br><span id="guestHint">—</span></div>
+    </div>
+    <div id="attendees" style="margin-top:10px; display:grid; gap:10px;"></div>
+  </section>
+
   <section class="card section">
     <h2 class="h">Comments</h2>
     <div id="commentLock" class="box" style="display:none;">Comments are available to accepted guests only.</div>
@@ -434,7 +479,7 @@ const spotsEl = document.getElementById("spots");
 const venueEl = document.getElementById("venue");
 const sizeEl = document.getElementById("size");
 const ratioEl = document.getElementById("ratio");
-const ratioBox = document.getElementById("ratioBox"); // ONLY CHANGE: grab the box so we can hide it
+const ratioBox = document.getElementById("ratioBox");
 const descEl = document.getElementById("description");
 
 const locationEl = document.getElementById("location");
@@ -458,6 +503,11 @@ const commentInput = document.getElementById("commentInput");
 const postComment = document.getElementById("postComment");
 const syncMyRatingBtn = document.getElementById("syncMyRating");
 const comments = document.getElementById("comments");
+
+/* Attendance (added) */
+const goingCountEl = document.getElementById("goingCount");
+const guestHintEl = document.getElementById("guestHint");
+const attendeesEl = document.getElementById("attendees");
 
 function setMsg(text, kind=""){
   msg.style.display = text ? "block" : "none";
@@ -515,6 +565,76 @@ function renderStars(selected){
   }
 }
 
+function initialsFromName(name){
+  const s = String(name || "").trim();
+  if (!s) return "?";
+  const parts = s.split(/\s+/).filter(Boolean);
+  const a = (parts[0] || "?")[0] || "?";
+  const b = (parts.length > 1 ? (parts[parts.length-1] || "")[0] : "") || "";
+  return (a + b).toUpperCase();
+}
+
+/* Attendance (added) */
+function renderAttendance(list, canSeeDetails){
+  const going = list.length;
+  goingCountEl.textContent = String(going);
+
+  if (!canSeeDetails && isInviteOnly){
+    guestHintEl.textContent = "Hidden";
+    attendeesEl.innerHTML = "";
+    return;
+  }
+
+  guestHintEl.textContent = going ? "Tap names to see profiles soon" : "No one yet";
+  attendeesEl.innerHTML = "";
+
+  list.forEach(p=>{
+    const div = document.createElement("div");
+    div.className = "attendee";
+    div.innerHTML = `
+      <div class="avatar">${esc(initialsFromName(p.name))}</div>
+      <div class="attendeeInfo">
+        <div class="attendeeName">${esc(p.name || "User")}</div>
+        <div class="attendeeMeta">${esc(p.status || "")}</div>
+      </div>
+    `;
+    attendeesEl.appendChild(div);
+  });
+}
+
+async function loadAttendance(canSeeDetails){
+  try{
+    const snap = await getDocs(collection(db, "events", eventId, "members"));
+    const people = [];
+    snap.forEach(d=>{
+      const m = d.data() || {};
+      const status = String(m.status || "").toLowerCase();
+      if (status === "accepted" || status === "going"){
+        people.push({
+          uid: m.uid || d.id,
+          name: m.name || m.displayName || m.username || "",
+          status: m.status || "accepted"
+        });
+      }
+    });
+
+    // Keep stable ordering (name first, then uid)
+    people.sort((a,b)=>{
+      const an = (a.name || "").toLowerCase();
+      const bn = (b.name || "").toLowerCase();
+      if (an < bn) return -1;
+      if (an > bn) return 1;
+      return String(a.uid || "").localeCompare(String(b.uid || ""));
+    });
+
+    renderAttendance(people, canSeeDetails);
+  } catch(_){
+    goingCountEl.textContent = "0";
+    guestHintEl.textContent = "—";
+    attendeesEl.innerHTML = "";
+  }
+}
+
 async function loadEvent(){
   const snap = await getDoc(doc(db, "events", eventId));
   if (!snap.exists()){
@@ -550,11 +670,11 @@ async function loadEvent(){
   venueEl.textContent = eventData.venueSize || "—";
   sizeEl.textContent = eventData.sizeEstimate ?? "—";
 
-  // ONLY CHANGE: hide ratio box unless toggle is on
-  const ratioOn = !!(eventData.useRatio ?? eventData.use_ratio);
-  if (ratioOn){
+  // CHANGE: ratio is optional now (no toggle). Hide if empty.
+  const ratioVal = String(eventData.ratio ?? "").trim();
+  if (ratioVal){
     ratioBox.style.display = "";
-    ratioEl.textContent = eventData.ratio || "—";
+    ratioEl.textContent = ratioVal;
   } else {
     ratioBox.style.display = "none";
   }
@@ -605,6 +725,9 @@ async function loadEvent(){
   commentInput.disabled = !canInteract;
   postComment.disabled = !canInteract;
   syncMyRatingBtn.disabled = !canInteract;
+
+  // Attendance (added)
+  await loadAttendance(canSeeDetails);
 
   await loadRatings();
   await loadMyRating();
