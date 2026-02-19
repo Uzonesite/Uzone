@@ -470,11 +470,18 @@
       return v || "U?";
     }
 
-    function setAvatar(src){
-      if (!src) return;
-      els.avatar.src = src;
-      els.avatar.onerror = () => { /* keep fallback */ };
-    }
+    function setAvatar(src, name){
+  if (src){
+    els.avatar.src = src;
+  } else {
+    els.avatar.src = placeholderAvatarFromName(name);
+  }
+
+  els.avatar.onerror = () => {
+    els.avatar.src = placeholderAvatarFromName(name);
+  };
+}
+
 
     function pill(text, cls=""){
       const s = document.createElement("span");
@@ -516,6 +523,29 @@
     function postCaptionOf(p){
       return (p?.caption ?? p?.text ?? p?.body ?? p?.content ?? "").toString().trim();
     }
+
+    function placeholderAvatarFromName(name){
+  const initial = (name?.trim()?.[0] || "U").toUpperCase();
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+      <defs>
+        <radialGradient id="g" cx="30%" cy="20%" r="90%">
+          <stop offset="0%" stop-color="#b00b55" stop-opacity="0.35"/>
+          <stop offset="65%" stop-color="#0b0b10" stop-opacity="1"/>
+        </radialGradient>
+      </defs>
+      <rect width="100%" height="100%" rx="200" fill="url(#g)"/>
+      <text x="50%" y="52%" text-anchor="middle"
+            font-size="160"
+            font-family="Arial"
+            fill="rgba(255,255,255,0.88)"
+            dominant-baseline="middle">${initial}</text>
+    </svg>`;
+
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
 
     function openLightbox(post){
       const img = postImageOf(post);
@@ -574,7 +604,7 @@
         if (gender) els.meta.appendChild(pill(`🧍 ${gender}`));
         if (age !== "" && age !== null && age !== undefined) els.meta.appendChild(pill(`🎂 ${String(age)}`));
 
-        setAvatar(getAvatar(u));
+setAvatar(getAvatar(u), name);
 
         const about =
           (u.description && u.description.toString().trim()) ? u.description.toString().trim() :
