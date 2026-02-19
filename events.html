@@ -198,15 +198,7 @@
       justify-content:space-between;
       min-width:0;
     }
-
-    /* CHANGED: allow the left text column to shrink so right-side buttons don't get pushed/clipped */
-    .mini{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.35;
-      min-width:0;
-      flex: 1 1 320px; /* key */
-    }
+    .mini{color:var(--muted); font-size:13px; line-height:1.35; min-width:0;}
     .miniTop{color: rgba(255,255,255,.88); font-weight:900}
     .miniSub{margin-top:4px; color: rgba(255,255,255,.70); font-size:12px;}
 
@@ -271,18 +263,6 @@
     }
     .mapBtn:hover{transform: translateY(-1px); border-color: var(--accent); box-shadow: 0 0 14px rgba(176,11,85,.45); filter: brightness(1.06);}
 
-    /* CHANGED: new wrapper to keep rating + map inside card without clipping */
-    .rightWrap{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      min-width:0;
-      max-width:100%;
-      flex: 0 1 auto; /* key */
-    }
-
     .actionRow{
       display:flex;
       gap:10px;
@@ -293,18 +273,8 @@
       background: rgba(0,0,0,.14);
       border-radius: 14px;
       padding:10px;
-      min-width:0; /* CHANGED */
     }
-    .actionBtns{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
-      min-width:0;   /* CHANGED */
-      max-width:100%;/* CHANGED */
-      flex: 0 1 auto;/* CHANGED */
-    }
+    .actionBtns{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
     .attendBtn,.peopleBtn,.applyBtn{
       padding:9px 11px;
       border-radius:999px;
@@ -805,8 +775,7 @@
                 ${estimatesHtml}
               </div>
 
-              <!-- CHANGED: was inline flex wrapper; now uses .rightWrap -->
-              <div class="rightWrap">
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:0;">
                 <div class="ratingBadge" title="Average rating">
                   <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
@@ -953,10 +922,10 @@
         attendingCountCache.delete(eventId);
         attendeeRatioCache.delete(eventId);
 
-        const attEl = document.querySelector(\`.attCount[data-ev="\${eventId}"]\`);
+        const attEl = document.querySelector(`.attCount[data-ev="${eventId}"]`);
         if (attEl) ensureAttendingCount(eventId, attEl);
 
-        const ratioEl = document.querySelector(\`.attRatio[data-ev="\${eventId}"]\`);
+        const ratioEl = document.querySelector(`.attRatio[data-ev="${eventId}"]`);
         if (ratioEl) ensureAttendeeRatio(eventId, ratioEl);
 
         applySearch();
@@ -1095,7 +1064,7 @@
         }
 
         setWhoMsg("");
-        whoCount.textContent = \`\${rows.length} going\`;
+        whoCount.textContent = `${rows.length} going`;
         renderRows(rows);
         whoSearch.oninput = () => renderRows(rows);
 
@@ -1126,10 +1095,10 @@
 
           row.innerHTML = `
             <div class="pLeft">
-              <div class="avatar">\${esc(initial)}</div>
+              <div class="avatar">${esc(initial)}</div>
               <div class="pName">
-                \${esc(r.name || "User")}
-                \${currentUser && r.uid === currentUser.uid ? `<span class="youBadge">you</span>` : ``}
+                ${esc(r.name || "User")}
+                ${currentUser && r.uid === currentUser.uid ? `<span class="youBadge">you</span>` : ``}
               </div>
             </div>
             <button class="viewBtn" type="button">View profile</button>
@@ -1137,7 +1106,7 @@
 
           row.querySelector(".viewBtn").addEventListener("click", (e) => {
             e.preventDefault(); e.stopPropagation();
-            window.location.href = \`view_profile.html?uid=\${encodeURIComponent(r.uid)}\`;
+            window.location.href = `view_profile.html?uid=${encodeURIComponent(r.uid)}`;
           });
 
           frag.appendChild(row);
@@ -1159,7 +1128,7 @@
         snap.forEach(d => list.push({ id: d.id, ...(d.data() || {}) }));
 
         allEvents = list;
-        count.textContent = \`\${allEvents.length} motive\${allEvents.length === 1 ? "" : "s"}\`;
+        count.textContent = `${allEvents.length} motive${allEvents.length === 1 ? "" : "s"}`;
 
         await preloadMyStates(allEvents);
 
@@ -1184,7 +1153,7 @@
         return;
       }
       currentUser = user;
-      subline.textContent = `Signed in as \${user.displayName || "User"}`;
+      subline.textContent = `Signed in as ${user.displayName || "User"}`;
       await loadEvents();
     });
   </script>
