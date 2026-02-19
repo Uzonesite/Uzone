@@ -404,7 +404,7 @@ async function loadMatches(){
   chatList.innerHTML = "";
   allChats = [];
 
-  const snap = await getDocs(collection(db,"matches"));
+  const snap = await getDocs(collection(db,"chats"));
 
   for (const docSnap of snap.docs){
     const data = docSnap.data();
@@ -414,29 +414,37 @@ async function loadMatches(){
     const userSnap = await getDoc(doc(db,"users",other));
     const name = userSnap.exists() ? (userSnap.data().name || other) : other;
 
-    allChats.push({ chatId: docSnap.id, name });
+    allChats.push({ chatId: docSnap.id, name, otherUid: other });
   }
 
-  // Sort alphabetically
   allChats.sort((a,b) => a.name.localeCompare(b.name));
-
   renderChatList("");
 
- // 🔥 Control sidebar visibility on page load
-const target = getUrlChatTarget();
+  const target = getUrlChatTarget();
 
-if (target.chatId) {
-  // Coming from Dating match → open specific chat, hide sidebar on mobile
-  const found = allChats.find(c => c.chatId === target.chatId);
-  const name = found ? found.name : "Chat";
-  openChat(target.chatId, name);
+  // ✅ If a chat ID is directly provided → open it
+  if (target.chatId) {
+    const found = allChats.find(c => c.chatId === target.chatId);
+    const name = found ? found.name : "Chat";
+    openChat(target.chatId, name);
+    sidebar.classList.remove("open");
+    return;
+  }
 
-  sidebar.classList.remove("open");
-} else {
-  // Coming from Hub → show chat list immediately
+  // ✅ If coming from profile with ?with=UID but no chat param
+  if (target.withUid) {
+    const found = allChats.find(c => c.otherUid === target.withUid);
+    if (found) {
+      openChat(found.chatId, found.name);
+      sidebar.classList.remove("open");
+    }
+    return;
+  }
+
+  // Default behavior (opened from Hub)
   sidebar.classList.add("open");
 }
-}
+
 
 function renderChatList(filterText){
   const q = (filterText || "").trim().toLowerCase();
