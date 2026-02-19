@@ -198,6 +198,10 @@
       justify-content:space-between;
       min-width:0;
     }
+    @media (max-width: 520px){
+      .line{flex-direction:column; align-items:stretch;}
+      .line > div:last-child{justify-content:flex-start;}
+    }
     .mini{color:var(--muted); font-size:13px; line-height:1.35; min-width:0;}
     .miniTop{color: rgba(255,255,255,.88); font-weight:900}
     .miniSub{margin-top:4px; color: rgba(255,255,255,.70); font-size:12px;}
@@ -560,6 +564,8 @@
     const membersCache = new Map();
     // cache: eventId -> number (members count)
     const attendingCountCache = new Map();
+    // cache: eventId -> string (attending ratio)
+    const attendingRatioCache = new Map();
     // users/{uid} name cache
     const userNameCache = new Map();
 
@@ -735,7 +741,7 @@
                   Spots: <b><span>${esc((ev.spotsAvailable ?? "") === "" ? "—" : ev.spotsAvailable)}</span></b>
                   • Venue: <b>${esc(ev.venueSize || "—")}</b>
                 </div>
-                <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b></div>
+                <div class="miniSub">Attending: <b><span class="attCount" data-ev="${esc(ev.id)}">—</span></b>${ratioOn ? ` • Ratio: <b><span class="attRatio" data-ev="${esc(ev.id)}">—</span></b>` : ``}</div>
                 ${estimatesHtml}
               </div>
 
@@ -793,7 +799,8 @@
 
         // attending count
         const attEl = card.querySelector('.attCount');
-        if (attEl) ensureAttendingCount(ev.id, attEl);
+        const ratioEl = card.querySelector('.attRatio');
+        if (attEl) ensureAttendingCount(ev.id, attEl, ratioEl);
 
         grid.appendChild(card);
 
@@ -942,26 +949,54 @@
     whoOverlay.addEventListener("click", (e) => { if (e.target === whoOverlay) closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && whoOverlay.classList.contains("show")) closeModal(); });
 
-    async function ensureAttendingCount(eventId, el){
+    async function ensureAttendingCount(eventId, el, ratioEl){
       if (!eventId || !el) return;
 
       if (attendingCountCache.has(eventId)){
         el.textContent = String(Number(attendingCountCache.get(eventId) || 0));
+        if (ratioEl){
+          ratioEl.textContent = attendingRatioCache.has(eventId) ? String(attendingRatioCache.get(eventId) || "—") : "—";
+        }
         return;
       }
 
       el.textContent = "…";
+      if (ratioEl) ratioEl.textContent = "…";
+
       try{
         const snap = await getDocs(query(collection(db, "events", eventId, "members"), limit(500)));
         const n = snap.size || 0;
         attendingCountCache.set(eventId, n);
         el.textContent = String(n);
+
+        // If ratio is requested, compute it from members docs (best-effort)
+        if (ratioEl){
+          let male = 0, female = 0;
+          snap.forEach(d => {
+            const data = d.data() || {};
+            const g = (data.gender ?? data.sex ?? data.Gender ?? data.Sex ?? "").toString().trim().toLowerCase();
+            if (!g) return;
+            if (g.startsWith("m")) male++;
+            else if (g.startsWith("f")) female++;
+          });
+
+          const tot = male + female;
+          let txt = "—";
+          if (tot > 0){
+            const fp = Math.round((female / tot) * 100);
+            const mp = 100 - fp;
+            txt = `${fp}% girls / ${mp}% guys`;
+          }
+          attendingRatioCache.set(eventId, txt);
+          ratioEl.textContent = txt;
+        }
       }catch(_){
         el.textContent = "—";
+        if (ratioEl) ratioEl.textContent = "—";
       }
     }
 
-    async function openWhosGoing(eventId, eventName){
+    async function openWhosGoingasync function openWhosGoing(eventId, eventName){
       if (!currentUser || !eventId) return;
 
       whoTitle.textContent = "Who’s going";
