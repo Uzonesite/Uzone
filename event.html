@@ -378,8 +378,6 @@
 
       <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
         <button class="btn" id="applyBtn" type="button" style="display:none;">Apply</button>
-        <button class="btn" id="attendBtn" type="button" style="display:none;">Attend</button>
-        <button class="btn secondary" id="abandonBtn" type="button" style="display:none;">Abandon</button>
         <a class="btn secondary" id="mapBtn" href="#" style="display:none;">View on Map</a>
         <span class="tag" id="statusChip" style="display:none;"><span class="dot"></span><span id="statusText">—</span></span>
       </div>
@@ -459,7 +457,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, getDocs,
+  getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs,
   query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
@@ -515,8 +513,6 @@ const goingCountEl = document.getElementById("goingCount");
 const attendeesEl = document.getElementById("attendees");
 
 const mapBtn = document.getElementById("mapBtn");
-const attendBtn = document.getElementById("attendBtn");
-const abandonBtn = document.getElementById("abandonBtn");
 
 function setMsg(text, kind=""){
   msg.style.display = text ? "block" : "none";
@@ -560,7 +556,6 @@ let eventData = null;
 let isHost = false;
 let isAccepted = false;
 let isInviteOnly = false;
-let isAttending = false;
 
 let myRating = 0; // cached
 
@@ -682,14 +677,9 @@ async function loadEvent(){
   // Host / accepted checks
   isHost = currentUser && eventData.hostUid === currentUser.uid;
   isAccepted = false;
-  isAttending = false;
   if (currentUser){
     const memSnap = await getDoc(doc(db, "events", eventId, "members", currentUser.uid));
-    const memExists = memSnap.exists();
-    const memStatus = memSnap.data()?.status || "";
-    isAccepted = memExists && memStatus === "accepted";
-    // For open events, any membership means attending.
-    isAttending = isInviteOnly ? isAccepted : memExists;
+    isAccepted = memSnap.exists() && memSnap.data()?.status === "accepted";
   }
 
   const canSeeDetails = !isInviteOnly || isHost || isAccepted;
@@ -759,28 +749,6 @@ if (canSeeDetails) {
     statusChip.style.display = "none";
   }
 
-  // Attend / Abandon / Map buttons
-  // - Invite-only: accepted guests see Map + Abandon; otherwise they see Apply.
-  // - Open: users see Attend, which becomes Abandon when attending.
-  attendBtn.style.display = "none";
-  abandonBtn.style.display = "none";
-
-  if (!isHost){
-    if (isInviteOnly){
-      if (isAccepted){
-        // accepted: show abandon beside map (map already handled by canSeeDetails)
-        abandonBtn.style.display = "inline-flex";
-      }
-    } else {
-      // open event
-      if (isAttending){
-        abandonBtn.style.display = "inline-flex";
-      } else {
-        attendBtn.style.display = "inline-flex";
-      }
-    }
-  }
-
   // Ratings + comments lock
   const canInteract = !isInviteOnly || isHost || isAccepted;
   commentLock.style.display = canInteract ? "none" : "block";
@@ -815,54 +783,6 @@ async function apply(){
     applyBtn.disabled = false;
   }
 }
-
-async function attendOpen(){
-  if (!currentUser || !eventId) return;
-  if (isInviteOnly) return;
-
-  setMsg("");
-  attendBtn.disabled = true;
-  try{
-    await setDoc(doc(db, "events", eventId, "members", currentUser.uid), {
-      uid: currentUser.uid,
-      name: (currentUser.displayName || "").toString(),
-      photoURL: (currentUser.photoURL || "").toString(),
-      createdAt: serverTimestamp()
-    }, { merge: true });
-
-    setMsg("You're marked as attending.", "ok");
-    await loadEvent();
-  } catch(e){
-    setMsg(e.message || "Failed to attend.", "error");
-  } finally {
-    attendBtn.disabled = false;
-  }
-}
-
-async function abandon(){
-  if (!currentUser || !eventId) return;
-
-  setMsg("");
-  abandonBtn.disabled = true;
-
-  try{
-    // Remove membership (attendance)
-    await deleteDoc(doc(db, "events", eventId, "members", currentUser.uid));
-
-    // For invite-only, also remove the application so they can reapply.
-    if (isInviteOnly){
-      try{ await deleteDoc(doc(db, "events", eventId, "applications", currentUser.uid)); }catch(_){}
-    }
-
-    setMsg("You left the event.", "ok");
-    await loadEvent();
-  } catch(e){
-    setMsg(e.message || "Failed to leave.", "error");
-  } finally {
-    abandonBtn.disabled = false;
-  }
-}
-
 
 async function loadRatings(){
   const snap = await getDocs(collection(db, "events", eventId, "ratings"));
@@ -969,8 +889,6 @@ onAuthStateChanged(auth, async (user) => {
   if (!eventId) { title.textContent = "Event not found"; return; }
 
   applyBtn.addEventListener("click", apply);
-  attendBtn.addEventListener("click", attendOpen);
-  abandonBtn.addEventListener("click", abandon);
   postComment.addEventListener("click", postAComment);
   syncMyRatingBtn.addEventListener("click", syncMyRating);
 
