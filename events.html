@@ -121,64 +121,6 @@
     }
     input:focus{border-color: rgba(176,11,85,.60); box-shadow: 0 0 0 4px rgba(176,11,85,.20);}
 
-    /* Ratio toggle */
-    .ratioToggle{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: rgba(255,255,255,.86);
-      user-select:none;
-      cursor:pointer;
-      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease, filter .12s ease;
-    }
-    .ratioToggle:hover{
-      transform: translateY(-1px);
-      border-color: var(--accent);
-      box-shadow: 0 0 14px rgba(176,11,85,.45);
-      filter: brightness(1.06);
-    }
-    .ratioToggle:active{transform: translateY(0px) scale(.995);}
-    .ratioToggle .lbl{font-size:12px; font-weight:950; letter-spacing:.2px;}
-    .ratioToggle .sub{font-size:12px; color: rgba(255,255,255,.70);}
-
-    .switch{
-      position:relative;
-      width:46px;
-      height:26px;
-      flex: 0 0 auto;
-    }
-    .switch input{ display:none; }
-    .track{
-      position:absolute; inset:0;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(255,255,255,.08);
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
-      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
-    }
-    .thumb{
-      position:absolute;
-      top:50%;
-      left:3px;
-      width:20px;
-      height:20px;
-      border-radius:999px;
-      background: rgba(255,255,255,.92);
-      transform: translateY(-50%);
-      box-shadow: 0 10px 24px rgba(0,0,0,.35);
-      transition: left .18s ease;
-    }
-    .switch input:checked + .track{
-      background: rgba(176,11,85,.32);
-      border-color: rgba(176,11,85,.55);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.18), inset 0 0 0 1px rgba(0,0,0,.25);
-    }
-    .switch input:checked + .track .thumb{ left:23px; }
-
     .grid{display:grid; grid-template-columns: repeat(12, 1fr); gap:14px;}
 
     .card{
@@ -378,8 +320,6 @@
       white-space:nowrap;
     }
     .estPill b{color: rgba(255,255,255,.92)}
-    .estPill.dim{opacity:.92}
-    .estPill.loading{opacity:.78}
 
     .empty{
       border:1px dashed rgba(255,255,255,.20);
@@ -530,18 +470,6 @@
       <div class="searchWrap">
         <input id="search" placeholder="Search motives (name, tags, date, location…)" />
         <button class="btn" id="refreshBtn" type="button">Refresh</button>
-
-        <!-- Ratio toggle -->
-        <button class="ratioToggle" id="ratioToggleBtn" type="button" aria-pressed="true" title="Toggle ratio pills on cards">
-          <div style="display:grid; gap:2px; line-height:1;">
-            <span class="lbl">Show ratios</span>
-            <span class="sub">Estimated + attendees</span>
-          </div>
-          <span class="switch" aria-hidden="true">
-            <input id="ratioToggle" type="checkbox" checked />
-            <span class="track"><span class="thumb"></span></span>
-          </span>
-        </button>
       </div>
       <div class="sub" id="count">—</div>
     </section>
@@ -610,11 +538,6 @@
     const count = $("count");
     const subline = $("subline");
 
-    // Ratio toggle
-    const ratioToggleBtn = $("ratioToggleBtn");
-    const ratioToggle = $("ratioToggle");
-    const RATIO_KEY = "uzone_show_ratios";
-
     // Who’s going modal elements
     const whoOverlay = $("whoOverlay");
     const whoClose = $("whoClose");
@@ -639,10 +562,6 @@
     const attendingCountCache = new Map();
     // users/{uid} name cache
     const userNameCache = new Map();
-
-    // ratio caches
-    const userGenderCache = new Map();   // uid -> "Male" | "Female" | ""
-    const eventRatioCache = new Map();   // eventId -> { f:number, m:number, text:string }
 
     function esc(s){
       return (s ?? "").toString()
@@ -711,91 +630,6 @@
       return "User";
     }
 
-    function gcd(a, b){
-      a = Math.abs(a); b = Math.abs(b);
-      while (b){ const t = b; b = a % b; a = t; }
-      return a || 1;
-    }
-
-    function ratioText(f, m){
-      const ff = Number(f) || 0;
-      const mm = Number(m) || 0;
-      if (ff === 0 && mm === 0) return "—";
-      const g = gcd(ff, mm);
-      const rf = Math.floor(ff / g);
-      const rm = Math.floor(mm / g);
-      // requested format: Females : males, like "3:2"
-      return `${rf}:${rm}`;
-    }
-
-    async function resolveGender(uid){
-      if (!uid) return "";
-      if (userGenderCache.has(uid)) return userGenderCache.get(uid) || "";
-
-      try{
-        const uSnap = await getDoc(doc(db, "users", uid));
-        if (uSnap.exists()){
-          const g = (uSnap.data()?.gender || "").toString().trim();
-          if (g === "Male" || g === "Female"){
-            userGenderCache.set(uid, g);
-            return g;
-          }
-        }
-      }catch{}
-
-      userGenderCache.set(uid, "");
-      return "";
-    }
-
-    async function computeAttendeeRatio(eventId){
-      if (!eventId) return { f:0, m:0, text:"—" };
-      if (eventRatioCache.has(eventId)) return eventRatioCache.get(eventId);
-
-      // Pull members (attendees)
-      let f = 0, m = 0;
-
-      try{
-        const snap = await getDocs(query(collection(db, "events", eventId, "members"), limit(500)));
-        const uids = snap.docs.map(d => d.id).filter(Boolean);
-
-        // limit concurrency so we don't hammer Firestore
-        const CONC = 20;
-        let idx = 0;
-
-        async function worker(){
-          while (idx < uids.length){
-            const myIdx = idx++;
-            const uid = uids[myIdx];
-            const g = await resolveGender(uid);
-            if (g === "Female") f++;
-            else if (g === "Male") m++;
-          }
-        }
-
-        const workers = Array.from({ length: Math.min(CONC, uids.length || 1) }, () => worker());
-        await Promise.all(workers);
-      } catch {
-        // leave zeros
-      }
-
-      const out = { f, m, text: ratioText(f, m) };
-      eventRatioCache.set(eventId, out);
-      return out;
-    }
-
-    function readRatioToggle(){
-      const raw = localStorage.getItem(RATIO_KEY);
-      // default: ON
-      if (raw === null) return true;
-      return raw === "1";
-    }
-
-    function setRatioToggle(on){
-      ratioToggle.checked = !!on;
-      ratioToggleBtn.setAttribute("aria-pressed", on ? "true" : "false");
-      localStorage.setItem(RATIO_KEY, on ? "1" : "0");
-    }
-
     async function preloadMyStates(list){
       if (!currentUser) return;
 
@@ -839,8 +673,6 @@
       grid.innerHTML = "";
       empty.style.display = list.length ? "none" : "block";
 
-      const showRatios = readRatioToggle();
-
       list.forEach(ev => {
         const v10 = clamp10(ev.ratingAvg);
         const pct = (v10 / 10) * 100;
@@ -854,25 +686,10 @@
         // estimates (from post_event.html: sizeEstimate + ratio)
         const estAtt = (ev.sizeEstimate ?? ev.estimatedAttendance ?? ev.estimated ?? ev.size ?? null);
         const estRatio = (ev.ratio ?? ev.estimatedRatio ?? null);
-
-        // Ratio UI is toggleable:
-        // - OFF: show no ratio pills at all
-        // - ON: show estimated ratio (if present) + attendee ratio computed from users/{uid}/gender
-        const estimatesHtml = (estAtt || (showRatios && (estRatio || true))) ? `
+        const estimatesHtml = (estAtt || estRatio) ? `
           <div class="estRow">
             ${estAtt ? `<span class="estPill">Estimated Attendance: <b>${esc(estAtt)}</b></span>` : ``}
-
-            ${
-              showRatios && estRatio
-                ? `<span class="estPill dim">Estimated ratio: <b>${esc(estRatio)}</b></span>`
-                : ``
-            }
-
-            ${
-              showRatios
-                ? `<span class="estPill loading" data-ratio="att" data-ev="${esc(ev.id)}">Attendee ratio (F:M): <b>…</b></span>`
-                : ``
-            }
+            ${estRatio ? `<span class="estPill">Estimated ratio: <b>${esc(estRatio)}</b></span>` : ``}
           </div>
         ` : ``;
 
@@ -1014,12 +831,6 @@
             await openWhosGoing(ev.id, peopleBtn.dataset.name || "Motive");
           });
         }
-
-        // If ratios are ON, populate attendee ratio pill now (async)
-        if (showRatios){
-          const ratioEl = card.querySelector(`[data-ratio="att"][data-ev="${ev.id}"]`);
-          if (ratioEl) ensureAttendeeRatio(ev.id, ratioEl);
-        }
       });
     }
 
@@ -1070,9 +881,6 @@
         attendingCountCache.delete(eventId);
         const attEl = document.querySelector(`.attCount[data-ev="${eventId}"]`);
         if (attEl) ensureAttendingCount(eventId, attEl);
-
-        // attendee ratio changed (membership changed)
-        eventRatioCache.delete(eventId);
 
         applySearch();
       } catch(err){
@@ -1150,32 +958,6 @@
       }catch(_){
         el.textContent = "—";
       }
-    }
-
-    async function ensureAttendeeRatio(eventId, el){
-      if (!eventId || !el) return;
-
-      // if toggle turned off since render, don't do work
-      if (!readRatioToggle()) return;
-
-      // if we already computed, render immediately
-      if (eventRatioCache.has(eventId)){
-        const v = eventRatioCache.get(eventId);
-        el.classList.remove("loading");
-        el.innerHTML = `Attendee ratio (F:M): <b>${esc(v?.text || "—")}</b>`;
-        return;
-      }
-
-      el.classList.add("loading");
-      el.innerHTML = `Attendee ratio (F:M): <b>…</b>`;
-
-      const v = await computeAttendeeRatio(eventId);
-
-      // if toggle turned off while loading, don't update UI
-      if (!readRatioToggle()) return;
-
-      el.classList.remove("loading");
-      el.innerHTML = `Attendee ratio (F:M): <b>${esc(v?.text || "—")}</b>`;
     }
 
     async function openWhosGoing(eventId, eventName){
@@ -1286,17 +1068,6 @@
       }
     }
 
-    // Ratio toggle init + behavior
-    function initRatioToggle(){
-      setRatioToggle(readRatioToggle());
-      ratioToggleBtn.addEventListener("click", () => {
-        const on = !readRatioToggle();
-        setRatioToggle(on);
-        // rerender so ratio pills appear/disappear cleanly
-        applySearch();
-      });
-    }
-
     refreshBtn.addEventListener("click", loadEvents);
     search.addEventListener("input", applySearch);
 
@@ -1306,9 +1077,6 @@
         return;
       }
       currentUser = user;
-
-      initRatioToggle();
-
       subline.textContent = `Signed in as ${user.displayName || "User"}`;
       await loadEvents();
     });
