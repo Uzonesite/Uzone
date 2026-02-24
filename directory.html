@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Uzone • Udirectory</title>
+  <title>Uzone • Directory</title>
   <link rel="icon" type="image/png" href="logo.png" />
   <meta name="color-scheme" content="dark light" />
 
@@ -230,6 +230,8 @@
       box-shadow: 0 18px 50px rgba(0,0,0,.45);
       background: rgba(0,0,0,.20);
     }
+
+    /* Avatar (image) */
     .avatar{
       width:54px;height:54px;
       border-radius:999px;
@@ -237,6 +239,19 @@
       background: rgba(255,255,255,.06);
       object-fit:cover;
       box-shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+
+    /* Avatar (fallback initial) */
+    .avatar.avatar-fallback{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(135deg, rgba(176,11,85,.85), rgba(176,11,85,.55));
+      color:white;
+      font-weight:900;
+      font-size:20px;
+      letter-spacing:.5px;
+      user-select:none;
     }
 
     .rowMain{min-width:0; display:grid; gap:4px;}
@@ -305,13 +320,12 @@
     <div class="left">
       <img src="logo.png" alt="Uzone" />
       <div class="title">
-        <h1>Udirectory</h1>
+        <h1>Directory</h1>
         <div class="sub" id="subline">Find people by name, school, degree, or U#</div>
       </div>
     </div>
     <div class="right">
-      <a class="btn" href="hub.html">Uhub</a>
-      <a class="btn" href="profile.html">Uprofile</a>
+      <a class="btn" href="hub.html">Hub</a>
     </div>
   </header>
 
@@ -328,12 +342,6 @@
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             <option value="Other">Other</option>
-          </select>
-          <select id="ageMin" aria-label="Minimum age">
-            <option value="">Min age</option>
-          </select>
-          <select id="ageMax" aria-label="Maximum age">
-            <option value="">Max age</option>
           </select>
         </div>
 
@@ -388,8 +396,6 @@
       q: document.getElementById("q"),
       school: document.getElementById("schoolFilter"),
       gender: document.getElementById("genderFilter"),
-      ageMin: document.getElementById("ageMin"),
-      ageMax: document.getElementById("ageMax"),
       clear: document.getElementById("clearBtn"),
       refresh: document.getElementById("refreshBtn"),
       results: document.getElementById("results"),
@@ -398,21 +404,6 @@
       msg: document.getElementById("msgBox"),
       subline: document.getElementById("subline"),
     };
-
-    const AGE_MIN = 16;
-    const AGE_MAX = 99;
-
-    for (let a = AGE_MIN; a <= AGE_MAX; a++){
-      const o1 = document.createElement("option");
-      o1.value = String(a);
-      o1.textContent = String(a);
-      els.ageMin.appendChild(o1);
-
-      const o2 = document.createElement("option");
-      o2.value = String(a);
-      o2.textContent = String(a);
-      els.ageMax.appendChild(o2);
-    }
 
     function showMsg(text, kind="ok"){
       els.msg.className = "msg " + (kind === "error" ? "error" : "ok");
@@ -486,10 +477,16 @@
       if (gender) metaBits.push(`<span class="pill">🧍 ${escapeHtml(gender)}</span>`);
       if (age !== "" && age !== null && age !== undefined) metaBits.push(`<span class="pill">🎂 ${escapeHtml(String(age))}</span>`);
 
+      // Fallback avatar = first letter of the display name
+      const initial = (name && name.length) ? name.trim().charAt(0).toUpperCase() : "?";
+      const avatarHtml = avatar
+        ? `<img class="avatar" alt="Avatar" src="${escapeAttr(avatar)}" />`
+        : `<div class="avatar avatar-fallback" aria-label="Avatar">${escapeHtml(initial)}</div>`;
+
       const wrapper = document.createElement("div");
       wrapper.className = "rowCard";
       wrapper.innerHTML = `
-        <img class="avatar" alt="Avatar" src="${avatar ? escapeAttr(avatar) : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect width='120' height='120' rx='60' fill='rgba(255,255,255,.08)'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' dominant-baseline='middle' fill='rgba(255,255,255,.55)' font-family='system-ui' font-size='34'%3F%3E%3F%3C/text%3E%3C/svg%3E"}" />
+        ${avatarHtml}
         <div class="rowMain">
           <div class="nameLine">
             <div class="name">${escapeHtml(name)}</div>
@@ -532,22 +529,12 @@
       const q = norm(els.q.value);
       const school = (els.school.value || "").trim();
       const gender = (els.gender.value || "").trim();
-      const minA = els.ageMin.value ? parseInt(els.ageMin.value, 10) : null;
-      const maxA = els.ageMax.value ? parseInt(els.ageMax.value, 10) : null;
-
-      let minAge = minA, maxAge = maxA;
-      if (minAge !== null && maxAge !== null && minAge > maxAge){
-        const t = minAge; minAge = maxAge; maxAge = t;
-      }
-
       const filtered = allUsers.filter(u => {
         const uid = (u.__uid || "").toString(); // internal doc id, not displayed
         const name = (u.name || u.displayName || "").toString();
         const uni = (u.university || "").toString();
         const prog = (u.program || "").toString();
         const g = (u.gender || "").toString();
-        const age = (u.age !== undefined && u.age !== null && u.age !== "") ? parseInt(u.age, 10) : null;
-
         const publicId = getPublicId(u);
 
         // Search: name / uni / program / publicId (and keep uid in search for admin/debug)
@@ -558,13 +545,6 @@
 
         if (school && uni.trim() !== school) return false;
         if (gender && g.trim() !== gender) return false;
-
-        if (minAge !== null){
-          if (age === null || Number.isNaN(age) || age < minAge) return false;
-        }
-        if (maxAge !== null){
-          if (age === null || Number.isNaN(age) || age > maxAge) return false;
-        }
 
         return true;
       });
@@ -627,15 +607,11 @@
     els.q.addEventListener("input", applyFilters);
     els.school.addEventListener("change", applyFilters);
     els.gender.addEventListener("change", applyFilters);
-    els.ageMin.addEventListener("change", applyFilters);
-    els.ageMax.addEventListener("change", applyFilters);
 
     els.clear.addEventListener("click", () => {
       els.q.value = "";
       els.school.value = "";
       els.gender.value = "";
-      els.ageMin.value = "";
-      els.ageMax.value = "";
       applyFilters();
       hideMsg();
     });
