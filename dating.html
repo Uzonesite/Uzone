@@ -60,7 +60,6 @@
       color:rgba(255,255,255,.85);
     }
 
-    /* Buttons: match the glassy hub theme + accent glow */
     .btn{
       padding:10px 12px;
       border-radius:12px;
@@ -176,7 +175,6 @@
       line-height:1.35;
     }
 
-    /* Card layout */
     .deck{
       display:grid;
       grid-template-columns: 1fr 360px;
@@ -310,7 +308,6 @@
       white-space:pre-line;
     }
 
-    /* Side panel (actions) */
     .side{
       border:1px solid var(--border);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
@@ -354,8 +351,6 @@
       border-color: rgba(255,80,120,.30);
       background: rgba(255,80,120,.10);
     }
-
-    /* ✅ Green glow hover for Like */
     .act.like:hover{
       border-color: rgba(80,255,160,.75);
       box-shadow: 0 0 16px rgba(80,255,160,.95), 0 16px 40px rgba(80,255,160,.22);
@@ -367,8 +362,6 @@
       box-shadow: 0 0 10px rgba(80,255,160,.85), 0 10px 28px rgba(80,255,160,.16);
       filter: brightness(1.0);
     }
-
-    /* ✅ Red glow hover for Pass */
     .act.nope:hover{
       border-color: rgba(255,80,120,.85);
       box-shadow: 0 0 16px rgba(255,80,120,.95), 0 16px 40px rgba(255,80,120,.22);
@@ -380,7 +373,6 @@
       box-shadow: 0 0 10px rgba(255,80,120,.85), 0 10px 28px rgba(255,80,120,.16);
       filter: brightness(1.0);
     }
-
     .act:disabled{opacity:.6;cursor:not-allowed}
 
     .act.super{
@@ -469,7 +461,6 @@
     .msg.ok{border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10);}
     .msg.error{border-color: rgba(255,80,120,.30); background: rgba(255,80,120,.10);}
 
-    /* Matches list */
     .matchesBox{
       border:1px solid rgba(255,255,255,.10);
       background: rgba(0,0,0,.16);
@@ -541,7 +532,6 @@
       line-height:1.35;
     }
 
-    /* Match modal */
     .modal{
       position:fixed;
       inset:0;
@@ -641,7 +631,6 @@
     </section>
 
     <section class="deck">
-      <!-- Profile Card -->
       <article class="card" aria-label="Candidate profile">
         <div class="media">
           <img id="mainImg" alt="Profile photo" />
@@ -664,7 +653,6 @@
         </div>
       </article>
 
-      <!-- Side Panel -->
       <aside class="side" aria-label="Actions">
         <div class="bigActions">
           <button class="act nope" id="nopeBtn" type="button">✕ Pass</button>
@@ -676,7 +664,6 @@
         <div class="tiny" id="seenHint">—</div>
         <div class="msg" id="msgBox" aria-live="polite"></div>
 
-        <!-- Matches list -->
         <div class="matchesBox" aria-label="Matches">
           <div class="matchesHeader">
             <div class="h">Matches</div>
@@ -687,7 +674,6 @@
           </div>
         </div>
 
-        <!-- Liked You (credit-gated reveal) -->
         <div class="matchesBox" aria-label="Liked you">
           <div class="matchesHeader">
             <div class="h">Liked you</div>
@@ -702,7 +688,6 @@
     </section>
   </main>
 
-  <!-- Match modal -->
   <div class="modal" id="matchModal" role="dialog" aria-modal="true" aria-label="Match dialog">
     <div class="modalCard">
       <div class="modalTitle">
@@ -818,19 +803,14 @@
     let currentUser = null;
 
     // State
-    let searchGender = "Female"; // "Female" | "Male"
-    let candidates = [];         // array of { uid, ...profile }
+    let searchGender = "Female";
+    let candidates = [];
     let idx = 0;
-    let currentPhotos = [];      // array of URLs for current card
+    let currentPhotos = [];
     let photoIndex = 0;
 
-    // Cache of swipe decisions: Map<otherUid, { direction: "like"|"dislike", updatedAt }>
     const swipeMap = new Map();
-
-    // Cache of matches: Map<matchId, { otherUid, chatId, name, photoURL }>
     const matchMap = new Map();
-
-    // Liked-you cache: Map<likerUid, { uid, revealed, type, createdAt, name?, photoURL? }>
     const likedMap = new Map();
 
     let myCredits = 0;
@@ -887,15 +867,14 @@
     }
 
     async function upsertLikedBy(targetUid, type="like"){
-      // Writes into THEIR incoming list: users/{targetUid}/likedBy/{meUid}
       try{
         const meUid = currentUser.uid;
         await setDoc(doc(db, "users", targetUid, "likedBy", meUid), {
-  fromUid: meUid,
-  type: type || "like",
-  revealed: type === "superlike",   // auto-reveal superlikes
-  createdAt: serverTimestamp()
-}, { merge:true });
+          fromUid: meUid,
+          type: type || "like",
+          revealed: type === "superlike",
+          createdAt: serverTimestamp()
+        }, { merge:true });
       } catch(err){
         console.warn("likedBy write failed:", err?.message || err);
       }
@@ -980,6 +959,7 @@
       return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
     }
 
+    // ✅ FIXED: isRevealed is computed BEFORE being used (cursor + image)
     function renderLikedYou(){
       if (!likedList) return;
       likedList.innerHTML = "";
@@ -993,18 +973,21 @@
       likedEmpty.style.display = "none";
 
       items.forEach(it => {
+        const isRevealed = it.revealed || it.type === "superlike";
+
         const row = document.createElement("div");
         row.className = "matchRow";
-row.style.cursor = isRevealed ? "pointer" : "default";
+        row.style.cursor = isRevealed ? "pointer" : "default";
+
         const av = document.createElement("div");
         av.className = "matchAvatar";
         const img = document.createElement("img");
         img.alt = "Like";
-        const isRevealed = it.revealed || it.type === "superlike";
 
-img.src = isRevealed
-  ? (it.photoURL || placeholderAvatarFromName(it.name || "U"))
-  : placeholderAvatarFromName("?");
+        img.src = isRevealed
+          ? (it.photoURL || placeholderAvatarFromName(it.name || "U"))
+          : placeholderAvatarFromName("?");
+
         av.appendChild(img);
 
         const meta = document.createElement("div");
@@ -1016,9 +999,7 @@ img.src = isRevealed
 
         const sub = document.createElement("div");
         sub.className = "matchSub";
-        sub.textContent = isRevealed
-  ? "View / Hide / Match"
-  : "Someone liked you";
+        sub.textContent = isRevealed ? "View / Hide / Match" : "Someone liked you";
 
         meta.appendChild(n);
         meta.appendChild(sub);
@@ -1047,7 +1028,8 @@ img.src = isRevealed
             e.stopPropagation();
             await hideLikedUser(it.uid);
           });
-const matchBtn = document.createElement("button");
+
+          const matchBtn = document.createElement("button");
           matchBtn.className = "miniBtn good";
           matchBtn.type = "button";
           matchBtn.textContent = "Match";
@@ -1071,7 +1053,6 @@ const matchBtn = document.createElement("button");
       });
     }
 
-    
     async function hideLikedUser(targetUid){
       if (!currentUser || !targetUid) return;
       try{
@@ -1090,14 +1071,12 @@ const matchBtn = document.createElement("button");
     }
 
     async function removeLikedYouEntry(targetUid){
-      // Used when you MATCH with someone who was in your liked-you list.
       if (!currentUser || !targetUid) return;
       try{
         await deleteDoc(doc(db, "users", currentUser.uid, "likedBy", targetUid));
         likedMap.delete(targetUid);
         renderLikedYou();
       } catch(err){
-        // If delete is blocked by rules, fall back to hiding it.
         try{
           await setDoc(doc(db, "users", currentUser.uid, "likedBy", targetUid), {
             hidden: true,
@@ -1111,10 +1090,12 @@ const matchBtn = document.createElement("button");
         }
       }
     }
-async function revealNextLike(){
+
+    async function revealNextLike(){
       const locked = [...likedMap.values()].filter(
-  x => !x.revealed && x.type !== "superlike" && !x.hidden
-);
+        x => !x.revealed && x.type !== "superlike" && !x.hidden
+      );
+
       if (!locked.length){
         setMsg("No locked likes to reveal.", "ok");
         return;
@@ -1386,21 +1367,16 @@ async function revealNextLike(){
       window.location.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
     }
 
-    // ✅ NEW: Remove match when you press Pass in the match list
     async function removeMatch(matchId, otherUid){
       if (!currentUser || !matchId || !otherUid) return;
       try{
-        // delete the match doc
         await deleteDoc(doc(db, "matches", matchId));
-
-        // optional: mark as dislike so they don't immediately rematch
         await setDoc(doc(db, "users", currentUser.uid, "swipes", otherUid), {
           direction: "dislike",
           updatedAt: serverTimestamp()
         }, { merge:true });
 
         swipeMap.set(otherUid, { direction: "dislike" });
-
         await loadMatches();
       } catch(err){
         console.error(err);
@@ -1465,7 +1441,6 @@ async function revealNextLike(){
           openChatWith(m.otherUid);
         });
 
-        // ✅ NEW: Pass (removes match)
         const passBtn = document.createElement("button");
         passBtn.className = "miniBtn bad";
         passBtn.type = "button";
@@ -1571,10 +1546,7 @@ async function revealNextLike(){
           const chatId = await ensureChat(currentUser.uid, otherUid);
           await ensureMatch(currentUser.uid, otherUid);
 
-          // If they were in your "Liked you" list, remove them once you match.
-          await removeLikedYouEntry(otherUid);
-
-          // If they were in your "Liked you" list, remove them once you match.
+          // ✅ FIXED: removed duplicate call
           await removeLikedYouEntry(otherUid);
 
           meBubble.src = mePhoto;
@@ -1611,14 +1583,13 @@ async function revealNextLike(){
 
       try{
         await setDoc(doc(db, "users", myUid, "swipes", otherUid), {
-          direction, // "like" | "dislike"
+          direction,
           updatedAt: serverTimestamp()
         }, { merge: true });
 
         swipeMap.set(otherUid, { direction });
 
         if (direction === "like") {
-          // Add me to their "Liked you" list (locked on their side until they spend credits)
           await upsertLikedBy(otherUid, "like");
 
           const theirSwipeRef = doc(db, "users", otherUid, "swipes", myUid);
@@ -1634,7 +1605,6 @@ async function revealNextLike(){
             const chatId = await ensureChat(myUid, otherUid);
             await ensureMatch(myUid, otherUid);
 
-            // If they were in your "Liked you" list, remove them once you match.
             await removeLikedYouEntry(otherUid);
 
             meBubble.src = mePhoto;
@@ -1642,7 +1612,6 @@ async function revealNextLike(){
             matchName.textContent = (cand.name || "Student").toString().trim();
 
             messageLink.href = `messages.html?chat=${encodeURIComponent(chatId)}&with=${encodeURIComponent(otherUid)}`;
-
             matchModal.style.display = "flex";
             await loadMatches();
           }
@@ -1689,10 +1658,8 @@ async function revealNextLike(){
     nopeBtn.addEventListener("click", () => swipe("dislike"));
     likeBtn.addEventListener("click", () => swipe("like"));
 
-    // Credit-gated: reveal who liked you
     revealLikeBtn.addEventListener("click", revealNextLike);
 
-    // Credit-gated: Super Like (spends 1 credit, counts as a Like, and flags as superlike on their Liked You list)
     superLikeBtn.addEventListener("click", async () => {
       const cand = currentCandidate();
       if (!cand) return;
@@ -1733,10 +1700,7 @@ async function revealNextLike(){
           const chatId = await ensureChat(currentUser.uid, otherUid);
           await ensureMatch(currentUser.uid, otherUid);
 
-          // If they were in your "Liked you" list, remove them once you match.
-          await removeLikedYouEntry(otherUid);
-
-          // If they were in your "Liked you" list, remove them once you match.
+          // ✅ FIXED: removed duplicate call
           await removeLikedYouEntry(otherUid);
 
           meBubble.src = mePhoto;
@@ -1760,10 +1724,11 @@ async function revealNextLike(){
 
     closeMatch.addEventListener("click", () => { matchModal.style.display = "none"; });
     keepSwiping.addEventListener("click", () => { matchModal.style.display = "none"; });
-
     passMatch.addEventListener("click", () => { matchModal.style.display = "none"; });
 
-    matchModal.addEventListener("click", (e) => { if (e.target === matchModal) matchModal.style.display = "none"; });
+    matchModal.addEventListener("click", (e) => {
+      if (e.target === matchModal) matchModal.style.display = "none";
+    });
 
     refreshMatchesBtn.addEventListener("click", loadMatches);
 
