@@ -936,7 +936,7 @@
         for (const r of rows){
           let name = "";
           let photoURL = "";
-          if (r.revealed){
+          if (r.revealed || r.type === "superlike"){
             try{
               const uSnap = await getDoc(doc(db, "users", r.uid));
               if (uSnap.exists()){
@@ -995,8 +995,7 @@
       items.forEach(it => {
         const row = document.createElement("div");
         row.className = "matchRow";
-        row.style.cursor = it.revealed ? "pointer" : "default";
-
+row.style.cursor = isRevealed ? "pointer" : "default";
         const av = document.createElement("div");
         av.className = "matchAvatar";
         const img = document.createElement("img");
@@ -1113,7 +1112,9 @@ const matchBtn = document.createElement("button");
       }
     }
 async function revealNextLike(){
-      const locked = [...likedMap.values()].filter(x => !x.revealed && !x.hidden);
+      const locked = [...likedMap.values()].filter(
+  x => !x.revealed && x.type !== "superlike" && !x.hidden
+);
       if (!locked.length){
         setMsg("No locked likes to reveal.", "ok");
         return;
