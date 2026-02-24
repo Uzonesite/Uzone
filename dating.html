@@ -891,10 +891,11 @@
       try{
         const meUid = currentUser.uid;
         await setDoc(doc(db, "users", targetUid, "likedBy", meUid), {
-          fromUid: meUid,
-          type: type || "like", // "like" | "superlike"
-          createdAt: serverTimestamp()
-        }, { merge:true });
+  fromUid: meUid,
+  type: type || "like",
+  revealed: type === "superlike",   // auto-reveal superlikes
+  createdAt: serverTimestamp()
+}, { merge:true });
       } catch(err){
         console.warn("likedBy write failed:", err?.message || err);
       }
@@ -1000,9 +1001,11 @@
         av.className = "matchAvatar";
         const img = document.createElement("img");
         img.alt = "Like";
-        img.src = it.revealed
-          ? (it.photoURL || placeholderAvatarFromName(it.name || "U"))
-          : placeholderAvatarFromName("?");
+        const isRevealed = it.revealed || it.type === "superlike";
+
+img.src = isRevealed
+  ? (it.photoURL || placeholderAvatarFromName(it.name || "U"))
+  : placeholderAvatarFromName("?");
         av.appendChild(img);
 
         const meta = document.createElement("div");
@@ -1010,13 +1013,13 @@
 
         const n = document.createElement("div");
         n.className = "matchName";
-        n.textContent = it.revealed ? (it.name || "Student") : "Locked";
+        n.textContent = isRevealed ? (it.name || "Student") : "Locked";
 
         const sub = document.createElement("div");
         sub.className = "matchSub";
-        sub.textContent = it.revealed
-          ? "View / Hide / Match"
-          : ((it.type === "superlike") ? "Someone super liked you" : "Someone liked you");
+        sub.textContent = isRevealed
+  ? "View / Hide / Match"
+  : "Someone liked you";
 
         meta.appendChild(n);
         meta.appendChild(sub);
@@ -1024,7 +1027,7 @@
         row.appendChild(av);
         row.appendChild(meta);
 
-        if (it.revealed){
+        if (isRevealed){
           const btns = document.createElement("div");
           btns.className = "rowBtns";
 
