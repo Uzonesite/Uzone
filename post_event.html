@@ -859,7 +859,10 @@
 
             // try to label it with the closest address
             let label = await reverseGeocode(lat, lng);
-            if (!label) label = "Your location";
+            if (!label) {
+  const hostName = auth.currentUser?.displayName || "Host";
+  label = `${hostName}'s location`;
+}
 
             setPicked(lat, lng, label);
             gmap.setZoom(15);
