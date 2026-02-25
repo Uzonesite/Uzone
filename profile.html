@@ -104,6 +104,16 @@
       box-shadow: 0 0 20px var(--accent), 0 18px 45px rgba(176,11,85,.34);
     }
 
+    /* (NEW) subtle "danger" variant for delete account */
+    .btn.danger{
+      border-color: rgba(255,80,120,.35);
+      background: rgba(255,80,120,.10);
+    }
+    .btn.danger:hover{
+      border-color: rgba(255,80,120,.60);
+      box-shadow: 0 0 16px rgba(255,80,120,.45), 0 16px 40px rgba(255,80,120,.22);
+    }
+
     main{width:min(1100px, 92vw); margin:16px auto 34px auto; display:grid; gap:14px;}
 
     .card{
@@ -202,21 +212,21 @@
     }
 
     /* Delete button on a post tile */
-.delBtn{
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(0,0,0,.35);
-  color: rgba(255,255,255,.92);
-  border-radius: 10px;
-  padding: 6px 8px;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-  line-height: 1;
-}
-.delBtn:hover{
-  border-color: var(--accent);
-  box-shadow: 0 0 14px rgba(176,11,85,.55);
-}
+    .delBtn{
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.92);
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .delBtn:hover{
+      border-color: var(--accent);
+      box-shadow: 0 0 14px rgba(176,11,85,.55);
+    }
 
     .empty{
       border:1px dashed rgba(255,255,255,.20);
@@ -236,15 +246,14 @@
       flex-wrap:wrap;
     }
 
-.badge.credits{
-  border-color: rgba(120,160,255,.35);
-  background: rgba(120,160,255,.10);
-}
-.badge.credits .dot{
-  background: rgba(120,160,255,.85);
-}
+    .badge.credits{
+      border-color: rgba(120,160,255,.35);
+      background: rgba(120,160,255,.10);
+    }
+    .badge.credits .dot{
+      background: rgba(120,160,255,.85);
+    }
 
-    
     .badge{
       display:inline-flex;
       align-items:center;
@@ -330,10 +339,9 @@
     </div>
 
     <div class="right">
-  <a class="btn" href="hub.html" aria-label="Back to hub">Hub</a>
-  <a class="btn" href="messages.html" aria-label="Chat">Chat</a>
-</div>
-
+      <a class="btn" href="hub.html" aria-label="Back to hub">Hub</a>
+      <a class="btn" href="messages.html" aria-label="Chat">Chat</a>
+    </div>
   </header>
 
   <main>
@@ -353,24 +361,23 @@
 
         <div class="fields">
           <div class="nameLine">
-  <span class="badge id" id="idBadge">
-    <span class="dot"></span>
-    <span id="idText">U—</span>
-  </span>
+            <span class="badge id" id="idBadge">
+              <span class="dot"></span>
+              <span id="idText">U—</span>
+            </span>
 
-  <span class="badge credits" id="creditsBadge">
-    <span class="dot"></span>
-    <span id="creditsText">0 Credits</span>
-  </span>
+            <span class="badge credits" id="creditsBadge">
+              <span class="dot"></span>
+              <span id="creditsText">0 Credits</span>
+            </span>
 
-  <span class="badge" id="verifyBadge">
-    <span class="dot"></span>
-    <span id="verifyText">Not verified</span>
-  </span>
+            <span class="badge" id="verifyBadge">
+              <span class="dot"></span>
+              <span id="verifyText">Not verified</span>
+            </span>
 
-  <button class="btn" id="openVerifyBtn" type="button">Verify</button>
-</div>
-
+            <button class="btn" id="openVerifyBtn" type="button">Verify</button>
+          </div>
 
           <div class="row">
             <label>
@@ -472,6 +479,19 @@
 
       <div id="postsGrid" class="grid" style="margin-top:12px;"></div>
     </section>
+
+    <!-- (NEW) DELETE ACCOUNT -->
+    <section class="card">
+      <h2 class="sectionTitle" style="margin:0 0 10px 0;">Danger zone</h2>
+      <div class="empty" style="margin-bottom:12px;">
+        Deleting your account permanently removes your login and attempts to delete your profile + posts.
+        <br />
+        This cannot be undone.
+      </div>
+      <div class="actions">
+        <button class="btn danger" id="deleteAccountBtn" type="button">Delete account</button>
+      </div>
+    </section>
   </main>
 
   <!-- Lightbox -->
@@ -488,7 +508,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
     import {
       getFirestore,
@@ -574,6 +594,9 @@
 
     const creditsText = document.getElementById("creditsText");
 
+    // (NEW)
+    const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+
     let currentUser = null;
     let cachedPosts = [];
     let selectedIdFile = null;
@@ -628,48 +651,47 @@
     }
 
     async function loadProfile(user) {
-  const snap = await getDoc(doc(db, "users", user.uid));
+      const snap = await getDoc(doc(db, "users", user.uid));
 
-  // Defaults (so UI always shows something)
-  idText.textContent = "U—";
-  creditsText.textContent = "0 Credits";
-  setVerificationUI("none");
-  avatarImg.src = placeholderAvatarFromName("U");
-  subline.textContent = "Edit your profile";
+      // Defaults (so UI always shows something)
+      idText.textContent = "U—";
+      creditsText.textContent = "0 Credits";
+      setVerificationUI("none");
+      avatarImg.src = placeholderAvatarFromName("U");
+      subline.textContent = "Edit your profile";
 
-  if (!snap.exists()) {
-    subline.textContent = "Profile not found (no users doc yet).";
-    return;
-  }
+      if (!snap.exists()) {
+        subline.textContent = "Profile not found (no users doc yet).";
+        return;
+      }
 
-  const data = snap.data();
+      const data = snap.data();
 
-  // U#
-  idText.textContent = (data.publicId || "U—").toString();
+      // U#
+      idText.textContent = (data.publicId || "U—").toString();
 
-  // ✅ Credits (this is what you were missing)
-  const credits = Number(data.credits || 0);
-  creditsText.textContent = `${credits} Credit${credits === 1 ? "" : "s"}`;
+      // Credits
+      const credits = Number(data.credits || 0);
+      creditsText.textContent = `${credits} Credit${credits === 1 ? "" : "s"}`;
 
-  // Verified badge
-  const status =
-    data?.verification?.status ||
-    (data.verified === true ? "verified" : "none");
-  setVerificationUI(status);
+      // Verified badge
+      const status =
+        data?.verification?.status ||
+        (data.verified === true ? "verified" : "none");
+      setVerificationUI(status);
 
-  // Form fields
-  nameEl.value = data.name || "";
-  universityEl.value = data.university || "";
-  programEl.value = data.program || "";
-  bioEl.value = data.bio || "";
-  ageEl.value = data.age || "";
-  genderEl.value = data.gender || "";
+      // Form fields
+      nameEl.value = data.name || "";
+      universityEl.value = data.university || "";
+      programEl.value = data.program || "";
+      bioEl.value = data.bio || "";
+      ageEl.value = data.age || "";
+      genderEl.value = data.gender || "";
 
-  // Avatar
-  const url = data.photoURL || "";
-  avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
-}
-
+      // Avatar
+      const url = data.photoURL || "";
+      avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
+    }
 
     async function saveProfile(){
       if (!currentUser) return;
@@ -747,16 +769,16 @@
         const left = document.createElement("span");
         left.textContent = p.caption ? p.caption : " ";
         const right = document.createElement("button");
-right.className = "delBtn";
-right.type = "button";
-right.textContent = "🗑";
-right.title = "Delete post";
+        right.className = "delBtn";
+        right.type = "button";
+        right.textContent = "🗑";
+        right.title = "Delete post";
 
-// IMPORTANT: prevent opening the lightbox when clicking delete
-right.addEventListener("click", async (e) => {
-  e.stopPropagation();
-  await deletePost(p);
-});
+        // IMPORTANT: prevent opening the lightbox when clicking delete
+        right.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          await deletePost(p);
+        });
 
         overlay.appendChild(left);
         overlay.appendChild(right);
@@ -820,83 +842,134 @@ right.addEventListener("click", async (e) => {
     }
 
     async function deletePost(post){
-  if (!currentUser) return;
+      if (!currentUser) return;
 
-  const ok = confirm("Delete this post?");
-  if (!ok) return;
+      const ok = confirm("Delete this post?");
+      if (!ok) return;
 
-  setMsg(msgBox, "");
-  try{
-    // 1) delete image from Storage (if we know the path)
-    if (post.storagePath) {
-      await deleteObject(ref(storage, post.storagePath));
+      setMsg(msgBox, "");
+      try{
+        // 1) delete image from Storage (if we know the path)
+        if (post.storagePath) {
+          await deleteObject(ref(storage, post.storagePath));
+        }
+
+        // 2) delete Firestore doc
+        await deleteDoc(doc(db, "users", currentUser.uid, "posts", post.id));
+
+        // refresh UI
+        closeLb(); // in case it was open
+        setMsg(msgBox, "Post deleted.", "ok");
+        await loadPosts(currentUser.uid);
+      } catch(err){
+        setMsg(msgBox, err?.message || "Failed to delete post.", "error");
+      }
     }
-
-    // 2) delete Firestore doc
-    await deleteDoc(doc(db, "users", currentUser.uid, "posts", post.id));
-
-    // refresh UI
-    closeLb(); // in case it was open
-    setMsg(msgBox, "Post deleted.", "ok");
-    await loadPosts(currentUser.uid);
-  } catch(err){
-    setMsg(msgBox, err?.message || "Failed to delete post.", "error");
-  }
-}
 
     function setVerifyMsg(text, kind=""){ setMsg(verifyMsg, text, kind); }
 
     async function submitVerification(){
-  if (!currentUser) return;
-  setVerifyMsg("");
+      if (!currentUser) return;
+      setVerifyMsg("");
 
-  if (!selectedIdFile || !selectedSelfieFile) {
-    setVerifyMsg("Please select BOTH a student ID photo and a selfie.", "error");
-    return;
-  }
+      if (!selectedIdFile || !selectedSelfieFile) {
+        setVerifyMsg("Please select BOTH a student ID photo and a selfie.", "error");
+        return;
+      }
 
-  submitVerifyBtn.disabled = true;
-  const originalText = submitVerifyBtn.textContent;
-  submitVerifyBtn.textContent = "Submitting…";
-  setVerifyMsg("Uploading files… please wait.", "");
+      submitVerifyBtn.disabled = true;
+      const originalText = submitVerifyBtn.textContent;
+      submitVerifyBtn.textContent = "Submitting…";
+      setVerifyMsg("Uploading files… please wait.", "");
 
-  try{
-    const idPath = `verification/${currentUser.uid}/id.jpg`;
-    const selfiePath = `verification/${currentUser.uid}/selfie.jpg`;
+      try{
+        const idPath = `verification/${currentUser.uid}/id.jpg`;
+        const selfiePath = `verification/${currentUser.uid}/selfie.jpg`;
 
-    await uploadBytes(ref(storage, idPath), selectedIdFile, {
-      contentType: selectedIdFile.type || "image/jpeg"
-    });
+        await uploadBytes(ref(storage, idPath), selectedIdFile, {
+          contentType: selectedIdFile.type || "image/jpeg"
+        });
 
-    await uploadBytes(ref(storage, selfiePath), selectedSelfieFile, {
-      contentType: selectedSelfieFile.type || "image/jpeg"
-    });
+        await uploadBytes(ref(storage, selfiePath), selectedSelfieFile, {
+          contentType: selectedSelfieFile.type || "image/jpeg"
+        });
 
-    await setDoc(doc(db, "verification_requests", currentUser.uid), {
-      uid: currentUser.uid,
-      status: "pending",
-      idImagePath: idPath,
-      selfieImagePath: selfiePath,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+        await setDoc(doc(db, "verification_requests", currentUser.uid), {
+          uid: currentUser.uid,
+          status: "pending",
+          idImagePath: idPath,
+          selfieImagePath: selfiePath,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
 
-    await setDoc(doc(db, "users", currentUser.uid), {
-      verification: { status: "pending", updatedAt: serverTimestamp() },
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+        await setDoc(doc(db, "users", currentUser.uid), {
+          verification: { status: "pending", updatedAt: serverTimestamp() },
+          updatedAt: serverTimestamp()
+        }, { merge: true });
 
-    setVerificationUI("pending");
-    setVerifyMsg("✅ Submitted! The photos will be permanently deleted once verified.", "ok");
+        setVerificationUI("pending");
+        setVerifyMsg("✅ Submitted! The photos will be permanently deleted once verified.", "ok");
 
-    submitVerifyBtn.textContent = "Submitted";
-  } catch(err){
-    setVerifyMsg(err?.message || "Verification submission failed.", "error");
-    submitVerifyBtn.disabled = false;
-    submitVerifyBtn.textContent = originalText;
-  }
-}
+        submitVerifyBtn.textContent = "Submitted";
+      } catch(err){
+        setVerifyMsg(err?.message || "Verification submission failed.", "error");
+        submitVerifyBtn.disabled = false;
+        submitVerifyBtn.textContent = originalText;
+      }
+    }
 
+    // (NEW) delete account flow
+    async function deleteAccount(){
+      if (!currentUser) return;
+
+      const ok = confirm("Are you sure you want to delete your account? This cannot be undone.");
+      if (!ok) return;
+
+      setMsg(msgBox, "");
+      deleteAccountBtn.disabled = true;
+      const originalText = deleteAccountBtn.textContent;
+      deleteAccountBtn.textContent = "Deleting…";
+
+      try{
+        // Best-effort cleanup: posts docs + storage objects
+        try{
+          const postsRef = collection(db, "users", currentUser.uid, "posts");
+          const snaps = await getDocs(postsRef);
+
+          for (const d of snaps.docs) {
+            const post = { id: d.id, ...d.data() };
+            if (post.storagePath) {
+              try { await deleteObject(ref(storage, post.storagePath)); } catch(_) {}
+            }
+            try { await deleteDoc(doc(db, "users", currentUser.uid, "posts", d.id)); } catch(_) {}
+          }
+        } catch(_) {}
+
+        // Best-effort cleanup: avatar + verification images
+        try { await deleteObject(ref(storage, `avatars/${currentUser.uid}/avatar.jpg`)); } catch(_) {}
+        try { await deleteObject(ref(storage, `verification/${currentUser.uid}/id.jpg`)); } catch(_) {}
+        try { await deleteObject(ref(storage, `verification/${currentUser.uid}/selfie.jpg`)); } catch(_) {}
+
+        // Best-effort cleanup: firestore docs
+        try { await deleteDoc(doc(db, "verification_requests", currentUser.uid)); } catch(_) {}
+        try { await deleteDoc(doc(db, "users", currentUser.uid)); } catch(_) {}
+
+        // Finally: delete Auth user
+        await deleteUser(currentUser);
+
+        // If successful, bounce to login
+        window.location.href = "index.html";
+      } catch(err){
+        // Common: requires-recent-login
+        const msg = err?.code === "auth/requires-recent-login"
+          ? "For safety, Firebase requires you to log in again before deleting your account. Log out/in, then try again."
+          : (err?.message || "Failed to delete account.");
+        setMsg(msgBox, msg, "error");
+        deleteAccountBtn.disabled = false;
+        deleteAccountBtn.textContent = originalText;
+      }
+    }
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
@@ -949,6 +1022,9 @@ right.addEventListener("click", async (e) => {
     });
 
     submitVerifyBtn.addEventListener("click", submitVerification);
+
+    // (NEW)
+    deleteAccountBtn.addEventListener("click", deleteAccount);
   </script>
 </body>
 </html>
