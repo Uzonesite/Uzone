@@ -1316,6 +1316,9 @@
         candidates.push({ uid: d.id, ...data });
       });
 
+      // Hide users who opted out of Match
+      candidates = candidates.filter(u => !u.matchOptOut);
+
       if (!candidates.length) {
         subline.textContent = "No profiles available";
         displayCandidate(null);
