@@ -418,6 +418,12 @@
             <textarea id="bio" placeholder="Write a short bio…"></textarea>
           </label>
 
+
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-top:2px;">
+            <input type="checkbox" id="matchOptOut" style="width:auto;" />
+            Hide me from Match (I won’t appear on dating)
+          </label>
+
           <div class="actions">
             <button class="btn primary" id="saveBtn" type="button">Save profile</button>
           </div>
@@ -564,6 +570,7 @@
     const bioEl = document.getElementById("bio");
     const ageEl = document.getElementById("age");
     const genderEl = document.getElementById("gender");
+    const matchOptOutEl = document.getElementById("matchOptOut");
     const saveBtn = document.getElementById("saveBtn");
 
     const idText = document.getElementById("idText");
@@ -659,6 +666,7 @@
       setVerificationUI("none");
       avatarImg.src = placeholderAvatarFromName("U");
       subline.textContent = "Edit your profile";
+      if (matchOptOutEl) matchOptOutEl.checked = false;
 
       if (!snap.exists()) {
         subline.textContent = "Profile not found (no users doc yet).";
@@ -687,6 +695,7 @@
       bioEl.value = data.bio || "";
       ageEl.value = data.age || "";
       genderEl.value = data.gender || "";
+      if (matchOptOutEl) matchOptOutEl.checked = !!data.matchOptOut;
 
       // Avatar
       const url = data.photoURL || "";
@@ -706,6 +715,7 @@
           bio: bioEl.value.trim(),
           age: ageEl.value.trim(),
           gender: genderEl.value,
+          matchOptOut: !!(matchOptOutEl && matchOptOutEl.checked),
           updatedAt: serverTimestamp()
         };
 
