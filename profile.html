@@ -418,7 +418,6 @@
             <textarea id="bio" placeholder="Write a short bio…"></textarea>
           </label>
 
-
           <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-top:2px;">
             <input type="checkbox" id="matchOptOut" style="width:auto;" />
             Opt out of Match
@@ -436,36 +435,81 @@
     <!-- VERIFICATION -->
     <section class="card" id="verifyCard" style="display:none;">
       <h2 class="sectionTitle">Verification</h2>
-      <div class="empty" style="margin-bottom:12px;">
-        Upload a clear photo of your <b>student ID</b> and a <b>selfie</b>. All images will be permanently deleted after verification.
-        <br /><br />
-        <b>Privacy:</b> This is not visible to anyone else.
+
+      <!-- (NEW) method toggle -->
+      <div class="actions" style="margin-bottom:10px;">
+        <button class="btn primary" id="methodEmailBtn" type="button">Verify by email</button>
+        <button class="btn" id="methodUploadBtn" type="button">Verify by uploading pics</button>
       </div>
 
-      <div class="row">
-        <div>
-          <label>
-            Student ID photo
-            <input id="idInput" type="file" accept="image/*" />
-          </label>
-          <div class="chip" id="idStatus">No ID selected</div>
+      <!-- (NEW) EMAIL VERIFY -->
+      <div id="emailVerifyBox">
+        <div class="empty" style="margin-bottom:12px;">
+          We’ll send a verification email using Firebase to your login email.
+          <br /><br />
+          <b>Rule:</b> Email verified + supported school email ⇒ Verified user.
         </div>
 
-        <div>
-          <label>
-            Selfie (phone-friendly)
-            <input id="selfieInput" type="file" accept="image/*" capture="user" />
-          </label>
-          <div class="chip" id="selfieStatus">No selfie selected</div>
+        <div class="row">
+          <div>
+            <label>
+              Your login email
+              <input id="emailDisplay" disabled />
+            </label>
+            <div class="chip" id="emailAllowedChip">—</div>
+          </div>
+
+          <div>
+            <label>
+              Email verification status
+              <input id="emailVerifiedDisplay" disabled />
+            </label>
+            <div class="chip" id="emailHintChip">—</div>
+          </div>
         </div>
+
+        <div class="actions" style="margin-top:12px;">
+          <button class="btn primary" id="sendVerifyEmailBtn" type="button">Send verification email</button>
+          <button class="btn" id="checkEmailVerifyBtn" type="button">I verified • Check</button>
+          <button class="btn" id="closeVerifyBtnA" type="button">Close</button>
+        </div>
+
+        <div class="msg" id="emailVerifyMsg" aria-live="polite"></div>
       </div>
 
-      <div class="actions" style="margin-top:12px;">
-        <button class="btn primary" id="submitVerifyBtn" type="button">Submit for review</button>
-        <button class="btn" id="closeVerifyBtn" type="button">Close</button>
-      </div>
+      <!-- UPLOAD VERIFY (existing UI, wrapped) -->
+      <div id="uploadVerifyBox" style="display:none;">
+        <div class="empty" style="margin-bottom:12px;">
+          Upload a clear photo of your <b>student ID</b> and a <b>selfie</b>. All images will be permanently deleted after verification.
+          <br /><br />
+          <b>Privacy:</b> This is not visible to anyone else.
+        </div>
 
-      <div class="msg" id="verifyMsg" aria-live="polite"></div>
+        <div class="row">
+          <div>
+            <label>
+              Student ID photo
+              <input id="idInput" type="file" accept="image/*" />
+            </label>
+            <div class="chip" id="idStatus">No ID selected</div>
+          </div>
+
+          <div>
+            <label>
+              Selfie (phone-friendly)
+              <input id="selfieInput" type="file" accept="image/*" capture="user" />
+            </label>
+            <div class="chip" id="selfieStatus">No selfie selected</div>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:12px;">
+          <button class="btn primary" id="submitVerifyBtn" type="button">Submit for review</button>
+          <button class="btn" id="closeVerifyBtn" type="button">Close</button>
+        </div>
+
+        <div class="msg" id="verifyMsg" aria-live="polite"></div>
+      </div>
     </section>
 
     <!-- POSTS -->
@@ -486,7 +530,7 @@
       <div id="postsGrid" class="grid" style="margin-top:12px;"></div>
     </section>
 
-    <!-- (NEW) DELETE ACCOUNT -->
+    <!-- DELETE ACCOUNT -->
     <section class="card">
       <h2 class="sectionTitle" style="margin:0 0 10px 0;">Danger zone</h2>
       <div class="empty" style="margin-bottom:12px;">
@@ -514,7 +558,12 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import { getAuth, onAuthStateChanged, deleteUser } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      deleteUser,
+      sendEmailVerification
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
     import {
       getFirestore,
@@ -557,6 +606,33 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
+    // -----------------------------
+    // (NEW) Allowed school emails
+    // -----------------------------
+    // Domains allowed (add more)
+    const ALLOWED_SCHOOL_DOMAINS = [
+      "uottawa.ca",
+      // "carleton.ca",
+      // "uoguelph.ca",
+      // "mcgill.ca",
+    ];
+
+    // Exact emails allowed (optional, for special cases)
+    const ALLOWED_SCHOOL_EMAILS = [
+      // "someone@someuni.edu",
+    ];
+
+    function normEmail(email){
+      return (email || "").trim().toLowerCase();
+    }
+    function emailAllowed(email){
+      const e = normEmail(email);
+      if (!e.includes("@")) return false;
+      if (ALLOWED_SCHOOL_EMAILS.includes(e)) return true;
+      const domain = e.split("@").pop();
+      return ALLOWED_SCHOOL_DOMAINS.includes(domain);
+    }
+
     // UI refs
     const subline = document.getElementById("subline");
 
@@ -579,6 +655,8 @@
     const openVerifyBtn = document.getElementById("openVerifyBtn");
 
     const verifyCard = document.getElementById("verifyCard");
+
+    // Upload verify refs (existing)
     const closeVerifyBtn = document.getElementById("closeVerifyBtn");
     const idInput = document.getElementById("idInput");
     const selfieInput = document.getElementById("selfieInput");
@@ -586,6 +664,21 @@
     const selfieStatus = document.getElementById("selfieStatus");
     const submitVerifyBtn = document.getElementById("submitVerifyBtn");
     const verifyMsg = document.getElementById("verifyMsg");
+
+    // (NEW) Email verify refs
+    const methodEmailBtn = document.getElementById("methodEmailBtn");
+    const methodUploadBtn = document.getElementById("methodUploadBtn");
+    const emailVerifyBox = document.getElementById("emailVerifyBox");
+    const uploadVerifyBox = document.getElementById("uploadVerifyBox");
+
+    const emailDisplay = document.getElementById("emailDisplay");
+    const emailAllowedChip = document.getElementById("emailAllowedChip");
+    const emailVerifiedDisplay = document.getElementById("emailVerifiedDisplay");
+    const emailHintChip = document.getElementById("emailHintChip");
+    const sendVerifyEmailBtn = document.getElementById("sendVerifyEmailBtn");
+    const checkEmailVerifyBtn = document.getElementById("checkEmailVerifyBtn");
+    const closeVerifyBtnA = document.getElementById("closeVerifyBtnA");
+    const emailVerifyMsg = document.getElementById("emailVerifyMsg");
 
     const postBtn = document.getElementById("postBtn");
     const postInput = document.getElementById("postInput");
@@ -600,8 +693,6 @@
     const closeLightbox = document.getElementById("closeLightbox");
 
     const creditsText = document.getElementById("creditsText");
-
-    // (NEW)
     const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 
     let currentUser = null;
@@ -657,10 +748,79 @@
       }
     }
 
+    function setVerifyMsg(text, kind=""){ setMsg(verifyMsg, text, kind); }
+    function setEmailVerifyMsg(text, kind=""){ setMsg(emailVerifyMsg, text, kind); }
+
+    function showVerifyMethod(method){
+      // method: "email" | "upload"
+      if (method === "upload") {
+        methodUploadBtn.classList.add("primary");
+        methodUploadBtn.classList.remove("btn");
+        methodEmailBtn.classList.remove("primary");
+        emailVerifyBox.style.display = "none";
+        uploadVerifyBox.style.display = "block";
+      } else {
+        methodEmailBtn.classList.add("primary");
+        methodUploadBtn.classList.remove("primary");
+        emailVerifyBox.style.display = "block";
+        uploadVerifyBox.style.display = "none";
+      }
+    }
+
+    function refreshEmailVerifyUI(){
+      const email = currentUser?.email || "";
+      const allowed = emailAllowed(email);
+      const verified = !!currentUser?.emailVerified;
+
+      emailDisplay.value = email || "(no email)";
+      emailAllowedChip.textContent = allowed
+        ? "✅ Allowed school email"
+        : "❌ Not a supported school email";
+      emailVerifiedDisplay.value = verified ? "Verified" : "Not verified";
+
+      if (!email) {
+        emailHintChip.textContent = "You must have a login email to verify by email.";
+      } else if (!allowed) {
+        emailHintChip.textContent =
+          "To use email verification, your login email must be a supported school email (ex: @uottawa.ca).";
+      } else if (verified) {
+        emailHintChip.textContent = "Nice — you can be marked Verified now.";
+      } else {
+        emailHintChip.textContent = "Send the email, click the link, then come back and press Check.";
+      }
+
+      sendVerifyEmailBtn.disabled = !email || !allowed || verified;
+      checkEmailVerifyBtn.disabled = !email || !allowed;
+    }
+
+    async function promoteVerifiedByEmailIfEligible(){
+      // Your rule: emailVerified + allowed school email => user verified
+      if (!currentUser) return false;
+
+      const email = currentUser.email || "";
+      const allowed = emailAllowed(email);
+      const verified = !!currentUser.emailVerified;
+      if (!allowed || !verified) return false;
+
+      await setDoc(doc(db, "users", currentUser.uid), {
+        verified: true,
+        verification: {
+          status: "verified",
+          method: "email",
+          email: normEmail(email),
+          updatedAt: serverTimestamp()
+        },
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      setVerificationUI("verified");
+      return true;
+    }
+
     async function loadProfile(user) {
       const snap = await getDoc(doc(db, "users", user.uid));
 
-      // Defaults (so UI always shows something)
+      // Defaults
       idText.textContent = "U—";
       creditsText.textContent = "0 Credits";
       setVerificationUI("none");
@@ -675,20 +835,16 @@
 
       const data = snap.data();
 
-      // U#
       idText.textContent = (data.publicId || "U—").toString();
 
-      // Credits
       const credits = Number(data.credits || 0);
       creditsText.textContent = `${credits} Credit${credits === 1 ? "" : "s"}`;
 
-      // Verified badge
       const status =
         data?.verification?.status ||
         (data.verified === true ? "verified" : "none");
       setVerificationUI(status);
 
-      // Form fields
       nameEl.value = data.name || "";
       universityEl.value = data.university || "";
       programEl.value = data.program || "";
@@ -697,7 +853,6 @@
       genderEl.value = data.gender || "";
       if (matchOptOutEl) matchOptOutEl.checked = !!data.matchOptOut;
 
-      // Avatar
       const url = data.photoURL || "";
       avatarImg.src = url ? url : placeholderAvatarFromName(data.name || "U");
     }
@@ -784,7 +939,6 @@
         right.textContent = "🗑";
         right.title = "Delete post";
 
-        // IMPORTANT: prevent opening the lightbox when clicking delete
         right.addEventListener("click", async (e) => {
           e.stopPropagation();
           await deletePost(p);
@@ -859,24 +1013,17 @@
 
       setMsg(msgBox, "");
       try{
-        // 1) delete image from Storage (if we know the path)
         if (post.storagePath) {
           await deleteObject(ref(storage, post.storagePath));
         }
-
-        // 2) delete Firestore doc
         await deleteDoc(doc(db, "users", currentUser.uid, "posts", post.id));
-
-        // refresh UI
-        closeLb(); // in case it was open
+        closeLb();
         setMsg(msgBox, "Post deleted.", "ok");
         await loadPosts(currentUser.uid);
       } catch(err){
         setMsg(msgBox, err?.message || "Failed to delete post.", "error");
       }
     }
-
-    function setVerifyMsg(text, kind=""){ setMsg(verifyMsg, text, kind); }
 
     async function submitVerification(){
       if (!currentUser) return;
@@ -914,13 +1061,12 @@
         }, { merge: true });
 
         await setDoc(doc(db, "users", currentUser.uid), {
-          verification: { status: "pending", updatedAt: serverTimestamp() },
+          verification: { status: "pending", method: "upload", updatedAt: serverTimestamp() },
           updatedAt: serverTimestamp()
         }, { merge: true });
 
         setVerificationUI("pending");
         setVerifyMsg("✅ Submitted! The photos will be permanently deleted once verified.", "ok");
-
         submitVerifyBtn.textContent = "Submitted";
       } catch(err){
         setVerifyMsg(err?.message || "Verification submission failed.", "error");
@@ -929,76 +1075,123 @@
       }
     }
 
-    // (NEW) delete account flow
-async function deleteAccount(){
-  if (!currentUser) return;
+    // (NEW) Email verification flow
+    async function sendSchoolVerifyEmail(){
+      if (!currentUser) return;
+      setEmailVerifyMsg("");
 
-  const ok = confirm("Are you sure you want to delete your account? This cannot be undone.");
-  if (!ok) return;
-
-  setMsg(msgBox, "");
-  deleteAccountBtn.disabled = true;
-  const originalText = deleteAccountBtn.textContent;
-  deleteAccountBtn.textContent = "Deleting…";
-
-  try{
-    const uid = currentUser.uid;
-
-    // ---------------------------
-    // DELETE POSTS
-    // ---------------------------
-    const postsRef = collection(db, "users", uid, "posts");
-    const snaps = await getDocs(postsRef);
-
-    for (const d of snaps.docs) {
-      const post = d.data();
-      if (post.storagePath) {
-        try { await deleteObject(ref(storage, post.storagePath)); } catch(_) {}
+      const email = currentUser.email || "";
+      if (!email) {
+        setEmailVerifyMsg("No login email found on your account.", "error");
+        return;
       }
-      try { await deleteDoc(d.ref); } catch(_) {}
+      if (!emailAllowed(email)) {
+        setEmailVerifyMsg(
+          "This login email is not a supported school email. Use the upload option, or sign in with a supported school email.",
+          "error"
+        );
+        return;
+      }
+      if (currentUser.emailVerified) {
+        setEmailVerifyMsg("Your email is already verified. Press Check to become Verified.", "ok");
+        return;
+      }
+
+      sendVerifyEmailBtn.disabled = true;
+      try{
+        await sendEmailVerification(currentUser);
+        setEmailVerifyMsg("✅ Sent! Check your inbox (and spam) for the verification link.", "ok");
+      } catch(err){
+        setEmailVerifyMsg(err?.message || "Failed to send verification email.", "error");
+      } finally{
+        sendVerifyEmailBtn.disabled = false;
+        refreshEmailVerifyUI();
+      }
     }
 
-    // ---------------------------
-    // DELETE STORAGE FILES
-    // ---------------------------
-    try { await deleteObject(ref(storage, `avatars/${uid}/avatar.jpg`)); } catch(_) {}
-    try { await deleteObject(ref(storage, `verification/${uid}/id.jpg`)); } catch(_) {}
-    try { await deleteObject(ref(storage, `verification/${uid}/selfie.jpg`)); } catch(_) {}
+    async function checkSchoolVerifyEmail(){
+      if (!currentUser) return;
+      setEmailVerifyMsg("");
 
-    // ---------------------------
-    // DELETE FIRESTORE DOCS
-    // ---------------------------
-    try { await deleteDoc(doc(db, "verification_requests", uid)); } catch(_) {}
-    try { await deleteDoc(doc(db, "users", uid)); } catch(_) {}
+      checkEmailVerifyBtn.disabled = true;
+      try{
+        await currentUser.reload(); // refresh emailVerified
+        refreshEmailVerifyUI();
 
-    // ---------------------------
-    // DELETE AUTH ACCOUNT
-    // ---------------------------
-    await deleteUser(currentUser);
-
-    // Hard sign-out redirect
-    window.location.replace("index.html");
-
-  } catch(err){
-
-    if (err.code === "auth/requires-recent-login") {
-      setMsg(
-        msgBox,
-        "For security, please log out and log back in before deleting your account.",
-        "error"
-      );
-
-      // Force sign out
-      await auth.signOut();
-      window.location.replace("index.html");
-      return;
+        const promoted = await promoteVerifiedByEmailIfEligible();
+        if (promoted) {
+          setEmailVerifyMsg("✅ You’re verified! (Email verified + school email)", "ok");
+          // hide verify button now that badge updates
+          await loadProfile(currentUser);
+        } else {
+          if (!emailAllowed(currentUser.email || "")) {
+            setEmailVerifyMsg("Your login email is not a supported school email.", "error");
+          } else if (!currentUser.emailVerified) {
+            setEmailVerifyMsg("Not verified yet. Click the email link, then press Check again.", "error");
+          } else {
+            setEmailVerifyMsg("Couldn’t mark verified yet. Try again in a moment.", "error");
+          }
+        }
+      } catch(err){
+        setEmailVerifyMsg(err?.message || "Failed to check verification status.", "error");
+      } finally{
+        checkEmailVerifyBtn.disabled = false;
+      }
     }
 
-    setMsg(msgBox, err?.message || "Failed to delete account.", "error");
-    deleteAccountBtn.disabled = false;
-    deleteAccountBtn.textContent = originalText;
-  }
-}
+    // delete account flow (unchanged)
+    async function deleteAccount(){
+      if (!currentUser) return;
+
+      const ok = confirm("Are you sure you want to delete your account? This cannot be undone.");
+      if (!ok) return;
+
+      setMsg(msgBox, "");
+      deleteAccountBtn.disabled = true;
+      const originalText = deleteAccountBtn.textContent;
+      deleteAccountBtn.textContent = "Deleting…";
+
+      try{
+        const uid = currentUser.uid;
+
+        const postsRef = collection(db, "users", uid, "posts");
+        const snaps = await getDocs(postsRef);
+
+        for (const d of snaps.docs) {
+          const post = d.data();
+          if (post.storagePath) {
+            try { await deleteObject(ref(storage, post.storagePath)); } catch(_) {}
+          }
+          try { await deleteDoc(d.ref); } catch(_) {}
+        }
+
+        try { await deleteObject(ref(storage, `avatars/${uid}/avatar.jpg`)); } catch(_) {}
+        try { await deleteObject(ref(storage, `verification/${uid}/id.jpg`)); } catch(_) {}
+        try { await deleteObject(ref(storage, `verification/${uid}/selfie.jpg`)); } catch(_) {}
+
+        try { await deleteDoc(doc(db, "verification_requests", uid)); } catch(_) {}
+        try { await deleteDoc(doc(db, "users", uid)); } catch(_) {}
+
+        await deleteUser(currentUser);
+        window.location.replace("index.html");
+
+      } catch(err){
+        if (err.code === "auth/requires-recent-login") {
+          setMsg(
+            msgBox,
+            "For security, please log out and log back in before deleting your account.",
+            "error"
+          );
+          await auth.signOut();
+          window.location.replace("index.html");
+          return;
+        }
+
+        setMsg(msgBox, err?.message || "Failed to delete account.", "error");
+        deleteAccountBtn.disabled = false;
+        deleteAccountBtn.textContent = originalText;
+      }
+    }
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = "index.html"; return; }
@@ -1007,6 +1200,14 @@ async function deleteAccount(){
 
       await loadProfile(user);
       await loadPosts(user.uid);
+
+      // (NEW) Auto-refresh email UI + auto-promote if eligible
+      try{
+        await currentUser.reload();
+      } catch(_) {}
+      refreshEmailVerifyUI();
+      await promoteVerifiedByEmailIfEligible();
+      await loadProfile(currentUser);
     });
 
     saveBtn.addEventListener("click", saveProfile);
@@ -1033,13 +1234,39 @@ async function deleteAccount(){
 
     openVerifyBtn.addEventListener("click", () => {
       verifyCard.style.display = "block";
+      // default to email option (new)
+      showVerifyMethod("email");
+      refreshEmailVerifyUI();
+      setEmailVerifyMsg("");
+      setVerifyMsg("");
       verifyCard.scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    closeVerifyBtn.addEventListener("click", () => {
-      verifyCard.style.display = "none";
+
+    // (NEW) method toggles
+    methodEmailBtn.addEventListener("click", () => {
+      showVerifyMethod("email");
+      refreshEmailVerifyUI();
+      setEmailVerifyMsg("");
+    });
+    methodUploadBtn.addEventListener("click", () => {
+      showVerifyMethod("upload");
       setVerifyMsg("");
     });
 
+    // close buttons
+    closeVerifyBtnA.addEventListener("click", () => {
+      verifyCard.style.display = "none";
+      setEmailVerifyMsg("");
+      setVerifyMsg("");
+    });
+
+    closeVerifyBtn.addEventListener("click", () => {
+      verifyCard.style.display = "none";
+      setEmailVerifyMsg("");
+      setVerifyMsg("");
+    });
+
+    // Upload input handlers (existing)
     idInput.addEventListener("change", () => {
       selectedIdFile = idInput.files?.[0] || null;
       idStatus.textContent = selectedIdFile ? `Selected: ${selectedIdFile.name}` : "No ID selected";
@@ -1052,7 +1279,10 @@ async function deleteAccount(){
 
     submitVerifyBtn.addEventListener("click", submitVerification);
 
-    // (NEW)
+    // (NEW) email verify handlers
+    sendVerifyEmailBtn.addEventListener("click", sendSchoolVerifyEmail);
+    checkEmailVerifyBtn.addEventListener("click", checkSchoolVerifyEmail);
+
     deleteAccountBtn.addEventListener("click", deleteAccount);
   </script>
 </body>
