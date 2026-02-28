@@ -432,9 +432,9 @@
 
       <div id="emailVerifyBox">
         <div class="empty" style="margin-bottom:12px;">
-          We’ll send a verification email using Firebase to your login email.
+          We’ll send a verification email to your login email.
           <br /><br />
-          <b>Rule:</b> Email verified + supported school email + you requested email verify ⇒ Verified user.
+          <b>Alternative:</b> Email "verify (your email used to sign up)" to verify@uzone.ca to request verification.
         </div>
 
         <div class="row">
@@ -748,7 +748,7 @@
         emailHintChip.textContent = "You must have a login email to verify by email.";
       } else if (!allowed) {
         emailHintChip.textContent =
-          "To use email verification, your login email must be a supported school email (ex: @uottawa.ca).";
+          "To use email verification, your login email must be a supported school email.";
       } else if (verified) {
         emailHintChip.textContent = "Email shows Verified in Auth. Press Check to apply verification (after requesting email verify).";
       } else {
