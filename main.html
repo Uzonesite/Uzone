@@ -20,7 +20,7 @@
       --shadow: 0 18px 60px rgba(17,16,24,.10);
 
       --radius: 18px;
-      --radius2: 14px;
+      --radius2: 16px;
     }
 
     *{ box-sizing:border-box; }
@@ -40,7 +40,7 @@
     button{ font:inherit; }
     img{ max-width:100%; display:block; }
 
-    /* --- Top tabs --- */
+    /* --- Header --- */
     header{
       position: sticky;
       top: 0;
@@ -54,18 +54,18 @@
       width: min(1120px, 92vw);
       margin: 0 auto;
       padding: 12px 0;
-      display:flex;
+      display:grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items:center;
-      justify-content:space-between;
       gap: 14px;
     }
 
     .brand{
+      justify-self: start;
       display:flex;
       align-items:center;
       gap:10px;
       min-width: 140px;
-      flex: 0 0 auto;
     }
     .brand img{
       width:34px;height:34px;
@@ -83,6 +83,7 @@
     .brand .btxt span{ font-size:12px; color:var(--muted); }
 
     .tabs{
+      justify-self: center;
       display:flex;
       gap:8px;
       padding:6px;
@@ -93,6 +94,7 @@
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
+      max-width: min(560px, 92vw);
     }
     .tab{
       flex: 0 0 auto;
@@ -109,7 +111,7 @@
       transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
       user-select:none;
       white-space:nowrap;
-      font-weight: 800;
+      font-weight: 900;
       font-size: 13px;
       scroll-snap-align: start;
     }
@@ -129,28 +131,44 @@
       box-shadow: 0 0 0 4px rgba(176,11,85,.14);
     }
 
-    /* Mobile header layout + “tab selector” fix */
-    @media (max-width: 700px){
+    .version{
+      justify-self:end;
+      text-align:right;
+      display:grid;
+      gap:2px;
+      min-width: 160px;
+    }
+    .version b{
+      font-size: 12px;
+      letter-spacing:.2px;
+    }
+    .version span{
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Mobile header layout fix */
+    @media (max-width: 760px){
       .topbar{
-        flex-wrap:wrap;
+        grid-template-columns: 1fr;
         gap:10px;
       }
-      .brand{
+      .brand{ justify-self: start; }
+      .tabs{
+        justify-self: stretch;
+        max-width: 100%;
+      }
+      .version{
+        justify-self: start;
+        text-align:left;
         min-width: unset;
-        flex: 1 1 auto;
       }
       .brand .btxt span{
-        max-width: 40vw;
+        max-width: 70vw;
         overflow:hidden;
         text-overflow:ellipsis;
         white-space:nowrap;
-      }
-      .tabs{
-        width: 100%;
-        flex: 1 1 100%;
-      }
-      .tab{
-        padding:10px 12px;
       }
     }
 
@@ -246,7 +264,7 @@
       border: 1px solid rgba(17,16,24,.12);
       background: rgba(255,255,255,.78);
       cursor:pointer;
-      font-weight: 900;
+      font-weight: 950;
       font-size: 13px;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
       user-select:none;
@@ -303,7 +321,7 @@
       .mapBox{ min-height: 360px; }
     }
 
-    /* --- Glow/Pulse pins (map.html style) --- */
+    /* --- Glow/Pulse pins --- */
     .pinWrap{ position:relative; width:1px; height:1px; overflow: visible; }
     .glow-pin{
       position:absolute;
@@ -332,70 +350,122 @@
       100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
     }
 
-    /* ✅ Make InfoWindow fit mobile */
+    /* InfoWindow mobile fit */
     .gm-style-iw{ padding:0 !important; }
     .gm-style-iw-d{ overflow:hidden !important; }
     .gm-style-iw-c{
-      max-width: 86vw !important;
+      max-width: 88vw !important;
       border-radius: 16px !important;
     }
     .gm-ui-hover-effect{ display:none !important; }
 
-    /* --- Event cards --- */
+    /* --- Store-style Event Cards --- */
     .eventGrid{
       display:grid;
       gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      align-items: stretch;
     }
+
     .eventCard{
       border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.84);
+      background: rgba(255,255,255,.86);
       border-radius: var(--radius2);
+      overflow:hidden;
+      box-shadow: 0 18px 50px rgba(17,16,24,.08);
+      display:grid;
+      grid-template-rows: auto 1fr;
+      min-height: 100%;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .eventCard:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.22);
+      box-shadow: 0 22px 64px rgba(176,11,85,.10);
+    }
+
+    .eventMedia{
+      position:relative;
+      background:
+        radial-gradient(700px 300px at 20% 20%, rgba(139,211,255,.55), transparent 55%),
+        radial-gradient(700px 300px at 85% 70%, rgba(176,11,85,.18), transparent 58%),
+        rgba(17,16,24,.04);
+      aspect-ratio: 16 / 9;
+      overflow:hidden;
+    }
+    .eventMedia img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+    .eventMedia .mediaOverlay{
+      position:absolute;
+      inset:auto 10px 10px 10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-start;
+      pointer-events:none;
+    }
+    .pill{
+      pointer-events:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.30);
+      background: rgba(17,16,24,.46);
+      color: rgba(255,255,255,.95);
+      font-size: 12px;
+      font-weight: 900;
+      backdrop-filter: blur(8px);
+      max-width: 100%;
+    }
+    .pill .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(139,211,255,.18);
+      flex: 0 0 auto;
+    }
+    .pill.pink .dot{ background: var(--pink); box-shadow: 0 0 0 4px rgba(176,11,85,.18); }
+
+    .eventBody{
       padding: 12px;
       display:grid;
       gap: 10px;
     }
-    .eventTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 10px;
-    }
+
     .eventTitle{
-      font-size: 14px;
-      font-weight: 950;
+      font-size: 15px;
+      font-weight: 1000;
       letter-spacing: .2px;
       margin:0;
-    }
-    .badge{
-      flex: 0 0 auto;
-      font-size: 12px;
-      font-weight: 900;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,16,24,.10);
-      background: rgba(139,211,255,.18);
-      color: rgba(17,16,24,.78);
-      white-space:nowrap;
-    }
-    .badge.invite{
-      background: rgba(176,11,85,.10);
-      border-color: rgba(176,11,85,.20);
-      color: rgba(176,11,85,.92);
-    }
-    .badge.hl{
-      background: linear-gradient(135deg, rgba(176,11,85,.12), rgba(109,40,217,.10));
-      border-color: rgba(176,11,85,.22);
-      color: rgba(176,11,85,.92);
+      line-height: 1.2;
     }
 
     .meta{
       display:grid;
-      gap: 4px;
-      color: rgba(17,16,24,.72);
+      gap: 6px;
+      color: rgba(17,16,24,.74);
       font-size: 13px;
       line-height: 1.35;
+      word-break: break-word;
     }
-    .meta b{ color: rgba(17,16,24,.82); }
+    .meta b{ color: rgba(17,16,24,.86); }
+
+    .descClamp{
+      color: rgba(17,16,24,.70);
+      font-size: 13px;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: calc(1.45em * 2);
+    }
 
     .tags{
       display:flex;
@@ -410,6 +480,10 @@
       border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.72);
       color: rgba(17,16,24,.72);
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
 
     .actions{
@@ -418,22 +492,31 @@
       gap: 10px;
       flex-wrap:wrap;
       align-items:center;
+      margin-top: 2px;
     }
+
     .miniLink{
       display:inline-flex;
       align-items:center;
+      justify-content:center;
       gap:8px;
       padding: 10px 12px;
       border-radius: 999px;
       border: 1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.74);
-      font-weight: 950;
+      background: rgba(255,255,255,.78);
+      font-weight: 1000;
       font-size: 13px;
       cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
     }
     .miniLink:hover{
       border-color: rgba(176,11,85,.22);
       box-shadow: 0 12px 30px rgba(176,11,85,.10);
+    }
+    .miniLink.primary{
+      border-color: rgba(176,11,85,.28);
+      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
     }
 
     .empty{
@@ -457,6 +540,170 @@
       flex-wrap:wrap;
     }
     footer a{ text-decoration: underline; text-decoration-color: rgba(176,11,85,.35); }
+
+    /* --- Modal (for Event + Ping Open) --- */
+    .modal{
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display:none;
+    }
+    .modal.show{ display:block; }
+
+    .modalBackdrop{
+      position:absolute;
+      inset:0;
+      background: rgba(17,16,24,.52);
+      backdrop-filter: blur(6px);
+    }
+
+    .modalPanel{
+      position:relative;
+      width: min(920px, 92vw);
+      margin: 26px auto;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.20);
+      background:
+        radial-gradient(900px 420px at 10% 0%, rgba(139,211,255,.22), transparent 60%),
+        radial-gradient(900px 420px at 90% 20%, rgba(176,11,85,.14), transparent 60%),
+        rgba(255,255,255,.92);
+      box-shadow: 0 30px 90px rgba(0,0,0,.30);
+      overflow:hidden;
+      max-height: calc(100vh - 52px);
+      display:grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .modalTop{
+      padding: 14px 14px 0 14px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .modalTitle{
+      margin:0;
+      font-size: 16px;
+      font-weight: 1000;
+      letter-spacing:.2px;
+      line-height:1.2;
+    }
+    .modalSub{
+      margin:6px 0 0 0;
+      font-size: 13px;
+      color: rgba(17,16,24,.68);
+      line-height:1.35;
+      max-width: 70ch;
+      word-break: break-word;
+    }
+    .closeBtn{
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,16,24,.12);
+      background: rgba(255,255,255,.92);
+      cursor:pointer;
+      font-weight: 1000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 12px 30px rgba(0,0,0,.12);
+    }
+    .closeBtn:hover{
+      border-color: rgba(176,11,85,.24);
+      box-shadow: 0 16px 42px rgba(176,11,85,.14);
+    }
+
+    .modalBody{
+      padding: 14px;
+      display:grid;
+      gap: 14px;
+      overflow:auto;
+    }
+
+    .modalGrid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 920px){
+      .modalGrid{ grid-template-columns: 1fr; }
+    }
+
+    .modalMedia{
+      border-radius: 18px;
+      overflow:hidden;
+      border: 1px solid rgba(17,16,24,.10);
+      background:
+        radial-gradient(800px 350px at 20% 20%, rgba(139,211,255,.50), transparent 55%),
+        radial-gradient(800px 350px at 85% 70%, rgba(176,11,85,.18), transparent 58%),
+        rgba(17,16,24,.04);
+      aspect-ratio: 16 / 9;
+    }
+    .modalMedia img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+    }
+    .modalMediaFallback{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color: rgba(17,16,24,.65);
+      font-weight: 900;
+      font-size: 13px;
+      padding: 16px;
+      text-align:center;
+    }
+
+    .infoCard{
+      border-radius: 18px;
+      border: 1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 18px 50px rgba(17,16,24,.06);
+      padding: 14px;
+      display:grid;
+      gap: 10px;
+    }
+
+    .kv{
+      display:grid;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(17,16,24,.72);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+    .kvRow{
+      display:grid;
+      grid-template-columns: 120px 1fr;
+      gap: 10px;
+      align-items:start;
+    }
+    @media (max-width: 520px){
+      .kvRow{ grid-template-columns: 1fr; gap: 4px; }
+    }
+    .kvRow b{ color: rgba(17,16,24,.88); }
+
+    .modalActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-start;
+      margin-top: 4px;
+    }
+
+    .hr{
+      height:1px;
+      background: rgba(17,16,24,.08);
+      border:none;
+      margin: 2px 0;
+    }
   </style>
 </head>
 
@@ -482,6 +729,11 @@
           <span class="dot"></span> Account
         </button>
       </nav>
+
+      <div class="version" aria-label="Version">
+        <b>v2.0.0</b>
+        <span>updated March 5 2026</span>
+      </div>
     </div>
   </header>
 
@@ -491,9 +743,7 @@
       <div class="bannerTop">
         <div>
           <h2>What’s going on today?</h2>
-          <p>
-            Clean map + clean cards. Tap an event to see details.
-          </p>
+          <p>Clean map + clean store-style cards. Tap Open to view everything in a popup.</p>
         </div>
         <div class="miniBtns">
           <a class="btn primary" href="post_event.html">Post an event</a>
@@ -513,7 +763,7 @@
                 <div class="sub">Filter events by title, location, or tags.</div>
               </div>
               <div class="search" role="search" style="max-width: 520px; width: 100%;">
-                <span style="opacity:.6; font-weight:900;">⌕</span>
+                <span style="opacity:.6; font-weight:1000;">⌕</span>
                 <input id="search" placeholder="Search events…" autocomplete="off" />
               </div>
             </div>
@@ -538,7 +788,7 @@
         </section>
       </div>
 
-      <!-- Highlighted events (replaces old Events bubble on the right) -->
+      <!-- Highlighted events -->
       <section class="card" aria-label="Highlighted events">
         <div class="cardInner">
           <div class="hRow">
@@ -546,7 +796,7 @@
               <h1 class="h1">Highlighted</h1>
               <div class="sub">Admin-picked events.</div>
             </div>
-            <span class="badge hl" title="Only events flagged by admin">Featured</span>
+            <!-- Removed Featured / Highlighted badges (per request) -->
           </div>
         </div>
 
@@ -567,7 +817,8 @@
             <h1 class="h1">All Events</h1>
             <div class="sub">Newest first.</div>
           </div>
-          <span class="badge" title="Matching search">
+          <span class="pill" style="background: rgba(17,16,24,.06); border:1px solid rgba(17,16,24,.10); color: rgba(17,16,24,.78);">
+            <span class="dot" style="background: rgba(17,16,24,.35); box-shadow:none;"></span>
             <span id="countText">0</span>
           </span>
         </div>
@@ -586,6 +837,43 @@
     <div>Having issues? <a href="mailto:report@uzone.ca?subject=Uzone%20Issue">report@uzone.ca</a></div>
     <div>© uZone</div>
   </footer>
+
+  <!-- Modal (used for BOTH event cards + map pin “Open”) -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modalBackdrop" id="modalBackdrop"></div>
+
+    <div class="modalPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modalTop">
+        <div>
+          <h3 class="modalTitle" id="modalTitle">Event</h3>
+          <p class="modalSub" id="modalSub">Details</p>
+        </div>
+        <button class="closeBtn" id="modalCloseBtn" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="modalGrid">
+          <div class="modalMedia" id="modalMedia">
+            <!-- injected -->
+          </div>
+
+          <div class="infoCard">
+            <div class="kv" id="modalKV"><!-- injected --></div>
+            <hr class="hr" />
+            <div class="modalActions">
+              <button class="miniLink primary" type="button" id="modalZoomBtn">Zoom pin</button>
+              <button class="miniLink" type="button" id="modalCloseBtn2">Close</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="infoCard" id="modalDescCard" style="display:none;">
+          <h3 style="margin:0; font-size:14px; font-weight:1000;">About</h3>
+          <div style="color: rgba(17,16,24,.72); font-size:13px; line-height:1.5; word-break: break-word;" id="modalDesc"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -612,10 +900,8 @@
 
     // --- Tabs ---
     function scrollActiveTabIntoView(){
-      const tabs = document.querySelector(".tabs");
       const active = document.querySelector(".tab.active");
-      if (!tabs || !active) return;
-      // keep active tab visible on mobile
+      if (!active) return;
       active.scrollIntoView({ behavior: "instant", inline: "center", block: "nearest" });
     }
     document.querySelectorAll(".tab[data-go]").forEach(btn => {
@@ -637,6 +923,19 @@
 
     const highlightGrid = document.getElementById("highlightGrid");
     const highlightEmpty = document.getElementById("highlightEmpty");
+
+    // Modal refs
+    const modal = document.getElementById("modal");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+    const modalCloseBtn2 = document.getElementById("modalCloseBtn2");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalSub = document.getElementById("modalSub");
+    const modalMedia = document.getElementById("modalMedia");
+    const modalKV = document.getElementById("modalKV");
+    const modalZoomBtn = document.getElementById("modalZoomBtn");
+    const modalDescCard = document.getElementById("modalDescCard");
+    const modalDesc = document.getElementById("modalDesc");
 
     // --- Helpers ---
     function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -680,7 +979,7 @@
       return ev?.highlighted === true || ev?.isHighlighted === true || ev?.featured === true || ev?.adminHighlighted === true;
     }
 
-    // Best-effort lat/lng getter so old/new events still show
+    // Best-effort lat/lng getter
     function pickLatLng(ev){
       const candidates = [
         [ev.lat, ev.lng],
@@ -692,17 +991,13 @@
         [ev.geo?.latitude, ev.geo?.longitude],
         [ev.location?.lat, ev.location?.lng],
       ];
-
       for (const [a,b] of candidates){
         const lat = Number(a), lng = Number(b);
         if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
       }
-
-      // Firestore GeoPoint
       if (ev?.geopoint && typeof ev.geopoint.latitude === "number"){
         return { lat: ev.geopoint.latitude, lng: ev.geopoint.longitude };
       }
-
       return null;
     }
 
@@ -711,13 +1006,197 @@
       return d ? d.getTime() : 0;
     }
 
+    function pickImageUrl(ev){
+      const candidates = [
+        ev.imageUrl, ev.imageURL, ev.image,
+        ev.photoUrl, ev.photoURL, ev.photo,
+        ev.bannerUrl, ev.bannerURL, ev.banner,
+        ev.coverUrl, ev.coverURL, ev.cover,
+        ev.posterUrl, ev.posterURL, ev.poster,
+        ev.flyerUrl, ev.flyerURL, ev.flyer,
+        ev.mediaUrl, ev.mediaURL, ev.media,
+        ev.img, ev.imgUrl, ev.imgURL,
+      ];
+      for (const c of candidates){
+        if (typeof c === "string" && c.trim()) return c.trim();
+      }
+      return "";
+    }
+
+    function pickDescription(ev){
+      const candidates = [ev.description, ev.desc, ev.details, ev.about, ev.caption, ev.bio];
+      for (const c of candidates){
+        if (typeof c === "string" && c.trim()) return c.trim();
+      }
+      return "";
+    }
+
+    function pickHost(ev){
+      const candidates = [ev.host, ev.hostName, ev.organizer, ev.organizerName, ev.createdByName, ev.ownerName, ev.userName];
+      for (const c of candidates){
+        if (typeof c === "string" && c.trim()) return c.trim();
+      }
+      return "";
+    }
+
+    function pickPrice(ev){
+      const candidates = [ev.price, ev.cost, ev.fee, ev.entryFee];
+      for (const c of candidates){
+        if (c === 0) return "Free";
+        if (typeof c === "number" && Number.isFinite(c)) return `$${c}`;
+        if (typeof c === "string" && c.trim()) return c.trim();
+      }
+      if (ev.free === true) return "Free";
+      return "";
+    }
+
+    function pickCapacity(ev){
+      const candidates = [ev.capacity, ev.maxPeople, ev.maxAttendees, ev.limit];
+      for (const c of candidates){
+        if (typeof c === "number" && Number.isFinite(c)) return String(c);
+        if (typeof c === "string" && c.trim()) return c.trim();
+      }
+      return "";
+    }
+
+    function pickLink(ev){
+      const candidates = [ev.link, ev.url, ev.website, ev.rsvpLink, ev.rsvpURL];
+      for (const c of candidates){
+        if (typeof c === "string" && c.trim()) return c.trim();
+      }
+      return "";
+    }
+
+    // --- Modal open/close ---
+    let currentModalEvent = null;
+
+    function closeModal(){
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+      currentModalEvent = null;
+    }
+
+    function openModalForEvent(ev, sourceLabel = "Event"){
+      if (!ev) return;
+      currentModalEvent = ev;
+
+      const title = (ev.name || ev.title || "Untitled").toString();
+      const when = fmtWhen(ev);
+      const where = (ev.location || ev.place || ev.address || "—").toString();
+      const invite = ev.inviteOnly ? "Invite-only" : "Public";
+      const tags = pickTags(ev);
+      const img = pickImageUrl(ev);
+      const desc = pickDescription(ev);
+      const host = pickHost(ev);
+      const price = pickPrice(ev);
+      const cap = pickCapacity(ev);
+      const link = pickLink(ev);
+
+      modalTitle.textContent = title;
+      modalSub.textContent = `${sourceLabel} • ${invite}`;
+
+      // Media
+      modalMedia.innerHTML = "";
+      if (img){
+        const im = document.createElement("img");
+        im.src = img;
+        im.alt = title;
+        im.loading = "lazy";
+        im.referrerPolicy = "no-referrer";
+        modalMedia.appendChild(im);
+        im.onerror = () => {
+          modalMedia.innerHTML = `<div class="modalMediaFallback">No image available.</div>`;
+        };
+      } else {
+        modalMedia.innerHTML = `<div class="modalMediaFallback">No image available.</div>`;
+      }
+
+      // Key/Value rows (show only what exists)
+      const rows = [];
+      function addRow(label, value){
+        const v = (value ?? "").toString().trim();
+        if (!v) return;
+        rows.push(`
+          <div class="kvRow">
+            <b>${esc(label)}</b>
+            <div>${esc(v)}</div>
+          </div>
+        `);
+      }
+
+      addRow("When", when);
+      addRow("Where", where);
+      addRow("Host", host);
+      addRow("Price", price);
+      addRow("Capacity", cap);
+      addRow("RSVP / Link", link);
+
+      // Tags (as a row)
+      if (tags.length){
+        rows.push(`
+          <div class="kvRow">
+            <b>Tags</b>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${tags.slice(0, 14).map(t => `<span class="tag">${esc(t)}</span>`).join("")}
+            </div>
+          </div>
+        `);
+      }
+
+      // Highlighted (as info only)
+      if (isHighlighted(ev)){
+        rows.push(`
+          <div class="kvRow">
+            <b>Status</b>
+            <div>Highlighted</div>
+          </div>
+        `);
+      }
+
+      modalKV.innerHTML = rows.length ? rows.join("") : `<div style="color: rgba(17,16,24,.68);">No extra details available.</div>`;
+
+      // Description
+      if (desc){
+        modalDescCard.style.display = "grid";
+        modalDesc.textContent = desc;
+      } else {
+        modalDescCard.style.display = "none";
+        modalDesc.textContent = "";
+      }
+
+      // Zoom pin button
+      const ll = pickLatLng(ev);
+      modalZoomBtn.disabled = !ll || !gmap;
+      modalZoomBtn.style.opacity = (!ll || !gmap) ? ".55" : "1";
+      modalZoomBtn.style.cursor = (!ll || !gmap) ? "not-allowed" : "pointer";
+
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    modalBackdrop.addEventListener("click", closeModal);
+    modalCloseBtn.addEventListener("click", closeModal);
+    modalCloseBtn2.addEventListener("click", closeModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("show")) closeModal();
+    });
+
+    modalZoomBtn.addEventListener("click", () => {
+      if (!currentModalEvent || !gmap) return;
+      const ll = pickLatLng(currentModalEvent);
+      if (!ll) return;
+      gmap.panTo(ll);
+      gmap.setZoom(Math.max(gmap.getZoom() || 12, 16));
+    });
+
     // --- Map ---
     const MAPS_API_KEY = "AIzaSyCt8UPeNwhR4mPoQgWUoYxUE2UrlKYL6UE";
     const MAP_ID = "f4ab270f6c4fc6deeed4fa00";
 
     let gmap = null;
     let info = null;
-    let markers = []; // AdvancedMarkerElement instances
+    let markers = [];
 
     function loadGoogleMaps(){
       return new Promise((resolve, reject) => {
@@ -766,6 +1245,7 @@
       markers = [];
     }
 
+    // Better-looking "ping" popup + Open uses modal (no page nav)
     function openInfo(marker, ev){
       const ll = pickLatLng(ev);
       if (!ll) return;
@@ -776,18 +1256,57 @@
       const badgeText = ev.inviteOnly ? "Invite-only" : "Public";
 
       const html = `
-        <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; width:min(270px,82vw); max-width:82vw; padding:12px; color: rgba(20,20,24,.92); position:relative;">
+        <div style="
+          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+          width:min(300px,86vw);
+          max-width:86vw;
+          padding:12px;
+          color: rgba(20,20,24,.92);
+          position:relative;
+          background:
+            radial-gradient(420px 200px at 10% 0%, rgba(139,211,255,.26), transparent 60%),
+            radial-gradient(420px 200px at 90% 20%, rgba(176,11,85,.14), transparent 60%),
+            rgba(255,255,255,.92);
+          border-radius: 16px;
+        ">
           <button type="button" id="iwCloseBtn"
-            style="position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:999px; border:1px solid rgba(0,0,0,.12); background: rgba(255,255,255,.92); color: rgba(20,20,24,.92); font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; line-height:1; box-shadow: 0 10px 24px rgba(0,0,0,.12);">
-            ✕
-          </button>
+            style="
+              position:absolute; top:10px; right:10px;
+              width:34px; height:34px;
+              border-radius:999px;
+              border:1px solid rgba(0,0,0,.12);
+              background: rgba(255,255,255,.92);
+              color: rgba(20,20,24,.92);
+              font-weight:1000;
+              cursor:pointer;
+              display:flex; align-items:center; justify-content:center;
+              line-height:1;
+              box-shadow: 0 10px 24px rgba(0,0,0,.12);
+            ">✕</button>
 
-          <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background: rgba(0,0,0,.06); border:1px solid rgba(0,0,0,.08); font-size:12px; color: rgba(20,20,24,.80); white-space:nowrap; max-width: calc(100% - 44px); overflow:hidden; text-overflow:ellipsis;">
-            <span style="width:7px;height:7px;border-radius:999px; background: var(--pink); box-shadow: 0 0 0 4px rgba(176,11,85,.16); flex:0 0 auto;"></span>
+          <div style="
+            display:flex; align-items:center; gap:8px;
+            padding:7px 10px;
+            border-radius:999px;
+            background: rgba(0,0,0,.06);
+            border:1px solid rgba(0,0,0,.08);
+            font-size:12px;
+            color: rgba(20,20,24,.80);
+            white-space:nowrap;
+            max-width: calc(100% - 44px);
+            overflow:hidden;
+            text-overflow:ellipsis;
+          ">
+            <span style="
+              width:7px;height:7px;border-radius:999px;
+              background: ${ev.inviteOnly ? "var(--pink)" : "rgba(17,16,24,.35)"};
+              box-shadow: 0 0 0 4px ${ev.inviteOnly ? "rgba(176,11,85,.16)" : "rgba(17,16,24,.10)"};
+              flex:0 0 auto;
+            "></span>
             ${badgeText}
           </div>
 
-          <h3 style="margin:10px 0 6px 0; font-size:15px; line-height:1.2; font-weight:900; padding-right:40px;">
+          <h3 style="margin:10px 0 6px 0; font-size:15px; line-height:1.2; font-weight:1000; padding-right:40px;">
             ${title}
           </h3>
 
@@ -797,14 +1316,33 @@
           </div>
 
           <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-            <a href="event.html?id=${encodeURIComponent(ev.id)}"
-              style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 10px; border-radius:12px; border:1px solid rgba(176,11,85,.35); background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.65)); color:#fff; font-weight:900; text-decoration:none; flex:1 1 auto; min-width:110px;">
-              Open
-            </a>
+            <button type="button" id="iwOpenBtn"
+              style="
+                display:inline-flex; align-items:center; justify-content:center; gap:8px;
+                padding:9px 10px;
+                border-radius:12px;
+                border:1px solid rgba(176,11,85,.35);
+                background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.65));
+                color:#fff;
+                font-weight:1000;
+                cursor:pointer;
+                flex:1 1 auto;
+                min-width:110px;
+              ">Open</button>
+
             <button type="button" id="iwZoomBtn"
-              style="display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 10px; border-radius:12px; border:1px solid rgba(0,0,0,.12); background: rgba(255,255,255,.88); color: rgba(20,20,24,.92); font-weight:900; cursor:pointer; flex:1 1 auto; min-width:110px;">
-              Zoom
-            </button>
+              style="
+                display:inline-flex; align-items:center; justify-content:center; gap:8px;
+                padding:9px 10px;
+                border-radius:12px;
+                border:1px solid rgba(0,0,0,.12);
+                background: rgba(255,255,255,.88);
+                color: rgba(20,20,24,.92);
+                font-weight:1000;
+                cursor:pointer;
+                flex:1 1 auto;
+                min-width:110px;
+              ">Zoom</button>
           </div>
         </div>
       `;
@@ -821,6 +1359,9 @@
           gmap.panTo(ll);
           gmap.setZoom(Math.max(gmap.getZoom() || 12, 16));
         };
+
+        const open = document.getElementById("iwOpenBtn");
+        if (open) open.onclick = () => openModalForEvent(ev, "Ping");
       });
     }
 
@@ -844,38 +1385,94 @@
     // --- Events ---
     let allEvents = []; // {id, ...data}
 
+    function storeCardHTML(ev, {compact=false} = {}){
+      const title = esc(ev.name || ev.title || "Untitled");
+      const when = esc(fmtWhen(ev));
+      const where = esc(ev.location || ev.place || ev.address || "—");
+      const invite = !!ev.inviteOnly;
+      const tags = pickTags(ev);
+      const img = pickImageUrl(ev);
+      const desc = pickDescription(ev);
+      const host = pickHost(ev);
+      const price = pickPrice(ev);
+
+      const pillLeft = invite
+        ? `<span class="pill pink"><span class="dot"></span>Invite-only</span>`
+        : `<span class="pill"><span class="dot" style="background: rgba(255,255,255,.85); box-shadow: 0 0 0 4px rgba(255,255,255,.12);"></span>Public</span>`;
+
+      const pillRight = price
+        ? `<span class="pill"><span class="dot" style="background: rgba(255,255,255,.85); box-shadow: 0 0 0 4px rgba(255,255,255,.12);"></span>${esc(price)}</span>`
+        : "";
+
+      return `
+        <article class="eventCard">
+          <div class="eventMedia">
+            ${img ? `<img src="${esc(img)}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();">` : ""}
+            <div class="mediaOverlay">
+              ${pillLeft}
+              ${pillRight}
+            </div>
+          </div>
+
+          <div class="eventBody">
+            <div>
+              <h3 class="eventTitle">${title}</h3>
+              <div class="meta" style="margin-top:8px;">
+                <div><b>When:</b> ${when}</div>
+                <div><b>Where:</b> ${where}</div>
+                ${host ? `<div><b>Host:</b> ${esc(host)}</div>` : ""}
+              </div>
+            </div>
+
+            ${desc ? `<div class="descClamp">${esc(desc)}</div>` : ""}
+
+            ${tags.length ? `<div class="tags">${tags.slice(0,6).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
+
+            <div class="actions">
+              <button class="miniLink primary" type="button" data-open="${esc(ev.id)}">Open</button>
+              <button class="miniLink" type="button" data-zoom="${esc(ev.id)}">Zoom pin</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
     function renderHighlighted(){
       const highlighted = allEvents.filter(isHighlighted);
       highlightGrid.innerHTML = "";
       highlightEmpty.style.display = highlighted.length ? "none" : "block";
 
-      // show a few (keeps bubble clean)
       const show = highlighted.slice(0, 6);
-
       for (const ev of show){
-        const invite = !!ev.inviteOnly;
-        const when = fmtWhen(ev);
-
-        const el = document.createElement("article");
-        el.className = "eventCard";
-        el.innerHTML = `
-          <div class="eventTop">
-            <h3 class="eventTitle">${esc(ev.name || "Untitled")}</h3>
-            <span class="badge hl">Highlighted</span>
-          </div>
-          <div class="meta">
-            <div><b>When:</b> ${esc(when)}</div>
-            <div><b>Where:</b> ${esc(ev.location || "—")}</div>
-          </div>
-          <div class="actions">
-            <a class="miniLink" href="event.html?id=${encodeURIComponent(ev.id)}">Open</a>
-            <button class="miniLink" type="button" data-zoom="${esc(ev.id)}">Zoom pin</button>
-          </div>
-        `;
-        highlightGrid.appendChild(el);
+        // No highlighted/featured badges anywhere in this section
+        highlightGrid.insertAdjacentHTML("beforeend", storeCardHTML(ev, {compact:true}));
       }
+    }
 
-      highlightGrid.querySelectorAll("button[data-zoom]").forEach(btn => {
+    function renderEvents(){
+      const q = (searchEl.value || "").trim().toLowerCase();
+      const filtered = !q ? allEvents : allEvents.filter(ev => {
+        const tags = pickTags(ev).join(" ");
+        const desc = pickDescription(ev);
+        const hay = [ev.name, ev.title, ev.location, ev.place, tags, desc]
+          .map(x => (x || "").toString().toLowerCase())
+          .join(" | ");
+        return hay.includes(q);
+      });
+
+      countText.textContent = String(filtered.length);
+
+      grid.innerHTML = "";
+      empty.style.display = filtered.length ? "none" : "block";
+
+      for (const ev of filtered){
+        grid.insertAdjacentHTML("beforeend", storeCardHTML(ev));
+      }
+    }
+
+    // Single place to wire Open/Zoom buttons (cards)
+    function wireCardButtons(){
+      document.querySelectorAll("button[data-zoom]").forEach(btn => {
         btn.addEventListener("click", () => {
           const id = btn.getAttribute("data-zoom");
           const ev = allEvents.find(e => e.id === id);
@@ -886,60 +1483,13 @@
           gmap.setZoom(Math.max(gmap.getZoom() || 12, 16));
         });
       });
-    }
 
-    function renderEvents(){
-      const q = (searchEl.value || "").trim().toLowerCase();
-      const filtered = !q ? allEvents : allEvents.filter(ev => {
-        const tags = pickTags(ev).join(" ");
-        const hay = [ev.name, ev.location, tags].map(x => (x || "").toString().toLowerCase()).join(" | ");
-        return hay.includes(q);
-      });
-
-      countText.textContent = String(filtered.length);
-
-      grid.innerHTML = "";
-      empty.style.display = filtered.length ? "none" : "block";
-
-      for (const ev of filtered){
-        const invite = !!ev.inviteOnly;
-        const when = fmtWhen(ev);
-        const tags = pickTags(ev);
-
-        const el = document.createElement("article");
-        el.className = "eventCard";
-        el.innerHTML = `
-          <div class="eventTop">
-            <h3 class="eventTitle">${esc(ev.name || "Untitled")}</h3>
-            <span class="badge ${invite ? "invite" : ""}">${invite ? "Invite-only" : "Public"}</span>
-          </div>
-
-          <div class="meta">
-            <div><b>When:</b> ${esc(when)}</div>
-            <div><b>Where:</b> ${esc(ev.location || "—")}</div>
-          </div>
-
-          ${tags.length ? `<div class="tags">${tags.slice(0,5).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
-
-          <div class="actions">
-            <a class="miniLink" href="event.html?id=${encodeURIComponent(ev.id)}">Open</a>
-            <button class="miniLink" type="button" data-zoom="${esc(ev.id)}">Zoom pin</button>
-          </div>
-        `;
-        grid.appendChild(el);
-      }
-
-      grid.querySelectorAll("button[data-zoom]").forEach(btn => {
+      document.querySelectorAll("button[data-open]").forEach(btn => {
         btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-zoom");
+          const id = btn.getAttribute("data-open");
           const ev = allEvents.find(e => e.id === id);
-          if (!ev || !gmap) return;
-
-          const ll = pickLatLng(ev);
-          if (!ll) return;
-
-          gmap.panTo(ll);
-          gmap.setZoom(Math.max(gmap.getZoom() || 12, 15));
+          if (!ev) return;
+          openModalForEvent(ev, "Event");
         });
       });
     }
@@ -964,10 +1514,11 @@
 
       renderHighlighted();
       renderEvents();
+      wireCardButtons();
     }
 
     refreshBtn.addEventListener("click", () => loadEvents().catch(console.error));
-    searchEl.addEventListener("input", () => renderEvents());
+    searchEl.addEventListener("input", () => { renderEvents(); wireCardButtons(); });
 
     // --- Auth gate + init ---
     onAuthStateChanged(auth, async (user) => {
