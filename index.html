@@ -5,58 +5,78 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>uZone • Login</title>
 
-  <!-- Tab icon (favicon) -->
   <link rel="icon" type="image/png" href="logo.png" />
-
-  <meta name="color-scheme" content="dark light" />
+  <meta name="color-scheme" content="light" />
 
   <style>
     :root{
-      --accent:#b00b55;
-      --bg:#0b0b10;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.70);
-      --border: rgba(255,255,255,.14);
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      /* Match events.html vibe */
+      --bg: #ffffff;
+      --ink: #111018;
+      --muted: rgba(17,16,24,.62);
+
+      --pink: #b00b55;
+      --purple: #6d28d9;
+      --blue: #8bd3ff;
+
+      --card: rgba(255,255,255,.86);
+      --border: rgba(17,16,24,.10);
+      --shadow: 0 18px 60px rgba(17,16,24,.10);
+
       --radius: 18px;
+      --radius2: 16px;
     }
-    *{box-sizing:border-box}
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
     body{
       margin:0;
       min-height:100vh;
       display:grid;
       place-items:center;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color:var(--text);
       background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(176,11,85,.30), transparent 60%),
-        radial-gradient(900px 600px at 80% 30%, rgba(176,11,85,.18), transparent 55%),
-        radial-gradient(700px 500px at 50% 90%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 500px at 15% 0%, rgba(139,211,255,.25), transparent 60%),
+        radial-gradient(900px 500px at 85% 10%, rgba(176,11,85,.12), transparent 55%),
+        radial-gradient(900px 500px at 60% 100%, rgba(109,40,217,.12), transparent 55%),
         var(--bg);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
+
+    a{ color:inherit; text-decoration:none; }
+    button{ font:inherit; }
+    img{ max-width:100%; display:block; }
+
     .wrap{
-      width:min(980px, 92vw);
+      width:min(1040px, 92vw);
       display:grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap:18px;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap:14px;
       align-items:stretch;
+      padding: 16px 0;
     }
-    @media (max-width: 860px){
-      .wrap{grid-template-columns:1fr}
+    @media (max-width: 900px){
+      .wrap{ grid-template-columns: 1fr; }
     }
-    .brand, .card{
+
+    .panel{
       border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      background: rgba(255,255,255,.80);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
+
+    /* Left “brand” panel */
     .brand{
-      padding:26px;
+      padding: 22px;
       position:relative;
+      background:
+        radial-gradient(700px 320px at 15% 20%, rgba(139,211,255,.30), transparent 60%),
+        radial-gradient(700px 320px at 85% 70%, rgba(176,11,85,.12), transparent 60%),
+        rgba(255,255,255,.82);
     }
+
     .logoRow{
       display:flex;
       align-items:center;
@@ -64,147 +84,252 @@
     }
     .logoRow img{
       width:44px;height:44px;
-      object-fit:contain;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,.35));
+      border-radius: 14px;
+      border:1px solid rgba(17,16,24,.08);
+      background: rgba(255,255,255,.6);
+      object-fit: cover;
+      box-shadow: 0 18px 50px rgba(17,16,24,.10);
     }
+    .logoRow .btxt{
+      display:grid;
+      gap:2px;
+      line-height:1.05;
+    }
+    .logoRow .btxt b{
+      font-size: 20px;
+      letter-spacing:.2px;
+    }
+    .logoRow .btxt span{
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 70vw;
+    }
+
     .brand h1{
-      margin:0;
-      font-size:28px;
+      margin: 14px 0 0 0;
+      font-size: 22px;
       letter-spacing:.2px;
     }
     .brand p{
-      margin:14px 0 0 0;
-      color:var(--muted);
-      line-height:1.45;
-    }
-    .pillRow{
-      margin-top:18px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-    }
-    .pill{
-      font-size:13px;
-      color:rgba(255,255,255,.85);
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(176,11,85,.10);
+      margin: 10px 0 0 0;
+      color: rgba(17,16,24,.72);
+      line-height:1.5;
+      font-size: 13px;
+      max-width: 65ch;
     }
 
-    .card{ padding:22px; }
+    .pillRow{
+      margin-top: 14px;
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+    }
+    .pill{
+      font-size: 12px;
+      font-weight: 900;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.72);
+      color: rgba(17,16,24,.72);
+    }
+    .pill.pink{
+      border-color: rgba(176,11,85,.22);
+      background: linear-gradient(135deg, rgba(176,11,85,.12), rgba(109,40,217,.10));
+      color: rgba(17,16,24,.82);
+    }
+
+    .meta{
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: var(--radius2);
+      border: 1px dashed rgba(17,16,24,.18);
+      background: rgba(255,255,255,.70);
+      color: rgba(17,16,24,.65);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    /* Right auth card */
+    .card{
+      padding: 18px;
+      display:grid;
+      gap: 12px;
+    }
+
     .tabs{
       display:flex;
-      gap:10px;
+      gap:8px;
       padding:6px;
       border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
-      width:fit-content;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 14px 40px rgba(17,16,24,.06);
+      width: fit-content;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
     }
+
     .tab{
       appearance:none;
-      border:0;
+      border:1px solid transparent;
       background:transparent;
-      color:rgba(255,255,255,.75);
+      color: rgba(17,16,24,.78);
       padding:10px 14px;
       border-radius:999px;
       cursor:pointer;
-      font-weight:650;
+      font-weight: 950;
       letter-spacing:.2px;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
+      white-space: nowrap;
     }
+    .tab:hover{ transform: translateY(-1px); background: rgba(139,211,255,.18); }
     .tab.active{
-      color:white;
-      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.55));
-      box-shadow: 0 12px 30px rgba(176,11,85,.25);
+      background: linear-gradient(135deg, rgba(176,11,85,.12), rgba(109,40,217,.10));
+      border-color: rgba(176,11,85,.22);
+      box-shadow: 0 12px 30px rgba(176,11,85,.10);
+      color: rgba(17,16,24,.92);
     }
-    .form{ margin-top:16px; display:grid; gap:12px; }
-    label{ display:grid; gap:6px; font-size:13px; color:rgba(255,255,255,.78); }
+
+    .form{
+      margin-top: 2px;
+      display:grid;
+      gap: 12px;
+    }
+
+    label{
+      display:grid;
+      gap:6px;
+      font-size: 13px;
+      color: rgba(17,16,24,.78);
+    }
+
     input{
       width:100%;
       padding:12px 12px;
       border-radius:12px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color:var(--text);
+      border:1px solid rgba(17,16,24,.12);
+      background: rgba(255,255,255,.82);
+      color: var(--ink);
       outline:none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
     }
     input:focus{
-      border-color: rgba(176,11,85,.60);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.20);
+      border-color: rgba(176,11,85,.40);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
     }
-    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    @media (max-width: 520px){ .row{grid-template-columns:1fr} }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 520px){
+      .row{ grid-template-columns: 1fr; }
+      .tabs{ width: 100%; justify-content: space-between; }
+      .tab{ flex: 1 1 auto; text-align:center; }
+    }
 
     .btn{
-      margin-top:6px;
-      padding:12px 14px;
-      border-radius:12px;
-      border:1px solid rgba(176,11,85,.55);
-      background: linear-gradient(135deg, rgba(176,11,85,.95), rgba(176,11,85,.58));
-      color:white;
-      font-weight:750;
+      margin-top: 6px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(176,11,85,.28);
+      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+      color: rgba(17,16,24,.92);
+      font-weight: 1000;
       letter-spacing:.2px;
       cursor:pointer;
-      box-shadow: 0 18px 40px rgba(176,11,85,.22);
+      box-shadow: 0 18px 50px rgba(17,16,24,.08);
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
-    .btn:disabled{ opacity:.65; cursor:not-allowed; }
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.22);
+      box-shadow: 0 22px 64px rgba(176,11,85,.10);
+    }
+    .btn:disabled{ opacity:.65; cursor:not-allowed; transform:none; }
 
-    .meta{ margin-top:10px; color:rgba(255,255,255,.65); font-size:13px; line-height:1.4; }
     .msg{
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.16);
-      color:rgba(255,255,255,.85);
+      margin-top: 4px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.78);
+      color: rgba(17,16,24,.82);
       display:none;
       white-space:pre-line;
+      font-size: 13px;
+      line-height: 1.4;
     }
-    .msg.error{ border-color: rgba(255,80,120,.35); background: rgba(255,80,120,.10); }
-    .msg.ok{ border-color: rgba(80,255,160,.25); background: rgba(80,255,160,.10); }
-    a{color: rgba(255,255,255,.90)}
+    .msg.error{
+      border-color: rgba(176,11,85,.28);
+      background: rgba(176,11,85,.06);
+    }
+    .msg.ok{
+      border-color: rgba(109,40,217,.22);
+      background: rgba(109,40,217,.06);
+    }
+
     .smallLink{
       display:inline-block;
-      margin-top:6px;
-      font-size:13px;
-      color:rgba(255,255,255,.72);
+      margin-top: 2px;
+      font-size: 13px;
+      color: rgba(17,16,24,.68);
       cursor:pointer;
       text-decoration: underline;
-      text-decoration-color: rgba(176,11,85,.55);
+      text-decoration-color: rgba(176,11,85,.35);
+      width: fit-content;
     }
+
+    footer{
+      width:min(1040px, 92vw);
+      margin: 6px auto 18px auto;
+      color: rgba(17,16,24,.60);
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    footer a{ text-decoration: underline; text-decoration-color: rgba(176,11,85,.35); }
   </style>
 </head>
 
 <body>
   <main class="wrap">
-    <section class="brand">
+    <section class="panel brand" aria-label="Brand panel">
       <div class="logoRow">
         <img src="logo.png" alt="uZone logo" />
-        <h1>uZone</h1>
+        <div class="btxt">
+          <b>uZone</b>
+          <span>student-only social • events • meet people • message</span>
+        </div>
       </div>
 
+      <h1>Sign in to see what’s going on.</h1>
       <p>
-        A student social space for uni life — meet people, message, and find your next motive.
-        <br /><br />
-        Sign in to access the Hub.
-        <br /><br />
+        Clean map + store-style event cards, plus the rest of the hub.
+        <br><br>
         Independent platform — not affiliated with any university.
       </p>
 
-      <div class="pillRow">
-        <span class="pill">Events</span>
+      <div class="pillRow" aria-label="Features">
+        <span class="pill pink">Events</span>
         <span class="pill">Dating</span>
         <span class="pill">Messaging</span>
         <span class="pill">Profiles</span>
       </div>
 
-      <p class="meta">
+      <div class="meta">
         Use any valid university email to get verified faster.
-      </p>
+      </div>
     </section>
 
-    <section class="card" aria-label="Login card">
+    <section class="panel card" aria-label="Login card">
       <div class="tabs" role="tablist" aria-label="Login or sign up">
         <button class="tab active" id="tabLogin" role="tab" aria-selected="true" type="button">Login</button>
         <button class="tab" id="tabSignup" role="tab" aria-selected="false" type="button">Sign up</button>
@@ -246,6 +371,11 @@
       </form>
     </section>
   </main>
+
+  <footer>
+    <div>Having issues? <a href="mailto:report@uzone.ca?subject=Uzone%20Issue">report@uzone.ca</a></div>
+    <div>© uZone</div>
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -420,7 +550,8 @@
         await ensurePublicId(user, user.displayName || "");
       } catch (_) {}
 
-      window.location.href = "main.html";
+      // ✅ changed from main.html -> events.html
+      window.location.href = "events.html";
     });
 
     // Forgot password
@@ -479,7 +610,8 @@
           await ensurePublicId(user, displayName);
 
           setMsg("Account created! Redirecting…", "ok");
-          window.location.href = "main.html";
+          // ✅ changed from main.html -> events.html
+          window.location.href = "events.html";
         } else {
           await signInWithEmailAndPassword(auth, email, password);
 
@@ -488,7 +620,8 @@
           }
 
           setMsg("Logged in! Redirecting…", "ok");
-          window.location.href = "main.html";
+          // ✅ changed from main.html -> events.html
+          window.location.href = "events.html";
         }
       } catch (err) {
         setMsg(friendlyAuthError(err), "error");
