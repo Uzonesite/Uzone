@@ -8,7 +8,6 @@
   <style>
     :root{
       --bg: #f8f7ff;
-      --bg2: #fcfbff;
       --ink: #111018;
       --muted: rgba(17,16,24,.62);
 
@@ -23,6 +22,8 @@
 
       --radius: 20px;
       --radius2: 16px;
+      --danger: #c6285d;
+      --success: #2f9e6f;
     }
 
     *{ box-sizing:border-box; }
@@ -65,7 +66,7 @@
     }
 
     .brand{
-      justify-self: start;
+      justify-self:start;
       display:flex;
       align-items:center;
       gap:10px;
@@ -90,11 +91,11 @@
     .brand .btxt span{ font-size:12px; color:var(--muted); }
 
     .tabs{
-      justify-self: center;
+      justify-self:center;
       display:flex;
       gap:8px;
       padding:6px;
-      border-radius: 999px;
+      border-radius:999px;
       border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.78);
       box-shadow: 0 14px 40px rgba(17,16,24,.05);
@@ -105,7 +106,7 @@
     }
 
     .tab{
-      flex: 0 0 auto;
+      flex:0 0 auto;
       display:inline-flex;
       align-items:center;
       justify-content:center;
@@ -119,9 +120,9 @@
       transition: transform .12s ease, background .12s ease, border-color .12s ease, box-shadow .12s ease;
       user-select:none;
       white-space:nowrap;
-      font-weight: 900;
-      font-size: 13px;
-      scroll-snap-align: start;
+      font-weight:900;
+      font-size:13px;
+      scroll-snap-align:start;
     }
 
     .tab:hover{ transform: translateY(-1px); background: rgba(139,211,255,.18); }
@@ -146,18 +147,18 @@
       text-align:right;
       display:grid;
       gap:2px;
-      min-width: 160px;
+      min-width:160px;
     }
 
     .version b{
-      font-size: 12px;
+      font-size:12px;
       letter-spacing:.2px;
     }
 
     .version span{
-      font-size: 12px;
+      font-size:12px;
       color: var(--muted);
-      white-space: nowrap;
+      white-space:nowrap;
     }
 
     @media (max-width: 760px){
@@ -165,18 +166,17 @@
         grid-template-columns: 1fr;
         gap:10px;
       }
-      .brand{ justify-self: start; }
       .tabs{
-        justify-self: stretch;
-        max-width: 100%;
+        justify-self:stretch;
+        max-width:100%;
       }
       .version{
-        justify-self: start;
+        justify-self:start;
         text-align:left;
-        min-width: unset;
+        min-width:unset;
       }
       .brand .btxt span{
-        max-width: 70vw;
+        max-width:70vw;
         overflow:hidden;
         text-overflow:ellipsis;
         white-space:nowrap;
@@ -187,55 +187,10 @@
       width: min(1120px, 92vw);
       margin: 16px auto 44px auto;
       display:grid;
-      gap: 18px;
-    }
-
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      align-items:start;
-    }
-
-    @media (max-width: 980px){
-      .grid2{ grid-template-columns: 1fr; }
-    }
-
-    .card{
-      border:1px solid rgba(255,255,255,.45);
-      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      backdrop-filter: blur(10px);
-    }
-
-    .cardInner{ padding: 16px; }
-
-    .hRow{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-
-    h1,h2,h3,h4{ margin:0; }
-
-    .h1{
-      font-size: 18px;
-      letter-spacing: .2px;
-    }
-
-    .sub{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-      margin-top: 6px;
+      gap:18px;
     }
 
     .banner{
-      position:relative;
       border-radius: var(--radius);
       overflow:hidden;
       border: 1px solid rgba(255,255,255,.48);
@@ -245,7 +200,7 @@
         radial-gradient(620px 240px at 95% 75%, rgba(176,11,85,.14), transparent 55%),
         linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));
       box-shadow: 0 22px 70px rgba(17,16,24,.08);
-      padding: 16px;
+      padding:16px;
       backdrop-filter: blur(12px);
     }
 
@@ -253,19 +208,20 @@
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 12px;
+      gap:12px;
       flex-wrap:wrap;
     }
 
     .banner h2{
-      font-size: 18px;
-      letter-spacing: .2px;
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
     }
 
     .banner p{
       margin:6px 0 0 0;
       color: rgba(17,16,24,.70);
-      font-size: 13px;
+      font-size:13px;
       line-height:1.4;
       max-width: 60ch;
     }
@@ -282,13 +238,13 @@
       justify-content:center;
       gap:8px;
       padding:10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,16,24,.12);
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.12);
       background: rgba(255,255,255,.84);
       cursor:pointer;
-      font-weight: 950;
-      font-size: 13px;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+      font-weight:950;
+      font-size:13px;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease, opacity .12s ease;
       user-select:none;
       white-space:nowrap;
     }
@@ -304,41 +260,98 @@
       background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
     }
 
+    .btn.danger{
+      border-color: rgba(176,11,85,.24);
+      color: var(--danger);
+      background: rgba(176,11,85,.08);
+    }
+
+    .btn:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .card{
+      border:1px solid rgba(255,255,255,.45);
+      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .cardInner{ padding:16px; }
+
+    .hRow{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    h1,h2,h3,h4,p{ margin:0; }
+
+    .h1{
+      font-size:18px;
+      letter-spacing:.2px;
+    }
+
+    .sub{
+      color: var(--muted);
+      font-size:13px;
+      line-height:1.35;
+      margin-top:6px;
+    }
+
     .searchBubble{
       display:flex;
       gap:10px;
       align-items:center;
       justify-content:space-between;
       flex-wrap:wrap;
-      margin-bottom: 14px;
     }
 
     .search{
-      flex: 1 1 280px;
+      flex:1 1 280px;
       display:flex;
       align-items:center;
       gap:10px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,16,24,.10);
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.88);
       box-shadow: 0 10px 26px rgba(17,16,24,.04);
+      max-width:560px;
+      width:100%;
     }
 
     .search input{
       border:none;
       outline:none;
       width:100%;
-      font-size: 14px;
-      background: transparent;
+      font-size:14px;
+      background:transparent;
       color: var(--ink);
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    @media (max-width: 980px){
+      .grid2{ grid-template-columns: 1fr; }
     }
 
     .eventGrid{
       display:grid;
-      gap: 12px;
+      gap:12px;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      align-items: stretch;
+      align-items:stretch;
     }
 
     .eventCard{
@@ -350,7 +363,7 @@
       box-shadow: 0 18px 50px rgba(17,16,24,.06);
       display:grid;
       grid-template-rows: auto 1fr;
-      min-height: 100%;
+      min-height:100%;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
       cursor:pointer;
       backdrop-filter: blur(8px);
@@ -363,8 +376,8 @@
     }
 
     .eventCard:focus-visible{
-      outline: 3px solid rgba(176,11,85,.22);
-      outline-offset: 2px;
+      outline:3px solid rgba(176,11,85,.22);
+      outline-offset:2px;
     }
 
     .eventMedia{
@@ -380,7 +393,7 @@
     .eventMedia img{
       width:100%;
       height:100%;
-      object-fit: cover;
+      object-fit:cover;
       display:block;
     }
 
@@ -396,66 +409,75 @@
     }
 
     .pill{
-      pointer-events:none;
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
+      padding:7px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      max-width:100%;
+      white-space:nowrap;
+    }
+
+    .pill.dark{
       border:1px solid rgba(255,255,255,.30);
       background: rgba(17,16,24,.46);
       color: rgba(255,255,255,.95);
-      font-size: 12px;
-      font-weight: 900;
       backdrop-filter: blur(8px);
-      max-width: 100%;
+    }
+
+    .pill.light{
+      background: rgba(17,16,24,.06);
+      border:1px solid rgba(17,16,24,.10);
+      color: rgba(17,16,24,.78);
     }
 
     .pill .dot{
-      width:8px; height:8px; border-radius:999px;
+      width:8px;height:8px;border-radius:999px;
       background: var(--blue);
       box-shadow: 0 0 0 4px rgba(139,211,255,.18);
-      flex: 0 0 auto;
+      flex:0 0 auto;
     }
 
-    .pill.pink .dot{
+    .pill.pinkDot .dot{
       background: var(--pink);
       box-shadow: 0 0 0 4px rgba(176,11,85,.18);
     }
 
     .eventBody{
-      padding: 12px;
+      padding:12px;
       display:grid;
-      gap: 10px;
+      gap:10px;
     }
 
     .eventTitle{
-      font-size: 15px;
-      font-weight: 1000;
-      letter-spacing: .2px;
+      font-size:15px;
+      font-weight:1000;
+      letter-spacing:.2px;
+      line-height:1.2;
       margin:0;
-      line-height: 1.2;
     }
 
     .meta{
       display:grid;
-      gap: 6px;
+      gap:6px;
       color: rgba(17,16,24,.74);
-      font-size: 13px;
-      line-height: 1.35;
-      word-break: break-word;
+      font-size:13px;
+      line-height:1.35;
+      word-break:break-word;
     }
 
     .meta b{ color: rgba(17,16,24,.86); }
 
     .descClamp{
       color: rgba(17,16,24,.70);
-      font-size: 13px;
-      line-height: 1.45;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      font-size:13px;
+      line-height:1.45;
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
       min-height: calc(1.45em * 2);
     }
 
@@ -466,28 +488,26 @@
     }
 
     .tag{
-      font-size: 12px;
-      font-weight: 900;
-      padding: 6px 9px;
-      border-radius: 999px;
+      font-size:12px;
+      font-weight:900;
+      padding:6px 9px;
+      border-radius:999px;
       border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.72);
       color: rgba(17,16,24,.72);
-      max-width: 100%;
+      max-width:100%;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
     }
 
     .actions{
-      position:relative;
-      z-index:3;
       display:flex;
       justify-content:space-between;
-      gap: 10px;
+      gap:10px;
       flex-wrap:wrap;
       align-items:center;
-      margin-top: 2px;
+      margin-top:2px;
     }
 
     .miniLink{
@@ -495,12 +515,12 @@
       align-items:center;
       justify-content:center;
       gap:8px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,16,24,.10);
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.80);
-      font-weight: 1000;
-      font-size: 13px;
+      font-weight:1000;
+      font-size:13px;
       cursor:pointer;
       user-select:none;
       white-space:nowrap;
@@ -524,57 +544,22 @@
       color: var(--pink);
     }
 
-    .miniLink.ghost{
-      background: rgba(17,16,24,.05);
-    }
-
     .empty{
-      padding: 18px 12px;
+      padding:18px 12px;
       border-radius: var(--radius2);
-      border: 1px dashed rgba(17,16,24,.18);
+      border:1px dashed rgba(17,16,24,.18);
       background: rgba(255,255,255,.70);
       color: rgba(17,16,24,.65);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .statsRow{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    @media (max-width: 760px){
-      .statsRow{ grid-template-columns: 1fr; }
-    }
-
-    .stat{
-      border:1px solid rgba(255,255,255,.45);
-      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 16px;
-    }
-
-    .statNum{
-      font-size: 28px;
-      font-weight: 1000;
-      line-height: 1;
-      letter-spacing: -.5px;
-    }
-
-    .statLabel{
-      margin-top:8px;
-      font-size: 13px;
-      color: var(--muted);
+      font-size:13px;
+      line-height:1.4;
     }
 
     footer{
       width: min(1120px, 92vw);
       margin: 14px auto 30px auto;
-      padding: 20px;
+      padding:20px;
       border:1px solid rgba(255,255,255,.45);
-      border-radius: 22px;
+      border-radius:22px;
       background:
         radial-gradient(520px 220px at 0% 0%, rgba(139,211,255,.18), transparent 60%),
         radial-gradient(520px 220px at 100% 100%, rgba(176,11,85,.10), transparent 60%),
@@ -593,15 +578,15 @@
     }
 
     .footerTitle{
-      font-size: 14px;
-      font-weight: 1000;
+      font-size:14px;
+      font-weight:1000;
       color: rgba(17,16,24,.9);
     }
 
     .footerSub{
-      font-size: 12px;
+      font-size:12px;
       color: rgba(17,16,24,.62);
-      line-height: 1.45;
+      line-height:1.45;
     }
 
     .footerActions{
@@ -620,8 +605,8 @@
       border-radius:999px;
       border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.86);
-      font-size: 12px;
-      font-weight: 900;
+      font-size:12px;
+      font-weight:900;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
 
@@ -632,18 +617,14 @@
     }
 
     @media (max-width: 760px){
-      footer{
-        grid-template-columns: 1fr;
-      }
-      .footerActions{
-        justify-content:flex-start;
-      }
+      footer{ grid-template-columns: 1fr; }
+      .footerActions{ justify-content:flex-start; }
     }
 
     .modal{
-      position: fixed;
-      inset: 0;
-      z-index: 2000;
+      position:fixed;
+      inset:0;
+      z-index:2000;
       display:none;
     }
 
@@ -658,10 +639,10 @@
 
     .modalPanel{
       position:relative;
-      width: min(920px, 92vw);
-      margin: 26px auto;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.20);
+      width:min(920px, 92vw);
+      margin:26px auto;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.20);
       background:
         radial-gradient(900px 420px at 10% 0%, rgba(139,211,255,.22), transparent 60%),
         radial-gradient(900px 420px at 90% 20%, rgba(176,11,85,.14), transparent 60%),
@@ -674,61 +655,56 @@
     }
 
     .modalTop{
-      padding: 14px 14px 0 14px;
+      padding:14px 14px 0 14px;
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 10px;
+      gap:10px;
     }
 
     .modalTitle{
       margin:0;
-      font-size: 16px;
-      font-weight: 1000;
+      font-size:16px;
+      font-weight:1000;
       letter-spacing:.2px;
       line-height:1.2;
     }
 
     .modalSub{
       margin:6px 0 0 0;
-      font-size: 13px;
+      font-size:13px;
       color: rgba(17,16,24,.68);
       line-height:1.35;
-      max-width: 70ch;
-      word-break: break-word;
+      max-width:70ch;
+      word-break:break-word;
     }
 
     .closeBtn{
-      flex: 0 0 auto;
-      width: 38px;
-      height: 38px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,16,24,.12);
+      flex:0 0 auto;
+      width:38px;
+      height:38px;
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.12);
       background: rgba(255,255,255,.92);
       cursor:pointer;
-      font-weight: 1000;
+      font-weight:1000;
       display:flex;
       align-items:center;
       justify-content:center;
       box-shadow: 0 12px 30px rgba(0,0,0,.12);
     }
 
-    .closeBtn:hover{
-      border-color: rgba(176,11,85,.24);
-      box-shadow: 0 16px 42px rgba(176,11,85,.12);
-    }
-
     .modalBody{
-      padding: 14px;
+      padding:14px;
       display:grid;
-      gap: 14px;
+      gap:14px;
       overflow:auto;
     }
 
     .modalGrid{
       display:grid;
       grid-template-columns: 1.08fr .92fr;
-      gap: 14px;
+      gap:14px;
       align-items:start;
     }
 
@@ -737,9 +713,9 @@
     }
 
     .modalMedia{
-      border-radius: 18px;
+      border-radius:18px;
       overflow:hidden;
-      border: 1px solid rgba(17,16,24,.10);
+      border:1px solid rgba(17,16,24,.10);
       background:
         radial-gradient(800px 350px at 20% 20%, rgba(139,211,255,.50), transparent 55%),
         radial-gradient(800px 350px at 85% 70%, rgba(176,11,85,.18), transparent 58%),
@@ -750,120 +726,131 @@
     .modalMedia img{
       width:100%;
       height:100%;
-      object-fit: cover;
+      object-fit:cover;
     }
 
-    .modalMediaFallback{
+    .modalMediaFallback,
+    .previewFallback{
       width:100%;
       height:100%;
       display:flex;
       align-items:center;
       justify-content:center;
-      color: rgba(17,16,24,.65);
-      font-weight: 900;
-      font-size: 13px;
-      padding: 16px;
+      color: rgba(17,16,24,.62);
+      font-size:13px;
+      font-weight:900;
+      padding:12px;
       text-align:center;
-    }
-
-    .infoCard{
-      border-radius: 18px;
-      border: 1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.80);
-      box-shadow: 0 18px 50px rgba(17,16,24,.04);
-      padding: 14px;
-      display:grid;
-      gap: 12px;
     }
 
     .kv{
       display:grid;
-      gap: 8px;
-      font-size: 13px;
-      color: rgba(17,16,24,.72);
-      line-height: 1.35;
-      word-break: break-word;
-    }
-
-    .kvRow{
-      display:grid;
-      grid-template-columns: 120px 1fr;
-      gap: 10px;
-      align-items:start;
-    }
-
-    @media (max-width: 520px){
-      .kvRow{ grid-template-columns: 1fr; gap: 4px; }
-    }
-
-    .kvRow b{ color: rgba(17,16,24,.88); }
-
-    .modalActions{
-      display:flex;
       gap:10px;
-      flex-wrap:wrap;
+    }
+
+    .kvItem{
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.82);
+      border-radius:16px;
+      padding:12px;
+      display:grid;
+      gap:4px;
+    }
+
+    .kvItem b{
+      font-size:12px;
+      color: rgba(17,16,24,.58);
+      letter-spacing:.2px;
+      text-transform:uppercase;
+    }
+
+    .kvItem span{
+      font-size:14px;
+      color: rgba(17,16,24,.90);
+      line-height:1.4;
+      word-break:break-word;
+    }
+
+    .statusBox{
+      min-height:46px;
+      display:flex;
       align-items:center;
-      justify-content:flex-start;
-      margin-top: 2px;
+      padding:12px 13px;
+      border-radius:14px;
+      border:1px solid rgba(17,16,24,.08);
+      background: rgba(255,255,255,.72);
+      color: rgba(17,16,24,.74);
+      font-size:13px;
+      line-height:1.45;
     }
 
-    .statusText{
-      font-size: 12px;
-      color: rgba(17,16,24,.62);
-      min-height: 16px;
+    .statusBox.success{
+      background: rgba(88,201,154,.14);
+      border-color: rgba(88,201,154,.22);
+      color: rgba(17,16,24,.86);
     }
 
-    .hr{
-      height:1px;
-      background: rgba(17,16,24,.08);
-      border:none;
-      margin: 0;
+    .statusBox.error{
+      background: rgba(176,11,85,.08);
+      border-color: rgba(176,11,85,.18);
+      color: #8c184a;
     }
 
     .formGrid{
       display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap:12px;
     }
 
-    @media (max-width: 760px){
-      .formGrid{ grid-template-columns: 1fr; }
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    @media (max-width: 700px){
+      .row2{ grid-template-columns: 1fr; }
     }
 
     .field{
       display:grid;
-      gap: 8px;
+      gap:6px;
     }
 
-    .field.full{
-      grid-column: 1 / -1;
-    }
-
-    .label{
-      font-size: 13px;
-      font-weight: 900;
+    .field label{
+      font-size:13px;
+      font-weight:900;
       color: rgba(17,16,24,.82);
     }
 
-    .input, .textarea, .select{
+    .input,
+    .textarea,
+    .select{
       width:100%;
       border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.84);
+      border-radius:14px;
+      padding:12px 13px;
       color: var(--ink);
-      border-radius: 14px;
-      padding: 12px 13px;
       outline:none;
-      transition: border-color .12s ease, box-shadow .12s ease, transform .12s ease;
+      transition: border-color .12s ease, box-shadow .12s ease;
     }
 
     .textarea{
-      resize: vertical;
-      min-height: 120px;
+      resize:vertical;
+      min-height:120px;
     }
 
-    .input:focus, .textarea:focus, .select:focus{
-      border-color: rgba(176,11,85,.26);
+    .input:focus,
+    .textarea:focus,
+    .select:focus{
+      border-color: rgba(176,11,85,.30);
       box-shadow: 0 0 0 4px rgba(176,11,85,.08);
+    }
+
+    .helper{
+      font-size:12px;
+      color: rgba(17,16,24,.58);
+      line-height:1.4;
     }
 
     .checkRow{
@@ -871,25 +858,25 @@
       gap:10px;
       align-items:center;
       flex-wrap:wrap;
-      padding: 12px 13px;
-      border-radius: 14px;
+      padding:12px 13px;
+      border-radius:14px;
       border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.92);
     }
 
     .uploadBox{
       border:1px dashed rgba(17,16,24,.18);
-      border-radius: 16px;
+      border-radius:16px;
       background: rgba(255,255,255,.78);
-      padding: 14px;
+      padding:14px;
       display:grid;
-      gap: 12px;
+      gap:12px;
     }
 
     .preview{
       width:100%;
-      aspect-ratio: 16 / 9;
-      border-radius: 14px;
+      aspect-ratio:16 / 9;
+      border-radius:14px;
       overflow:hidden;
       border:1px solid rgba(17,16,24,.10);
       background:
@@ -899,30 +886,23 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      color: rgba(17,16,24,.62);
-      font-size: 13px;
-      font-weight: 900;
       overflow:hidden;
     }
 
     .preview img{
       width:100%;
       height:100%;
-      object-fit: cover;
+      object-fit:cover;
     }
 
-    .helper{
-      font-size: 12px;
-      color: rgba(17,16,24,.58);
-      line-height: 1.4;
-    }
+    .hidden{ display:none !important; }
   </style>
 </head>
 
 <body>
   <header>
     <div class="topbar">
-      <a class="brand" href="main.html" aria-label="uZone main">
+      <a class="brand" href="events.html" aria-label="uZone events">
         <img src="logo.png" alt="uZone logo" />
         <div class="btxt">
           <b>uZone</b>
@@ -931,7 +911,7 @@
       </a>
 
       <nav class="tabs" aria-label="Top tabs">
-        <button class="tab" type="button" data-go="main.html">
+        <button class="tab" type="button" data-go="events.html">
           <span class="dot"></span> Events
         </button>
         <button class="tab active" type="button" data-go="myevents.html">
@@ -944,7 +924,7 @@
 
       <div class="version" aria-label="Version">
         <b>v2.0.0</b>
-        <span>updated March 5 2026</span>
+        <span>updated March 6 2026</span>
       </div>
     </div>
   </header>
@@ -963,29 +943,14 @@
       </div>
     </section>
 
-    <section class="statsRow" aria-label="Quick stats">
-      <div class="stat">
-        <div class="statNum" id="postedCount">0</div>
-        <div class="statLabel">events posted</div>
-      </div>
-      <div class="stat">
-        <div class="statNum" id="registeredCount">0</div>
-        <div class="statLabel">registered events</div>
-      </div>
-      <div class="stat">
-        <div class="statNum" id="totalCount">0</div>
-        <div class="statLabel">total showing here</div>
-      </div>
-    </section>
-
     <section class="card" aria-label="Search section">
       <div class="cardInner">
         <div class="searchBubble">
           <div>
             <h1 class="h1" style="font-size:16px;">Search</h1>
-            <div class="sub">Filter your posted and registered events by title, location, or tags.</div>
+            <div class="sub">Filter your posted and registered events by title, location, description, or tags.</div>
           </div>
-          <div class="search" role="search" style="max-width: 560px; width: 100%;">
+          <div class="search" role="search">
             <span style="opacity:.6; font-weight:1000;">⌕</span>
             <input id="search" placeholder="Search my events…" autocomplete="off" />
           </div>
@@ -1001,7 +966,7 @@
               <h1 class="h1">Posted by you</h1>
               <div class="sub">Events you created.</div>
             </div>
-            <span class="pill" style="background: rgba(17,16,24,.06); border:1px solid rgba(17,16,24,.10); color: rgba(17,16,24,.78);">
+            <span class="pill light">
               <span class="dot" style="background: rgba(17,16,24,.35); box-shadow:none;"></span>
               <span id="postedCountPill">0</span>
             </span>
@@ -1010,9 +975,7 @@
 
         <div class="cardInner" style="padding-top:0;">
           <div class="eventGrid" id="postedGrid"></div>
-          <div class="empty" id="postedEmpty" style="display:none;">
-            You haven’t posted any events yet.
-          </div>
+          <div class="empty hidden" id="postedEmpty">You haven’t posted any events yet.</div>
         </div>
       </section>
 
@@ -1023,7 +986,7 @@
               <h1 class="h1">Registered for</h1>
               <div class="sub">Events you’re going to.</div>
             </div>
-            <span class="pill" style="background: rgba(17,16,24,.06); border:1px solid rgba(17,16,24,.10); color: rgba(17,16,24,.78);">
+            <span class="pill light">
               <span class="dot" style="background: rgba(17,16,24,.35); box-shadow:none;"></span>
               <span id="registeredCountPill">0</span>
             </span>
@@ -1032,9 +995,7 @@
 
         <div class="cardInner" style="padding-top:0;">
           <div class="eventGrid" id="registeredGrid"></div>
-          <div class="empty" id="registeredEmpty" style="display:none;">
-            You’re not registered for any events yet.
-          </div>
+          <div class="empty hidden" id="registeredEmpty">You’re not registered for any events yet.</div>
         </div>
       </section>
     </section>
@@ -1044,41 +1005,910 @@
     <div class="footerLeft">
       <div class="footerTitle">uZone</div>
       <div class="footerSub">Student events, cleaner and easier to browse.</div>
-      <div class="footerSub">Post something, keep track of it, and see what you’ve joined.</div>
     </div>
 
     <div class="footerActions">
-      <a class="footerLink" href="mailto:report@uzone.ca?subject=uZone%20Issue%20Report">Report an issue</a>
+      <a class="footerLink" href="mailto:report@uzone.ca?subject=Uzone%20Issue">Report an issue</a>
       <span class="footerSub">© uZone</span>
     </div>
   </footer>
 
-  <div class="modal" id="viewModal" aria-hidden="true">
-    <div class="modalBackdrop" id="viewModalBackdrop"></div>
-
-    <div class="modalPanel" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+  <!-- Event details modal -->
+  <div class="modal" id="eventModal" aria-hidden="true">
+    <div class="modalBackdrop" id="eventModalBackdrop"></div>
+    <div class="modalPanel" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
       <div class="modalTop">
         <div>
-          <h3 class="modalTitle" id="viewModalTitle">Event</h3>
-          <p class="modalSub" id="viewModalSub">Details</p>
+          <h3 class="modalTitle" id="eventModalTitle">Event</h3>
+          <div class="modalSub" id="eventModalSub">Loading…</div>
         </div>
-        <button class="closeBtn" id="viewModalCloseBtn" type="button" aria-label="Close">✕</button>
+        <button class="closeBtn" id="eventModalCloseBtn" type="button" aria-label="Close">×</button>
       </div>
 
       <div class="modalBody">
         <div class="modalGrid">
-          <div class="modalMedia" id="viewModalMedia"></div>
+          <div class="modalMedia" id="eventModalMedia"></div>
 
-          <div class="infoCard">
-            <div class="kv" id="viewModalKV"></div>
-            <hr class="hr" />
-            <div class="modalActions">
-              <button class="miniLink primary" type="button" id="viewModalRegisterBtn">Register</button>
-              <button class="miniLink ghost" type="button" id="viewModalEditBtn">Edit basic info</button>
-            </div>
-            <div class="statusText" id="viewModalStatus"></div>
-          </div>
+          <div class="kv" id="eventModalKV"></div>
         </div>
 
-        <div class="infoCard" id="viewModalDescCard" style="display:none;">
-          <h3 style="margin:
+        <div class="card">
+          <div class="cardInner">
+            <div class="hRow">
+              <div>
+                <h1 class="h1" style="font-size:16px;">Description</h1>
+                <div class="sub">Full event details.</div>
+              </div>
+              <div class="miniBtns">
+                <button class="btn" id="eventModalMapBtn" type="button">Open in Events</button>
+                <button class="btn primary" id="eventModalRegisterBtn" type="button">Register</button>
+              </div>
+            </div>
+          </div>
+          <div class="cardInner" style="padding-top:0;">
+            <div class="statusBox" id="eventModalStatus">Ready.</div>
+            <div style="margin-top:12px; color:rgba(17,16,24,.78); font-size:14px; line-height:1.55;" id="eventModalDesc">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Post modal -->
+  <div class="modal" id="postModal" aria-hidden="true">
+    <div class="modalBackdrop" id="postModalBackdrop"></div>
+    <div class="modalPanel" role="dialog" aria-modal="true" aria-labelledby="postModalTitle">
+      <div class="modalTop">
+        <div>
+          <h3 class="modalTitle" id="postModalTitle">Post an event</h3>
+          <div class="modalSub">Upload a cover image and fill in the details below.</div>
+        </div>
+        <button class="closeBtn" id="postModalCloseBtn" type="button" aria-label="Close">×</button>
+      </div>
+
+      <div class="modalBody">
+        <form id="postForm" class="formGrid" novalidate>
+          <div class="uploadBox">
+            <div class="preview" id="coverPreview">
+              <div class="previewFallback">Cover preview</div>
+            </div>
+
+            <div class="field">
+              <label for="coverInput">Cover image</label>
+              <input class="input" id="coverInput" type="file" accept="image/*" />
+              <div class="helper">Optional. JPG, PNG, WEBP, etc.</div>
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="titleInput">Title</label>
+              <input class="input" id="titleInput" maxlength="90" placeholder="Event title" required />
+            </div>
+
+            <div class="field">
+              <label for="locationInput">Location</label>
+              <input class="input" id="locationInput" maxlength="120" placeholder="Where is it?" required />
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="dateInput">Date</label>
+              <input class="input" id="dateInput" type="date" required />
+            </div>
+
+            <div class="field">
+              <label for="timeInput">Time</label>
+              <input class="input" id="timeInput" type="time" required />
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="latInput">Latitude</label>
+              <input class="input" id="latInput" type="number" step="any" placeholder="45.4215" />
+            </div>
+
+            <div class="field">
+              <label for="lngInput">Longitude</label>
+              <input class="input" id="lngInput" type="number" step="any" placeholder="-75.6972" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="tagsInput">Tags</label>
+            <input class="input" id="tagsInput" maxlength="160" placeholder="party, music, sports, food" />
+            <div class="helper">Comma separated.</div>
+          </div>
+
+          <div class="field">
+            <label for="descInput">Description</label>
+            <textarea class="textarea" id="descInput" maxlength="1000" placeholder="What should people know?" required></textarea>
+          </div>
+
+          <label class="checkRow">
+            <input id="inviteOnlyInput" type="checkbox" />
+            <span>Invite-only event</span>
+          </label>
+
+          <div class="miniBtns">
+            <button class="btn primary" id="submitPostBtn" type="submit">Post event</button>
+            <button class="btn" id="cancelPostBtn" type="button">Cancel</button>
+          </div>
+
+          <div class="statusBox" id="postStatus">Ready to post.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      getDoc,
+      doc,
+      query,
+      orderBy,
+      runTransaction,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+    import {
+      getStorage,
+      ref,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const hello = document.getElementById("hello");
+    const searchEl = document.getElementById("search");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    const postedGrid = document.getElementById("postedGrid");
+    const registeredGrid = document.getElementById("registeredGrid");
+    const postedEmpty = document.getElementById("postedEmpty");
+    const registeredEmpty = document.getElementById("registeredEmpty");
+    const postedCountPill = document.getElementById("postedCountPill");
+    const registeredCountPill = document.getElementById("registeredCountPill");
+
+    const eventModal = document.getElementById("eventModal");
+    const eventModalBackdrop = document.getElementById("eventModalBackdrop");
+    const eventModalCloseBtn = document.getElementById("eventModalCloseBtn");
+    const eventModalTitle = document.getElementById("eventModalTitle");
+    const eventModalSub = document.getElementById("eventModalSub");
+    const eventModalMedia = document.getElementById("eventModalMedia");
+    const eventModalKV = document.getElementById("eventModalKV");
+    const eventModalDesc = document.getElementById("eventModalDesc");
+    const eventModalStatus = document.getElementById("eventModalStatus");
+    const eventModalRegisterBtn = document.getElementById("eventModalRegisterBtn");
+    const eventModalMapBtn = document.getElementById("eventModalMapBtn");
+
+    const postModal = document.getElementById("postModal");
+    const postModalBackdrop = document.getElementById("postModalBackdrop");
+    const postModalCloseBtn = document.getElementById("postModalCloseBtn");
+    const openPostBtn = document.getElementById("openPostBtn");
+    const cancelPostBtn = document.getElementById("cancelPostBtn");
+    const postForm = document.getElementById("postForm");
+    const submitPostBtn = document.getElementById("submitPostBtn");
+    const postStatus = document.getElementById("postStatus");
+
+    const coverInput = document.getElementById("coverInput");
+    const coverPreview = document.getElementById("coverPreview");
+    const titleInput = document.getElementById("titleInput");
+    const locationInput = document.getElementById("locationInput");
+    const dateInput = document.getElementById("dateInput");
+    const timeInput = document.getElementById("timeInput");
+    const latInput = document.getElementById("latInput");
+    const lngInput = document.getElementById("lngInput");
+    const tagsInput = document.getElementById("tagsInput");
+    const descInput = document.getElementById("descInput");
+    const inviteOnlyInput = document.getElementById("inviteOnlyInput");
+
+    let currentUser = null;
+    let currentUserDisplayName = "";
+    let allEvents = [];
+    let currentModalEvent = null;
+    let currentCoverFile = null;
+
+    function scrollActiveTabIntoView(){
+      const active = document.querySelector(".tab.active");
+      if (!active) return;
+      active.scrollIntoView({ behavior: "instant", inline: "center", block: "nearest" });
+    }
+
+    document.querySelectorAll(".tab[data-go]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const to = btn.getAttribute("data-go");
+        if (to) window.location.href = to;
+      });
+    });
+
+    scrollActiveTabIntoView();
+
+    function esc(value){
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function setStatus(el, text, type = ""){
+      el.textContent = text;
+      el.className = "statusBox" + (type ? ` ${type}` : "");
+    }
+
+    function uniqueStrings(arr){
+      return [...new Set((Array.isArray(arr) ? arr : [])
+        .map(x => String(x ?? "").trim())
+        .filter(Boolean)
+      )];
+    }
+
+    function safeNumber(value){
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function pickTitle(ev){
+      return (ev?.name || ev?.title || "Untitled event").toString();
+    }
+
+    function pickDescription(ev){
+      return (ev?.description || ev?.desc || ev?.details || "").toString().trim();
+    }
+
+    function pickWhere(ev){
+      return (ev?.location || ev?.place || ev?.address || "—").toString();
+    }
+
+    function pickHost(ev){
+      return (ev?.hostName || ev?.createdByName || ev?.ownerName || ev?.posterName || "").toString().trim();
+    }
+
+    function pickImage(ev){
+      return (ev?.coverUrl || ev?.imageUrl || ev?.photoUrl || ev?.img || "").toString().trim();
+    }
+
+    function pickTags(ev){
+      if (Array.isArray(ev?.tags)) return uniqueStrings(ev.tags);
+      if (typeof ev?.tags === "string") return uniqueStrings(ev.tags.split(","));
+      if (typeof ev?.tag === "string") return uniqueStrings(ev.tag.split(","));
+      return [];
+    }
+
+    function pickCreatedAtMs(ev){
+      const v = ev?.createdAt;
+      if (!v) return 0;
+      if (typeof v?.toMillis === "function") return v.toMillis();
+      if (typeof v?.seconds === "number") return v.seconds * 1000;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function pickEventDateObj(ev){
+      if (ev?.date && ev?.time){
+        const dt = new Date(`${ev.date}T${ev.time}`);
+        if (!Number.isNaN(dt.getTime())) return dt;
+      }
+
+      const maybe =
+        ev?.startsAt ||
+        ev?.startAt ||
+        ev?.eventDate ||
+        ev?.datetime ||
+        ev?.dateTime ||
+        null;
+
+      if (maybe?.toDate) return maybe.toDate();
+
+      if (typeof maybe?.seconds === "number"){
+        const dt = new Date(maybe.seconds * 1000);
+        if (!Number.isNaN(dt.getTime())) return dt;
+      }
+
+      if (typeof maybe === "number"){
+        const dt = new Date(maybe);
+        if (!Number.isNaN(dt.getTime())) return dt;
+      }
+
+      if (typeof maybe === "string"){
+        const dt = new Date(maybe);
+        if (!Number.isNaN(dt.getTime())) return dt;
+      }
+
+      if (ev?.date){
+        const dt = new Date(ev.date);
+        if (!Number.isNaN(dt.getTime())) return dt;
+      }
+
+      return null;
+    }
+
+    function fmtWhen(ev){
+      const dt = pickEventDateObj(ev);
+      if (!dt) {
+        const d = (ev?.date || "").toString().trim();
+        const t = (ev?.time || "").toString().trim();
+        return [d, t].filter(Boolean).join(" • ") || "—";
+      }
+
+      return dt.toLocaleString([], {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function attendeeData(ev){
+      const ids = uniqueStrings(ev?.attendeeIds || []);
+      const names = uniqueStrings(ev?.attendeeNames || []);
+      const count = Math.max(
+        Number.isFinite(Number(ev?.attendeeCount)) ? Number(ev.attendeeCount) : 0,
+        ids.length,
+        names.length
+      );
+      return { ids, names, count };
+    }
+
+    function userIsRegisteredForEvent(ev){
+      if (!currentUser) return false;
+      const data = attendeeData(ev);
+      return data.ids.includes(currentUser.uid);
+    }
+
+    function eventIsPostedByUser(ev){
+      if (!currentUser) return false;
+
+      const uid = currentUser.uid;
+      const possibleIds = [
+        ev?.uid,
+        ev?.userId,
+        ev?.ownerId,
+        ev?.createdBy,
+        ev?.createdByUid,
+        ev?.creatorId,
+        ev?.posterUid,
+        ev?.postedBy
+      ].map(x => String(x ?? "").trim()).filter(Boolean);
+
+      if (possibleIds.includes(uid)) return true;
+
+      const emails = [
+        ev?.email,
+        ev?.ownerEmail,
+        ev?.createdByEmail,
+        ev?.posterEmail
+      ].map(x => String(x ?? "").trim().toLowerCase()).filter(Boolean);
+
+      if (currentUser.email && emails.includes(currentUser.email.toLowerCase())) return true;
+
+      return false;
+    }
+
+    function matchesSearch(ev, q){
+      if (!q) return true;
+      const hay = [
+        pickTitle(ev),
+        pickWhere(ev),
+        pickHost(ev),
+        pickDescription(ev),
+        ...pickTags(ev)
+      ].join(" | ").toLowerCase();
+      return hay.includes(q);
+    }
+
+    function storeCardHTML(ev, mode){
+      const title = esc(pickTitle(ev));
+      const img = pickImage(ev);
+      const when = esc(fmtWhen(ev));
+      const where = esc(pickWhere(ev));
+      const host = pickHost(ev);
+      const desc = pickDescription(ev);
+      const tags = pickTags(ev);
+      const data = attendeeData(ev);
+      const isRegistered = userIsRegisteredForEvent(ev);
+
+      const leftPill = mode === "posted"
+        ? `<span class="pill dark pinkDot"><span class="dot"></span>Posted by you</span>`
+        : `<span class="pill dark"><span class="dot"></span>Registered</span>`;
+
+      const rightPill = `<span class="pill dark"><span class="dot"></span>${data.count} going</span>`;
+
+      return `
+        <article class="eventCard" data-open-card="${esc(ev.id)}" tabindex="0" role="button" aria-label="Open ${title}">
+          <div class="eventMedia">
+            ${img ? `<img src="${esc(img)}" alt="${title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove();">` : ""}
+            <div class="mediaOverlay">
+              ${leftPill}
+              ${rightPill}
+            </div>
+          </div>
+
+          <div class="eventBody">
+            <div>
+              <h3 class="eventTitle">${title}</h3>
+              <div class="meta" style="margin-top:8px;">
+                <div><b>When:</b> ${when}</div>
+                <div><b>Where:</b> ${where}</div>
+                ${host ? `<div><b>Host:</b> ${esc(host)}</div>` : ""}
+              </div>
+            </div>
+
+            ${desc ? `<div class="descClamp">${esc(desc)}</div>` : ""}
+            ${tags.length ? `<div class="tags">${tags.slice(0,6).map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>` : ""}
+
+            <div class="actions">
+              <button class="miniLink" type="button" data-open-events="${esc(ev.id)}">Open in Events</button>
+              <button class="miniLink ${isRegistered ? "danger" : "primary"}" type="button" data-register="${esc(ev.id)}">${isRegistered ? "Unregister" : "Register"}</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function openEventModal(ev){
+      currentModalEvent = ev;
+      const img = pickImage(ev);
+      const title = pickTitle(ev);
+      const host = pickHost(ev);
+      const data = attendeeData(ev);
+
+      eventModalTitle.textContent = title;
+      eventModalSub.textContent = host ? `Hosted by ${host}` : "Event details";
+      eventModalDesc.textContent = pickDescription(ev) || "No description yet.";
+
+      eventModalMedia.innerHTML = img
+        ? `<img src="${esc(img)}" alt="${esc(title)}" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='<div class=&quot;modalMediaFallback&quot;>No image</div>';">`
+        : `<div class="modalMediaFallback">No image</div>`;
+
+      eventModalKV.innerHTML = `
+        <div class="kvItem">
+          <b>When</b>
+          <span>${esc(fmtWhen(ev))}</span>
+        </div>
+        <div class="kvItem">
+          <b>Where</b>
+          <span>${esc(pickWhere(ev))}</span>
+        </div>
+        <div class="kvItem">
+          <b>Going</b>
+          <span>${data.count}</span>
+        </div>
+        <div class="kvItem">
+          <b>Tags</b>
+          <span>${esc(pickTags(ev).join(", ") || "—")}</span>
+        </div>
+      `;
+
+      updateEventModalRegisterButton(ev);
+      setStatus(eventModalStatus, "Ready.");
+      eventModal.classList.add("show");
+      eventModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeEventModal(){
+      eventModal.classList.remove("show");
+      eventModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    function openPostModal(){
+      postModal.classList.add("show");
+      postModal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closePostModal(){
+      postModal.classList.remove("show");
+      postModal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    function resetPostForm(){
+      postForm.reset();
+      currentCoverFile = null;
+      coverPreview.innerHTML = `<div class="previewFallback">Cover preview</div>`;
+      setStatus(postStatus, "Ready to post.");
+    }
+
+    function updateCoverPreview(file){
+      if (!file){
+        coverPreview.innerHTML = `<div class="previewFallback">Cover preview</div>`;
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      coverPreview.innerHTML = `<img src="${url}" alt="Cover preview">`;
+    }
+
+    function updateEventModalRegisterButton(ev){
+      const isRegistered = userIsRegisteredForEvent(ev);
+      eventModalRegisterBtn.textContent = isRegistered ? "Unregister" : "Register";
+      eventModalRegisterBtn.className = `btn ${isRegistered ? "danger" : "primary"}`;
+    }
+
+    function replaceLocalEvent(updated){
+      const idx = allEvents.findIndex(x => x.id === updated.id);
+      if (idx >= 0) allEvents[idx] = { ...allEvents[idx], ...updated };
+      else allEvents.unshift(updated);
+      return allEvents.find(x => x.id === updated.id);
+    }
+
+    function render(){
+      const q = (searchEl.value || "").trim().toLowerCase();
+
+      const posted = allEvents
+        .filter(eventIsPostedByUser)
+        .filter(ev => matchesSearch(ev, q))
+        .sort((a, b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
+
+      const registered = allEvents
+        .filter(userIsRegisteredForEvent)
+        .filter(ev => matchesSearch(ev, q))
+        .sort((a, b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
+
+      postedCountPill.textContent = String(posted.length);
+      registeredCountPill.textContent = String(registered.length);
+
+      postedGrid.innerHTML = "";
+      registeredGrid.innerHTML = "";
+
+      postedEmpty.classList.toggle("hidden", posted.length > 0);
+      registeredEmpty.classList.toggle("hidden", registered.length > 0);
+
+      posted.forEach(ev => postedGrid.insertAdjacentHTML("beforeend", storeCardHTML(ev, "posted")));
+      registered.forEach(ev => registeredGrid.insertAdjacentHTML("beforeend", storeCardHTML(ev, "registered")));
+
+      wireCards();
+    }
+
+    function wireCards(){
+      document.querySelectorAll("[data-open-card]").forEach(card => {
+        const id = card.getAttribute("data-open-card");
+        const openCard = () => {
+          const ev = allEvents.find(x => x.id === id);
+          if (ev) openEventModal(ev);
+        };
+
+        card.onclick = null;
+        card.onkeydown = null;
+
+        card.addEventListener("click", (e) => {
+          if (e.target.closest("[data-register]") || e.target.closest("[data-open-events]")) return;
+          openCard();
+        });
+
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openCard();
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-register]").forEach(btn => {
+        btn.onclick = null;
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-register");
+          await quickToggleRegister(id, btn);
+        });
+      });
+
+      document.querySelectorAll("[data-open-events]").forEach(btn => {
+        btn.onclick = null;
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.location.href = "events.html";
+        });
+      });
+    }
+
+    async function toggleEventRegistration(eventId, shouldRegister){
+      if (!currentUser) throw new Error("Not signed in.");
+
+      const eventRef = doc(db, "events", eventId);
+
+      const updated = await runTransaction(db, async (transaction) => {
+        const snap = await transaction.get(eventRef);
+        if (!snap.exists()) throw new Error("Event not found.");
+
+        const ev = { id: snap.id, ...(snap.data() || {}) };
+
+        const ids = uniqueStrings(ev.attendeeIds || []);
+        const names = uniqueStrings(ev.attendeeNames || []);
+        const wasRegistered = ids.includes(currentUser.uid);
+        const displayName = currentUserDisplayName || currentUser.email?.split("@")[0] || "User";
+
+        let nextIds = [...ids];
+        let nextNames = [...names];
+
+        if (shouldRegister && !wasRegistered){
+          nextIds.push(currentUser.uid);
+          nextNames.push(displayName);
+        }
+
+        if (!shouldRegister && wasRegistered){
+          nextIds = nextIds.filter(id => id !== currentUser.uid);
+          nextNames = nextNames.filter(name => name !== displayName);
+        }
+
+        nextIds = uniqueStrings(nextIds);
+        nextNames = uniqueStrings(nextNames);
+
+        const nextCount = Math.max(nextIds.length, nextNames.length);
+
+        const nextData = {
+          attendeeIds: nextIds,
+          attendeeNames: nextNames,
+          attendeeCount: nextCount
+        };
+
+        transaction.update(eventRef, nextData);
+        return { ...ev, ...nextData };
+      });
+
+      return replaceLocalEvent(updated);
+    }
+
+    async function registerEvent(eventId){
+      return toggleEventRegistration(eventId, true);
+    }
+
+    async function unregisterEvent(eventId){
+      return toggleEventRegistration(eventId, false);
+    }
+
+    async function quickToggleRegister(eventId, btn = null){
+      const ev = allEvents.find(x => x.id === eventId);
+      if (!ev || !currentUser) return;
+
+      const alreadyRegistered = userIsRegisteredForEvent(ev);
+
+      try{
+        if (btn) btn.disabled = true;
+
+        const updated = alreadyRegistered
+          ? await unregisterEvent(eventId)
+          : await registerEvent(eventId);
+
+        if (currentModalEvent && currentModalEvent.id === eventId){
+          currentModalEvent = { ...updated };
+          updateEventModalRegisterButton(currentModalEvent);
+          setStatus(
+            eventModalStatus,
+            alreadyRegistered ? "You’re no longer registered for this event." : "You’re registered for this event.",
+            "success"
+          );
+        }
+
+        render();
+      } catch (err){
+        console.error(err);
+        if (currentModalEvent && currentModalEvent.id === eventId){
+          setStatus(
+            eventModalStatus,
+            alreadyRegistered ? "Couldn’t unregister right now." : "Couldn’t register right now.",
+            "error"
+          );
+          updateEventModalRegisterButton(currentModalEvent);
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    async function loadEvents(){
+      let snap;
+      try{
+        snap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc")));
+      } catch (_) {
+        snap = await getDocs(collection(db, "events"));
+      }
+
+      const arr = [];
+      snap.forEach(d => arr.push({ id: d.id, ...(d.data() || {}) }));
+      arr.sort((a, b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
+      allEvents = arr;
+      render();
+    }
+
+    async function uploadCoverIfNeeded(file){
+      if (!file) return "";
+
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `event-covers/${currentUser.uid}/${Date.now()}.${ext}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      return await getDownloadURL(storageRef);
+    }
+
+    async function createEvent(){
+      if (!currentUser) throw new Error("Not signed in.");
+
+      const title = titleInput.value.trim();
+      const location = locationInput.value.trim();
+      const date = dateInput.value;
+      const time = timeInput.value;
+      const desc = descInput.value.trim();
+
+      if (!title) throw new Error("Please add a title.");
+      if (!location) throw new Error("Please add a location.");
+      if (!date) throw new Error("Please add a date.");
+      if (!time) throw new Error("Please add a time.");
+      if (!desc) throw new Error("Please add a description.");
+
+      const coverUrl = await uploadCoverIfNeeded(currentCoverFile);
+      const tags = uniqueStrings(tagsInput.value.split(","));
+      const lat = safeNumber(latInput.value);
+      const lng = safeNumber(lngInput.value);
+
+      const payload = {
+        name: title,
+        title,
+        location,
+        date,
+        time,
+        description: desc,
+        desc,
+        tags,
+        inviteOnly: !!inviteOnlyInput.checked,
+
+        uid: currentUser.uid,
+        userId: currentUser.uid,
+        ownerId: currentUser.uid,
+        createdBy: currentUser.uid,
+        createdByUid: currentUser.uid,
+        creatorId: currentUser.uid,
+        posterUid: currentUser.uid,
+
+        createdByName: currentUserDisplayName || currentUser.displayName || currentUser.email?.split("@")[0] || "User",
+        ownerName: currentUserDisplayName || currentUser.displayName || currentUser.email?.split("@")[0] || "User",
+        hostName: currentUserDisplayName || currentUser.displayName || currentUser.email?.split("@")[0] || "User",
+
+        createdByEmail: currentUser.email || "",
+        ownerEmail: currentUser.email || "",
+        email: currentUser.email || "",
+
+        attendeeIds: [],
+        attendeeNames: [],
+        attendeeCount: 0,
+
+        coverUrl,
+        imageUrl: coverUrl,
+
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      if (lat !== null && lng !== null){
+        payload.lat = lat;
+        payload.lng = lng;
+        payload.latitude = lat;
+        payload.longitude = lng;
+      }
+
+      const refDoc = await addDoc(collection(db, "events"), payload);
+      return { id: refDoc.id, ...payload };
+    }
+
+    openPostBtn.addEventListener("click", () => {
+      resetPostForm();
+      openPostModal();
+    });
+
+    cancelPostBtn.addEventListener("click", () => closePostModal());
+    postModalCloseBtn.addEventListener("click", () => closePostModal());
+    postModalBackdrop.addEventListener("click", () => closePostModal());
+
+    eventModalCloseBtn.addEventListener("click", () => closeEventModal());
+    eventModalBackdrop.addEventListener("click", () => closeEventModal());
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape"){
+        if (postModal.classList.contains("show")) closePostModal();
+        if (eventModal.classList.contains("show")) closeEventModal();
+      }
+    });
+
+    coverInput.addEventListener("change", () => {
+      currentCoverFile = coverInput.files?.[0] || null;
+      updateCoverPreview(currentCoverFile);
+    });
+
+    postForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      submitPostBtn.disabled = true;
+      setStatus(postStatus, "Posting event...");
+
+      try{
+        const created = await createEvent();
+
+        setStatus(postStatus, "Event posted.", "success");
+
+        allEvents.unshift({
+          ...created,
+          createdAt: Date.now()
+        });
+
+        render();
+        resetPostForm();
+        closePostModal();
+        await loadEvents();
+      } catch (err){
+        console.error(err);
+        setStatus(postStatus, err?.message || "Could not post event right now.", "error");
+      } finally {
+        submitPostBtn.disabled = false;
+      }
+    });
+
+    eventModalMapBtn.addEventListener("click", () => {
+      window.location.href = "events.html";
+    });
+
+    eventModalRegisterBtn.addEventListener("click", async () => {
+      if (!currentModalEvent) return;
+      eventModalRegisterBtn.disabled = true;
+
+      try{
+        await quickToggleRegister(currentModalEvent.id);
+      } finally {
+        eventModalRegisterBtn.disabled = false;
+      }
+    });
+
+    refreshBtn.addEventListener("click", () => loadEvents().catch(console.error));
+    searchEl.addEventListener("input", render);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user){
+        window.location.href = "index.html";
+        return;
+      }
+
+      currentUser = user;
+
+      let displayName = user.displayName?.trim() || "";
+      try{
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists()){
+          const data = snap.data() || {};
+          if (typeof data.name === "string" && data.name.trim()) displayName = data.name.trim();
+        }
+      } catch (_) {}
+
+      currentUserDisplayName = displayName || user.email?.split("@")[0] || "User";
+      hello.textContent = displayName ? `Hey, ${displayName}` : "Welcome back";
+
+      await loadEvents().catch(console.error);
+    });
+  </script>
+</body>
+</html>
