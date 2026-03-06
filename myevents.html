@@ -1488,6 +1488,7 @@
     let autocomplete = null;
     let geocoder = null;
     let autoDefaultLocationAttempted = false;
+    let mapFocusTimer = null;
 
     function nextPaint(){
       return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -2094,6 +2095,38 @@
       return mapsReadyPromise;
     }
 
+    function getMarkerPosition(){
+      if (!gmarker) return null;
+      const raw = "position" in gmarker ? gmarker.position : (typeof gmarker.getPosition === "function" ? gmarker.getPosition() : null);
+      const lat = Number(raw?.lat ?? raw?.lat?.());
+      const lng = Number(raw?.lng ?? raw?.lng?.());
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    }
+
+    function focusPickedOnMap(pos, zoom = 15, animate = true){
+      if (!gmap || !pos) return;
+
+      if (mapFocusTimer) clearTimeout(mapFocusTimer);
+
+      const applyFocus = () => {
+        if (!gmap) return;
+        google.maps.event.trigger(gmap, "resize");
+        if (animate && typeof gmap.panTo === "function") gmap.panTo(pos);
+        else gmap.setCenter(pos);
+        gmap.setZoom(zoom);
+      };
+
+      applyFocus();
+      requestAnimationFrame(() => requestAnimationFrame(applyFocus));
+      mapFocusTimer = setTimeout(applyFocus, 180);
+      google.maps.event.addListenerOnce(gmap, "idle", () => {
+        if (!gmap) return;
+        gmap.setCenter(pos);
+        gmap.setZoom(zoom);
+      });
+    }
+
     async function ensureMapReady(){
       await loadGoogleMaps();
       await nextPaint();
@@ -2172,36 +2205,18 @@
         });
       }
 
-      const pos = gmarker
-        ? ("position" in gmarker ? gmarker.position : null)
-        : null;
-      const lat = Number(pos?.lat ?? pos?.lat?.());
-      const lng = Number(pos?.lng ?? pos?.lng?.());
-      const center = Number.isFinite(lat) && Number.isFinite(lng)
-        ? { lat, lng }
-        : (safeNumber(latInput.value) !== null && safeNumber(lngInput.value) !== null
+      const center = getMarkerPosition()
+        || (safeNumber(latInput.value) !== null && safeNumber(lngInput.value) !== null
             ? { lat: Number(latInput.value), lng: Number(lngInput.value) }
             : DEFAULT_CENTER);
 
-      setTimeout(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
         if (!gmap) return;
         google.maps.event.trigger(gmap, "resize");
-        gmap.setCenter(center);
         if (gmarker && "map" in gmarker) gmarker.map = gmap;
         else if (gmarker && typeof gmarker.setMap === "function") gmarker.setMap(gmap);
-      }, 0);
-
-      setTimeout(() => {
-        if (!gmap) return;
-        google.maps.event.trigger(gmap, "resize");
-        gmap.setCenter(center);
-      }, 220);
-
-      setTimeout(() => {
-        if (!gmap) return;
-        google.maps.event.trigger(gmap, "resize");
-        gmap.setCenter(center);
-      }, 420);
+        focusPickedOnMap(center, center === DEFAULT_CENTER ? 12 : 15, false);
+      }));
     }
 
     function setPicked(lat, lng, label = "", pan = false){
@@ -2265,11 +2280,7 @@
         }
       }
 
-      if (gmap){
-        if (pan) gmap.panTo(pos);
-        else gmap.setCenter(pos);
-        gmap.setZoom(15);
-      }
+      focusPickedOnMap(pos, 15, pan);
     }
 
     function clearPicked(){
