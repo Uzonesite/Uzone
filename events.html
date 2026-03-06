@@ -16,9 +16,9 @@
       --blue: #8bd3ff;
       --green: #58c99a;
 
-      --card: rgba(255,255,255,.88);
+      --card: rgba(255,255,255,.90);
       --border: rgba(17,16,24,.10);
-      --shadow: 0 18px 60px rgba(17,16,24,.10);
+      --shadow: 0 18px 60px rgba(17,16,24,.08);
 
       --radius: 20px;
       --radius2: 16px;
@@ -31,10 +31,10 @@
     body{
       margin:0;
       background:
-        radial-gradient(900px 500px at 15% 0%, rgba(139,211,255,.25), transparent 60%),
-        radial-gradient(900px 500px at 85% 10%, rgba(176,11,85,.12), transparent 55%),
-        radial-gradient(900px 500px at 60% 100%, rgba(109,40,217,.12), transparent 55%),
-        var(--bg);
+        radial-gradient(900px 500px at 15% 0%, rgba(139,211,255,.18), transparent 60%),
+        radial-gradient(900px 500px at 85% 8%, rgba(176,11,85,.08), transparent 55%),
+        radial-gradient(900px 500px at 60% 100%, rgba(109,40,217,.08), transparent 55%),
+        linear-gradient(180deg, #ffffff 0%, #fcfbff 35%, #ffffff 100%);
       color:var(--ink);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
@@ -48,7 +48,7 @@
       top: 0;
       z-index: 60;
       backdrop-filter: blur(10px);
-      background: rgba(255,255,255,.72);
+      background: rgba(255,255,255,.78);
       border-bottom: 1px solid rgba(17,16,24,.08);
     }
 
@@ -94,8 +94,8 @@
       padding:6px;
       border-radius: 999px;
       border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.72);
-      box-shadow: 0 14px 40px rgba(17,16,24,.06);
+      background: rgba(255,255,255,.76);
+      box-shadow: 0 14px 40px rgba(17,16,24,.05);
       overflow:auto;
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
@@ -122,11 +122,11 @@
       scroll-snap-align: start;
     }
 
-    .tab:hover{ transform: translateY(-1px); background: rgba(139,211,255,.20); }
+    .tab:hover{ transform: translateY(-1px); background: rgba(139,211,255,.18); }
     .tab.active{
-      background: linear-gradient(135deg, rgba(176,11,85,.12), rgba(109,40,217,.10));
-      border-color: rgba(176,11,85,.22);
-      box-shadow: 0 12px 30px rgba(176,11,85,.10);
+      background: linear-gradient(135deg, rgba(176,11,85,.11), rgba(109,40,217,.08));
+      border-color: rgba(176,11,85,.20);
+      box-shadow: 0 12px 30px rgba(176,11,85,.08);
     }
 
     .tab .dot{
@@ -202,11 +202,12 @@
     .stack{ display:grid; gap: 14px; }
 
     .card{
-      border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.80);
+      border:1px solid rgba(17,16,24,.09);
+      background: rgba(255,255,255,.82);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
+      backdrop-filter: blur(6px);
     }
 
     .cardInner{ padding: 16px; }
@@ -216,6 +217,7 @@
       align-items:flex-end;
       justify-content:space-between;
       gap: 12px;
+      flex-wrap:wrap;
     }
 
     h1,h2,h3,h4{ margin:0; }
@@ -235,16 +237,15 @@
     .banner{
       position:relative;
       border-radius: var(--radius);
-      overflow:visible;
+      overflow:hidden;
       border: 1px solid rgba(17,16,24,.10);
       background:
-        radial-gradient(600px 250px at 10% 40%, rgba(139,211,255,.55), transparent 60%),
-        radial-gradient(600px 250px at 60% 10%, rgba(109,40,217,.22), transparent 55%),
-        radial-gradient(600px 250px at 90% 70%, rgba(176,11,85,.22), transparent 55%),
-        rgba(255,255,255,.72);
-      box-shadow: 0 22px 70px rgba(17,16,24,.10);
+        radial-gradient(600px 250px at 10% 40%, rgba(139,211,255,.48), transparent 60%),
+        radial-gradient(600px 250px at 60% 10%, rgba(109,40,217,.18), transparent 55%),
+        radial-gradient(600px 250px at 90% 70%, rgba(176,11,85,.18), transparent 55%),
+        rgba(255,255,255,.78);
+      box-shadow: 0 22px 70px rgba(17,16,24,.08);
       padding: 16px;
-      z-index: 1;
     }
 
     .bannerTop{
@@ -282,7 +283,7 @@
       padding:10px 12px;
       border-radius: 999px;
       border: 1px solid rgba(17,16,24,.12);
-      background: rgba(255,255,255,.78);
+      background: rgba(255,255,255,.82);
       cursor:pointer;
       font-weight: 950;
       font-size: 13px;
@@ -294,7 +295,7 @@
     .btn:hover{
       transform: translateY(-1px);
       border-color: rgba(176,11,85,.25);
-      box-shadow: 0 14px 38px rgba(176,11,85,.10);
+      box-shadow: 0 14px 38px rgba(176,11,85,.08);
     }
 
     .btn.primary{
@@ -302,58 +303,8 @@
       background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
     }
 
-    .sectionDivider{
-      position:relative;
-      height:90px;
-      margin-top:-6px;
-      margin-bottom:-48px;
-      border-radius: 0 0 32px 32px;
-      background:
-        linear-gradient(180deg, rgba(109,40,217,.08), rgba(139,211,255,.06)),
-        rgba(255,255,255,.36);
-      border:1px solid rgba(17,16,24,.06);
-      overflow:visible;
-      z-index:0;
-    }
-
-    .mapOverlap{
-      position:relative;
-      z-index:2;
-      margin-top:-38px;
-    }
-
-    .searchBubble{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
-
-    .search{
-      flex: 1 1 260px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.82);
-    }
-
-    .search input{
-      border:none;
-      outline:none;
-      width:100%;
-      font-size: 14px;
-      background: transparent;
-      color: var(--ink);
-    }
-
     .mapBox{
-      border:1px solid rgba(17,16,24,.10);
-      border-radius: var(--radius);
-      overflow:hidden;
+      border-top:1px solid rgba(17,16,24,.08);
       background: rgba(255,255,255,.72);
       min-height: 420px;
     }
@@ -366,8 +317,36 @@
     @media (max-width: 520px){
       #map{ height: 360px; }
       .mapBox{ min-height: 360px; }
-      .mapOverlap{ margin-top:-28px; }
-      .sectionDivider{ height:72px; margin-bottom:-34px; }
+    }
+
+    .searchBubble{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+
+    .search{
+      flex: 1 1 280px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 10px 26px rgba(17,16,24,.04);
+    }
+
+    .search input{
+      border:none;
+      outline:none;
+      width:100%;
+      font-size: 14px;
+      background: transparent;
+      color: var(--ink);
     }
 
     .pinWrap{ position:relative; width:1px; height:1px; overflow: visible; }
@@ -417,10 +396,10 @@
     .eventCard{
       position:relative;
       border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.86);
+      background: rgba(255,255,255,.88);
       border-radius: var(--radius2);
       overflow:hidden;
-      box-shadow: 0 18px 50px rgba(17,16,24,.08);
+      box-shadow: 0 18px 50px rgba(17,16,24,.06);
       display:grid;
       grid-template-rows: auto 1fr;
       min-height: 100%;
@@ -431,7 +410,7 @@
     .eventCard:hover{
       transform: translateY(-1px);
       border-color: rgba(176,11,85,.22);
-      box-shadow: 0 22px 64px rgba(176,11,85,.10);
+      box-shadow: 0 22px 64px rgba(176,11,85,.08);
     }
 
     .eventCard:focus-visible{
@@ -570,24 +549,30 @@
       padding: 10px 12px;
       border-radius: 999px;
       border: 1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.78);
+      background: rgba(255,255,255,.80);
       font-weight: 1000;
       font-size: 13px;
       cursor:pointer;
       user-select:none;
       white-space:nowrap;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease, opacity .12s ease;
     }
 
     .miniLink:hover{
       transform: translateY(-1px);
       border-color: rgba(176,11,85,.22);
-      box-shadow: 0 12px 30px rgba(176,11,85,.10);
+      box-shadow: 0 12px 30px rgba(176,11,85,.08);
     }
 
     .miniLink.primary{
       border-color: rgba(176,11,85,.28);
       background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+    }
+
+    .miniLink.danger{
+      border-color: rgba(176,11,85,.22);
+      background: rgba(176,11,85,.08);
+      color: var(--pink);
     }
 
     .empty{
@@ -603,29 +588,27 @@
     footer{
       width: min(1120px, 92vw);
       margin: 14px auto 30px auto;
-      padding: 18px;
+      padding: 20px;
       border:1px solid rgba(17,16,24,.08);
-      border-radius: 20px;
+      border-radius: 22px;
       background:
-        radial-gradient(600px 220px at 10% 0%, rgba(139,211,255,.18), transparent 60%),
-        radial-gradient(600px 220px at 90% 80%, rgba(176,11,85,.10), transparent 60%),
-        rgba(255,255,255,.78);
-      box-shadow: 0 18px 50px rgba(17,16,24,.08);
-      display:flex;
+        radial-gradient(520px 220px at 0% 0%, rgba(139,211,255,.18), transparent 60%),
+        radial-gradient(520px 220px at 100% 100%, rgba(176,11,85,.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.78));
+      box-shadow: 0 18px 50px rgba(17,16,24,.06);
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:16px;
       align-items:center;
-      justify-content:space-between;
-      gap:14px;
-      flex-wrap:wrap;
-      color: rgba(17,16,24,.72);
     }
 
     .footerLeft{
       display:grid;
-      gap:4px;
+      gap:6px;
     }
 
     .footerTitle{
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 1000;
       color: rgba(17,16,24,.9);
     }
@@ -633,6 +616,7 @@
     .footerSub{
       font-size: 12px;
       color: rgba(17,16,24,.62);
+      line-height: 1.45;
     }
 
     .footerActions{
@@ -640,23 +624,35 @@
       align-items:center;
       gap:10px;
       flex-wrap:wrap;
+      justify-content:flex-end;
     }
 
     .footerLink{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      padding:9px 12px;
+      padding:10px 13px;
       border-radius:999px;
       border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.82);
+      background: rgba(255,255,255,.86);
       font-size: 12px;
       font-weight: 900;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
 
     .footerLink:hover{
+      transform: translateY(-1px);
       border-color: rgba(176,11,85,.22);
-      box-shadow: 0 12px 30px rgba(176,11,85,.10);
+      box-shadow: 0 12px 30px rgba(176,11,85,.08);
+    }
+
+    @media (max-width: 760px){
+      footer{
+        grid-template-columns: 1fr;
+      }
+      .footerActions{
+        justify-content:flex-start;
+      }
     }
 
     .modal{
@@ -684,7 +680,7 @@
       background:
         radial-gradient(900px 420px at 10% 0%, rgba(139,211,255,.22), transparent 60%),
         radial-gradient(900px 420px at 90% 20%, rgba(176,11,85,.14), transparent 60%),
-        rgba(255,255,255,.92);
+        rgba(255,255,255,.94);
       box-shadow: 0 30px 90px rgba(0,0,0,.30);
       overflow:hidden;
       max-height: calc(100vh - 52px);
@@ -734,7 +730,7 @@
 
     .closeBtn:hover{
       border-color: rgba(176,11,85,.24);
-      box-shadow: 0 16px 42px rgba(176,11,85,.14);
+      box-shadow: 0 16px 42px rgba(176,11,85,.12);
     }
 
     .modalBody{
@@ -788,8 +784,8 @@
     .infoCard{
       border-radius: 18px;
       border: 1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.78);
-      box-shadow: 0 18px 50px rgba(17,16,24,.06);
+      background: rgba(255,255,255,.80);
+      box-shadow: 0 18px 50px rgba(17,16,24,.04);
       padding: 14px;
       display:grid;
       gap: 12px;
@@ -941,7 +937,7 @@
       <div class="bannerTop">
         <div>
           <h2>What’s going on today?</h2>
-          <p>Find something nearby, open any card for full details, and register right from the popup.</p>
+          <p>Find something nearby, open any card for full details, and register or unregister right from the popup.</p>
         </div>
         <div class="miniBtns">
           <a class="btn primary" href="post_event.html">Post an event</a>
@@ -949,9 +945,7 @@
       </div>
     </section>
 
-    <div class="sectionDivider" aria-hidden="true"></div>
-
-    <section class="grid2 mapOverlap">
+    <section class="grid2">
       <div class="stack">
         <section class="card" aria-label="Map section" id="mapSection">
           <div class="cardInner">
@@ -966,19 +960,6 @@
 
           <div class="mapBox">
             <div id="map" role="application" aria-label="Events map"></div>
-          </div>
-
-          <div class="cardInner" style="padding-top:14px;">
-            <div class="searchBubble">
-              <div>
-                <h1 class="h1" style="font-size:16px;">Search</h1>
-                <div class="sub">Filter events by title, location, or tags.</div>
-              </div>
-              <div class="search" role="search" style="max-width: 520px; width: 100%;">
-                <span style="opacity:.6; font-weight:1000;">⌕</span>
-                <input id="search" placeholder="Search events…" autocomplete="off" />
-              </div>
-            </div>
           </div>
         </section>
       </div>
@@ -1017,6 +998,17 @@
       </div>
 
       <div class="cardInner" style="padding-top:0;">
+        <div class="searchBubble">
+          <div>
+            <h1 class="h1" style="font-size:16px;">Search</h1>
+            <div class="sub">Filter events by title, location, or tags.</div>
+          </div>
+          <div class="search" role="search" style="max-width: 560px; width: 100%;">
+            <span style="opacity:.6; font-weight:1000;">⌕</span>
+            <input id="search" placeholder="Search events…" autocomplete="off" />
+          </div>
+        </div>
+
         <div class="eventGrid" id="eventGrid"></div>
         <div class="empty" id="empty" style="display:none;">
           No events found. Try a different search — or be the first to post.
@@ -1029,10 +1021,11 @@
     <div class="footerLeft">
       <div class="footerTitle">uZone</div>
       <div class="footerSub">Student events, cleaner and easier to browse.</div>
+      <div class="footerSub">See what’s happening, find it on the map, and join faster.</div>
     </div>
 
     <div class="footerActions">
-      <a class="footerLink" href="mailto:report@uzone.ca?subject=Uzone%20Issue">Report an issue</a>
+      <a class="footerLink" href="mailto:report@uzone.ca?subject=uZone%20Issue%20Report">Report an issue</a>
       <span class="footerSub">© uZone</span>
     </div>
   </footer>
@@ -1071,7 +1064,6 @@
             <div class="modalActions">
               <button class="miniLink primary" type="button" id="modalRegisterBtn">Register</button>
               <button class="miniLink" type="button" id="modalShowMapBtn">Show on map</button>
-              <button class="miniLink" type="button" id="modalCloseBtn2">Close</button>
             </div>
             <div class="statusText" id="modalStatus"></div>
           </div>
@@ -1097,7 +1089,9 @@
       query,
       orderBy,
       updateDoc,
-      arrayUnion
+      arrayUnion,
+      arrayRemove,
+      increment
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -1128,7 +1122,6 @@
     const modal = document.getElementById("modal");
     const modalBackdrop = document.getElementById("modalBackdrop");
     const modalCloseBtn = document.getElementById("modalCloseBtn");
-    const modalCloseBtn2 = document.getElementById("modalCloseBtn2");
     const modalTitle = document.getElementById("modalTitle");
     const modalSub = document.getElementById("modalSub");
     const modalMedia = document.getElementById("modalMedia");
@@ -1145,6 +1138,7 @@
     let currentUser = null;
     let currentModalEvent = null;
     let currentUserDisplayName = "";
+    let allEvents = [];
 
     function scrollActiveTabIntoView(){
       const active = document.querySelector(".tab.active");
@@ -1309,6 +1303,7 @@
       if (Array.isArray(ev.attendeeNames)) nameBuckets.push(...ev.attendeeNames);
       if (Array.isArray(ev.registeredUserNames)) nameBuckets.push(...ev.registeredUserNames);
       if (Array.isArray(ev.goerNames)) nameBuckets.push(...ev.goerNames);
+
       if (Array.isArray(ev.attendees)) {
         ev.attendees.forEach(item => {
           if (typeof item === "string") nameBuckets.push(item);
@@ -1317,6 +1312,7 @@
           }
         });
       }
+
       if (Array.isArray(ev.registeredUsers)) {
         ev.registeredUsers.forEach(item => {
           if (typeof item === "string") nameBuckets.push(item);
@@ -1325,6 +1321,7 @@
           }
         });
       }
+
       if (Array.isArray(ev.goers)) {
         ev.goers.forEach(item => {
           if (typeof item === "string") nameBuckets.push(item);
@@ -1335,9 +1332,15 @@
       }
 
       const names = uniqueStrings(nameBuckets);
-      const count = Math.max(names.length, ids.length, Number(ev.attendeeCount) || 0, Number(ev.registeredCount) || 0, Number(ev.goingCount) || 0);
+      const rawCount = Math.max(
+        names.length,
+        ids.length,
+        Number(ev.attendeeCount) || 0,
+        Number(ev.registeredCount) || 0,
+        Number(ev.goingCount) || 0
+      );
 
-      return { ids, names, count };
+      return { ids, names, count: rawCount };
     }
 
     function userIsRegisteredForEvent(ev){
@@ -1366,10 +1369,12 @@
 
     function updateModalRegisterButton(ev){
       const alreadyRegistered = userIsRegisteredForEvent(ev);
-      modalRegisterBtn.disabled = alreadyRegistered;
-      modalRegisterBtn.style.opacity = alreadyRegistered ? ".62" : "1";
-      modalRegisterBtn.style.cursor = alreadyRegistered ? "default" : "pointer";
-      modalRegisterBtn.textContent = alreadyRegistered ? "Registered" : "Register";
+      modalRegisterBtn.disabled = false;
+      modalRegisterBtn.style.opacity = "1";
+      modalRegisterBtn.style.cursor = "pointer";
+      modalRegisterBtn.textContent = alreadyRegistered ? "Unregister" : "Register";
+      modalRegisterBtn.classList.toggle("danger", alreadyRegistered);
+      modalRegisterBtn.classList.toggle("primary", !alreadyRegistered);
     }
 
     function closeModal(){
@@ -1477,7 +1482,6 @@
 
     modalBackdrop.addEventListener("click", closeModal);
     modalCloseBtn.addEventListener("click", closeModal);
-    modalCloseBtn2.addEventListener("click", closeModal);
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && modal.classList.contains("show")) closeModal();
@@ -1495,55 +1499,95 @@
     modalShowMapBtn.addEventListener("click", () => {
       if (!currentModalEvent) return;
       showEventOnMap(currentModalEvent);
+      closeModal();
     });
 
-    async function registerForCurrentEvent(){
+    function applyLocalRegister(eventId, userId, displayName){
+      const ev = allEvents.find(e => e.id === eventId);
+      if (!ev) return null;
+
+      ev.attendeeIds = uniqueStrings([...(ev.attendeeIds || []), userId]);
+      ev.attendeeNames = uniqueStrings([...(ev.attendeeNames || []), displayName]);
+
+      const attendeeData = buildAttendeeData(ev);
+      ev.attendeeCount = attendeeData.count;
+      return ev;
+    }
+
+    function applyLocalUnregister(eventId, userId, displayName){
+      const ev = allEvents.find(e => e.id === eventId);
+      if (!ev) return null;
+
+      ev.attendeeIds = uniqueStrings((ev.attendeeIds || []).filter(id => id !== userId));
+      ev.attendeeNames = uniqueStrings((ev.attendeeNames || []).filter(name => name !== displayName));
+
+      const attendeeData = buildAttendeeData(ev);
+      ev.attendeeCount = attendeeData.count;
+      return ev;
+    }
+
+    async function registerEvent(eventId){
+      if (!currentUser) return null;
+      const displayName = currentUserDisplayName || currentUser.displayName || currentUser.email?.split("@")[0] || "Someone";
+
+      await updateDoc(doc(db, "events", eventId), {
+        attendeeIds: arrayUnion(currentUser.uid),
+        attendeeNames: arrayUnion(displayName),
+        attendeeCount: increment(1)
+      });
+
+      return applyLocalRegister(eventId, currentUser.uid, displayName);
+    }
+
+    async function unregisterEvent(eventId){
+      if (!currentUser) return null;
+      const displayName = currentUserDisplayName || currentUser.displayName || currentUser.email?.split("@")[0] || "Someone";
+
+      await updateDoc(doc(db, "events", eventId), {
+        attendeeIds: arrayRemove(currentUser.uid),
+        attendeeNames: arrayRemove(displayName),
+        attendeeCount: increment(-1)
+      });
+
+      return applyLocalUnregister(eventId, currentUser.uid, displayName);
+    }
+
+    async function toggleCurrentEventRegistration(){
       if (!currentUser || !currentModalEvent) return;
-      if (userIsRegisteredForEvent(currentModalEvent)) return;
+
+      const eventId = currentModalEvent.id;
+      const alreadyRegistered = userIsRegisteredForEvent(currentModalEvent);
 
       modalRegisterBtn.disabled = true;
-      modalStatus.textContent = "Registering…";
+      modalStatus.textContent = alreadyRegistered ? "Unregistering…" : "Registering…";
 
       try{
-        const displayName = currentUserDisplayName || currentUser.displayName || currentUser.email?.split("@")[0] || "Someone";
+        const updated = alreadyRegistered
+          ? await unregisterEvent(eventId)
+          : await registerEvent(eventId);
 
-        await updateDoc(doc(db, "events", currentModalEvent.id), {
-          attendeeIds: arrayUnion(currentUser.uid),
-          attendeeNames: arrayUnion(displayName),
-          attendeeCount: arrayUnion ? undefined : undefined
-        }).catch(async () => {
-          await updateDoc(doc(db, "events", currentModalEvent.id), {
-            attendeeIds: arrayUnion(currentUser.uid),
-            attendeeNames: arrayUnion(displayName)
-          });
-        });
-
-        currentModalEvent = {
-          ...currentModalEvent,
-          attendeeIds: uniqueStrings([...(currentModalEvent.attendeeIds || []), currentUser.uid]),
-          attendeeNames: uniqueStrings([...(currentModalEvent.attendeeNames || []), displayName])
-        };
-
-        const index = allEvents.findIndex(e => e.id === currentModalEvent.id);
-        if (index >= 0){
-          allEvents[index] = {
-            ...allEvents[index],
-            attendeeIds: uniqueStrings([...(allEvents[index].attendeeIds || []), currentUser.uid]),
-            attendeeNames: uniqueStrings([...(allEvents[index].attendeeNames || []), displayName])
-          };
+        if (updated){
+          currentModalEvent = { ...updated };
+          renderAttendees(currentModalEvent);
+          updateModalRegisterButton(currentModalEvent);
+          modalStatus.textContent = alreadyRegistered
+            ? "You’re no longer registered for this event."
+            : "You’re registered for this event.";
         }
 
-        renderAttendees(currentModalEvent);
-        updateModalRegisterButton(currentModalEvent);
-        modalStatus.textContent = "You’re registered for this event.";
+        renderHighlighted();
+        renderEvents();
+        wireCardButtons();
       } catch (err){
         console.error(err);
-        modalStatus.textContent = "Couldn’t register right now.";
+        modalStatus.textContent = alreadyRegistered
+          ? "Couldn’t unregister right now."
+          : "Couldn’t register right now.";
         updateModalRegisterButton(currentModalEvent);
       }
     }
 
-    modalRegisterBtn.addEventListener("click", registerForCurrentEvent);
+    modalRegisterBtn.addEventListener("click", toggleCurrentEventRegistration);
 
     const MAPS_API_KEY = "AIzaSyCt8UPeNwhR4mPoQgWUoYxUE2UrlKYL6UE";
     const MAP_ID = "f4ab270f6c4fc6deeed4fa00";
@@ -1619,7 +1663,7 @@
           background:
             radial-gradient(420px 200px at 10% 0%, rgba(139,211,255,.26), transparent 60%),
             radial-gradient(420px 200px at 90% 20%, rgba(176,11,85,.14), transparent 60%),
-            rgba(255,255,255,.92);
+            rgba(255,255,255,.94);
           border-radius: 16px;
         ">
           <button type="button" id="iwCloseBtn"
@@ -1732,8 +1776,6 @@
       markers.push(marker);
     }
 
-    let allEvents = [];
-
     function storeCardHTML(ev){
       const title = esc(ev.name || ev.title || "Untitled");
       const when = esc(fmtWhen(ev));
@@ -1745,6 +1787,7 @@
       const host = pickHost(ev);
       const price = pickPrice(ev);
       const attendeeData = buildAttendeeData(ev);
+      const isRegistered = userIsRegisteredForEvent(ev);
 
       const pillLeft = invite
         ? `<span class="pill pink"><span class="dot"></span>Invite-only</span>`
@@ -1780,7 +1823,7 @@
 
             <div class="actions">
               <button class="miniLink" type="button" data-showmap="${esc(ev.id)}">Show on map</button>
-              <button class="miniLink primary" type="button" data-register="${esc(ev.id)}">${userIsRegisteredForEvent(ev) ? "Registered" : "Register"}</button>
+              <button class="miniLink ${isRegistered ? "danger" : "primary"}" type="button" data-register="${esc(ev.id)}">${isRegistered ? "Unregister" : "Register"}</button>
             </div>
           </div>
         </article>
@@ -1817,26 +1860,24 @@
       });
     }
 
-    async function quickRegister(eventId){
+    async function quickToggleRegister(eventId){
       const ev = allEvents.find(e => e.id === eventId);
-      if (!ev || !currentUser || userIsRegisteredForEvent(ev)) return;
+      if (!ev || !currentUser) return;
 
-      const displayName = currentUserDisplayName || currentUser.displayName || currentUser.email?.split("@")[0] || "Someone";
+      const alreadyRegistered = userIsRegisteredForEvent(ev);
 
       try{
-        await updateDoc(doc(db, "events", eventId), {
-          attendeeIds: arrayUnion(currentUser.uid),
-          attendeeNames: arrayUnion(displayName)
-        });
+        const updated = alreadyRegistered
+          ? await unregisterEvent(eventId)
+          : await registerEvent(eventId);
 
-        ev.attendeeIds = uniqueStrings([...(ev.attendeeIds || []), currentUser.uid]);
-        ev.attendeeNames = uniqueStrings([...(ev.attendeeNames || []), displayName]);
-
-        if (currentModalEvent && currentModalEvent.id === eventId){
-          currentModalEvent = { ...ev };
+        if (currentModalEvent && currentModalEvent.id === eventId && updated){
+          currentModalEvent = { ...updated };
           renderAttendees(currentModalEvent);
           updateModalRegisterButton(currentModalEvent);
-          modalStatus.textContent = "You’re registered for this event.";
+          modalStatus.textContent = alreadyRegistered
+            ? "You’re no longer registered for this event."
+            : "You’re registered for this event.";
         }
 
         renderHighlighted();
@@ -1883,7 +1924,7 @@
         btn.addEventListener("click", async (e) => {
           e.stopPropagation();
           const id = btn.getAttribute("data-register");
-          await quickRegister(id);
+          await quickToggleRegister(id);
         });
       });
     }
@@ -1899,7 +1940,10 @@
       const arr = [];
       snap.forEach(d => arr.push({ id: d.id, ...(d.data() || {}) }));
       arr.sort((a,b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
-      allEvents = arr;
+      allEvents = arr.map(ev => {
+        const attendeeData = buildAttendeeData(ev);
+        return { ...ev, attendeeCount: attendeeData.count };
+      });
 
       clearMarkers();
       for (const ev of allEvents) addMarkerForEvent(ev);
