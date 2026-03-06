@@ -897,6 +897,60 @@
     }
 
     .placeWrap{ width:100%; display:block; }
+
+    .locationSearchWrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width:100%;
+    }
+
+    .locationSearchInput{
+      width:100%;
+      min-height:52px;
+      border:none;
+      outline:none;
+      background:transparent;
+      color: var(--ink);
+      font:inherit;
+      font-size:14px;
+      line-height:1.2;
+      padding:0;
+      caret-color: var(--pink);
+    }
+
+    .locationSearchInput::placeholder{
+      color: rgba(17,16,24,.44);
+    }
+
+    .locationSearchInput::-webkit-calendar-picker-indicator{
+      display:none !important;
+    }
+
+    .locationSearchBtn{
+      flex:0 0 auto;
+      min-height:38px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(176,11,85,.18);
+      background: linear-gradient(135deg, rgba(176,11,85,.12), rgba(109,40,217,.08));
+      color: var(--ink);
+      font-size:12px;
+      font-weight:1000;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .locationSearchBtn:hover{
+      border-color: rgba(176,11,85,.28);
+      box-shadow: 0 10px 26px rgba(176,11,85,.08);
+    }
+
+    .locationSuggestionsNote{
+      font-size:12px;
+      color: rgba(17,16,24,.56);
+    }
+
     gmp-place-autocomplete{ width:100%; display:block; }
     gmp-place-autocomplete::part(input){
       width:100%;
@@ -1344,9 +1398,10 @@
                   <span class="placeIcon" aria-hidden="true">⌕</span>
                   <div class="placeWrap">
                     <div class="locationSearchWrap">
-                    <span class="locationSearchIcon">⌕</span>
-                    <input id="locationAutocomplete" class="locationSearchInput" type="text" placeholder="Search for an address" autocomplete="off" />
+                    <input id="locationAutocomplete" class="locationSearchInput" type="text" placeholder="Search for an address" autocomplete="off" list="locationSuggestions" />
+                    <button class="locationSearchBtn" id="locationSearchBtn" type="button">Search</button>
                   </div>
+                  <datalist id="locationSuggestions"></datalist>
                   </div>
                 </div>
               </div>
@@ -1463,8 +1518,12 @@
     const coverPreview = document.getElementById("coverPreview");
     const titleInput = document.getElementById("titleInput");
     const locationAutocompleteEl = document.getElementById("locationAutocomplete");
-    let placesAutocomplete = null;
-    let placesReady = false;
+    const locationSearchBtn = document.getElementById("locationSearchBtn");
+    const locationSuggestionsEl = document.getElementById("locationSuggestions");
+    let autocompleteService = null;
+    let predictionSessionToken = null;
+    let latestPredictions = [];
+    let predictionTimer = null;
     const locationInput = document.getElementById("locationInput");
     const pickedLocationLabel = document.getElementById("pickedLocationLabel");
     const dateInput = document.getElementById("dateInput");
@@ -2092,63 +2151,90 @@
           setPicked(lat, lng, label, true);
         });
 
-        if (locationAutocompleteEl && !placesReady && google.maps.places?.Autocomplete){
-          placesAutocomplete = new google.maps.places.Autocomplete(locationAutocompleteEl, {
-            fields: ["formatted_address", "geometry", "name"],
-            types: ["geocode"]
-          });
-          placesReady = true;
+        if (!autocompleteService && google.maps.places?.AutocompleteService){
+          autocompleteService = new google.maps.places.AutocompleteService();
+        }
 
-          placesAutocomplete.addListener("place_changed", async () => {
-            try{
-              await ensureMapReady();
-              refreshPostMap(false);
-
-              const place = placesAutocomplete.getPlace();
-              const label = place?.formatted_address || place?.name || locationAutocompleteEl.value.trim();
-              const loc = place?.geometry?.location;
-
-              if (loc){
-                setPicked(loc.lat(), loc.lng(), label, true);
-                locationAutocompleteEl.value = label;
-                setStatus(postStatus, "Location picked.", "success");
-                return;
-              }
-
-              if (label){
-                await searchAddress(label);
-                locationAutocompleteEl.value = label;
-                return;
-              }
-
-              setStatus(postStatus, "Choose a location from the list or type a more specific address.", "error");
-            } catch (err){
-              console.error(err);
-              setStatus(postStatus, "Couldn’t use that address. Try another one.", "error");
-            }
-          });
-
-          locationAutocompleteEl.addEventListener("keydown", async (e) => {
-            if (e.key !== "Enter") return;
-            e.preventDefault();
-            const raw = locationAutocompleteEl.value.trim();
-            if (!raw) return;
-            await searchAddress(raw);
-          });
-
-          locationAutocompleteEl.addEventListener("blur", async () => {
-            const raw = locationAutocompleteEl.value.trim();
-            if (!raw) return;
-            if (raw === locationInput.value.trim()) return;
-            if (latInput.value && lngInput.value) return;
-            await searchAddress(raw);
-          });
+        if (!predictionSessionToken && google.maps.places?.AutocompleteSessionToken){
+          predictionSessionToken = new google.maps.places.AutocompleteSessionToken();
         }
       }
 
       setTimeout(() => {
         if (gmap) google.maps.event.trigger(gmap, "resize");
       }, 60);
+
+
+    function renderLocationSuggestions(predictions){
+      latestPredictions = Array.isArray(predictions) ? predictions : [];
+      if (!locationSuggestionsEl) return;
+      locationSuggestionsEl.innerHTML = latestPredictions
+        .slice(0, 6)
+        .map(item => `<option value="${esc(item.description || "")}"></option>`)
+        .join("");
+    }
+
+    async function updateLocationSuggestions(){
+      const raw = locationAutocompleteEl?.value?.trim() || "";
+      if (!raw || raw.length < 3){
+        renderLocationSuggestions([]);
+        return;
+      }
+
+      await ensureMapReady();
+
+      if (!autocompleteService){
+        renderLocationSuggestions([]);
+        return;
+      }
+
+      autocompleteService.getPlacePredictions(
+        {
+          input: raw,
+          sessionToken: predictionSessionToken || undefined,
+          componentRestrictions: { country: "ca" }
+        },
+        (predictions) => {
+          renderLocationSuggestions(predictions || []);
+        }
+      );
+    }
+
+    async function searchSelectedOrTyped(){
+      const raw = locationAutocompleteEl?.value?.trim() || "";
+      if (!raw){
+        setStatus(postStatus, "Enter an address to search.", "error");
+        return;
+      }
+
+      const matchedPrediction = latestPredictions.find(item => (item.description || "").trim().toLowerCase() === raw.toLowerCase());
+
+      if (matchedPrediction?.place_id){
+        await ensureMapReady();
+        setStatus(postStatus, "Searching address...");
+
+        geocoder.geocode({ placeId: matchedPrediction.place_id }, (results, status) => {
+          if (status !== "OK" || !results?.length){
+            searchAddress(raw);
+            return;
+          }
+
+          const result = results[0];
+          const loc = result.geometry?.location;
+          if (!loc){
+            searchAddress(raw);
+            return;
+          }
+
+          setPicked(loc.lat(), loc.lng(), result.formatted_address || raw, true);
+          setStatus(postStatus, "Location picked.", "success");
+        });
+        return;
+      }
+
+      await searchAddress(raw);
+    }
+
     }
 
     function setPicked(lat, lng, label = "", pan = false){
@@ -2274,6 +2360,36 @@
       });
     }
 
+
+
+    if (locationAutocompleteEl){
+      locationAutocompleteEl.addEventListener("input", () => {
+        clearTimeout(predictionTimer);
+        predictionTimer = setTimeout(() => {
+          updateLocationSuggestions().catch(err => {
+            console.error(err);
+          });
+        }, 120);
+      });
+
+      locationAutocompleteEl.addEventListener("keydown", async (e) => {
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        await searchSelectedOrTyped();
+      });
+
+      locationAutocompleteEl.addEventListener("change", async () => {
+        const raw = locationAutocompleteEl.value.trim();
+        if (!raw) return;
+        await searchSelectedOrTyped();
+      });
+    }
+
+    if (locationSearchBtn){
+      locationSearchBtn.addEventListener("click", async () => {
+        await searchSelectedOrTyped();
+      });
+    }
 
     useMyLocationBtn.addEventListener("click", async () => {
       if (!navigator.geolocation){
