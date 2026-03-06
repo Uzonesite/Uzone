@@ -702,6 +702,13 @@
       display:grid;
       gap:14px;
       overflow:auto;
+      overscroll-behavior: contain;
+      overflow-anchor: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body.modal-open{
+      overflow:hidden;
     }
 
     .modalGrid{
@@ -844,6 +851,28 @@
 
     .input:focus,
     .textarea:focus{
+      border-color: rgba(176,11,85,.30);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.08);
+    }
+
+    .placeWrap{ width:100%; display:block; }
+    gmp-place-autocomplete{ width:100%; display:block; }
+    gmp-place-autocomplete::part(input){
+      width:100%;
+      min-height:48px;
+      padding:12px 13px;
+      border-radius:14px;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.84);
+      color: var(--ink);
+      outline:none;
+      font:inherit;
+      line-height:1.2;
+    }
+    gmp-place-autocomplete::part(input)::placeholder{
+      color: rgba(17,16,24,.48);
+    }
+    gmp-place-autocomplete::part(input):focus{
       border-color: rgba(176,11,85,.30);
       box-shadow: 0 0 0 4px rgba(176,11,85,.08);
     }
@@ -1078,7 +1107,6 @@
         </div>
         <div class="miniBtns">
           <button class="btn primary" id="openPostBtn" type="button">Post an event</button>
-          <button class="btn" id="refreshBtn" type="button">Refresh</button>
         </div>
       </div>
     </section>
@@ -1269,8 +1297,10 @@
           <div class="mapPicker">
             <div class="mapPickerTop">
               <div class="field">
-                <label for="locationSearchInput">Location</label>
-                <input class="input" id="locationSearchInput" maxlength="160" placeholder="Start typing an address…" autocomplete="off" />
+                <label for="locationAutocomplete">Location</label>
+                <div class="placeWrap">
+                  <gmp-place-autocomplete id="locationAutocomplete"></gmp-place-autocomplete>
+                </div>
               </div>
 
               <div class="mapPickerBtns">
@@ -1346,7 +1376,6 @@
 
     const hello = document.getElementById("hello");
     const searchEl = document.getElementById("search");
-    const refreshBtn = document.getElementById("refreshBtn");
 
     const postedGrid = document.getElementById("postedGrid");
     const registeredGrid = document.getElementById("registeredGrid");
@@ -1385,7 +1414,7 @@
     const coverInput = document.getElementById("coverInput");
     const coverPreview = document.getElementById("coverPreview");
     const titleInput = document.getElementById("titleInput");
-    const locationSearchInput = document.getElementById("locationSearchInput");
+    const locationAutocompleteEl = document.getElementById("locationAutocomplete");
     const locationInput = document.getElementById("locationInput");
     const pickedLocationLabel = document.getElementById("pickedLocationLabel");
     const dateInput = document.getElementById("dateInput");
@@ -1918,6 +1947,7 @@
     function openPostModal(){
       postModal.classList.add("show");
       postModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
       ensureMapReady().catch(err => {
         console.error(err);
         setStatus(postStatus, "Could not load the map right now.", "error");
@@ -1927,6 +1957,7 @@
     function closePostModal(){
       postModal.classList.remove("show");
       postModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
     }
 
     openPostBtn.addEventListener("click", () => {
@@ -1991,26 +2022,32 @@
           setPicked(lat, lng, label, true);
         });
 
-        if (google.maps.places?.Autocomplete){
-          autocomplete = new google.maps.places.Autocomplete(locationSearchInput, {
-            fields: ["formatted_address", "geometry", "name"],
-            types: ["geocode"]
-          });
+        if (locationAutocompleteEl && !locationAutocompleteEl.dataset.boundSelect){
+          locationAutocompleteEl.dataset.boundSelect = "true";
+          locationAutocompleteEl.addEventListener("gmp-select", async (e) => {
+            try{
+              const place = e.placePrediction?.toPlace?.() ?? e.place;
+              if (!place) return;
 
-          autocomplete.addListener("place_changed", async () => {
-            const place = autocomplete.getPlace();
-            if (!place) return;
+              if (typeof place.fetchFields === "function") {
+                await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
+              }
 
-            const label = place.formatted_address || place.name || "";
-            const loc = place.geometry?.location;
+              const label = place.formattedAddress || place.displayName || "";
+              const loc = place.location;
 
-            if (loc){
-              setPicked(loc.lat(), loc.lng(), label, true);
-              return;
-            }
+              if (loc){
+                setPicked(loc.lat(), loc.lng(), label, true);
+                setStatus(postStatus, "Location picked.", "success");
+                return;
+              }
 
-            if (label){
-              await searchAddress(label);
+              if (label){
+                await searchAddress(label);
+              }
+            } catch (err){
+              console.error(err);
+              setStatus(postStatus, "Couldn’t use that address. Try another one.", "error");
             }
           });
         }
@@ -2112,7 +2149,7 @@
     }
 
     async function searchAddress(address){
-      const q = String(address || locationSearchInput.value || "").trim();
+      const q = String(address || locationInput.value || "").trim();
       if (!q){
         setStatus(postStatus, "Enter an address to search.", "error");
         return;
@@ -2139,12 +2176,6 @@
       });
     }
 
-    locationSearchInput.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter" && !autocomplete){
-        e.preventDefault();
-        await searchAddress();
-      }
-    });
 
     useMyLocationBtn.addEventListener("click", async () => {
       if (!navigator.geolocation){
@@ -2353,7 +2384,6 @@
       pickedLocationLabel.textContent = location || "No location picked yet.";
       latInput.value = ll ? String(ll.lat) : "";
       lngInput.value = ll ? String(ll.lng) : "";
-      locationSearchInput.value = location || "";
 
       updateCoverPreview(null, pickImage(ev));
       openPostModal();
@@ -2406,7 +2436,6 @@
       deleteCurrentEvent().catch(console.error);
     });
 
-    refreshBtn.addEventListener("click", () => loadEvents().catch(console.error));
     searchEl.addEventListener("input", render);
 
     async function loadEvents(){
