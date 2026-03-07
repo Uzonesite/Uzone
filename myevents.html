@@ -1058,11 +1058,12 @@
       font-weight:900;
       color: rgba(17,16,24,.78);
       max-width:100%;
+      flex-wrap:wrap;
     }
 
     .attendeeAvatar{
-      width:20px;
-      height:20px;
+      width:22px;
+      height:22px;
       border-radius:999px;
       display:inline-flex;
       align-items:center;
@@ -1072,6 +1073,93 @@
       color:#fff;
       background: linear-gradient(135deg, var(--pink), var(--purple));
       flex:0 0 auto;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.7);
+    }
+
+    .attendeeAvatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:inherit;
+    }
+
+    .verifiedBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:18px;
+      height:18px;
+      padding:0 5px;
+      border-radius:999px;
+      background: linear-gradient(135deg, rgba(109,40,217,.14), rgba(139,211,255,.22));
+      border:1px solid rgba(109,40,217,.16);
+      color: var(--purple);
+      font-size:10px;
+      font-weight:1000;
+      flex:0 0 auto;
+    }
+
+    .chipAction{
+      border:none;
+      background: rgba(176,11,85,.10);
+      color: var(--pink);
+      border-radius:999px;
+      padding:6px 8px;
+      font-size:11px;
+      font-weight:1000;
+      cursor:pointer;
+    }
+
+    .chipAction.accept{
+      background: rgba(88,201,154,.14);
+      color: var(--success);
+    }
+
+    .filePicker{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .filePicker input[type="file"]{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+
+    .filePickerLabel{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(176,11,85,.28);
+      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+      cursor:pointer;
+      font-weight:950;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .filePickerName{
+      font-size:12px;
+      color: rgba(17,16,24,.62);
+      line-height:1.4;
+    }
+
+    .sectionBlock{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
     }
 
     .attendeeEmpty{
@@ -1255,6 +1343,16 @@
                 <span class="attendeeCount" id="eventModalAttendeeCount">0</span>
               </div>
               <div class="attendeeList" id="eventModalAttendees"></div>
+              <div class="sectionBlock" id="eventModalApplicantsSection" style="display:none;">
+                <div class="attendeeHead">
+                  <div>
+                    <h1 class="h1" style="font-size:16px;">Applications</h1>
+                    <div class="sub">Pending invite-only requests.</div>
+                  </div>
+                  <span class="attendeeCount" id="eventModalApplicantCount">0</span>
+                </div>
+                <div class="attendeeList" id="eventModalApplicants"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1300,7 +1398,11 @@
           <div class="uploadBox">
             <div class="field">
               <label for="coverInput">Cover image</label>
-              <input class="input" id="coverInput" type="file" accept="image/*" />
+              <div class="filePicker">
+                <label class="filePickerLabel" for="coverInput">Upload cover image</label>
+                <input id="coverInput" type="file" accept="image/*" />
+                <span class="filePickerName" id="coverFileName">No file chosen</span>
+              </div>
             </div>
             <div class="preview" id="coverPreview">
               <div class="previewFallback">Cover preview</div>
@@ -1324,8 +1426,19 @@
               <input class="input" id="dateInput" type="date" required />
             </div>
             <div class="field">
-              <label for="timeInput">Time</label>
+              <label for="timeInput">Start time</label>
               <input class="input" id="timeInput" type="time" required />
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="endTimeInput">End time <span class="helper">optional</span></label>
+              <input class="input" id="endTimeInput" type="time" />
+            </div>
+            <div class="field hidden" id="generalAreaField">
+              <label for="generalAreaInput">General area</label>
+              <input class="input" id="generalAreaInput" maxlength="160" placeholder="DMS / campus area / nearby landmark" />
             </div>
           </div>
 
@@ -1447,6 +1560,9 @@
     const eventModalDeleteBtn = document.getElementById("eventModalDeleteBtn");
     const eventModalAttendees = document.getElementById("eventModalAttendees");
     const eventModalAttendeeCount = document.getElementById("eventModalAttendeeCount");
+    const eventModalApplicantsSection = document.getElementById("eventModalApplicantsSection");
+    const eventModalApplicantCount = document.getElementById("eventModalApplicantCount");
+    const eventModalApplicants = document.getElementById("eventModalApplicants");
 
     const postModal = document.getElementById("postModal");
     const postModalBackdrop = document.getElementById("postModalBackdrop");
@@ -1460,6 +1576,7 @@
     const postStatus = document.getElementById("postStatus");
 
     const coverInput = document.getElementById("coverInput");
+    const coverFileName = document.getElementById("coverFileName");
     const coverPreview = document.getElementById("coverPreview");
     const titleInput = document.getElementById("titleInput");
     const locationAutocompleteEl = document.getElementById("locationAutocomplete");
@@ -1467,10 +1584,13 @@
     const pickedLocationLabel = document.getElementById("pickedLocationLabel");
     const dateInput = document.getElementById("dateInput");
     const timeInput = document.getElementById("timeInput");
+    const endTimeInput = document.getElementById("endTimeInput");
     const latInput = document.getElementById("latInput");
     const lngInput = document.getElementById("lngInput");
     const tagsInput = document.getElementById("tagsInput");
     const descInput = document.getElementById("descInput");
+    const generalAreaField = document.getElementById("generalAreaField");
+    const generalAreaInput = document.getElementById("generalAreaInput");
     const inviteOnlyInput = document.getElementById("inviteOnlyInput");
     const useMyLocationBtn = document.getElementById("useMyLocationBtn");
     const clearLocationBtn = document.getElementById("clearLocationBtn");
@@ -1481,6 +1601,7 @@
     let currentModalEvent = null;
     let editingEventId = null;
     let currentCoverFile = null;
+    const userCache = new Map();
 
     let mapsReadyPromise = null;
     let gmap = null;
@@ -1523,6 +1644,72 @@
       return uniqueStrings(String(value || "").split(","));
     }
 
+    function pickProfileImage(userLike){
+      if (!userLike || typeof userLike !== "object") return "";
+      const candidates = [userLike.photoURL, userLike.photoUrl, userLike.profilePic, userLike.profilePicture, userLike.avatarUrl, userLike.avatarURL, userLike.imageUrl, userLike.imageURL];
+      for (const c of candidates){
+        if (typeof c === "string" && c.trim()) return c.trim();
+      }
+      return "";
+    }
+
+    function isVerifiedUser(userLike){
+      return !!(userLike && (userLike.verified === true || userLike.isVerified === true || userLike.emailVerified === true || userLike.verifiedStudent === true));
+    }
+
+    function getUserRecord(uid){
+      return uid ? (userCache.get(String(uid)) || null) : null;
+    }
+
+    async function primeUserCache(ids = []){
+      const unique = [...new Set((Array.isArray(ids) ? ids : []).map(v => String(v || "").trim()).filter(Boolean))];
+      await Promise.all(unique.map(async (uid) => {
+        if (userCache.has(uid)) return;
+        try{
+          const snap = await getDoc(doc(db, "users", uid));
+          userCache.set(uid, snap.exists() ? { id: uid, ...(snap.data() || {}) } : null);
+        } catch (_) {
+          userCache.set(uid, null);
+        }
+      }));
+    }
+
+    function buildApplicantData(ev){
+      const ids = uniqueStrings([...(Array.isArray(ev?.applicantIds) ? ev.applicantIds : []), ...(Array.isArray(ev?.pendingIds) ? ev.pendingIds : [])]);
+      const names = uniqueStrings([...(Array.isArray(ev?.applicantNames) ? ev.applicantNames : []), ...(Array.isArray(ev?.pendingNames) ? ev.pendingNames : [])]);
+      const count = Math.max(ids.length, names.length);
+      const entries = ids.map((uid, idx) => {
+        const user = getUserRecord(uid);
+        return { uid, name: user?.name || user?.displayName || names[idx] || `Applicant ${idx + 1}`, photoUrl: pickProfileImage(user), verified: isVerifiedUser(user) };
+      });
+      names.forEach((name) => { if (!entries.some(entry => entry.name === name)) entries.push({ uid: "", name, photoUrl: "", verified: false }); });
+      return { ids, names, count, entries };
+    }
+
+    function userHasAppliedToEvent(ev){
+      if (!currentUser || !ev) return false;
+      return buildApplicantData(ev).ids.includes(currentUser.uid);
+    }
+
+    function formatUserChip(name, userLike = null, actionHTML = ""){
+      const safeName = String(name || "Someone").trim() || "Someone";
+      const img = pickProfileImage(userLike);
+      const verified = isVerifiedUser(userLike);
+      const avatar = img
+        ? `<span class="attendeeAvatar"><img src="${esc(img)}" alt="${esc(safeName)}" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${esc((safeName.charAt(0) || '?').toUpperCase())}'"></span>`
+        : `<span class="attendeeAvatar">${esc((safeName.charAt(0) || '?').toUpperCase())}</span>`;
+      const badge = verified ? `<span class="verifiedBadge" title="Verified">✓</span>` : "";
+      return `${avatar}<span>${esc(safeName)}</span>${badge}${actionHTML}`;
+    }
+
+    function pickVisibleLocation(ev){
+      const exact = pickLocation(ev);
+      const general = ev?.generalLocation || ev?.generalArea || ev?.area || "";
+      if (!ev?.inviteOnly) return exact || general || "";
+      if (eventIsPostedByUser(ev) || userIsRegisteredForEvent(ev)) return exact || general || "";
+      return general || exact || "";
+    }
+
     function pickTitle(ev){
       return ev?.name || ev?.title || "Untitled";
     }
@@ -1560,6 +1747,8 @@
     function fmtWhen(ev){
       const date = ev?.date || ev?.startDate || "";
       const time = ev?.time || ev?.startTime || "";
+      const endTime = ev?.endTime || "";
+      if (date && time && endTime) return `${date} • ${time} → ${endTime}`;
       return [date, time].filter(Boolean).join(" • ") || "—";
     }
 
@@ -1578,7 +1767,14 @@
         ids.length,
         names.length
       );
-      return { ids, names, count };
+      const entries = ids.map((uid, idx) => {
+        const user = getUserRecord(uid);
+        return { uid, name: user?.name || user?.displayName || names[idx] || `User ${idx + 1}`, photoUrl: pickProfileImage(user), verified: isVerifiedUser(user) };
+      });
+      names.forEach((name) => {
+        if (!entries.some(entry => entry.name === name)) entries.push({ uid: "", name, photoUrl: "", verified: false });
+      });
+      return { ids, names, count, entries };
     }
 
     function userIsRegisteredForEvent(ev){
@@ -1670,7 +1866,7 @@
     function storeCardHTML(ev){
       const title = esc(pickTitle(ev));
       const when = esc(fmtWhen(ev));
-      const where = esc(pickLocation(ev) || "—");
+      const where = esc(pickVisibleLocation(ev) || "—");
       const invite = !!ev.inviteOnly;
       const tags = pickTags(ev);
       const img = pickImage(ev);
@@ -1678,6 +1874,7 @@
       const host = pickHost(ev);
       const attendeeData = buildAttendeeData(ev);
       const isRegistered = userIsRegisteredForEvent(ev);
+      const isApplied = userHasAppliedToEvent(ev);
 
       const pillLeft = invite
         ? `<span class="pill dark pinkDot"><span class="dot"></span>Invite-only</span>`
@@ -1708,7 +1905,7 @@
 
             <div class="actions">
               <button class="miniLink" type="button" data-open-events="${esc(ev.id)}">Open in Events</button>
-              <button class="miniLink ${isRegistered ? "danger" : "primary"}" type="button" data-register="${esc(ev.id)}">${isRegistered ? "Unregister" : "Register"}</button>
+              <button class="miniLink ${(invite ? (isApplied || isRegistered) : isRegistered) ? "danger" : "primary"}" type="button" data-register="${esc(ev.id)}">${invite ? (isRegistered ? "Accepted" : (isApplied ? "Withdraw" : "Apply")) : (isRegistered ? "Unregister" : "Register")}</button>
             </div>
           </div>
         </article>
@@ -1724,7 +1921,7 @@
         .sort((a, b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
 
       const registered = allEvents
-        .filter(userIsRegisteredForEvent)
+        .filter(ev => userIsRegisteredForEvent(ev) || userHasAppliedToEvent(ev))
         .filter(ev => matchesSearch(ev, q))
         .sort((a, b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
 
@@ -1783,6 +1980,51 @@
           window.location.href = "events.html";
         });
       });
+
+      document.querySelectorAll("[data-remove-attendee]").forEach(btn => {
+        btn.onclick = null;
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          try{
+            const updated = await removeAttendeeFromEvent(btn.getAttribute("data-remove-attendee"), btn.getAttribute("data-attendee-id"));
+            if (updated && currentModalEvent?.id === updated.id){
+              currentModalEvent = { ...updated };
+              renderAttendees(currentModalEvent);
+              updateModalRegisterButton(currentModalEvent);
+              setStatus(eventModalStatus, "Attendee removed.", "success");
+              wireCards();
+            }
+            render();
+          } catch (err){
+            console.error(err);
+            setStatus(eventModalStatus, "Couldn’t remove that attendee right now.", "error");
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-accept-applicant], [data-reject-applicant]").forEach(btn => {
+        btn.onclick = null;
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const accept = btn.hasAttribute("data-accept-applicant");
+          const eventId = btn.getAttribute(accept ? "data-accept-applicant" : "data-reject-applicant");
+          const applicantId = btn.getAttribute("data-applicant-id");
+          try{
+            const updated = await setApplicantDecision(eventId, applicantId, accept);
+            if (updated && currentModalEvent?.id === updated.id){
+              currentModalEvent = { ...updated };
+              renderAttendees(currentModalEvent);
+              updateModalRegisterButton(currentModalEvent);
+              setStatus(eventModalStatus, accept ? "Applicant accepted." : "Applicant rejected.", "success");
+              wireCards();
+            }
+            render();
+          } catch (err){
+            console.error(err);
+            setStatus(eventModalStatus, "Couldn’t update that application right now.", "error");
+          }
+        });
+      });
     }
 
     function closeEventModal(){
@@ -1792,31 +2034,50 @@
 
     function renderAttendees(ev){
       const attendeeData = buildAttendeeData(ev);
+      const isHost = eventIsPostedByUser(ev);
       eventModalAttendeeCount.textContent = `${attendeeData.count}`;
 
-      if (!attendeeData.names.length){
+      if (!attendeeData.entries.length){
         eventModalAttendees.innerHTML = `<div class="attendeeEmpty">No one registered yet.</div>`;
-        return;
+      } else {
+        eventModalAttendees.innerHTML = attendeeData.entries.map(entry => `
+          <span class="attendeeChip">
+            ${formatUserChip(entry.name, entry, isHost && entry.uid ? `<button class="chipAction" type="button" data-remove-attendee="${esc(ev.id)}" data-attendee-id="${esc(entry.uid)}">Remove</button>` : "")}
+          </span>
+        `).join("");
       }
 
-      eventModalAttendees.innerHTML = attendeeData.names.map(name => `
-        <span class="attendeeChip">
-          <span class="attendeeAvatar">${esc(initials(name))}</span>
-          <span>${esc(name)}</span>
-        </span>
-      `).join("");
+      const applicantData = buildApplicantData(ev);
+      if (ev?.inviteOnly && isHost){
+        eventModalApplicantsSection.style.display = "grid";
+        eventModalApplicantCount.textContent = `${applicantData.count}`;
+        eventModalApplicants.innerHTML = applicantData.entries.length
+          ? applicantData.entries.map(entry => `
+            <span class="attendeeChip">
+              ${formatUserChip(entry.name, entry, entry.uid ? `<button class="chipAction accept" type="button" data-accept-applicant="${esc(ev.id)}" data-applicant-id="${esc(entry.uid)}">Accept</button><button class="chipAction" type="button" data-reject-applicant="${esc(ev.id)}" data-applicant-id="${esc(entry.uid)}">Reject</button>` : "")}
+            </span>
+          `).join("")
+          : `<div class="attendeeEmpty">No pending applications.</div>`;
+      } else {
+        eventModalApplicantsSection.style.display = "none";
+        eventModalApplicants.innerHTML = "";
+      }
     }
 
     function updateModalRegisterButton(ev){
       const isPosted = eventIsPostedByUser(ev);
       const isRegistered = userIsRegisteredForEvent(ev);
+      const isApplied = userHasAppliedToEvent(ev);
 
       eventModalEditBtn.classList.toggle("hidden", !isPosted);
       eventModalDeleteBtn.classList.toggle("hidden", !isPosted);
 
-      eventModalRegisterBtn.textContent = isRegistered ? "Unregister" : "Register";
-      eventModalRegisterBtn.classList.toggle("danger", isRegistered);
-      eventModalRegisterBtn.classList.toggle("primary", !isRegistered);
+      eventModalRegisterBtn.textContent = ev?.inviteOnly
+        ? (isRegistered ? "Accepted" : (isApplied ? "Withdraw application" : "Apply"))
+        : (isRegistered ? "Unregister" : "Register");
+      eventModalRegisterBtn.classList.toggle("danger", !!isApplied || isRegistered);
+      eventModalRegisterBtn.classList.toggle("primary", !isApplied && !isRegistered);
+      eventModalRegisterBtn.disabled = !!(ev?.inviteOnly && isRegistered);
     }
 
     function openEventModal(ev){
@@ -1827,7 +2088,7 @@
       const img = pickImage(ev);
       const desc = pickDescription(ev);
       const when = fmtWhen(ev);
-      const where = pickLocation(ev);
+      const where = pickVisibleLocation(ev);
       const tags = pickTags(ev);
 
       eventModalTitle.textContent = title;
@@ -1847,6 +2108,12 @@
           <b>Where</b>
           <span>${esc(where || "—")}</span>
         </div>
+        ${ev.inviteOnly && !userIsRegisteredForEvent(ev) && !eventIsPostedByUser(ev) && (ev.generalLocation || ev.generalArea || ev.area) ? `
+          <div class="kvItem">
+            <b>Area</b>
+            <span>${esc(ev.generalLocation || ev.generalArea || ev.area)}</span>
+          </div>
+        ` : ""}
         ${host ? `
           <div class="kvItem">
             <b>Host</b>
@@ -1899,30 +2166,49 @@
 
         const attendeeIds = uniqueStrings(ev.attendeeIds || []);
         const attendeeNames = uniqueStrings(ev.attendeeNames || []);
+        const applicantIds = uniqueStrings(ev.applicantIds || ev.pendingIds || []);
+        const applicantNames = uniqueStrings(ev.applicantNames || ev.pendingNames || []);
         const wasRegistered = attendeeIds.includes(currentUser.uid);
+        const wasApplied = applicantIds.includes(currentUser.uid);
 
         let nextIds = [...attendeeIds];
         let nextNames = [...attendeeNames];
+        let nextApplicantIds = [...applicantIds];
+        let nextApplicantNames = [...applicantNames];
 
-        if (shouldRegister && !wasRegistered){
-          nextIds.push(currentUser.uid);
-          nextNames.push(displayName);
-        }
-
-        if (!shouldRegister && wasRegistered){
-          nextIds = nextIds.filter(id => id !== currentUser.uid);
-          nextNames = nextNames.filter(name => name !== displayName);
+        if (ev.inviteOnly){
+          if (shouldRegister && !wasRegistered && !wasApplied){
+            nextApplicantIds.push(currentUser.uid);
+            nextApplicantNames.push(displayName);
+          }
+          if (!shouldRegister && wasApplied){
+            nextApplicantIds = nextApplicantIds.filter(id => id !== currentUser.uid);
+            nextApplicantNames = nextApplicantNames.filter(name => name !== displayName);
+          }
+        } else {
+          if (shouldRegister && !wasRegistered){
+            nextIds.push(currentUser.uid);
+            nextNames.push(displayName);
+          }
+          if (!shouldRegister && wasRegistered){
+            nextIds = nextIds.filter(id => id !== currentUser.uid);
+            nextNames = nextNames.filter(name => name !== displayName);
+          }
         }
 
         nextIds = uniqueStrings(nextIds);
         nextNames = uniqueStrings(nextNames);
-
-        const nextCount = Math.max(nextIds.length, nextNames.length);
+        nextApplicantIds = uniqueStrings(nextApplicantIds);
+        nextApplicantNames = uniqueStrings(nextApplicantNames);
 
         const nextData = {
           attendeeIds: nextIds,
           attendeeNames: nextNames,
-          attendeeCount: nextCount
+          attendeeCount: Math.max(nextIds.length, nextNames.length),
+          applicantIds: nextApplicantIds,
+          applicantNames: nextApplicantNames,
+          pendingIds: nextApplicantIds,
+          pendingNames: nextApplicantNames
         };
 
         transaction.update(eventRef, nextData);
@@ -1940,15 +2226,88 @@
       return toggleEventRegistration(eventId, false);
     }
 
+    async function setApplicantDecision(eventId, applicantId, accept){
+      if (!currentUser) throw new Error("Not signed in.");
+      const eventRef = doc(db, "events", eventId);
+      const updated = await runTransaction(db, async (transaction) => {
+        const snap = await transaction.get(eventRef);
+        if (!snap.exists()) throw new Error("Event not found.");
+        const ev = { id: snap.id, ...(snap.data() || {}) };
+        if (!eventIsPostedByUser(ev)) throw new Error("Only the host can do that.");
+
+        let attendeeIds = uniqueStrings(ev.attendeeIds || []);
+        let attendeeNames = uniqueStrings(ev.attendeeNames || []);
+        let applicantIds = uniqueStrings(ev.applicantIds || ev.pendingIds || []);
+        let applicantNames = uniqueStrings(ev.applicantNames || ev.pendingNames || []);
+        const idx = applicantIds.indexOf(applicantId);
+        const user = getUserRecord(applicantId);
+        const applicantName = user?.name || user?.displayName || applicantNames[idx] || "Applicant";
+
+        applicantIds = applicantIds.filter(id => id !== applicantId);
+        applicantNames = applicantNames.filter(name => name !== applicantName);
+
+        if (accept && !attendeeIds.includes(applicantId)){
+          attendeeIds.push(applicantId);
+          attendeeNames.push(applicantName);
+        }
+
+        attendeeIds = uniqueStrings(attendeeIds);
+        attendeeNames = uniqueStrings(attendeeNames);
+        applicantIds = uniqueStrings(applicantIds);
+        applicantNames = uniqueStrings(applicantNames);
+
+        const nextData = {
+          attendeeIds,
+          attendeeNames,
+          attendeeCount: Math.max(attendeeIds.length, attendeeNames.length),
+          applicantIds,
+          applicantNames,
+          pendingIds: applicantIds,
+          pendingNames: applicantNames
+        };
+        transaction.update(eventRef, nextData);
+        return { ...ev, ...nextData };
+      });
+      return replaceLocalEvent(updated);
+    }
+
+    async function removeAttendeeFromEvent(eventId, attendeeId){
+      if (!currentUser) throw new Error("Not signed in.");
+      const eventRef = doc(db, "events", eventId);
+      const updated = await runTransaction(db, async (transaction) => {
+        const snap = await transaction.get(eventRef);
+        if (!snap.exists()) throw new Error("Event not found.");
+        const ev = { id: snap.id, ...(snap.data() || {}) };
+        if (!eventIsPostedByUser(ev)) throw new Error("Only the host can do that.");
+
+        const user = getUserRecord(attendeeId);
+        const fallbackNames = uniqueStrings(ev.attendeeNames || []);
+        const maybeName = user?.name || user?.displayName || fallbackNames[uniqueStrings(ev.attendeeIds || []).indexOf(attendeeId)] || "";
+        const attendeeIds = uniqueStrings(ev.attendeeIds || []).filter(id => id !== attendeeId);
+        const attendeeNames = uniqueStrings(ev.attendeeNames || []).filter(name => name !== maybeName);
+
+        const nextData = {
+          attendeeIds,
+          attendeeNames,
+          attendeeCount: Math.max(attendeeIds.length, attendeeNames.length)
+        };
+        transaction.update(eventRef, nextData);
+        return { ...ev, ...nextData };
+      });
+      return replaceLocalEvent(updated);
+    }
+
     async function quickToggleRegister(eventId, btn = null){
       const ev = allEvents.find(x => x.id === eventId);
       if (!ev) return;
 
       const alreadyRegistered = userIsRegisteredForEvent(ev);
+      const alreadyApplied = userHasAppliedToEvent(ev);
+      if (ev.inviteOnly && alreadyRegistered) return;
       if (btn) btn.disabled = true;
 
       try{
-        const updated = alreadyRegistered
+        const updated = (ev.inviteOnly ? alreadyApplied : alreadyRegistered)
           ? await unregisterEvent(eventId)
           : await registerEvent(eventId);
 
@@ -1956,14 +2315,16 @@
           currentModalEvent = { ...updated };
           renderAttendees(currentModalEvent);
           updateModalRegisterButton(currentModalEvent);
-          setStatus(eventModalStatus, alreadyRegistered ? "You’re no longer registered for this event." : "You’re registered for this event.", "success");
+          setStatus(eventModalStatus, ev.inviteOnly
+            ? ((alreadyApplied || alreadyRegistered) ? "Application removed." : "Application sent to the host.")
+            : (alreadyRegistered ? "You’re no longer registered for this event." : "You’re registered for this event."), "success");
         }
 
         render();
       } catch (err){
         console.error(err);
         if (currentModalEvent?.id === eventId){
-          setStatus(eventModalStatus, alreadyRegistered ? "Couldn’t unregister right now." : "Couldn’t register right now.", "error");
+          setStatus(eventModalStatus, ev.inviteOnly ? "Couldn’t update your application right now." : (alreadyRegistered ? "Couldn’t unregister right now." : "Couldn’t register right now."), "error");
         }
       } finally {
         if (btn) btn.disabled = false;
@@ -2023,6 +2384,8 @@
       submitPostBtn.textContent = "Post event";
 
       postForm.reset();
+      generalAreaField.classList.add("hidden");
+      coverFileName.textContent = "No file chosen";
       if (locationAutocompleteEl) locationAutocompleteEl.value = "";
       locationInput.value = "";
       latInput.value = "";
@@ -2383,6 +2746,8 @@
       const date = dateInput.value;
       const time = timeInput.value;
       const desc = descInput.value.trim();
+      const endTime = endTimeInput.value;
+      const generalArea = generalAreaInput.value.trim();
       const lat = safeNumber(latInput.value);
       const lng = safeNumber(lngInput.value);
       const tags = parseTagsInput(tagsInput.value);
@@ -2392,6 +2757,7 @@
       if (!location) throw new Error("Please choose a location.");
       if (!date) throw new Error("Please add a date.");
       if (!time) throw new Error("Please add a time.");
+      if (inviteOnly && !generalArea) throw new Error("Please add a general area for invite-only events.");
       if (lat === null || lng === null) throw new Error("Please choose a location by searching, using your location, or clicking the map.");
 
       const displayName = currentUserDisplayName || currentUser.email?.split("@")[0] || "User";
@@ -2410,6 +2776,9 @@
         desc,
         tags,
         inviteOnly,
+        endTime: endTime || undefined,
+        generalLocation: inviteOnly ? generalArea : undefined,
+        generalArea: inviteOnly ? generalArea : undefined,
         lat,
         lng,
         latitude: lat,
@@ -2429,6 +2798,10 @@
         attendeeIds: editingEventId ? undefined : [],
         attendeeNames: editingEventId ? undefined : [],
         attendeeCount: editingEventId ? undefined : 0,
+        applicantIds: editingEventId ? undefined : [],
+        applicantNames: editingEventId ? undefined : [],
+        pendingIds: editingEventId ? undefined : [],
+        pendingNames: editingEventId ? undefined : [],
         coverUrl: existingImageUrl || undefined,
         imageUrl: existingImageUrl || undefined,
         updatedAt: serverTimestamp()
@@ -2459,6 +2832,10 @@
       payload.attendeeIds = [];
       payload.attendeeNames = [];
       payload.attendeeCount = 0;
+      payload.applicantIds = [];
+      payload.applicantNames = [];
+      payload.pendingIds = [];
+      payload.pendingNames = [];
       payload.createdAt = serverTimestamp();
 
       Object.keys(payload).forEach(key => {
@@ -2488,6 +2865,10 @@
       if (existing.attendeeIds && payload.attendeeIds === undefined) payload.attendeeIds = existing.attendeeIds;
       if (existing.attendeeNames && payload.attendeeNames === undefined) payload.attendeeNames = existing.attendeeNames;
       if (typeof existing.attendeeCount !== "undefined" && payload.attendeeCount === undefined) payload.attendeeCount = existing.attendeeCount;
+      if (existing.applicantIds && payload.applicantIds === undefined) payload.applicantIds = existing.applicantIds;
+      if (existing.applicantNames && payload.applicantNames === undefined) payload.applicantNames = existing.applicantNames;
+      if (existing.pendingIds && payload.pendingIds === undefined) payload.pendingIds = existing.pendingIds;
+      if (existing.pendingNames && payload.pendingNames === undefined) payload.pendingNames = existing.pendingNames;
 
       Object.keys(payload).forEach(key => {
         if (payload[key] === undefined) delete payload[key];
@@ -2612,6 +2993,13 @@
       const arr = [];
       snap.forEach(d => arr.push({ id: d.id, ...(d.data() || {}) }));
       arr.sort((a, b) => pickCreatedAtMs(b) - pickCreatedAtMs(a));
+
+      await primeUserCache(arr.flatMap(ev => [
+        ...(Array.isArray(ev.attendeeIds) ? ev.attendeeIds : []),
+        ...(Array.isArray(ev.applicantIds) ? ev.applicantIds : []),
+        ...(Array.isArray(ev.pendingIds) ? ev.pendingIds : []),
+        ev.hostUid, ev.ownerUid, ev.uid, ev.createdByUid, ev.userId, ev.ownerId
+      ]));
 
       allEvents = arr.map(ev => {
         const attendeeData = buildAttendeeData(ev);
