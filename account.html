@@ -934,7 +934,7 @@
 
             <div class="verifyPane" id="verifyPaneStudentId">
               <div class="verifyNote">
-                Take a live photo of your student ID and a selfie. This keeps the same old admin review flow.
+                Take a photo of your student ID and a selfie. Both images will be permanently deleted once verified.
               </div>
 
               <div class="docUploadGrid">
@@ -1305,7 +1305,7 @@
       } else if (domainValid){
         emailVerifyInfo.textContent = `Your email looks like a valid school email (${email}). Verify it and your account can be marked verified.`;
       } else {
-        emailVerifyInfo.textContent = `Your current email (${email}) is not in the allowed university email list. Use the student ID option or change your account email to a school one.`;
+        emailVerifyInfo.textContent = `Your current email (${email}) is not in the allowed university email list. Use the student ID option.`;
       }
     }
 
