@@ -269,7 +269,7 @@
 
     .grid{
       display:grid;
-      grid-template-columns: 1.05fr .95fr;
+      grid-template-columns: 1fr .95fr;
       gap: 14px;
       align-items:start;
     }
@@ -397,15 +397,9 @@
 
     .stats{
       display:grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr;
       gap:10px;
       margin-top: 14px;
-    }
-
-    @media (max-width: 560px){
-      .stats{
-        grid-template-columns: 1fr;
-      }
     }
 
     .stat{
@@ -481,51 +475,6 @@
 
     @media (max-width: 700px){
       .row2{ grid-template-columns: 1fr; }
-    }
-
-    .quickLinks{
-      display:grid;
-      gap:10px;
-    }
-
-    .quickLink{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px;
-      border-radius:16px;
-      border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.76);
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-
-    .quickLink:hover{
-      transform: translateY(-1px);
-      border-color: rgba(176,11,85,.22);
-      box-shadow: 0 14px 38px rgba(176,11,85,.08);
-    }
-
-    .quickLinkLeft{
-      display:grid;
-      gap:4px;
-    }
-
-    .quickLinkLeft b{
-      font-size: 14px;
-    }
-
-    .quickLinkLeft span{
-      font-size: 12px;
-      color: var(--muted);
-      line-height:1.35;
-    }
-
-    .arrow{
-      font-weight:1000;
-      color: rgba(17,16,24,.45);
-      font-size:18px;
-      line-height:1;
     }
 
     .statusBox{
@@ -662,11 +611,12 @@
       <div class="bannerTop">
         <div>
           <h2>Your account</h2>
-          <p>Manage your profile, update the way you appear to other students, and quickly get to your events or sign out.</p>
+          <p>Manage your profile, update the way you appear to other students, and get back to your events fast.</p>
         </div>
         <div class="miniBtns">
           <a class="btn primary" href="events.html">Browse events</a>
           <a class="btn" href="myevents.html">My events</a>
+          <button class="btn" id="signOutBtn" type="button">Sign out</button>
         </div>
       </div>
     </section>
@@ -688,9 +638,9 @@
                     <span id="studentStatusText">Verified student</span>
                   </span>
 
-                  <span class="pill pending" id="emailStatusPill">
+                  <span class="pill pending" id="publicIdPill">
                     <span class="dot"></span>
-                    <span id="emailStatusText">Email status</span>
+                    <span id="publicIdText">U# —</span>
                   </span>
                 </div>
               </div>
@@ -700,14 +650,6 @@
               <div class="stat">
                 <b id="statJoined">—</b>
                 <span>Joined</span>
-              </div>
-              <div class="stat">
-                <b id="statEvents">0</b>
-                <span>Events posted</span>
-              </div>
-              <div class="stat">
-                <b id="statNameLen">0</b>
-                <span>Profile strength</span>
               </div>
             </div>
           </div>
@@ -739,18 +681,6 @@
                 </div>
               </div>
 
-              <div class="row2">
-                <div class="field">
-                  <label for="programInput">Program</label>
-                  <input class="input" id="programInput" maxlength="80" placeholder="Program / major" />
-                </div>
-
-                <div class="field">
-                  <label for="yearInput">Year</label>
-                  <input class="input" id="yearInput" maxlength="30" placeholder="1st year, 2nd year, etc." />
-                </div>
-              </div>
-
               <div class="field">
                 <label for="bioInput">Bio</label>
                 <textarea class="textarea" id="bioInput" maxlength="220" placeholder="A short bio about you..."></textarea>
@@ -769,88 +699,13 @@
       </div>
 
       <div class="stack">
-        <section class="card" aria-label="Quick actions">
-          <div class="cardInner">
-            <div class="hRow">
-              <div>
-                <h1 class="h1">Quick actions</h1>
-                <div class="sub">Shortcuts for common account stuff.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="cardInner" style="padding-top:0;">
-            <div class="quickLinks">
-              <a class="quickLink" href="events.html">
-                <div class="quickLinkLeft">
-                  <b>All events</b>
-                  <span>Go back to the main page and browse what’s happening.</span>
-                </div>
-                <span class="arrow">›</span>
-              </a>
-
-              <a class="quickLink" href="myevents.html">
-                <div class="quickLinkLeft">
-                  <b>My events</b>
-                  <span>Post something new or manage your own event listings.</span>
-                </div>
-                <span class="arrow">›</span>
-              </a>
-
-              <button class="quickLink" id="signOutBtn" type="button" style="text-align:left; width:100%; cursor:pointer;">
-                <div class="quickLinkLeft">
-                  <b>Sign out</b>
-                  <span>Safely sign out of your uZone account on this device.</span>
-                </div>
-                <span class="arrow">›</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section class="card" aria-label="Account info">
-          <div class="cardInner">
-            <h3 class="sectionTitle">Account info</h3>
-            <div class="sub" style="margin-bottom:12px;">Read-only details from your account.</div>
-
-            <div class="quickLinks">
-              <div class="quickLink" style="cursor:default;">
-                <div class="quickLinkLeft">
-                  <b>Email</b>
-                  <span id="infoEmail">—</span>
-                </div>
-              </div>
-
-              <div class="quickLink" style="cursor:default;">
-                <div class="quickLinkLeft">
-                  <b>User ID</b>
-                  <span id="infoUid">—</span>
-                </div>
-              </div>
-
-              <div class="quickLink" style="cursor:default;">
-                <div class="quickLinkLeft">
-                  <b>Verification</b>
-                  <span id="infoVerification">—</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section class="card dangerCard" aria-label="Danger zone">
           <div class="cardInner">
             <h3 class="sectionTitle">Danger zone</h3>
             <div class="sub" style="margin-bottom:12px;">Be careful with actions here.</div>
 
-            <div class="quickLinks">
-              <button class="quickLink" id="deleteBtn" type="button" style="text-align:left; width:100%; cursor:pointer;">
-                <div class="quickLinkLeft">
-                  <b style="color:var(--danger);">Delete account</b>
-                  <span>This removes your auth account and signs you out. You’ll be asked to confirm.</span>
-                </div>
-                <span class="arrow" style="color:var(--danger);">›</span>
-              </button>
+            <div class="miniBtns">
+              <button class="btn danger" id="deleteBtn" type="button">Delete account</button>
             </div>
 
             <div class="statusBox" id="dangerStatus" style="margin-top:12px;">No danger action used.</div>
@@ -885,11 +740,7 @@
       getFirestore,
       doc,
       getDoc,
-      setDoc,
-      collection,
-      getDocs,
-      query,
-      where
+      setDoc
     } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -912,18 +763,14 @@
     const profileName = document.getElementById("profileName");
     const profileEmail = document.getElementById("profileEmail");
     const studentStatusText = document.getElementById("studentStatusText");
-    const emailStatusText = document.getElementById("emailStatusText");
     const studentStatusPill = document.getElementById("studentStatusPill");
-    const emailStatusPill = document.getElementById("emailStatusPill");
+    const publicIdText = document.getElementById("publicIdText");
+    const publicIdPill = document.getElementById("publicIdPill");
 
     const statJoined = document.getElementById("statJoined");
-    const statEvents = document.getElementById("statEvents");
-    const statNameLen = document.getElementById("statNameLen");
 
     const nameInput = document.getElementById("nameInput");
     const schoolInput = document.getElementById("schoolInput");
-    const programInput = document.getElementById("programInput");
-    const yearInput = document.getElementById("yearInput");
     const bioInput = document.getElementById("bioInput");
     const bioCount = document.getElementById("bioCount");
 
@@ -931,17 +778,12 @@
     const resetBtn = document.getElementById("resetBtn");
     const saveStatus = document.getElementById("saveStatus");
 
-    const infoEmail = document.getElementById("infoEmail");
-    const infoUid = document.getElementById("infoUid");
-    const infoVerification = document.getElementById("infoVerification");
-
     const signOutBtn = document.getElementById("signOutBtn");
     const deleteBtn = document.getElementById("deleteBtn");
     const dangerStatus = document.getElementById("dangerStatus");
 
     let currentUser = null;
     let loadedUserDoc = {};
-    let joinedDateText = "—";
 
     function scrollActiveTabIntoView(){
       const active = document.querySelector(".tab.active");
@@ -1000,9 +842,8 @@
 
       const email = safeString(user.email);
       const school = safeString(data.school).trim();
-      const program = safeString(data.program).trim();
-      const year = safeString(data.year).trim();
       const bio = safeString(data.bio).trim();
+      const publicId = safeString(data.publicId).trim();
 
       hello.textContent = `Hey, ${name}`;
       profileName.textContent = name;
@@ -1011,20 +852,13 @@
 
       nameInput.value = safeString(data.name) || safeString(user.displayName) || "";
       schoolInput.value = school;
-      programInput.value = program;
-      yearInput.value = year;
       bioInput.value = bio;
       updateBioCount();
-
-      infoEmail.textContent = email || "—";
-      infoUid.textContent = user.uid || "—";
 
       const userVerified =
         data.verified === true ||
         data.userVerified === true ||
         data.isVerified === true;
-
-      const emailVerified = user.emailVerified === true;
 
       if (userVerified){
         studentStatusText.textContent = "Verified student";
@@ -1034,67 +868,22 @@
         studentStatusPill.className = "pill unverified";
       }
 
-      if (emailVerified){
-        emailStatusText.textContent = "Email verified";
-        emailStatusPill.className = "pill";
+      if (publicId){
+        publicIdText.textContent = `U# ${publicId}`;
+        publicIdPill.className = "pill pending";
       } else {
-        emailStatusText.textContent = "Email not verified";
-        emailStatusPill.className = "pill pending";
+        publicIdText.textContent = "U# —";
+        publicIdPill.className = "pill unverified";
       }
-
-      infoVerification.textContent = userVerified
-        ? (emailVerified ? "Student verified • Email verified" : "Student verified • Email not verified")
-        : (emailVerified ? "Not student verified • Email verified" : "Not student verified • Email not verified");
-
-      const strength =
-        (nameInput.value.trim() ? 25 : 0) +
-        (schoolInput.value.trim() ? 20 : 0) +
-        (programInput.value.trim() ? 20 : 0) +
-        (yearInput.value.trim() ? 15 : 0) +
-        (bioInput.value.trim() ? 20 : 0);
-
-      statNameLen.textContent = `${strength}%`;
 
       const createdAt = data.createdAt || data.joinedAt || data.created || user.metadata?.creationTime || null;
-      joinedDateText = formatDate(createdAt);
-      statJoined.textContent = joinedDateText;
-    }
-
-    async function loadMyEventCount(uid){
-      try{
-        let total = 0;
-
-        try{
-          const byUid = await getDocs(query(collection(db, "events"), where("uid", "==", uid)));
-          total += byUid.size;
-        } catch (_) {}
-
-        if (!total){
-          try{
-            const byCreatedBy = await getDocs(query(collection(db, "events"), where("createdBy", "==", uid)));
-            total += byCreatedBy.size;
-          } catch (_) {}
-        }
-
-        if (!total){
-          try{
-            const byOwner = await getDocs(query(collection(db, "events"), where("ownerId", "==", uid)));
-            total += byOwner.size;
-          } catch (_) {}
-        }
-
-        statEvents.textContent = String(total);
-      } catch (_) {
-        statEvents.textContent = "0";
-      }
+      statJoined.textContent = formatDate(createdAt);
     }
 
     function getFormData(){
       return {
         name: nameInput.value.trim(),
         school: schoolInput.value.trim(),
-        program: programInput.value.trim(),
-        year: yearInput.value.trim(),
         bio: bioInput.value.trim()
       };
     }
@@ -1102,8 +891,6 @@
     function resetForm(){
       nameInput.value = safeString(loadedUserDoc.name) || safeString(currentUser?.displayName) || "";
       schoolInput.value = safeString(loadedUserDoc.school) || "";
-      programInput.value = safeString(loadedUserDoc.program) || "";
-      yearInput.value = safeString(loadedUserDoc.year) || "";
       bioInput.value = safeString(loadedUserDoc.bio) || "";
       updateBioCount();
       applyProfileToUI(currentUser, loadedUserDoc);
@@ -1116,7 +903,7 @@
       if (currentUser) applyProfileToUI(currentUser, { ...loadedUserDoc, ...getFormData() });
     });
 
-    [nameInput, schoolInput, programInput, yearInput].forEach(el => {
+    [nameInput, schoolInput].forEach(el => {
       el.addEventListener("input", () => {
         if (currentUser) applyProfileToUI(currentUser, { ...loadedUserDoc, ...getFormData() });
       });
@@ -1211,7 +998,6 @@
 
       loadedUserDoc = data;
       applyProfileToUI(user, data);
-      await loadMyEventCount(user.uid);
       setStatus(saveStatus, "Profile loaded.");
       setStatus(dangerStatus, "No danger action used.");
     });
