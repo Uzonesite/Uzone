@@ -1198,6 +1198,14 @@
     }
 
     .hidden{ display:none !important; }
+    .pac-container{
+      z-index: 2147483647 !important;
+      border-radius: 16px;
+      border: 1px solid rgba(17,16,24,.10);
+      box-shadow: 0 18px 40px rgba(17,16,24,.14);
+      overflow: hidden;
+    }
+
   </style>
 </head>
 
@@ -1436,9 +1444,9 @@
               <label for="endTimeInput">End time <span class="helper">optional</span></label>
               <input class="input" id="endTimeInput" type="time" />
             </div>
-            <div class="field hidden" id="generalAreaField">
-              <label for="generalAreaInput">General area</label>
-              <input class="input" id="generalAreaInput" maxlength="160" placeholder="DMS / campus area / nearby landmark" />
+            <div class="field">
+              <label for="publicLocationAutocomplete">Public location</label>
+              <div class="helper">This is what people can see before they’re accepted.</div>
             </div>
           </div>
 
@@ -1452,14 +1460,14 @@
             <span>Invite-only event</span>
           </label>
 
-          <div class="mapPicker">
+          <div class="mapPicker" id="publicLocationPicker">
             <div class="mapPickerTop">
               <div class="field">
-                <label for="locationAutocomplete">Location</label>
+                <label for="publicLocationAutocomplete">Public location</label>
                 <div class="placeWrap">
                   <div class="placeSearch">
                     <span class="placeSearchIcon">⌕</span>
-                    <input id="locationAutocomplete" class="placeSearchInput" type="text" placeholder="Search for an address or place" autocomplete="off" />
+                    <input id="publicLocationAutocomplete" class="placeSearchInput" type="text" placeholder="Search for a public address or place" autocomplete="off" />
                   </div>
                 </div>
               </div>
@@ -1469,16 +1477,43 @@
                 <button class="btn" id="clearLocationBtn" type="button">Clear pin</button>
               </div>
 
-              <div class="pickedLocation" id="pickedLocationLabel">No location picked yet.</div>
-              <div class="helper">Search for an address, choose an autocomplete result, or tap the map to drop the pin.</div>
+              <div class="pickedLocation" id="publicPickedLocationLabel">No public location picked yet.</div>
+              <div class="helper">Search for an address, choose a suggestion, or tap the map to drop the public pin.</div>
             </div>
 
-            <div id="postMap" class="mapCanvas" aria-label="Location picker map"></div>
+            <div id="publicPostMap" class="mapCanvas" aria-label="Public location picker map"></div>
           </div>
 
-          <input id="locationInput" type="hidden" />
-          <input id="latInput" type="hidden" />
-          <input id="lngInput" type="hidden" />
+          <div class="mapPicker hidden" id="privateLocationPicker">
+            <div class="mapPickerTop">
+              <div class="field">
+                <label for="privateLocationAutocomplete">Private location</label>
+                <div class="placeWrap">
+                  <div class="placeSearch">
+                    <span class="placeSearchIcon">⌕</span>
+                    <input id="privateLocationAutocomplete" class="placeSearchInput" type="text" placeholder="Search for the exact private address or place" autocomplete="off" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="mapPickerBtns">
+                <button class="btn" id="useMyPrivateLocationBtn" type="button">Use my location</button>
+                <button class="btn" id="clearPrivateLocationBtn" type="button">Clear pin</button>
+              </div>
+
+              <div class="pickedLocation" id="privatePickedLocationLabel">No private location picked yet.</div>
+              <div class="helper">Accepted people will see this exact location.</div>
+            </div>
+
+            <div id="privatePostMap" class="mapCanvas" aria-label="Private location picker map"></div>
+          </div>
+
+          <input id="publicLocationInput" type="hidden" />
+          <input id="publicLatInput" type="hidden" />
+          <input id="publicLngInput" type="hidden" />
+          <input id="privateLocationInput" type="hidden" />
+          <input id="privateLatInput" type="hidden" />
+          <input id="privateLngInput" type="hidden" />
 
           <div class="miniBtns">
             <button class="btn primary" id="submitPostBtn" type="submit">Post event</button>
@@ -1579,21 +1614,28 @@
     const coverFileName = document.getElementById("coverFileName");
     const coverPreview = document.getElementById("coverPreview");
     const titleInput = document.getElementById("titleInput");
-    const locationAutocompleteEl = document.getElementById("locationAutocomplete");
-    const locationInput = document.getElementById("locationInput");
-    const pickedLocationLabel = document.getElementById("pickedLocationLabel");
+    const publicLocationPicker = document.getElementById("publicLocationPicker");
+    const privateLocationPicker = document.getElementById("privateLocationPicker");
+    const publicLocationAutocompleteEl = document.getElementById("publicLocationAutocomplete");
+    const publicLocationInput = document.getElementById("publicLocationInput");
+    const publicPickedLocationLabel = document.getElementById("publicPickedLocationLabel");
+    const privateLocationAutocompleteEl = document.getElementById("privateLocationAutocomplete");
+    const privateLocationInput = document.getElementById("privateLocationInput");
+    const privatePickedLocationLabel = document.getElementById("privatePickedLocationLabel");
     const dateInput = document.getElementById("dateInput");
     const timeInput = document.getElementById("timeInput");
     const endTimeInput = document.getElementById("endTimeInput");
-    const latInput = document.getElementById("latInput");
-    const lngInput = document.getElementById("lngInput");
+    const publicLatInput = document.getElementById("publicLatInput");
+    const publicLngInput = document.getElementById("publicLngInput");
+    const privateLatInput = document.getElementById("privateLatInput");
+    const privateLngInput = document.getElementById("privateLngInput");
     const tagsInput = document.getElementById("tagsInput");
     const descInput = document.getElementById("descInput");
-    const generalAreaField = document.getElementById("generalAreaField");
-    const generalAreaInput = document.getElementById("generalAreaInput");
     const inviteOnlyInput = document.getElementById("inviteOnlyInput");
     const useMyLocationBtn = document.getElementById("useMyLocationBtn");
     const clearLocationBtn = document.getElementById("clearLocationBtn");
+    const useMyPrivateLocationBtn = document.getElementById("useMyPrivateLocationBtn");
+    const clearPrivateLocationBtn = document.getElementById("clearPrivateLocationBtn");
 
     let currentUser = null;
     let currentUserDisplayName = "";
@@ -1604,12 +1646,12 @@
     const userCache = new Map();
 
     let mapsReadyPromise = null;
-    let gmap = null;
-    let gmarker = null;
-    let autocomplete = null;
     let geocoder = null;
     let autoDefaultLocationAttempted = false;
-    let mapFocusTimer = null;
+    const pickers = {
+      public: { map: null, marker: null, autocomplete: null, focusTimer: null },
+      private: { map: null, marker: null, autocomplete: null, focusTimer: null }
+    };
 
     function nextPaint(){
       return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -1704,7 +1746,7 @@
 
     function pickVisibleLocation(ev){
       const exact = pickLocation(ev);
-      const general = ev?.generalLocation || ev?.generalArea || ev?.area || "";
+      const general = ev?.publicLocation || ev?.generalLocation || ev?.generalArea || ev?.area || "";
       if (!ev?.inviteOnly) return exact || general || "";
       if (eventIsPostedByUser(ev) || userIsRegisteredForEvent(ev)) return exact || general || "";
       return general || exact || "";
@@ -2108,10 +2150,10 @@
           <b>Where</b>
           <span>${esc(where || "—")}</span>
         </div>
-        ${ev.inviteOnly && !userIsRegisteredForEvent(ev) && !eventIsPostedByUser(ev) && (ev.generalLocation || ev.generalArea || ev.area) ? `
+        ${ev.inviteOnly && !userIsRegisteredForEvent(ev) && !eventIsPostedByUser(ev) && (ev.publicLocation || ev.publicLocation || ev.generalLocation || ev.generalArea || ev.area) ? `
           <div class="kvItem">
             <b>Area</b>
-            <span>${esc(ev.generalLocation || ev.generalArea || ev.area)}</span>
+            <span>${esc(ev.publicLocation || ev.publicLocation || ev.generalLocation || ev.generalArea || ev.area)}</span>
           </div>
         ` : ""}
         ${host ? `
@@ -2341,27 +2383,49 @@
       }
     });
 
-    function hasPickedLocation(){
-      return safeNumber(latInput.value) !== null && safeNumber(lngInput.value) !== null;
+    function getPickerDom(kind){
+      return kind === "private" ? {
+        mapEl: document.getElementById("privatePostMap"),
+        inputEl: privateLocationAutocompleteEl,
+        valueEl: privateLocationInput,
+        latEl: privateLatInput,
+        lngEl: privateLngInput,
+        labelEl: privatePickedLocationLabel
+      } : {
+        mapEl: document.getElementById("publicPostMap"),
+        inputEl: publicLocationAutocompleteEl,
+        valueEl: publicLocationInput,
+        latEl: publicLatInput,
+        lngEl: publicLngInput,
+        labelEl: publicPickedLocationLabel
+      };
     }
 
-    async function tryUseCurrentLocationAsDefault(force = false){
-      if (!navigator.geolocation) return;
-      if (!force && autoDefaultLocationAttempted) return;
-      if (!force && hasPickedLocation()) return;
+    function getPickerState(kind){
+      return pickers[kind === "private" ? "private" : "public"];
+    }
 
-      autoDefaultLocationAttempted = true;
+    function pickerHasLocation(kind){
+      const dom = getPickerDom(kind);
+      return safeNumber(dom.latEl.value) !== null && safeNumber(dom.lngEl.value) !== null;
+    }
+
+    async function tryUseCurrentLocationAsDefault(force = false, kind = "public"){
+      if (!navigator.geolocation) return;
+      if (kind === "public" && !force && autoDefaultLocationAttempted) return;
+      if (!force && pickerHasLocation(kind)) return;
+      if (kind === "public") autoDefaultLocationAttempted = true;
 
       return new Promise((resolve) => {
         navigator.geolocation.getCurrentPosition(
           async (pos) => {
             try{
-              await ensureMapReady();
+              await ensureMapReady(kind);
               const lat = pos.coords.latitude;
               const lng = pos.coords.longitude;
               const label = await reverseGeocode(lat, lng) || "My current location";
-              setPicked(lat, lng, label, true);
-              setStatus(postStatus, "Using your current location as the default.", "success");
+              setPicked(kind, lat, lng, label, true);
+              setStatus(postStatus, `${kind === "private" ? "Private" : "Public"} location picked.`, "success");
             } catch (err){
               console.error(err);
             } finally {
@@ -2384,15 +2448,11 @@
       submitPostBtn.textContent = "Post event";
 
       postForm.reset();
-      generalAreaField.classList.add("hidden");
       coverFileName.textContent = "No file chosen";
-      if (locationAutocompleteEl) locationAutocompleteEl.value = "";
-      locationInput.value = "";
-      latInput.value = "";
-      lngInput.value = "";
-      pickedLocationLabel.textContent = "No location picked yet.";
+      clearPicked("public");
+      clearPicked("private");
+      toggleInviteOnlyFields();
       updateCoverPreview(null, "");
-      clearPicked();
       setStatus(postStatus, "Ready.");
     }
 
@@ -2404,8 +2464,8 @@
       Promise.resolve()
         .then(nextPaint)
         .then(() => new Promise(resolve => setTimeout(resolve, 180)))
-        .then(() => ensureMapReady())
-        .then(() => tryUseCurrentLocationAsDefault())
+        .then(() => ensureMapReady("public"))
+        .then(() => tryUseCurrentLocationAsDefault(false, "public"))
         .catch(err => {
           console.error(err);
           setStatus(postStatus, "Could not load the map right now.", "error");
@@ -2447,7 +2507,7 @@
 
         const s = document.createElement("script");
         s.dataset.googleMaps = "true";
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(MAPS_API_KEY)}&libraries=marker,places&v=weekly&loading=async`;
+        s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(MAPS_API_KEY)}&libraries=places,marker&v=weekly&loading=async`;
         s.async = true;
         s.defer = true;
         s.onload = () => resolve();
@@ -2458,47 +2518,52 @@
       return mapsReadyPromise;
     }
 
-    function getMarkerPosition(){
-      if (!gmarker) return null;
-      const raw = "position" in gmarker ? gmarker.position : (typeof gmarker.getPosition === "function" ? gmarker.getPosition() : null);
+    function getMarkerPosition(kind = "public"){
+      const state = getPickerState(kind);
+      const marker = state.marker;
+      if (!marker) return null;
+      const raw = "position" in marker ? marker.position : (typeof marker.getPosition === "function" ? marker.getPosition() : null);
       const lat = Number(raw?.lat ?? raw?.lat?.());
       const lng = Number(raw?.lng ?? raw?.lng?.());
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
       return { lat, lng };
     }
 
-    function focusPickedOnMap(pos, zoom = 15, animate = true){
+    function focusPickedOnMap(kind, pos, zoom = 15, animate = true){
+      const state = getPickerState(kind);
+      const gmap = state.map;
       if (!gmap || !pos) return;
 
-      if (mapFocusTimer) clearTimeout(mapFocusTimer);
+      if (state.focusTimer) clearTimeout(state.focusTimer);
 
       const applyFocus = () => {
-        if (!gmap) return;
-        google.maps.event.trigger(gmap, "resize");
-        if (animate && typeof gmap.panTo === "function") gmap.panTo(pos);
-        else gmap.setCenter(pos);
-        gmap.setZoom(zoom);
+        if (!state.map) return;
+        google.maps.event.trigger(state.map, "resize");
+        if (animate && typeof state.map.panTo === "function") state.map.panTo(pos);
+        else state.map.setCenter(pos);
+        state.map.setZoom(zoom);
       };
 
       applyFocus();
       requestAnimationFrame(() => requestAnimationFrame(applyFocus));
-      mapFocusTimer = setTimeout(applyFocus, 180);
-      google.maps.event.addListenerOnce(gmap, "idle", () => {
-        if (!gmap) return;
-        gmap.setCenter(pos);
-        gmap.setZoom(zoom);
+      state.focusTimer = setTimeout(applyFocus, 180);
+      google.maps.event.addListenerOnce(state.map, "idle", () => {
+        if (!state.map) return;
+        state.map.setCenter(pos);
+        state.map.setZoom(zoom);
       });
     }
 
-    async function ensureMapReady(){
+    async function ensureMapReady(kind = "public"){
       await loadGoogleMaps();
       await nextPaint();
 
-      const mapEl = document.getElementById("postMap");
-      if (!mapEl) throw new Error("Map container not found.");
+      const state = getPickerState(kind);
+      const dom = getPickerDom(kind);
+      if (!dom.mapEl) throw new Error("Map container not found.");
 
-      if (!gmap){
-        gmap = new google.maps.Map(mapEl, {
+      if (!state.map){
+        state.map = new google.maps.Map(dom.mapEl, {
           center: DEFAULT_CENTER,
           zoom: 12,
           mapId: MAP_ID,
@@ -2506,40 +2571,40 @@
           gestureHandling: "greedy"
         });
 
-        geocoder = new google.maps.Geocoder();
+        geocoder = geocoder || new google.maps.Geocoder();
 
-        gmap.addListener("click", async (e) => {
+        state.map.addListener("click", async (e) => {
           if (!e?.latLng) return;
           const lat = e.latLng.lat();
           const lng = e.latLng.lng();
-          const label = await reverseGeocode(lat, lng) || locationInput.value.trim() || "Pinned location";
-          setPicked(lat, lng, label, true);
+          const label = await reverseGeocode(lat, lng) || dom.valueEl.value.trim() || "Pinned location";
+          setPicked(kind, lat, lng, label, true);
         });
       }
 
-      if (locationAutocompleteEl && !autocomplete){
-        autocomplete = new google.maps.places.Autocomplete(locationAutocompleteEl, {
+      if (dom.inputEl && !state.autocomplete){
+        state.autocomplete = new google.maps.places.Autocomplete(dom.inputEl, {
           fields: ["formatted_address", "geometry", "name"]
         });
 
-        autocomplete.bindTo("bounds", gmap);
-        locationAutocompleteEl.setAttribute("autocomplete", "new-password");
-        locationAutocompleteEl.setAttribute("spellcheck", "false");
+        state.autocomplete.bindTo("bounds", state.map);
+        dom.inputEl.setAttribute("autocomplete", "new-password");
+        dom.inputEl.setAttribute("spellcheck", "false");
 
-        autocomplete.addListener("place_changed", async () => {
+        state.autocomplete.addListener("place_changed", async () => {
           try{
-            const place = autocomplete.getPlace();
-            const label = place?.formatted_address || place?.name || locationAutocompleteEl.value.trim();
+            const place = state.autocomplete.getPlace();
+            const label = place?.formatted_address || place?.name || dom.inputEl.value.trim();
             const loc = place?.geometry?.location;
 
             if (loc){
-              setPicked(loc.lat(), loc.lng(), label, true);
-              setStatus(postStatus, "Location picked.", "success");
+              setPicked(kind, loc.lat(), loc.lng(), label, true);
+              setStatus(postStatus, `${kind === "private" ? "Private" : "Public"} location picked.`, "success");
               return;
             }
 
             if (label){
-              await searchAddress(label);
+              await searchAddress(kind, label);
               return;
             }
 
@@ -2550,118 +2615,112 @@
           }
         });
 
-        locationAutocompleteEl.addEventListener("keydown", async (e) => {
+        dom.inputEl.addEventListener("keydown", async (e) => {
           if (e.key !== "Enter") return;
           e.preventDefault();
-          await searchAddress(locationAutocompleteEl.value);
+          await searchAddress(kind, dom.inputEl.value);
         });
 
-        locationAutocompleteEl.addEventListener("change", async () => {
-          const typed = locationAutocompleteEl.value.trim();
+        dom.inputEl.addEventListener("change", async () => {
+          const typed = dom.inputEl.value.trim();
           if (!typed) return;
-          if (typed === (locationInput.value || "").trim()) return;
-          await searchAddress(typed);
+          if (typed === (dom.valueEl.value || "").trim()) return;
+          await searchAddress(kind, typed);
         });
 
-        locationAutocompleteEl.addEventListener("focus", () => {
-          if (autocomplete && gmap) autocomplete.bindTo("bounds", gmap);
+        dom.inputEl.addEventListener("focus", () => {
+          if (state.autocomplete && state.map) state.autocomplete.bindTo("bounds", state.map);
         });
       }
 
-      const center = getMarkerPosition()
-        || (safeNumber(latInput.value) !== null && safeNumber(lngInput.value) !== null
-            ? { lat: Number(latInput.value), lng: Number(lngInput.value) }
+      const center = getMarkerPosition(kind)
+        || (safeNumber(dom.latEl.value) !== null && safeNumber(dom.lngEl.value) !== null
+            ? { lat: Number(dom.latEl.value), lng: Number(dom.lngEl.value) }
             : DEFAULT_CENTER);
 
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        if (!gmap) return;
-        google.maps.event.trigger(gmap, "resize");
-        if (gmarker && "map" in gmarker) gmarker.map = gmap;
-        else if (gmarker && typeof gmarker.setMap === "function") gmarker.setMap(gmap);
-        focusPickedOnMap(center, center === DEFAULT_CENTER ? 12 : 15, false);
+        if (!state.map) return;
+        google.maps.event.trigger(state.map, "resize");
+        if (state.marker && "map" in state.marker) state.marker.map = state.map;
+        else if (state.marker && typeof state.marker.setMap === "function") state.marker.setMap(state.map);
+        focusPickedOnMap(kind, center, center == DEFAULT_CENTER ? 12 : 15, false);
       }));
     }
 
-    function setPicked(lat, lng, label = "", pan = false){
+    function setPicked(kind, lat, lng, label = "", pan = false){
+      const state = getPickerState(kind);
+      const dom = getPickerDom(kind);
       const niceLat = Number(lat);
       const niceLng = Number(lng);
       if (!Number.isFinite(niceLat) || !Number.isFinite(niceLng)) return;
 
-      latInput.value = String(niceLat);
-      lngInput.value = String(niceLng);
-      locationInput.value = label || locationInput.value.trim() || "Pinned location";
-      if (locationAutocompleteEl) locationAutocompleteEl.value = locationInput.value;
-      pickedLocationLabel.textContent = locationInput.value;
+      dom.latEl.value = String(niceLat);
+      dom.lngEl.value = String(niceLng);
+      dom.valueEl.value = label || dom.valueEl.value.trim() || "Pinned location";
+      if (dom.inputEl) dom.inputEl.value = dom.valueEl.value;
+      dom.labelEl.textContent = dom.valueEl.value;
 
       const pos = { lat: niceLat, lng: niceLng };
 
-      if (!gmarker){
+      if (!state.marker){
         if (window.google?.maps?.marker?.AdvancedMarkerElement){
-          gmarker = new google.maps.marker.AdvancedMarkerElement({
-            map: gmap,
+          state.marker = new google.maps.marker.AdvancedMarkerElement({
+            map: state.map,
             position: pos,
-            title: "Picked location",
+            title: kind === "private" ? "Picked private location" : "Picked public location",
             content: buildPingPinEl(),
             gmpDraggable: true
           });
 
-          gmarker.addListener("dragend", async (e) => {
-            const dragPos = e?.latLng || gmarker.position;
+          state.marker.addListener("dragend", async (e) => {
+            const dragPos = e?.latLng || state.marker.position;
             const nextLat = Number(dragPos?.lat ?? dragPos?.lat?.());
             const nextLng = Number(dragPos?.lng ?? dragPos?.lng?.());
             if (!Number.isFinite(nextLat) || !Number.isFinite(nextLng)) return;
-            const nextLabel = await reverseGeocode(nextLat, nextLng) || locationInput.value.trim() || "Pinned location";
-            setPicked(nextLat, nextLng, nextLabel, false);
+            const nextLabel = await reverseGeocode(nextLat, nextLng) || dom.valueEl.value.trim() || "Pinned location";
+            setPicked(kind, nextLat, nextLng, nextLabel, false);
           });
         } else {
-          gmarker = new google.maps.Marker({
-            position: pos,
-            map: gmap,
-            draggable: true
-          });
-
-          gmarker.addListener("dragend", async () => {
-            const p = gmarker.getPosition();
+          state.marker = new google.maps.Marker({ position: pos, map: state.map, draggable: true });
+          state.marker.addListener("dragend", async () => {
+            const p = state.marker.getPosition();
             if (!p) return;
             const nextLat = p.lat();
             const nextLng = p.lng();
-            const nextLabel = await reverseGeocode(nextLat, nextLng) || locationInput.value.trim() || "Pinned location";
-            setPicked(nextLat, nextLng, nextLabel, false);
+            const nextLabel = await reverseGeocode(nextLat, nextLng) || dom.valueEl.value.trim() || "Pinned location";
+            setPicked(kind, nextLat, nextLng, nextLabel, false);
           });
         }
       } else {
-        if ("position" in gmarker){
-          gmarker.position = pos;
-        } else if (typeof gmarker.setPosition === "function"){
-          gmarker.setPosition(pos);
-        }
+        if ("position" in state.marker) state.marker.position = pos;
+        else if (typeof state.marker.setPosition === "function") state.marker.setPosition(pos);
 
-        if ("map" in gmarker){
-          gmarker.map = gmap;
-        } else if (typeof gmarker.setMap === "function" && !gmarker.getMap()){
-          gmarker.setMap(gmap);
-        }
+        if ("map" in state.marker) state.marker.map = state.map;
+        else if (typeof state.marker.setMap === "function" && !state.marker.getMap()) state.marker.setMap(state.map);
       }
 
-      focusPickedOnMap(pos, 15, pan);
+      focusPickedOnMap(kind, pos, 15, pan);
     }
 
-    function clearPicked(){
-      latInput.value = "";
-      lngInput.value = "";
-      locationInput.value = "";
-      if (locationAutocompleteEl) locationAutocompleteEl.value = "";
-      pickedLocationLabel.textContent = "No location picked yet.";
+    function clearPicked(kind = "public"){
+      const state = getPickerState(kind);
+      const dom = getPickerDom(kind);
+      dom.latEl.value = "";
+      dom.lngEl.value = "";
+      dom.valueEl.value = "";
+      if (dom.inputEl) dom.inputEl.value = "";
+      dom.labelEl.textContent = kind === "private" ? "No private location picked yet." : "No public location picked yet.";
 
-      if (gmarker){
-        if ("map" in gmarker) gmarker.map = null;
-        else if (typeof gmarker.setMap === "function") gmarker.setMap(null);
+      if (state.marker){
+        if ("map" in state.marker) state.marker.map = null;
+        else if (typeof state.marker.setMap === "function") state.marker.setMap(null);
       }
-      gmarker = null;
+      state.marker = null;
     }
 
     async function reverseGeocode(lat, lng){
-      await ensureMapReady();
+      await ensureMapReady("public");
+      geocoder = geocoder || new google.maps.Geocoder();
       return new Promise((resolve) => {
         geocoder.geocode({ location: { lat, lng } }, (results, status) => {
           if (status !== "OK" || !results?.length) return resolve(null);
@@ -2670,14 +2729,16 @@
       });
     }
 
-    async function searchAddress(address){
-      const q = String(address || (locationAutocompleteEl?.value || "") || locationInput.value || "").trim();
+    async function searchAddress(kind = "public", address){
+      const dom = getPickerDom(kind);
+      const q = String(address || (dom.inputEl?.value || "") || dom.valueEl.value || "").trim();
       if (!q){
         setStatus(postStatus, "Enter an address to search.", "error");
         return;
       }
 
-      await ensureMapReady();
+      await ensureMapReady(kind);
+      geocoder = geocoder || new google.maps.Geocoder();
       setStatus(postStatus, "Searching address...");
 
       geocoder.geocode({ address: q }, (results, status) => {
@@ -2694,80 +2755,102 @@
         }
 
         const formatted = result.formatted_address || q;
-        setPicked(loc.lat(), loc.lng(), formatted, true);
-        if (locationAutocompleteEl) locationAutocompleteEl.value = formatted;
-        setStatus(postStatus, "Location picked.", "success");
+        setPicked(kind, loc.lat(), loc.lng(), formatted, true);
+        if (dom.inputEl) dom.inputEl.value = formatted;
+        setStatus(postStatus, `${kind === "private" ? "Private" : "Public"} location picked.`, "success");
       });
     }
 
-
     useMyLocationBtn.addEventListener("click", async () => {
-      autoDefaultLocationAttempted = true;
-      if (!navigator.geolocation){
-        setStatus(postStatus, "Geolocation isn’t available in this browser.", "error");
-        return;
-      }
-
       useMyLocationBtn.disabled = true;
       setStatus(postStatus, "Getting your location...");
-
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          try{
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            const label = await reverseGeocode(lat, lng) || "My current location";
-            setPicked(lat, lng, label, true);
-            setStatus(postStatus, "Location picked.", "success");
-          } catch (err){
-            console.error(err);
-            setStatus(postStatus, "Couldn’t use your location right now.", "error");
-          } finally {
-            useMyLocationBtn.disabled = false;
-          }
-        },
-        (err) => {
-          console.error(err);
-          setStatus(postStatus, "Couldn’t access your location.", "error");
-          useMyLocationBtn.disabled = false;
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
+      try{
+        await tryUseCurrentLocationAsDefault(true, "public");
+      } finally {
+        useMyLocationBtn.disabled = false;
+      }
     });
 
     clearLocationBtn.addEventListener("click", () => {
-      clearPicked();
-      setStatus(postStatus, "Location cleared.");
+      clearPicked("public");
+      setStatus(postStatus, "Public location cleared.");
     });
+
+    if (useMyPrivateLocationBtn){
+      useMyPrivateLocationBtn.addEventListener("click", async () => {
+        useMyPrivateLocationBtn.disabled = true;
+        setStatus(postStatus, "Getting your location...");
+        try{
+          await tryUseCurrentLocationAsDefault(true, "private");
+        } finally {
+          useMyPrivateLocationBtn.disabled = false;
+        }
+      });
+    }
+
+    if (clearPrivateLocationBtn){
+      clearPrivateLocationBtn.addEventListener("click", () => {
+        clearPicked("private");
+        setStatus(postStatus, "Private location cleared.");
+      });
+    }
+
+    function toggleInviteOnlyFields(){
+      const inviteOnly = !!inviteOnlyInput.checked;
+      privateLocationPicker.classList.toggle("hidden", !inviteOnly);
+      if (!inviteOnly) clearPicked("private");
+      Promise.resolve().then(async () => {
+        await ensureMapReady("public");
+        if (inviteOnly) await ensureMapReady("private");
+      }).catch(console.error);
+    }
+
+    inviteOnlyInput.addEventListener("change", toggleInviteOnlyFields);
 
     function buildEventPayload(existingImageUrl = ""){
       const title = titleInput.value.trim();
-      const location = locationInput.value.trim();
+      const publicLocation = publicLocationInput.value.trim();
+      const privateLocation = privateLocationInput.value.trim();
       const date = dateInput.value;
       const time = timeInput.value;
       const desc = descInput.value.trim();
       const endTime = endTimeInput.value;
-      const generalArea = generalAreaInput.value.trim();
-      const lat = safeNumber(latInput.value);
-      const lng = safeNumber(lngInput.value);
+      const publicLat = safeNumber(publicLatInput.value);
+      const publicLng = safeNumber(publicLngInput.value);
+      const privateLat = safeNumber(privateLatInput.value);
+      const privateLng = safeNumber(privateLngInput.value);
       const tags = parseTagsInput(tagsInput.value);
       const inviteOnly = !!inviteOnlyInput.checked;
 
       if (!title) throw new Error("Please add a title.");
-      if (!location) throw new Error("Please choose a location.");
+      if (!publicLocation) throw new Error(inviteOnly ? "Please choose a public location." : "Please choose a location.");
       if (!date) throw new Error("Please add a date.");
       if (!time) throw new Error("Please add a time.");
-      if (inviteOnly && !generalArea) throw new Error("Please add a general area for invite-only events.");
-      if (lat === null || lng === null) throw new Error("Please choose a location by searching, using your location, or clicking the map.");
+      if (publicLat === null || publicLng === null) throw new Error("Please choose the public location by searching, using your location, or clicking the map.");
+      if (inviteOnly && !privateLocation) throw new Error("Please choose a private location for invite-only events.");
+      if (inviteOnly && (privateLat === null || privateLng === null)) throw new Error("Please choose the private location by searching, using your location, or clicking the map.");
 
       const displayName = currentUserDisplayName || currentUser.email?.split("@")[0] || "User";
+      const exactLocation = inviteOnly ? privateLocation : publicLocation;
+      const exactLat = inviteOnly ? privateLat : publicLat;
+      const exactLng = inviteOnly ? privateLng : publicLng;
 
       return {
         name: title,
         title,
-        location,
-        place: location,
-        address: location,
+        location: exactLocation,
+        place: exactLocation,
+        address: exactLocation,
+        publicLocation,
+        publicAddress: publicLocation,
+        publicLat,
+        publicLng,
+        generalLocation: inviteOnly ? publicLocation : undefined,
+        generalArea: inviteOnly ? publicLocation : undefined,
+        privateLocation: inviteOnly ? privateLocation : undefined,
+        privateAddress: inviteOnly ? privateLocation : undefined,
+        privateLat: inviteOnly ? privateLat : undefined,
+        privateLng: inviteOnly ? privateLng : undefined,
         date,
         time,
         startDate: date,
@@ -2777,12 +2860,10 @@
         tags,
         inviteOnly,
         endTime: endTime || undefined,
-        generalLocation: inviteOnly ? generalArea : undefined,
-        generalArea: inviteOnly ? generalArea : undefined,
-        lat,
-        lng,
-        latitude: lat,
-        longitude: lng,
+        lat: exactLat,
+        lng: exactLng,
+        latitude: exactLat,
+        longitude: exactLng,
         hostUid: currentUser.uid,
         ownerUid: currentUser.uid,
         uid: currentUser.uid,
@@ -2800,8 +2881,6 @@
         attendeeCount: editingEventId ? undefined : 0,
         applicantIds: editingEventId ? undefined : [],
         applicantNames: editingEventId ? undefined : [],
-        pendingIds: editingEventId ? undefined : [],
-        pendingNames: editingEventId ? undefined : [],
         coverUrl: existingImageUrl || undefined,
         imageUrl: existingImageUrl || undefined,
         updatedAt: serverTimestamp()
@@ -2915,25 +2994,45 @@
       submitPostBtn.textContent = "Save changes";
 
       titleInput.value = pickTitle(ev);
-      if (locationAutocompleteEl) locationAutocompleteEl.value = pickLocation(ev);
       dateInput.value = ev.date || ev.startDate || "";
       timeInput.value = ev.time || ev.startTime || "";
+      endTimeInput.value = ev.endTime || ev.finishTime || "";
       descInput.value = pickDescription(ev);
       tagsInput.value = pickTags(ev).join(", ");
       inviteOnlyInput.checked = !!ev.inviteOnly;
 
-      const location = pickLocation(ev);
-      const ll = pickLatLng(ev);
-      locationInput.value = location || "";
-      pickedLocationLabel.textContent = location || "No location picked yet.";
-      latInput.value = ll ? String(ll.lat) : "";
-      lngInput.value = ll ? String(ll.lng) : "";
+      const publicLocation = (ev.inviteOnly ? (ev.publicLocation || ev.publicLocation || ev.generalLocation || ev.generalArea || ev.area || "") : (ev.publicLocation || pickLocation(ev) || ""));
+      const publicLL = (Number.isFinite(Number(ev.publicLat)) && Number.isFinite(Number(ev.publicLng)))
+        ? { lat: Number(ev.publicLat), lng: Number(ev.publicLng) }
+        : (!ev.inviteOnly ? pickLatLng(ev) : null);
+      const privateLocation = ev.privateLocation || pickLocation(ev) || "";
+      const privateLL = (Number.isFinite(Number(ev.privateLat)) && Number.isFinite(Number(ev.privateLng)))
+        ? { lat: Number(ev.privateLat), lng: Number(ev.privateLng) }
+        : (ev.inviteOnly ? pickLatLng(ev) : null);
 
+      publicLocationInput.value = publicLocation || "";
+      publicPickedLocationLabel.textContent = publicLocation || "No public location picked yet.";
+      publicLatInput.value = publicLL ? String(publicLL.lat) : "";
+      publicLngInput.value = publicLL ? String(publicLL.lng) : "";
+      if (publicLocationAutocompleteEl) publicLocationAutocompleteEl.value = publicLocation || "";
+
+      privateLocationInput.value = privateLocation || "";
+      privatePickedLocationLabel.textContent = privateLocation || "No private location picked yet.";
+      privateLatInput.value = privateLL ? String(privateLL.lat) : "";
+      privateLngInput.value = privateLL ? String(privateLL.lng) : "";
+      if (privateLocationAutocompleteEl) privateLocationAutocompleteEl.value = privateLocation || "";
+
+      toggleInviteOnlyFields();
       updateCoverPreview(null, pickImage(ev));
       openPostModal();
 
-      ensureMapReady().then(() => {
-        if (ll) setPicked(ll.lat, ll.lng, location || "Pinned location", true);
+      Promise.resolve().then(async () => {
+        await ensureMapReady("public");
+        if (publicLL) setPicked("public", publicLL.lat, publicLL.lng, publicLocation || "Pinned location", true);
+        if (ev.inviteOnly){
+          await ensureMapReady("private");
+          if (privateLL) setPicked("private", privateLL.lat, privateLL.lng, privateLocation || "Pinned location", true);
+        }
       }).catch(console.error);
     }
 
