@@ -2056,7 +2056,6 @@
             if (updated && currentModalEvent?.id === updated.id){
               currentModalEvent = { ...updated };
               renderAttendees(currentModalEvent);
-              renderApplicants(currentModalEvent);
               updateModalRegisterButton(currentModalEvent);
               setStatus(eventModalStatus, accept ? "Applicant accepted." : "Applicant rejected.", "success");
               wireCards();
@@ -2177,6 +2176,7 @@
 
       renderAttendees(ev);
       updateModalRegisterButton(ev);
+      wireCards();
       setStatus(eventModalStatus, "Ready.");
 
       eventModal.classList.add("show");
