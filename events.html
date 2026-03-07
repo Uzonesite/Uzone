@@ -1239,21 +1239,39 @@
     }
 
     function pickLatLng(ev){
-      const candidates = [
-        [ev.lat, ev.lng],
-        [ev.latitude, ev.longitude],
-        [ev.locationLat, ev.locationLng],
-        [ev.locLat, ev.locLng],
-        [ev.coords?.lat, ev.coords?.lng],
-        [ev.geo?.lat, ev.geo?.lng],
-        [ev.geo?.latitude, ev.geo?.longitude],
-        [ev.location?.lat, ev.location?.lng],
-      ];
+      const shouldHideExact = !!(ev?.inviteOnly && !eventIsPostedByUser(ev) && !userIsRegisteredForEvent(ev));
+      const candidates = shouldHideExact
+        ? [
+            [ev.publicLat, ev.publicLng],
+            [ev.generalLat, ev.generalLng],
+            [ev.areaLat, ev.areaLng],
+            [ev.lat, ev.lng],
+            [ev.latitude, ev.longitude],
+            [ev.locationLat, ev.locationLng],
+            [ev.locLat, ev.locLng],
+            [ev.coords?.lat, ev.coords?.lng],
+            [ev.geo?.lat, ev.geo?.lng],
+            [ev.geo?.latitude, ev.geo?.longitude],
+            [ev.location?.lat, ev.location?.lng],
+          ]
+        : [
+            [ev.lat, ev.lng],
+            [ev.latitude, ev.longitude],
+            [ev.locationLat, ev.locationLng],
+            [ev.locLat, ev.locLng],
+            [ev.coords?.lat, ev.coords?.lng],
+            [ev.geo?.lat, ev.geo?.lng],
+            [ev.geo?.latitude, ev.geo?.longitude],
+            [ev.location?.lat, ev.location?.lng],
+            [ev.publicLat, ev.publicLng],
+            [ev.generalLat, ev.generalLng],
+            [ev.areaLat, ev.areaLng],
+          ];
       for (const [a,b] of candidates){
         const lat = Number(a), lng = Number(b);
         if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
       }
-      if (ev?.geopoint && typeof ev.geopoint.latitude === "number"){
+      if (!shouldHideExact && ev?.geopoint && typeof ev.geopoint.latitude === "number"){
         return { lat: ev.geopoint.latitude, lng: ev.geopoint.longitude };
       }
       return null;
@@ -1839,7 +1857,7 @@
       if (!ll) return;
 
       const when = esc(fmtWhen(ev));
-      const where = esc(ev.location || "—");
+      const where = esc(pickVisibleLocation(ev));
       const title = esc(ev.name || "Event");
       const badgeText = ev.inviteOnly ? "Invite-only" : "Public";
 
@@ -2020,7 +2038,7 @@
       const filtered = !q ? allEvents : allEvents.filter(ev => {
         const tags = pickTags(ev).join(" ");
         const desc = pickDescription(ev);
-        const hay = [ev.name, ev.title, ev.location, ev.place, tags, desc]
+        const hay = [ev.name, ev.title, pickVisibleLocation(ev), ev.publicLocation, ev.generalLocation, ev.generalArea, ev.area, tags, desc]
           .map(x => (x || "").toString().toLowerCase())
           .join(" | ");
         return hay.includes(q);
