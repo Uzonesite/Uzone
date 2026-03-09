@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>uZone • Join</title>
-  <meta name="color-scheme" content="light" />
+  <link rel="icon" type="image/png" href="logo.png" />
 
   <style>
     :root{
@@ -17,24 +17,22 @@
       --purple: #6d28d9;
       --blue: #8bd3ff;
       --green: #58c99a;
+      --red: #d92d55;
 
       --card: rgba(255,255,255,.88);
       --border: rgba(17,16,24,.10);
       --shadow: 0 18px 60px rgba(17,16,24,.08);
 
-      --radius: 20px;
+      --radius: 22px;
       --radius2: 16px;
-      --danger: #c6285d;
-      --success: #2f9e6f;
     }
 
     *{ box-sizing:border-box; }
-    html,body{ min-height:100%; }
-
+    html,body{ height:100%; }
     body{
       margin:0;
       color:var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background:
         radial-gradient(1200px 700px at 10% -10%, rgba(139,211,255,.20), transparent 60%),
         radial-gradient(1000px 600px at 100% 0%, rgba(176,11,85,.08), transparent 58%),
@@ -44,7 +42,7 @@
     }
 
     a{ color:inherit; text-decoration:none; }
-    button, input, select{ font:inherit; }
+    button, input{ font:inherit; }
 
     header{
       position: sticky;
@@ -56,35 +54,35 @@
     }
 
     .topbar{
-      width: min(1000px, 92vw);
+      width: min(1120px, 92vw);
       margin: 0 auto;
       padding: 12px 0;
-      display:grid;
-      grid-template-columns: 1fr auto;
+      display:flex;
       align-items:center;
-      gap: 14px;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
     }
 
     .brand{
       display:flex;
       align-items:center;
       gap:10px;
-      min-width:0;
     }
 
     .brand img{
-      width:36px;
-      height:36px;
+      width:34px;
+      height:34px;
       border-radius:10px;
       border:1px solid rgba(17,16,24,.08);
       background: rgba(255,255,255,.6);
-      object-fit: cover;
+      object-fit:cover;
     }
 
     .brandText{
       display:grid;
       gap:2px;
-      min-width:0;
+      line-height:1.05;
     }
 
     .brandText b{
@@ -95,32 +93,27 @@
     .brandText span{
       font-size:12px;
       color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
     }
 
     .topActions{
       display:flex;
-      align-items:center;
-      justify-content:flex-end;
       gap:10px;
       flex-wrap:wrap;
+      align-items:center;
     }
 
-    .chip{
-      padding:8px 10px;
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 11px;
       border-radius:999px;
       border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.84);
+      background: rgba(17,16,24,.06);
+      color: rgba(17,16,24,.78);
       font-size:12px;
       font-weight:900;
-      color: rgba(17,16,24,.78);
-      box-shadow: 0 10px 24px rgba(17,16,24,.04);
-      max-width: min(320px, 70vw);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space:nowrap;
     }
 
     .btn{
@@ -128,7 +121,7 @@
       align-items:center;
       justify-content:center;
       gap:8px;
-      padding:10px 12px;
+      padding:11px 14px;
       border-radius:999px;
       border:1px solid rgba(17,16,24,.12);
       background: rgba(255,255,255,.84);
@@ -137,11 +130,12 @@
       font-size:13px;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease, opacity .12s ease;
       white-space:nowrap;
+      color: var(--ink);
     }
 
     .btn:hover{
       transform: translateY(-1px);
-      border-color: rgba(176,11,85,.25);
+      border-color: rgba(176,11,85,.24);
       box-shadow: 0 14px 38px rgba(176,11,85,.08);
     }
 
@@ -151,19 +145,27 @@
     }
 
     .btn.danger{
-      border-color: rgba(176,11,85,.22);
-      background: rgba(176,11,85,.08);
-      color: var(--danger);
+      border-color: rgba(217,45,85,.22);
+      background: rgba(217,45,85,.08);
+      color: var(--red);
+    }
+
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
     }
 
     main{
-      width: min(1000px, 92vw);
-      margin: 22px auto 44px auto;
+      width: min(1120px, 92vw);
+      margin: 18px auto 44px auto;
       display:grid;
       gap:18px;
     }
 
     .hero{
+      position:relative;
       border-radius: var(--radius);
       overflow:hidden;
       border: 1px solid rgba(255,255,255,.48);
@@ -173,22 +175,41 @@
         radial-gradient(620px 240px at 95% 75%, rgba(176,11,85,.14), transparent 55%),
         linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));
       box-shadow: 0 22px 70px rgba(17,16,24,.08);
-      padding:18px;
+      padding: 20px;
       backdrop-filter: blur(12px);
+    }
+
+    .heroTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      flex-wrap:wrap;
     }
 
     .hero h1{
       margin:0;
-      font-size:26px;
+      font-size:24px;
       letter-spacing:.2px;
     }
 
     .hero p{
-      margin:10px 0 0 0;
-      color: rgba(17,16,24,.70);
-      font-size:14px;
-      line-height:1.5;
-      max-width: 72ch;
+      margin:8px 0 0 0;
+      color: rgba(17,16,24,.72);
+      font-size:13px;
+      line-height:1.45;
+      max-width: 76ch;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    @media (max-width: 960px){
+      .grid{ grid-template-columns: 1fr; }
     }
 
     .card{
@@ -201,7 +222,15 @@
     }
 
     .cardInner{
-      padding:18px;
+      padding:16px;
+    }
+
+    .hRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
     .h1{
@@ -211,382 +240,302 @@
     }
 
     .sub{
-      color: var(--muted);
-      font-size:13px;
-      line-height:1.35;
       margin-top:6px;
-    }
-
-    .grid{
-      display:grid;
-      gap:14px;
-      grid-template-columns: 1fr 1fr;
-      margin-top:16px;
-    }
-
-    .field{
-      display:grid;
-      gap:8px;
-    }
-
-    .field label{
       font-size:13px;
-      font-weight:800;
-      color: rgba(17,16,24,.78);
-    }
-
-    .input, .select{
-      width:100%;
-      padding:13px 14px;
-      border-radius:14px;
-      border:1px solid rgba(17,16,24,.12);
-      background: rgba(255,255,255,.90);
-      color: var(--ink);
-      outline:none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .input:focus, .select:focus{
-      border-color: rgba(176,11,85,.40);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:16px;
+      color: var(--muted);
+      line-height:1.4;
     }
 
     .msg{
-      margin-top:14px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(17,16,24,.08);
-      background: rgba(255,255,255,.72);
-      color: rgba(17,16,24,.74);
+      display:none;
+      padding:13px 14px;
+      border-radius:16px;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.78);
+      color: rgba(17,16,24,.8);
       font-size:13px;
       line-height:1.45;
-      display:none;
       white-space:pre-line;
     }
 
     .msg.ok{
-      background: rgba(88,201,154,.14);
-      border-color: rgba(88,201,154,.22);
-      color: rgba(17,16,24,.86);
+      display:block;
+      border-color: rgba(88,201,154,.30);
+      background: rgba(88,201,154,.10);
     }
 
     .msg.error{
-      background: rgba(176,11,85,.08);
-      border-color: rgba(176,11,85,.18);
-      color: #8c184a;
-    }
-
-    .infoGrid{
-      display:grid;
-      gap:14px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      margin-top:14px;
-    }
-
-    .miniCard{
-      border:1px solid rgba(17,16,24,.08);
-      background: rgba(255,255,255,.76);
-      border-radius:16px;
-      padding:14px;
-    }
-
-    .miniCard b{
       display:block;
-      font-size:13px;
-      margin-bottom:6px;
+      border-color: rgba(217,45,85,.25);
+      background: rgba(217,45,85,.08);
+      color:#8f1737;
     }
 
-    .miniCard span{
-      color: rgba(17,16,24,.68);
-      font-size:13px;
-      line-height:1.45;
-      word-break: break-word;
+    .msg.info{
+      display:block;
     }
 
-    .authGate{
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background: rgba(248,247,255,.72);
-      backdrop-filter: blur(16px);
-    }
-
-    .authGate.hidden{
-      display:none;
-    }
-
-    .authCard{
-      width:min(440px, 92vw);
-      border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.94);
-      border-radius: 22px;
-      box-shadow: 0 30px 80px rgba(17,16,24,.14);
-      padding:18px;
+    .signBox{
       display:grid;
       gap:12px;
     }
 
-    .authCard h2{
-      margin:0;
-      font-size:22px;
-      letter-spacing:.2px;
-    }
-
-    .authCard p{
-      margin:0;
-      color: rgba(17,16,24,.68);
-      font-size:13px;
-      line-height:1.45;
-    }
-
-    .authForm{
-      display:grid;
-      gap:12px;
-      margin-top:4px;
-    }
-
-    .authForm label{
-      display:grid;
-      gap:6px;
-      font-size:13px;
-      color: rgba(17,16,24,.78);
-    }
-
-    .authForm input{
-      width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid rgba(17,16,24,.12);
-      background: rgba(255,255,255,.90);
-      color: var(--ink);
-      outline:none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .authForm input:focus{
-      border-color: rgba(176,11,85,.40);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
-    }
-
-    .authBtn{
-      margin-top: 4px;
-      padding:12px 14px;
-      border-radius:12px;
-      border:1px solid rgba(176,11,85,.28);
-      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
-      color: rgba(17,16,24,.92);
-      font-weight:1000;
-      letter-spacing:.2px;
-      cursor:pointer;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
-      box-shadow: 0 18px 50px rgba(17,16,24,.08);
-    }
-
-    .authBtn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(176,11,85,.22);
-      box-shadow: 0 22px 64px rgba(17,16,24,.10);
-    }
-
-    .authBtn:disabled{
-      opacity:.65;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .authMsg{
-      display:none;
-      padding:10px 12px;
-      border-radius:12px;
+    .accountCard{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:14px;
+      border-radius:18px;
       border:1px solid rgba(17,16,24,.10);
       background: rgba(255,255,255,.78);
-      color: rgba(17,16,24,.82);
-      white-space:pre-line;
+      box-shadow: 0 10px 26px rgba(17,16,24,.04);
+    }
+
+    .avatar{
+      width:56px;
+      height:56px;
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.90);
+      object-fit:cover;
+      box-shadow: 0 14px 30px rgba(17,16,24,.08);
+      flex: 0 0 auto;
+    }
+
+    .avatarFallback{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      color:#fff;
+      background: linear-gradient(135deg, var(--pink), var(--purple));
+    }
+
+    .accountMain{
+      min-width:0;
+      display:grid;
+      gap:6px;
+    }
+
+    .name{
+      font-size:15px;
+      font-weight:1000;
+      line-height:1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      color: rgba(17,16,24,.72);
       font-size:13px;
-      line-height:1.4;
+      line-height:1.35;
     }
 
-    .authMsg.show{
-      display:block;
+    .tag{
+      font-size:12px;
+      font-weight:900;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.72);
+      color: rgba(17,16,24,.72);
+      max-width:100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
 
-    .authMsg.error{
-      border-color: rgba(176,11,85,.28);
-      background: rgba(176,11,85,.06);
-      color: #8c184a;
+    .eventList{
+      display:grid;
+      gap:12px;
     }
 
-    .authMsg.ok{
-      border-color: rgba(109,40,217,.22);
-      background: rgba(109,40,217,.06);
+    .eventCard{
+      border:1px solid rgba(255,255,255,.44);
+      background: linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.76));
+      border-radius: 18px;
+      padding: 14px;
+      display:grid;
+      gap:12px;
+      box-shadow: 0 18px 50px rgba(17,16,24,.06);
     }
 
-    code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 12px;
-      background: rgba(17,16,24,.06);
-      padding: 2px 6px;
-      border-radius: 8px;
-      border: 1px solid rgba(17,16,24,.06);
+    .eventTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    @media (max-width: 760px){
-      .topbar{
-        grid-template-columns: 1fr;
-      }
+    .eventTitle{
+      margin:0;
+      font-size:16px;
+      font-weight:1000;
+      line-height:1.2;
+    }
 
-      .topActions{
-        justify-content:flex-start;
-      }
+    .eventDesc{
+      margin:6px 0 0 0;
+      font-size:13px;
+      color: rgba(17,16,24,.7);
+      line-height:1.45;
+    }
 
-      .chip{
-        max-width: 100%;
-      }
+    .eventMeta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
 
-      .grid{
-        grid-template-columns: 1fr;
-      }
+    .empty{
+      padding:18px 14px;
+      border-radius:16px;
+      border:1px dashed rgba(17,16,24,.18);
+      background: rgba(255,255,255,.70);
+      color: rgba(17,16,24,.65);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    footer{
+      width:min(1120px, 92vw);
+      margin: 14px auto 30px auto;
+      padding:20px;
+      border:1px solid rgba(255,255,255,.45);
+      border-radius:22px;
+      background:
+        radial-gradient(520px 220px at 0% 0%, rgba(139,211,255,.18), transparent 60%),
+        radial-gradient(520px 220px at 100% 100%, rgba(176,11,85,.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
+      box-shadow: 0 18px 50px rgba(17,16,24,.06);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+      backdrop-filter: blur(10px);
+    }
+
+    .footerTitle{
+      font-size:14px;
+      font-weight:1000;
+      color: rgba(17,16,24,.9);
+    }
+
+    .footerSub{
+      font-size:12px;
+      color: rgba(17,16,24,.62);
+      line-height:1.45;
     }
   </style>
 </head>
 <body>
   <header>
     <div class="topbar">
-      <div class="brand">
+      <a class="brand" href="index.html" aria-label="uZone">
         <img src="logo.png" alt="uZone logo" />
         <div class="brandText">
           <b>uZone</b>
-          <span id="subline">Checking sign-in…</span>
+          <span id="hello">Join games</span>
         </div>
-      </div>
+      </a>
 
       <div class="topActions">
-        <span class="chip" id="userChip">User: —</span>
-        <button class="btn" id="refreshBtn" type="button">Refresh</button>
-        <button class="btn danger" id="logoutBtn" type="button">Log out</button>
+        <span class="pill" id="authPill">Checking sign-in…</span>
+        <a class="btn" href="index.html">Home</a>
       </div>
     </div>
   </header>
 
   <main>
     <section class="hero">
-      <h1>Join an event</h1>
-      <p>
-        Sign in if you are not already signed in, pick a live event, enter your code,
-        and join your spot in that event.
-      </p>
-    </section>
-
-    <section class="card">
-      <div class="cardInner">
-        <h2 class="h1">Event access</h2>
-        <div class="sub">The event list and codes are loaded from Firebase when the host creates the game.</div>
-
-        <div class="grid">
-          <div class="field">
-            <label for="eventSelect">Live event</label>
-            <select id="eventSelect" class="select">
-              <option value="">Loading events...</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="codeInput">Ticket code</label>
-            <input
-              id="codeInput"
-              class="input"
-              type="text"
-              placeholder="Enter your code"
-              autocomplete="off"
-              spellcheck="false"
-            />
-          </div>
+      <div class="heroTop">
+        <div>
+          <h1>Join an event</h1>
+          <p>Sign in on this page, pick a live event, and join it. Right now this page is set up for Hide &amp; Seek. If your account is on the host’s allowed list, you’ll be sent to <b>hider.html</b>.</p>
         </div>
 
-        <div class="actions">
-          <button class="btn primary" id="joinBtn" type="button">Join event</button>
-        </div>
-
-        <div class="msg" id="msgBox" aria-live="polite"></div>
-
-        <div class="infoGrid">
-          <div class="miniCard">
-            <b>Signed in as</b>
-            <span id="profileName">—</span>
-          </div>
-          <div class="miniCard">
-            <b>Email</b>
-            <span id="profileEmail">—</span>
-          </div>
-          <div class="miniCard">
-            <b>Selected event page</b>
-            <span id="selectedEventPage">—</span>
-          </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" id="refreshBtn" type="button">Refresh</button>
+          <button class="btn danger" id="signOutBtn" type="button" style="display:none;">Sign out</button>
         </div>
       </div>
     </section>
 
-    <section class="card">
-      <div class="cardInner">
-        <h2 class="h1">Database structure expected</h2>
-        <div class="sub">
-          This page reads live events from <code>/events</code>. Each event should have
-          a name, optional page, optional joinPage, active flag, and a list of codes.
+    <div id="msgBox" class="msg info">Loading…</div>
+
+    <section class="grid">
+      <section class="card">
+        <div class="cardInner">
+          <div class="hRow">
+            <div>
+              <h2 class="h1">Account</h2>
+              <div class="sub">Users can sign in right here without being redirected away.</div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div class="cardInner" style="padding-top:0;">
+          <div class="signBox" id="signSection">
+            <div class="empty" id="signedOutBox">
+              You’re not signed in yet.
+            </div>
+
+            <button class="btn primary" id="googleSignInBtn" type="button">Sign in to join</button>
+
+            <div class="accountCard" id="accountCard" style="display:none;">
+              <div id="avatarWrap"></div>
+              <div class="accountMain">
+                <div class="name" id="accountName">Signed in</div>
+                <div class="meta">
+                  <span class="tag" id="accountEmail"></span>
+                  <span class="tag" id="accountUid"></span>
+                  <span class="tag" id="accountPublicId" style="display:none;"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardInner">
+          <div class="hRow">
+            <div>
+              <h2 class="h1">Events</h2>
+              <div class="sub">Available events you can join right now.</div>
+            </div>
+            <span class="pill" id="eventCountPill">1 event</span>
+          </div>
+        </div>
+
+        <div class="cardInner" style="padding-top:0;">
+          <div class="eventList" id="eventList"></div>
+          <div class="empty" id="eventEmpty" style="display:none;">No events are available right now.</div>
+        </div>
+      </section>
     </section>
   </main>
 
-  <div class="authGate hidden" id="authGate" aria-hidden="true">
-    <div class="authCard" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <h2 id="authTitle">Sign in to continue</h2>
-      <p>Use the same account you use on uZone. This sign-in stays on this page.</p>
-
-      <form class="authForm" id="authForm" novalidate>
-        <label>
-          Email
-          <input id="authEmail" type="email" autocomplete="email" placeholder="you@email.com" required />
-        </label>
-
-        <label>
-          Password
-          <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required />
-        </label>
-
-        <button class="authBtn" id="authSubmitBtn" type="submit">Sign in</button>
-        <div class="authMsg" id="authMsg" aria-live="polite"></div>
-      </form>
+  <footer>
+    <div>
+      <div class="footerTitle">uZone</div>
+      <div class="footerSub">Join flow for Hide &amp; Seek.</div>
     </div>
-  </div>
+    <div class="footerSub">© uZone</div>
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut,
-      signInWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-    import {
-      getDatabase,
-      ref,
-      onValue,
-      get,
-      child,
-      set,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -600,347 +549,301 @@
     };
 
     const app = initializeApp(firebaseConfig);
-
-    try {
-      if (await analyticsSupported()) getAnalytics(app);
-    } catch (_) {}
-
     const auth = getAuth(app);
-    const db = getDatabase(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-    const subline = document.getElementById("subline");
-    const userChip = document.getElementById("userChip");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
+    const HNS_WHITELIST_KEY = "hns_whitelist_uids";
+    const HNS_EVENTS_KEY = "hns_join_events";
 
-    const eventSelect = document.getElementById("eventSelect");
-    const codeInput = document.getElementById("codeInput");
-    const joinBtn = document.getElementById("joinBtn");
+    const els = {
+      hello: document.getElementById("hello"),
+      authPill: document.getElementById("authPill"),
+      msgBox: document.getElementById("msgBox"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      signOutBtn: document.getElementById("signOutBtn"),
+      googleSignInBtn: document.getElementById("googleSignInBtn"),
+      signedOutBox: document.getElementById("signedOutBox"),
+      accountCard: document.getElementById("accountCard"),
+      avatarWrap: document.getElementById("avatarWrap"),
+      accountName: document.getElementById("accountName"),
+      accountEmail: document.getElementById("accountEmail"),
+      accountUid: document.getElementById("accountUid"),
+      accountPublicId: document.getElementById("accountPublicId"),
+      eventList: document.getElementById("eventList"),
+      eventEmpty: document.getElementById("eventEmpty"),
+      eventCountPill: document.getElementById("eventCountPill")
+    };
 
-    const msgBox = document.getElementById("msgBox");
-    const profileName = document.getElementById("profileName");
-    const profileEmail = document.getElementById("profileEmail");
-    const selectedEventPage = document.getElementById("selectedEventPage");
+    let currentUser = null;
+    let currentUserDoc = null;
 
-    const authGate = document.getElementById("authGate");
-    const authForm = document.getElementById("authForm");
-    const authEmail = document.getElementById("authEmail");
-    const authPassword = document.getElementById("authPassword");
-    const authSubmitBtn = document.getElementById("authSubmitBtn");
-    const authMsg = document.getElementById("authMsg");
-
-    let liveEvents = [];
-
-    function setMsg(text, kind = ""){
-      msgBox.style.display = text ? "block" : "none";
-      msgBox.textContent = text || "";
-      msgBox.className = "msg" + (kind ? " " + kind : "");
-    }
-
-    function setAuthMsg(text, kind = ""){
-      authMsg.textContent = text || "";
-      authMsg.className = "authMsg" + (text ? " show" : "") + (kind ? " " + kind : "");
-    }
-
-    function showAuthGate(){
-      authGate.classList.remove("hidden");
-      authGate.setAttribute("aria-hidden", "false");
-      subline.textContent = "Sign in required";
-      userChip.textContent = "User: —";
-      profileName.textContent = "—";
-      profileEmail.textContent = "—";
-      setMsg("");
-      requestAnimationFrame(() => authEmail.focus());
-    }
-
-    function hideAuthGate(){
-      authGate.classList.add("hidden");
-      authGate.setAttribute("aria-hidden", "true");
-      setAuthMsg("");
-      authPassword.value = "";
-    }
-
-    function friendlyAuthError(err){
-      const code = String(err?.code || "");
-      if (code.includes("auth/invalid-credential")) return "Invalid email or password.";
-      if (code.includes("auth/invalid-email")) return "That email address doesn’t look valid.";
-      if (code.includes("auth/network-request-failed")) return "Network error. Check your connection and try again.";
-      if (code.includes("auth/too-many-requests")) return "Too many attempts. Try again in a moment.";
-      return err?.message || "Could not sign in. Please try again.";
-    }
-
-    function normalizeCode(value){
-      return String(value || "").trim().toUpperCase();
-    }
-
-    function escapeHtml(value){
-      return String(value ?? "").replace(/[&<>"']/g, (m) => ({
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => ({
         "&":"&amp;",
         "<":"&lt;",
         ">":"&gt;",
         '"':"&quot;",
         "'":"&#39;"
-      })[m]);
+      }[m]));
     }
 
-    function extractCodes(eventData){
-      if (!eventData) return [];
-
-      if (Array.isArray(eventData.codes)) {
-        return eventData.codes.map(normalizeCode).filter(Boolean);
-      }
-
-      if (eventData.codes && typeof eventData.codes === "object") {
-        return Object.entries(eventData.codes)
-          .filter(([, value]) => value !== false && value != null)
-          .map(([key, value]) => {
-            if (typeof value === "string") return normalizeCode(value);
-            if (typeof value === "object" && value?.code) return normalizeCode(value.code);
-            return normalizeCode(key);
-          })
-          .filter(Boolean);
-      }
-
-      if (eventData.allowedCodes && typeof eventData.allowedCodes === "object") {
-        return Object.keys(eventData.allowedCodes).map(normalizeCode).filter(Boolean);
-      }
-
-      return [];
+    function showMsg(text, kind = "info"){
+      els.msgBox.className = "msg " + kind;
+      els.msgBox.textContent = text;
+      els.msgBox.style.display = "block";
     }
 
-    function mapEventsFromSnapshot(data){
-      if (!data || typeof data !== "object") return [];
-
-      return Object.entries(data)
-        .map(([id, value]) => {
-          const codes = extractCodes(value);
-          const page = value.joinPage || value.page || value.eventPage || "";
-          const name = value.name || value.title || value.eventName || id;
-
-          return {
-            id,
-            name,
-            page,
-            active: value.active !== false,
-            codes,
-            raw: value
-          };
-        })
-        .filter(event => event.active)
-        .sort((a, b) => a.name.localeCompare(b.name));
+    function hideMsg(){
+      els.msgBox.style.display = "none";
+      els.msgBox.textContent = "";
+      els.msgBox.className = "msg";
     }
 
-    function populateEvents(){
-      eventSelect.innerHTML = "";
-
-      if (!liveEvents.length) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = "No live events available";
-        eventSelect.appendChild(option);
-        selectedEventPage.textContent = "—";
-        return;
-      }
-
-      liveEvents.forEach((event) => {
-        const option = document.createElement("option");
-        option.value = event.id;
-        option.textContent = event.name;
-        eventSelect.appendChild(option);
-      });
-
-      updateSelectedEventPage();
+    function getDisplayName(userLike){
+      return (userLike?.name || userLike?.displayName || "").toString().trim() || "Unnamed User";
     }
 
-    function getSelectedEvent(){
-      return liveEvents.find(e => e.id === eventSelect.value) || liveEvents[0] || null;
+    function getEmail(userLike){
+      return (userLike?.email || userLike?.schoolEmail || userLike?.studentEmail || "").toString().trim();
     }
 
-    function updateSelectedEventPage(){
-      const event = getSelectedEvent();
-      selectedEventPage.textContent = event?.page || "—";
+    function getPublicId(userLike){
+      return (userLike?.publicId ?? userLike?.publicID ?? userLike?.uNumber ?? "").toString().trim();
     }
 
-    function unlockPage(user){
-      hideAuthGate();
-
-      const displayName = user.displayName?.trim() || user.email || "Signed in user";
-
-      userChip.textContent = `User: ${displayName}`;
-      subline.textContent = "Signed in";
-      profileName.textContent = displayName;
-      profileEmail.textContent = user.email || "—";
-
-      setMsg("Signed in. Pick an event and enter your code.", "ok");
+    function makeAvatarHtml(name, photoURL){
+      const safeName = esc(name);
+      const initial = (name || "?").trim().charAt(0).toUpperCase() || "?";
+      if (photoURL){
+        return `<img class="avatar" alt="${safeName}" src="${esc(photoURL)}" referrerpolicy="no-referrer">`;
+      }
+      return `<div class="avatar avatarFallback">${esc(initial)}</div>`;
     }
 
-    function listenForEvents(){
-      const eventsRef = ref(db, "events");
-
-      onValue(eventsRef, (snapshot) => {
-        liveEvents = mapEventsFromSnapshot(snapshot.val());
-        populateEvents();
-
-        if (liveEvents.length) {
-          setMsg("Live events loaded.", "ok");
-        } else {
-          setMsg("No active events were found in the database.", "error");
-        }
-      }, (error) => {
-        console.error(error);
-        liveEvents = [];
-        populateEvents();
-        setMsg("Could not load events from Firebase.", "error");
-      });
-    }
-
-    async function recordJoin(event, code, user){
-      const joinPath = `events/${event.id}/joins/${user.uid}`;
-      await set(ref(db, joinPath), {
-        uid: user.uid,
-        email: user.email || "",
-        name: user.displayName || "",
-        code: normalizeCode(code),
-        joinedAt: serverTimestamp()
-      });
-    }
-
-    async function tryJoinEvent(){
-      const user = auth.currentUser;
-      if (!user) {
-        showAuthGate();
-        setMsg("You need to sign in first.", "error");
-        return;
-      }
-
-      const event = getSelectedEvent();
-      if (!event) {
-        setMsg("No event is available.", "error");
-        return;
-      }
-
-      const enteredCode = normalizeCode(codeInput.value);
-      if (!enteredCode) {
-        setMsg("Enter your code first.", "error");
-        codeInput.focus();
-        return;
-      }
-
-      joinBtn.disabled = true;
-
-      try {
-        const eventSnap = await get(child(ref(db), `events/${event.id}`));
-        if (!eventSnap.exists()) {
-          setMsg("That event no longer exists.", "error");
-          return;
-        }
-
-        const freshEvent = {
-          ...event,
-          raw: eventSnap.val(),
-          codes: extractCodes(eventSnap.val()),
-          page: eventSnap.val().joinPage || eventSnap.val().page || eventSnap.val().eventPage || ""
-        };
-
-        if (!freshEvent.codes.includes(enteredCode)) {
-          setMsg("That code is not valid for the selected event.", "error");
-          return;
-        }
-
-        await recordJoin(freshEvent, enteredCode, user);
-
-        if (!freshEvent.page) {
-          setMsg("Code accepted, but this event does not have a page set yet.", "error");
-          return;
-        }
-
-        setMsg(`Code accepted. Sending you to ${freshEvent.page}...`, "ok");
-        setTimeout(() => {
-          window.location.href = freshEvent.page;
-        }, 500);
-      } catch (error) {
-        console.error(error);
-        setMsg("Something went wrong while joining the event.", "error");
-      } finally {
-        joinBtn.disabled = false;
-      }
-    }
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        showAuthGate();
-        return;
-      }
-
-      unlockPage(user);
-    });
-
-    authForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      setAuthMsg("");
-
-      if (!authForm.checkValidity()) {
-        authForm.reportValidity();
-        return;
-      }
-
-      authSubmitBtn.disabled = true;
-
-      try {
-        await signInWithEmailAndPassword(
-          auth,
-          authEmail.value.trim(),
-          authPassword.value
-        );
-        setAuthMsg("Signed in.", "ok");
-      } catch (err) {
-        setAuthMsg(friendlyAuthError(err), "error");
-      } finally {
-        authSubmitBtn.disabled = false;
-      }
-    });
-
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
+    function readLocalArray(key){
+      try{
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return [...new Set(parsed.map(v => String(v || "").trim()).filter(Boolean))];
       } catch (_) {
-      } finally {
-        authEmail.value = "";
-        authPassword.value = "";
-        codeInput.value = "";
-        showAuthGate();
+        return [];
       }
-    });
+    }
 
-    refreshBtn.addEventListener("click", async () => {
-      setMsg("Refreshing events...", "ok");
-      try {
-        const snapshot = await get(ref(db, "events"));
-        liveEvents = mapEventsFromSnapshot(snapshot.val());
-        populateEvents();
-
-        if (liveEvents.length) {
-          setMsg("Event list refreshed.", "ok");
-        } else {
-          setMsg("No active events were found in the database.", "error");
+    function defaultEvents(){
+      return [
+        {
+          id: "hide-and-seek",
+          title: "Hide & Seek",
+          description: "Join the current Hide & Seek game. If you’re on the allowed list, you’ll go to hider.html.",
+          target: "hider.html",
+          type: "hns"
         }
-      } catch (error) {
-        console.error(error);
-        setMsg("Could not refresh events.", "error");
+      ];
+    }
+
+    function getJoinEvents(){
+      const stored = readLocalArrayObjects(HNS_EVENTS_KEY);
+      if (stored.length) return stored;
+      return defaultEvents();
+    }
+
+    function readLocalArrayObjects(key){
+      try{
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter(x => x && typeof x === "object");
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function setSignedOutUI(){
+      els.authPill.textContent = "Signed out";
+      els.hello.textContent = "Join games";
+      els.signedOutBox.style.display = "block";
+      els.googleSignInBtn.style.display = "inline-flex";
+      els.accountCard.style.display = "none";
+      els.signOutBtn.style.display = "none";
+    }
+
+    function setSignedInUI(user, userDoc){
+      const displayName = getDisplayName(userDoc || user);
+      const email = getEmail(userDoc || user) || user.email || "";
+      const publicId = getPublicId(userDoc || user);
+      const photo = (user.photoURL || userDoc?.photoURL || userDoc?.photoUrl || "").toString().trim();
+
+      els.authPill.textContent = "Signed in";
+      els.hello.textContent = displayName ? `Hey, ${displayName}` : "Welcome";
+      els.signedOutBox.style.display = "none";
+      els.googleSignInBtn.style.display = "none";
+      els.accountCard.style.display = "flex";
+      els.signOutBtn.style.display = "inline-flex";
+
+      els.avatarWrap.innerHTML = makeAvatarHtml(displayName, photo);
+      els.accountName.textContent = displayName;
+      els.accountEmail.textContent = email || "No email";
+      els.accountUid.textContent = `UID ${user.uid}`;
+
+      if (publicId){
+        els.accountPublicId.style.display = "inline-flex";
+        els.accountPublicId.textContent = `🆔 ${publicId}`;
+      } else {
+        els.accountPublicId.style.display = "none";
+        els.accountPublicId.textContent = "";
+      }
+    }
+
+    async function loadCurrentUserDoc(uid){
+      try{
+        const snap = await getDoc(doc(db, "users", uid));
+        return snap.exists() ? (snap.data() || {}) : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function isAllowedForHideAndSeek(){
+      if (!currentUser) return false;
+      const ids = readLocalArray(HNS_WHITELIST_KEY);
+      return ids.includes(currentUser.uid);
+    }
+
+    function eventCardHTML(ev){
+      const title = (ev.title || ev.name || "Untitled Event").toString().trim();
+      const description = (ev.description || "").toString().trim();
+      const isHns = (ev.type || "") === "hns" || ev.id === "hide-and-seek";
+
+      return `
+        <article class="eventCard">
+          <div class="eventTop">
+            <div>
+              <h3 class="eventTitle">${esc(title)}</h3>
+              <p class="eventDesc">${esc(description || "Join this event.")}</p>
+            </div>
+            <div class="eventMeta">
+              <span class="tag">${isHns ? "Hide & Seek" : "Event"}</span>
+              <span class="tag">Live</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn primary" type="button" data-join-event="${esc(ev.id || "")}">
+              Join
+            </button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderEvents(){
+      const events = getJoinEvents();
+      els.eventList.innerHTML = "";
+      els.eventCountPill.textContent = `${events.length} event${events.length === 1 ? "" : "s"}`;
+      els.eventEmpty.style.display = events.length ? "none" : "block";
+
+      events.forEach(ev => {
+        els.eventList.insertAdjacentHTML("beforeend", eventCardHTML(ev));
+      });
+    }
+
+    async function joinEvent(eventId){
+      if (!currentUser){
+        showMsg("Sign in first to join this event.", "error");
+        return;
+      }
+
+      const events = getJoinEvents();
+      const ev = events.find(x => String(x.id || "") === String(eventId || ""));
+      if (!ev){
+        showMsg("That event could not be found.", "error");
+        return;
+      }
+
+      if (String(ev.id) === "hide-and-seek" || String(ev.type || "") === "hns"){
+        const allowed = isAllowedForHideAndSeek();
+        if (!allowed){
+          showMsg("You are not on the Hide & Seek allowed list yet.", "error");
+          return;
+        }
+
+        showMsg("Allowed. Sending you into the game…", "ok");
+        setTimeout(() => {
+          window.location.href = ev.target || "hider.html";
+        }, 350);
+        return;
+      }
+
+      showMsg("This event type is not wired yet.", "error");
+    }
+
+    els.googleSignInBtn.addEventListener("click", async () => {
+      showMsg("Signing you in…", "info");
+      try{
+        await signInWithPopup(auth, provider);
+      } catch (err){
+        console.error(err);
+        showMsg("Could not sign you in on this page.", "error");
       }
     });
 
-    eventSelect.addEventListener("change", updateSelectedEventPage);
-    joinBtn.addEventListener("click", tryJoinEvent);
-
-    codeInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        tryJoinEvent();
+    els.signOutBtn.addEventListener("click", async () => {
+      try{
+        await signOut(auth);
+        showMsg("Signed out.", "ok");
+      } catch (err){
+        console.error(err);
+        showMsg("Could not sign you out.", "error");
       }
     });
 
-    listenForEvents();
+    els.refreshBtn.addEventListener("click", async () => {
+      renderEvents();
+      if (currentUser){
+        currentUserDoc = await loadCurrentUserDoc(currentUser.uid);
+        setSignedInUI(currentUser, currentUserDoc);
+        showMsg(isAllowedForHideAndSeek()
+          ? "Refreshed. Your account is currently on the Hide & Seek allowed list."
+          : "Refreshed. Your account is not currently on the Hide & Seek allowed list.",
+          isAllowedForHideAndSeek() ? "ok" : "info"
+        );
+      } else {
+        setSignedOutUI();
+        showMsg("Refreshed.", "ok");
+      }
+    });
+
+    els.eventList.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-join-event]");
+      if (!btn) return;
+      await joinEvent(btn.getAttribute("data-join-event"));
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user || null;
+      renderEvents();
+
+      if (!user){
+        currentUserDoc = null;
+        setSignedOutUI();
+        hideMsg();
+        return;
+      }
+
+      currentUserDoc = await loadCurrentUserDoc(user.uid);
+      setSignedInUI(user, currentUserDoc);
+
+      if (isAllowedForHideAndSeek()){
+        showMsg("You’re signed in and on the Hide & Seek allowed list.", "ok");
+      } else {
+        showMsg("You’re signed in, but you are not on the Hide & Seek allowed list yet.", "info");
+      }
+    });
   </script>
 </body>
 </html>
