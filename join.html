@@ -30,6 +30,7 @@
 
     *{ box-sizing:border-box; }
     html,body{ min-height:100%; }
+
     body{
       margin:0;
       color:var(--ink);
@@ -43,7 +44,7 @@
     }
 
     a{ color:inherit; text-decoration:none; }
-    button{ font:inherit; }
+    button, input{ font:inherit; }
 
     header{
       position: sticky;
@@ -458,13 +459,146 @@
       border: 1px solid rgba(17,16,24,.06);
     }
 
+    .authGate{
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(248,247,255,.72);
+      backdrop-filter: blur(16px);
+    }
+
+    .authGate.hidden{
+      display:none;
+    }
+
+    .authCard{
+      width:min(440px, 92vw);
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.94);
+      border-radius: 22px;
+      box-shadow: 0 30px 80px rgba(17,16,24,.14);
+      padding:18px;
+      display:grid;
+      gap:12px;
+    }
+
+    .authCard h2{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
+
+    .authCard p{
+      margin:0;
+      color: rgba(17,16,24,.68);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .authForm{
+      display:grid;
+      gap:12px;
+      margin-top:4px;
+    }
+
+    .authForm label{
+      display:grid;
+      gap:6px;
+      font-size:13px;
+      color: rgba(17,16,24,.78);
+    }
+
+    .authForm input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(17,16,24,.12);
+      background: rgba(255,255,255,.90);
+      color: var(--ink);
+      outline:none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .authForm input:focus{
+      border-color: rgba(176,11,85,.40);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
+    }
+
+    .authBtn{
+      margin-top: 4px;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid rgba(176,11,85,.28);
+      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+      color: rgba(17,16,24,.92);
+      font-weight:1000;
+      letter-spacing:.2px;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
+      box-shadow: 0 18px 50px rgba(17,16,24,.08);
+    }
+
+    .authBtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.22);
+      box-shadow: 0 22px 64px rgba(17,16,24,.10);
+    }
+
+    .authBtn:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .authMsg{
+      display:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.78);
+      color: rgba(17,16,24,.82);
+      white-space:pre-line;
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .authMsg.show{
+      display:block;
+    }
+
+    .authMsg.error{
+      border-color: rgba(176,11,85,.28);
+      background: rgba(176,11,85,.06);
+      color: #8c184a;
+    }
+
+    .authMsg.ok{
+      border-color: rgba(109,40,217,.22);
+      background: rgba(109,40,217,.06);
+    }
+
+    .authMeta{
+      padding:12px;
+      border-radius:16px;
+      border:1px dashed rgba(17,16,24,.16);
+      background: rgba(255,255,255,.72);
+      color: rgba(17,16,24,.66);
+      font-size:12px;
+      line-height:1.45;
+    }
+
     @media (max-width: 760px){
       .topbar{
         grid-template-columns: 1fr;
       }
+
       .topActions{
         justify-content:flex-start;
       }
+
       .chip{
         max-width: 100%;
       }
@@ -497,8 +631,8 @@
         <div>
           <h1>Admin hub</h1>
           <p>
-            Signed-in admin landing page. Add as many cards here as you want for internal tools like
-            verifications, host hide and seek, users, payouts, or anything else.
+            Signed-in admin landing page. If someone opens this page without already being signed in,
+            they can sign in right here without getting redirected to your main login page.
           </p>
         </div>
 
@@ -543,18 +677,49 @@
             You can change the badge, icon, description, and tags without touching the auth logic.
           </div>
           <div class="tip">
-            Since your current admin pages already protect access with Firebase auth and an allowlist,
-            this page uses the same pattern before showing anything. :contentReference[oaicite:2]{index=2}
+            This page now has its own sign-in gate, so visiting <code>/join</code> works even when the visitor is not already signed in.
           </div>
         </div>
       </div>
     </section>
   </main>
 
+  <div class="authGate hidden" id="authGate" aria-hidden="true">
+    <div class="authCard" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <h2 id="authTitle">Sign in to continue</h2>
+      <p>Use the same account you use on uZone. After signing in, you will stay on this page.</p>
+
+      <form class="authForm" id="authForm" novalidate>
+        <label>
+          Email
+          <input id="authEmail" type="email" autocomplete="email" placeholder="you@email.ca" required />
+        </label>
+
+        <label>
+          Password
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required />
+        </label>
+
+        <button class="authBtn" id="authSubmitBtn" type="submit">Sign in</button>
+
+        <div class="authMsg" id="authMsg" aria-live="polite"></div>
+      </form>
+
+      <div class="authMeta">
+        This sign-in is only for accessing this page. It uses the same Firebase account system as your main login, but it does not send the user to a different page first.
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
     import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -595,7 +760,10 @@
     ];
 
     const app = initializeApp(firebaseConfig);
-    try { if (await analyticsSupported()) getAnalytics(app); } catch (_) {}
+    try {
+      if (await analyticsSupported()) getAnalytics(app);
+    } catch (_) {}
+
     const auth = getAuth(app);
 
     const subline = document.getElementById("subline");
@@ -606,10 +774,40 @@
     const hubGrid = document.getElementById("hubGrid");
     const emptyBox = document.getElementById("emptyBox");
 
+    const authGate = document.getElementById("authGate");
+    const authForm = document.getElementById("authForm");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
+    const authSubmitBtn = document.getElementById("authSubmitBtn");
+    const authMsg = document.getElementById("authMsg");
+
     function setMsg(text, kind = ""){
       msgBox.style.display = text ? "block" : "none";
       msgBox.textContent = text || "";
       msgBox.className = "msg" + (kind ? " " + kind : "");
+    }
+
+    function setAuthMsg(text, kind = ""){
+      authMsg.textContent = text || "";
+      authMsg.className = "authMsg" + (text ? " show" : "") + (kind ? " " + kind : "");
+    }
+
+    function showAuthGate(){
+      authGate.classList.remove("hidden");
+      authGate.setAttribute("aria-hidden", "false");
+      subline.textContent = "Sign in required";
+      adminChip.textContent = "Admin: —";
+      hubGrid.innerHTML = "";
+      emptyBox.style.display = "none";
+      setMsg("");
+      requestAnimationFrame(() => authEmail.focus());
+    }
+
+    function hideAuthGate(){
+      authGate.classList.add("hidden");
+      authGate.setAttribute("aria-hidden", "true");
+      setAuthMsg("");
+      authPassword.value = "";
     }
 
     function isAllowedAdmin(user){
@@ -617,11 +815,20 @@
       return !!email && ADMIN_EMAILS.has(email);
     }
 
+    function friendlyAuthError(err){
+      const code = String(err?.code || "");
+      if (code.includes("auth/invalid-credential")) return "Invalid email or password.";
+      if (code.includes("auth/invalid-email")) return "That email address doesn’t look valid.";
+      if (code.includes("auth/network-request-failed")) return "Network error. Check your connection and try again.";
+      if (code.includes("auth/too-many-requests")) return "Too many attempts. Try again in a moment.";
+      return err?.message || "Could not sign in. Please try again.";
+    }
+
     function renderTools(){
       hubGrid.innerHTML = "";
       emptyBox.style.display = TOOLS.length ? "none" : "block";
 
-      TOOLS.forEach(tool => {
+      TOOLS.forEach((tool) => {
         const card = document.createElement("article");
         card.className = "hubCard";
 
@@ -652,7 +859,8 @@
 
         const tags = document.createElement("div");
         tags.className = "tags";
-        (tool.tags || []).forEach(t => {
+
+        (tool.tags || []).forEach((t) => {
           const tag = document.createElement("span");
           tag.className = "tag";
           tag.textContent = t;
@@ -661,7 +869,10 @@
 
         body.appendChild(title);
         body.appendChild(desc);
-        if ((tool.tags || []).length) body.appendChild(tags);
+
+        if ((tool.tags || []).length) {
+          body.appendChild(tags);
+        }
 
         const actions = document.createElement("div");
         actions.className = "hubActions";
@@ -681,24 +892,63 @@
       });
     }
 
-    onAuthStateChanged(auth, (user) => {
+    function unlockPage(user){
+      hideAuthGate();
+      adminChip.textContent = `Admin: ${user.email || "—"}`;
+      subline.textContent = "Signed in";
+      renderTools();
+      setMsg("Hub loaded.", "ok");
+    }
 
-  // If NOT signed in → send them to login
-  if (!user) {
-    window.location.href = "index.html";
-    return;
-  }
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        showAuthGate();
+        return;
+      }
 
-  // User is signed in
-  adminChip.textContent = `User: ${user.email || "—"}`;
-  subline.textContent = "Signed in";
+      if (!isAllowedAdmin(user)) {
+        showAuthGate();
+        setAuthMsg("This account is not in the admin allowlist.", "error");
+        try { await signOut(auth); } catch (_) {}
+        return;
+      }
 
-  renderTools(); // or whatever your page loads
-});
+      unlockPage(user);
+    });
+
+    authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setAuthMsg("");
+
+      if (!authForm.checkValidity()) {
+        authForm.reportValidity();
+        return;
+      }
+
+      authSubmitBtn.disabled = true;
+
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          authEmail.value.trim(),
+          authPassword.value
+        );
+        setAuthMsg("Signed in.", "ok");
+      } catch (err) {
+        setAuthMsg(friendlyAuthError(err), "error");
+      } finally {
+        authSubmitBtn.disabled = false;
+      }
+    });
 
     logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "index.html";
+      try {
+        await signOut(auth);
+      } finally {
+        authEmail.value = "";
+        authPassword.value = "";
+        showAuthGate();
+      }
     });
 
     refreshBtn.addEventListener("click", () => {
