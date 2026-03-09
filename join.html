@@ -3,348 +3,944 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Event Hub</title>
+  <title>uZone • Join</title>
+  <meta name="color-scheme" content="light" />
+
   <style>
     :root{
-      --bg:#0f172a;
-      --card:#111827;
-      --card2:#1f2937;
-      --text:#f9fafb;
-      --muted:#9ca3af;
-      --accent:#7c3aed;
-      --accent2:#a78bfa;
-      --border:rgba(255,255,255,.08);
-      --danger:#ef4444;
-      --success:#22c55e;
+      --bg: #f8f7ff;
+      --bg2: #fcfbff;
+      --ink: #111018;
+      --muted: rgba(17,16,24,.62);
+
+      --pink: #b00b55;
+      --purple: #6d28d9;
+      --blue: #8bd3ff;
+      --green: #58c99a;
+
+      --card: rgba(255,255,255,.88);
+      --border: rgba(17,16,24,.10);
+      --shadow: 0 18px 60px rgba(17,16,24,.08);
+
+      --radius: 20px;
+      --radius2: 16px;
+      --danger: #c6285d;
+      --success: #2f9e6f;
     }
 
-    *{box-sizing:border-box}
+    *{ box-sizing:border-box; }
+    html,body{ min-height:100%; }
+
     body{
       margin:0;
-      min-height:100vh;
-      font-family:Arial, Helvetica, sans-serif;
-      color:var(--text);
-      background:linear-gradient(180deg,#0b1120,#111827);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 10% -10%, rgba(139,211,255,.20), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(176,11,85,.08), transparent 58%),
+        radial-gradient(1100px 700px at 50% 100%, rgba(109,40,217,.10), transparent 62%),
+        linear-gradient(180deg, #fbfaff 0%, #f8f7ff 45%, #fbfbff 100%);
+      background-attachment: fixed;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    button, input, select{ font:inherit; }
+
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(255,255,255,.72);
+      border-bottom: 1px solid rgba(17,16,24,.08);
+    }
+
+    .topbar{
+      width: min(1000px, 92vw);
+      margin: 0 auto;
+      padding: 12px 0;
       display:grid;
-      place-items:center;
-      padding:24px;
+      grid-template-columns: 1fr auto;
+      align-items:center;
+      gap: 14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .brand img{
+      width:36px;
+      height:36px;
+      border-radius:10px;
+      border:1px solid rgba(17,16,24,.08);
+      background: rgba(255,255,255,.6);
+      object-fit: cover;
+    }
+
+    .brandText{
+      display:grid;
+      gap:2px;
+      min-width:0;
+    }
+
+    .brandText b{
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+
+    .brandText span{
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .topActions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.84);
+      font-size:12px;
+      font-weight:900;
+      color: rgba(17,16,24,.78);
+      box-shadow: 0 10px 24px rgba(17,16,24,.04);
+      max-width: min(320px, 70vw);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.12);
+      background: rgba(255,255,255,.84);
+      cursor:pointer;
+      font-weight:950;
+      font-size:13px;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease, opacity .12s ease;
+      white-space:nowrap;
+    }
+
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.25);
+      box-shadow: 0 14px 38px rgba(176,11,85,.08);
+    }
+
+    .btn.primary{
+      border-color: rgba(176,11,85,.28);
+      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+    }
+
+    .btn.danger{
+      border-color: rgba(176,11,85,.22);
+      background: rgba(176,11,85,.08);
+      color: var(--danger);
+    }
+
+    main{
+      width: min(1000px, 92vw);
+      margin: 22px auto 44px auto;
+      display:grid;
+      gap:18px;
+    }
+
+    .hero{
+      border-radius: var(--radius);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.48);
+      background:
+        radial-gradient(650px 260px at 10% 35%, rgba(139,211,255,.34), transparent 60%),
+        radial-gradient(700px 280px at 65% 10%, rgba(109,40,217,.14), transparent 55%),
+        radial-gradient(620px 240px at 95% 75%, rgba(176,11,85,.14), transparent 55%),
+        linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));
+      box-shadow: 0 22px 70px rgba(17,16,24,.08);
+      padding:18px;
+      backdrop-filter: blur(12px);
+    }
+
+    .hero h1{
+      margin:0;
+      font-size:26px;
+      letter-spacing:.2px;
+    }
+
+    .hero p{
+      margin:10px 0 0 0;
+      color: rgba(17,16,24,.70);
+      font-size:14px;
+      line-height:1.5;
+      max-width: 72ch;
     }
 
     .card{
-      width:100%;
-      max-width:520px;
-      background:linear-gradient(180deg,var(--card),var(--card2));
-      border:1px solid var(--border);
-      border-radius:20px;
-      padding:28px;
-      box-shadow:0 20px 60px rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.45);
+      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
     }
 
-    h1{
-      margin:0 0 8px 0;
-      font-size:28px;
+    .cardInner{
+      padding:18px;
+    }
+
+    .h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.2px;
     }
 
     .sub{
-      margin:0 0 24px 0;
-      color:var(--muted);
-      line-height:1.5;
-      font-size:14px;
-    }
-
-    .user-box{
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:14px 16px;
-      margin-bottom:18px;
-    }
-
-    .label{
-      display:block;
+      color: var(--muted);
       font-size:13px;
-      color:var(--muted);
-      margin-bottom:8px;
+      line-height:1.35;
+      margin-top:6px;
     }
 
-    .value{
-      font-size:18px;
-      font-weight:700;
+    .grid{
+      display:grid;
+      gap:14px;
+      grid-template-columns: 1fr 1fr;
+      margin-top:16px;
     }
 
     .field{
-      margin-bottom:16px;
+      display:grid;
+      gap:8px;
     }
 
-    select,
-    input{
+    .field label{
+      font-size:13px;
+      font-weight:800;
+      color: rgba(17,16,24,.78);
+    }
+
+    .input, .select{
       width:100%;
-      padding:14px 14px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.05);
-      color:var(--text);
+      padding:13px 14px;
+      border-radius:14px;
+      border:1px solid rgba(17,16,24,.12);
+      background: rgba(255,255,255,.90);
+      color: var(--ink);
       outline:none;
-      font-size:15px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
     }
 
-    select:focus,
-    input:focus{
-      border-color:var(--accent2);
-      box-shadow:0 0 0 3px rgba(167,139,250,.15);
+    .input:focus, .select:focus{
+      border-color: rgba(176,11,85,.40);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
     }
 
-    button{
-      width:100%;
-      border:none;
-      border-radius:12px;
-      padding:14px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:white;
-      font-weight:700;
-      font-size:15px;
-      cursor:pointer;
-    }
-
-    button:hover{
-      opacity:.95;
-    }
-
-    .status{
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
       margin-top:16px;
+    }
+
+    .msg{
+      margin-top:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(17,16,24,.08);
+      background: rgba(255,255,255,.72);
+      color: rgba(17,16,24,.74);
+      font-size:13px;
+      line-height:1.45;
+      display:none;
+      white-space:pre-line;
+    }
+
+    .msg.ok{
+      background: rgba(88,201,154,.14);
+      border-color: rgba(88,201,154,.22);
+      color: rgba(17,16,24,.86);
+    }
+
+    .msg.error{
+      background: rgba(176,11,85,.08);
+      border-color: rgba(176,11,85,.18);
+      color: #8c184a;
+    }
+
+    .infoGrid{
+      display:grid;
+      gap:14px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top:14px;
+    }
+
+    .miniCard{
+      border:1px solid rgba(17,16,24,.08);
+      background: rgba(255,255,255,.76);
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .miniCard b{
+      display:block;
+      font-size:13px;
+      margin-bottom:6px;
+    }
+
+    .miniCard span{
+      color: rgba(17,16,24,.68);
+      font-size:13px;
+      line-height:1.45;
+      word-break: break-word;
+    }
+
+    .authGate{
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(248,247,255,.72);
+      backdrop-filter: blur(16px);
+    }
+
+    .authGate.hidden{
+      display:none;
+    }
+
+    .authCard{
+      width:min(440px, 92vw);
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.94);
+      border-radius: 22px;
+      box-shadow: 0 30px 80px rgba(17,16,24,.14);
+      padding:18px;
+      display:grid;
+      gap:12px;
+    }
+
+    .authCard h2{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.2px;
+    }
+
+    .authCard p{
+      margin:0;
+      color: rgba(17,16,24,.68);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .authForm{
+      display:grid;
+      gap:12px;
+      margin-top:4px;
+    }
+
+    .authForm label{
+      display:grid;
+      gap:6px;
+      font-size:13px;
+      color: rgba(17,16,24,.78);
+    }
+
+    .authForm input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid rgba(17,16,24,.12);
+      background: rgba(255,255,255,.90);
+      color: var(--ink);
+      outline:none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .authForm input:focus{
+      border-color: rgba(176,11,85,.40);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
+    }
+
+    .authBtn{
+      margin-top: 4px;
       padding:12px 14px;
       border-radius:12px;
-      background:rgba(255,255,255,.04);
-      border:1px solid var(--border);
-      color:var(--muted);
-      font-size:14px;
-      min-height:46px;
+      border:1px solid rgba(176,11,85,.28);
+      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+      color: rgba(17,16,24,.92);
+      font-weight:1000;
+      letter-spacing:.2px;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
+      box-shadow: 0 18px 50px rgba(17,16,24,.08);
     }
 
-    .status.success{
-      color:#dcfce7;
-      border-color:rgba(34,197,94,.35);
-      background:rgba(34,197,94,.10);
+    .authBtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.22);
+      box-shadow: 0 22px 64px rgba(17,16,24,.10);
     }
 
-    .status.error{
-      color:#fee2e2;
-      border-color:rgba(239,68,68,.35);
-      background:rgba(239,68,68,.10);
+    .authBtn:disabled{
+      opacity:.65;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .authMsg{
+      display:none;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(17,16,24,.10);
+      background: rgba(255,255,255,.78);
+      color: rgba(17,16,24,.82);
+      white-space:pre-line;
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .authMsg.show{
+      display:block;
+    }
+
+    .authMsg.error{
+      border-color: rgba(176,11,85,.28);
+      background: rgba(176,11,85,.06);
+      color: #8c184a;
+    }
+
+    .authMsg.ok{
+      border-color: rgba(109,40,217,.22);
+      background: rgba(109,40,217,.06);
+    }
+
+    code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      background: rgba(17,16,24,.06);
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(17,16,24,.06);
+    }
+
+    @media (max-width: 760px){
+      .topbar{
+        grid-template-columns: 1fr;
+      }
+
+      .topActions{
+        justify-content:flex-start;
+      }
+
+      .chip{
+        max-width: 100%;
+      }
+
+      .grid{
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Event Hub</h1>
-    <p class="sub">Pick a live event, enter your ticket code, and go straight to that event page.</p>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <img src="logo.png" alt="uZone logo" />
+        <div class="brandText">
+          <b>uZone</b>
+          <span id="subline">Checking sign-in…</span>
+        </div>
+      </div>
 
-    <div class="user-box">
-      <span class="label">Signed in as</span>
-      <div class="value" id="userName">Loading...</div>
+      <div class="topActions">
+        <span class="chip" id="userChip">User: —</span>
+        <button class="btn" id="refreshBtn" type="button">Refresh</button>
+        <button class="btn danger" id="logoutBtn" type="button">Log out</button>
+      </div>
     </div>
+  </header>
 
-    <div class="field">
-      <label class="label" for="eventSelect">Live event</label>
-      <select id="eventSelect">
-        <option value="">Loading events...</option>
-      </select>
+  <main>
+    <section class="hero">
+      <h1>Join an event</h1>
+      <p>
+        Sign in if you are not already signed in, pick a live event, enter your code,
+        and join your spot in that event.
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="cardInner">
+        <h2 class="h1">Event access</h2>
+        <div class="sub">The event list and codes are loaded from Firebase when the host creates the game.</div>
+
+        <div class="grid">
+          <div class="field">
+            <label for="eventSelect">Live event</label>
+            <select id="eventSelect" class="select">
+              <option value="">Loading events...</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="codeInput">Ticket code</label>
+            <input
+              id="codeInput"
+              class="input"
+              type="text"
+              placeholder="Enter your code"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="joinBtn" type="button">Join event</button>
+        </div>
+
+        <div class="msg" id="msgBox" aria-live="polite"></div>
+
+        <div class="infoGrid">
+          <div class="miniCard">
+            <b>Signed in as</b>
+            <span id="profileName">—</span>
+          </div>
+          <div class="miniCard">
+            <b>Email</b>
+            <span id="profileEmail">—</span>
+          </div>
+          <div class="miniCard">
+            <b>Selected event page</b>
+            <span id="selectedEventPage">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="cardInner">
+        <h2 class="h1">Database structure expected</h2>
+        <div class="sub">
+          This page reads live events from <code>/events</code>. Each event should have
+          a name, optional page, optional joinPage, active flag, and a list of codes.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="authGate hidden" id="authGate" aria-hidden="true">
+    <div class="authCard" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <h2 id="authTitle">Sign in to continue</h2>
+      <p>Use the same account you use on uZone. This sign-in stays on this page.</p>
+
+      <form class="authForm" id="authForm" novalidate>
+        <label>
+          Email
+          <input id="authEmail" type="email" autocomplete="email" placeholder="you@email.com" required />
+        </label>
+
+        <label>
+          Password
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required />
+        </label>
+
+        <button class="authBtn" id="authSubmitBtn" type="submit">Sign in</button>
+        <div class="authMsg" id="authMsg" aria-live="polite"></div>
+      </form>
     </div>
-
-    <div class="field">
-      <label class="label" for="ticketCode">Ticket code</label>
-      <input id="ticketCode" type="text" placeholder="Enter your code" maxlength="40" />
-    </div>
-
-    <button id="joinBtn" type="button">Join Event</button>
-
-    <div class="status" id="statusBox">Waiting for event list...</div>
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
     import {
       getAuth,
-      signInAnonymously,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+      onAuthStateChanged,
+      signOut,
+      signInWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
     import {
-      getFirestore,
-      collection,
-      getDocs,
-      query,
-      where,
-      limit
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+      getDatabase,
+      ref,
+      onValue,
+      get,
+      child,
+      set,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-    const FIREBASE_CONFIG = {
-      apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
-      authDomain: "PASTE_YOUR_AUTH_DOMAIN",
-      projectId: "PASTE_YOUR_PROJECT_ID",
-      storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
-      messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
-      appId: "PASTE_YOUR_APP_ID"
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
     };
 
-    const app = initializeApp(FIREBASE_CONFIG);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
 
-    const userNameEl = document.getElementById("userName");
+    try {
+      if (await analyticsSupported()) getAnalytics(app);
+    } catch (_) {}
+
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const subline = document.getElementById("subline");
+    const userChip = document.getElementById("userChip");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
     const eventSelect = document.getElementById("eventSelect");
-    const ticketCodeInput = document.getElementById("ticketCode");
+    const codeInput = document.getElementById("codeInput");
     const joinBtn = document.getElementById("joinBtn");
-    const statusBox = document.getElementById("statusBox");
+
+    const msgBox = document.getElementById("msgBox");
+    const profileName = document.getElementById("profileName");
+    const profileEmail = document.getElementById("profileEmail");
+    const selectedEventPage = document.getElementById("selectedEventPage");
+
+    const authGate = document.getElementById("authGate");
+    const authForm = document.getElementById("authForm");
+    const authEmail = document.getElementById("authEmail");
+    const authPassword = document.getElementById("authPassword");
+    const authSubmitBtn = document.getElementById("authSubmitBtn");
+    const authMsg = document.getElementById("authMsg");
 
     let liveEvents = [];
 
-    function setStatus(message, type = "") {
-      statusBox.textContent = message;
-      statusBox.className = "status" + (type ? " " + type : "");
+    function setMsg(text, kind = ""){
+      msgBox.style.display = text ? "block" : "none";
+      msgBox.textContent = text || "";
+      msgBox.className = "msg" + (kind ? " " + kind : "");
     }
 
-    function getDisplayName() {
-      let savedName = localStorage.getItem("event_display_name");
+    function setAuthMsg(text, kind = ""){
+      authMsg.textContent = text || "";
+      authMsg.className = "authMsg" + (text ? " show" : "") + (kind ? " " + kind : "");
+    }
 
-      if (!savedName) {
-        savedName = "User-" + Math.random().toString(36).slice(2, 7).toUpperCase();
-        localStorage.setItem("event_display_name", savedName);
+    function showAuthGate(){
+      authGate.classList.remove("hidden");
+      authGate.setAttribute("aria-hidden", "false");
+      subline.textContent = "Sign in required";
+      userChip.textContent = "User: —";
+      profileName.textContent = "—";
+      profileEmail.textContent = "—";
+      setMsg("");
+      requestAnimationFrame(() => authEmail.focus());
+    }
+
+    function hideAuthGate(){
+      authGate.classList.add("hidden");
+      authGate.setAttribute("aria-hidden", "true");
+      setAuthMsg("");
+      authPassword.value = "";
+    }
+
+    function friendlyAuthError(err){
+      const code = String(err?.code || "");
+      if (code.includes("auth/invalid-credential")) return "Invalid email or password.";
+      if (code.includes("auth/invalid-email")) return "That email address doesn’t look valid.";
+      if (code.includes("auth/network-request-failed")) return "Network error. Check your connection and try again.";
+      if (code.includes("auth/too-many-requests")) return "Too many attempts. Try again in a moment.";
+      return err?.message || "Could not sign in. Please try again.";
+    }
+
+    function normalizeCode(value){
+      return String(value || "").trim().toUpperCase();
+    }
+
+    function escapeHtml(value){
+      return String(value ?? "").replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+      })[m]);
+    }
+
+    function extractCodes(eventData){
+      if (!eventData) return [];
+
+      if (Array.isArray(eventData.codes)) {
+        return eventData.codes.map(normalizeCode).filter(Boolean);
       }
 
-      return savedName;
+      if (eventData.codes && typeof eventData.codes === "object") {
+        return Object.entries(eventData.codes)
+          .filter(([, value]) => value !== false && value != null)
+          .map(([key, value]) => {
+            if (typeof value === "string") return normalizeCode(value);
+            if (typeof value === "object" && value?.code) return normalizeCode(value.code);
+            return normalizeCode(key);
+          })
+          .filter(Boolean);
+      }
+
+      if (eventData.allowedCodes && typeof eventData.allowedCodes === "object") {
+        return Object.keys(eventData.allowedCodes).map(normalizeCode).filter(Boolean);
+      }
+
+      return [];
     }
 
-    async function ensureSignedIn() {
-      if (auth.currentUser) return auth.currentUser;
+    function mapEventsFromSnapshot(data){
+      if (!data || typeof data !== "object") return [];
 
-      await signInAnonymously(auth);
+      return Object.entries(data)
+        .map(([id, value]) => {
+          const codes = extractCodes(value);
+          const page = value.joinPage || value.page || value.eventPage || "";
+          const name = value.name || value.title || value.eventName || id;
 
-      return new Promise((resolve) => {
-        const unsub = onAuthStateChanged(auth, (user) => {
-          if (user) {
-            unsub();
-            resolve(user);
-          }
-        });
+          return {
+            id,
+            name,
+            page,
+            active: value.active !== false,
+            codes,
+            raw: value
+          };
+        })
+        .filter(event => event.active)
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    function populateEvents(){
+      eventSelect.innerHTML = "";
+
+      if (!liveEvents.length) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "No live events available";
+        eventSelect.appendChild(option);
+        selectedEventPage.textContent = "—";
+        return;
+      }
+
+      liveEvents.forEach((event) => {
+        const option = document.createElement("option");
+        option.value = event.id;
+        option.textContent = event.name;
+        eventSelect.appendChild(option);
+      });
+
+      updateSelectedEventPage();
+    }
+
+    function getSelectedEvent(){
+      return liveEvents.find(e => e.id === eventSelect.value) || liveEvents[0] || null;
+    }
+
+    function updateSelectedEventPage(){
+      const event = getSelectedEvent();
+      selectedEventPage.textContent = event?.page || "—";
+    }
+
+    function unlockPage(user){
+      hideAuthGate();
+
+      const displayName = user.displayName?.trim() || user.email || "Signed in user";
+
+      userChip.textContent = `User: ${displayName}`;
+      subline.textContent = "Signed in";
+      profileName.textContent = displayName;
+      profileEmail.textContent = user.email || "—";
+
+      setMsg("Signed in. Pick an event and enter your code.", "ok");
+    }
+
+    function listenForEvents(){
+      const eventsRef = ref(db, "events");
+
+      onValue(eventsRef, (snapshot) => {
+        liveEvents = mapEventsFromSnapshot(snapshot.val());
+        populateEvents();
+
+        if (liveEvents.length) {
+          setMsg("Live events loaded.", "ok");
+        } else {
+          setMsg("No active events were found in the database.", "error");
+        }
+      }, (error) => {
+        console.error(error);
+        liveEvents = [];
+        populateEvents();
+        setMsg("Could not load events from Firebase.", "error");
       });
     }
 
-    async function loadLiveEvents() {
-      setStatus("Loading live events...");
+    async function recordJoin(event, code, user){
+      const joinPath = `events/${event.id}/joins/${user.uid}`;
+      await set(ref(db, joinPath), {
+        uid: user.uid,
+        email: user.email || "",
+        name: user.displayName || "",
+        code: normalizeCode(code),
+        joinedAt: serverTimestamp()
+      });
+    }
+
+    async function tryJoinEvent(){
+      const user = auth.currentUser;
+      if (!user) {
+        showAuthGate();
+        setMsg("You need to sign in first.", "error");
+        return;
+      }
+
+      const event = getSelectedEvent();
+      if (!event) {
+        setMsg("No event is available.", "error");
+        return;
+      }
+
+      const enteredCode = normalizeCode(codeInput.value);
+      if (!enteredCode) {
+        setMsg("Enter your code first.", "error");
+        codeInput.focus();
+        return;
+      }
+
+      joinBtn.disabled = true;
 
       try {
-        const eventsRef = collection(db, "events");
-
-        // Assumes each event doc has:
-        // name: string
-        // live: boolean
-        // pageUrl: string   (example: "verifications.html")
-        // validCodes: array (example: ["ABC123", "VIP777"])
-        const q = query(eventsRef, where("live", "==", true));
-        const snap = await getDocs(q);
-
-        liveEvents = [];
-        eventSelect.innerHTML = "";
-
-        if (snap.empty) {
-          eventSelect.innerHTML = '<option value="">No live events</option>';
-          setStatus("There are no live events right now.");
+        const eventSnap = await get(child(ref(db), `events/${event.id}`));
+        if (!eventSnap.exists()) {
+          setMsg("That event no longer exists.", "error");
           return;
         }
 
-        snap.forEach((docSnap) => {
-          const data = docSnap.data();
-          liveEvents.push({
-            id: docSnap.id,
-            name: data.name || "Untitled Event",
-            pageUrl: data.pageUrl || "",
-            validCodes: Array.isArray(data.validCodes) ? data.validCodes : []
-          });
-        });
+        const freshEvent = {
+          ...event,
+          raw: eventSnap.val(),
+          codes: extractCodes(eventSnap.val()),
+          page: eventSnap.val().joinPage || eventSnap.val().page || eventSnap.val().eventPage || ""
+        };
 
-        eventSelect.innerHTML = '<option value="">Select an event</option>';
-
-        for (const event of liveEvents) {
-          const option = document.createElement("option");
-          option.value = event.id;
-          option.textContent = event.name;
-          eventSelect.appendChild(option);
+        if (!freshEvent.codes.includes(enteredCode)) {
+          setMsg("That code is not valid for the selected event.", "error");
+          return;
         }
 
-        setStatus("Live events loaded.", "success");
+        await recordJoin(freshEvent, enteredCode, user);
+
+        if (!freshEvent.page) {
+          setMsg("Code accepted, but this event does not have a page set yet.", "error");
+          return;
+        }
+
+        setMsg(`Code accepted. Sending you to ${freshEvent.page}...`, "ok");
+        setTimeout(() => {
+          window.location.href = freshEvent.page;
+        }, 500);
       } catch (error) {
         console.error(error);
-        eventSelect.innerHTML = '<option value="">Could not load events</option>';
-        setStatus("Failed to load live events.", "error");
+        setMsg("Something went wrong while joining the event.", "error");
+      } finally {
+        joinBtn.disabled = false;
       }
     }
 
-    function findSelectedEvent() {
-      return liveEvents.find((event) => event.id === eventSelect.value) || null;
-    }
-
-    function normalizeCode(code) {
-      return String(code || "").trim().toUpperCase();
-    }
-
-    async function joinEvent() {
-      const selectedEvent = findSelectedEvent();
-      const enteredCode = normalizeCode(ticketCodeInput.value);
-
-      if (!selectedEvent) {
-        setStatus("Please select an event.", "error");
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        showAuthGate();
         return;
       }
 
-      if (!enteredCode) {
-        setStatus("Please enter your ticket code.", "error");
+      unlockPage(user);
+    });
+
+    authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setAuthMsg("");
+
+      if (!authForm.checkValidity()) {
+        authForm.reportValidity();
         return;
       }
 
-      const validCodes = selectedEvent.validCodes.map(normalizeCode);
-      const isValid = validCodes.includes(enteredCode);
+      authSubmitBtn.disabled = true;
 
-      if (!isValid) {
-        setStatus("That code is not valid for the selected event.", "error");
-        return;
-      }
-
-      if (!selectedEvent.pageUrl) {
-        setStatus("This event does not have a page set yet.", "error");
-        return;
-      }
-
-      setStatus("Code accepted. Redirecting...", "success");
-
-      // Optional: save last joined event/code locally
-      localStorage.setItem("last_event_id", selectedEvent.id);
-      localStorage.setItem("last_event_code", enteredCode);
-
-      // Sends user to the event page with event ID and code in the URL
-      window.location.href =
-        `${selectedEvent.pageUrl}?event=${encodeURIComponent(selectedEvent.id)}&code=${encodeURIComponent(enteredCode)}`;
-    }
-
-    joinBtn.addEventListener("click", joinEvent);
-
-    ticketCodeInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        joinEvent();
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          authEmail.value.trim(),
+          authPassword.value
+        );
+        setAuthMsg("Signed in.", "ok");
+      } catch (err) {
+        setAuthMsg(friendlyAuthError(err), "error");
+      } finally {
+        authSubmitBtn.disabled = false;
       }
     });
 
-    (async function init() {
+    logoutBtn.addEventListener("click", async () => {
       try {
-        const displayName = getDisplayName();
-        userNameEl.textContent = displayName;
+        await signOut(auth);
+      } catch (_) {
+      } finally {
+        authEmail.value = "";
+        authPassword.value = "";
+        codeInput.value = "";
+        showAuthGate();
+      }
+    });
 
-        await ensureSignedIn();
-        await loadLiveEvents();
+    refreshBtn.addEventListener("click", async () => {
+      setMsg("Refreshing events...", "ok");
+      try {
+        const snapshot = await get(ref(db, "events"));
+        liveEvents = mapEventsFromSnapshot(snapshot.val());
+        populateEvents();
+
+        if (liveEvents.length) {
+          setMsg("Event list refreshed.", "ok");
+        } else {
+          setMsg("No active events were found in the database.", "error");
+        }
       } catch (error) {
         console.error(error);
-        setStatus("Could not start the page.", "error");
+        setMsg("Could not refresh events.", "error");
       }
-    })();
+    });
+
+    eventSelect.addEventListener("change", updateSelectedEventPage);
+    joinBtn.addEventListener("click", tryJoinEvent);
+
+    codeInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        tryJoinEvent();
+      }
+    });
+
+    listenForEvents();
   </script>
 </body>
 </html>
