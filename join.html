@@ -3,806 +3,348 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>uZone • Join Event</title>
-  <meta name="color-scheme" content="light" />
-
+  <title>Event Hub</title>
   <style>
     :root{
-      --bg: #f8f7ff;
-      --bg2: #fcfbff;
-      --ink: #111018;
-      --muted: rgba(17,16,24,.62);
-
-      --pink: #b00b55;
-      --purple: #6d28d9;
-      --blue: #8bd3ff;
-      --green: #58c99a;
-
-      --card: rgba(255,255,255,.88);
-      --border: rgba(17,16,24,.10);
-      --shadow: 0 18px 60px rgba(17,16,24,.08);
-
-      --radius: 20px;
-      --radius2: 16px;
-      --danger: #c6285d;
-      --success: #2f9e6f;
+      --bg:#0f172a;
+      --card:#111827;
+      --card2:#1f2937;
+      --text:#f9fafb;
+      --muted:#9ca3af;
+      --accent:#7c3aed;
+      --accent2:#a78bfa;
+      --border:rgba(255,255,255,.08);
+      --danger:#ef4444;
+      --success:#22c55e;
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ min-height:100%; }
-
+    *{box-sizing:border-box}
     body{
       margin:0;
-      color:var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background:
-        radial-gradient(1200px 700px at 10% -10%, rgba(139,211,255,.20), transparent 60%),
-        radial-gradient(1000px 600px at 100% 0%, rgba(176,11,85,.08), transparent 58%),
-        radial-gradient(1100px 700px at 50% 100%, rgba(109,40,217,.10), transparent 62%),
-        linear-gradient(180deg, #fbfaff 0%, #f8f7ff 45%, #fbfbff 100%);
-      background-attachment: fixed;
-    }
-
-    a{ color:inherit; text-decoration:none; }
-    button, input, select{ font:inherit; }
-
-    header{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(14px);
-      background: rgba(255,255,255,.72);
-      border-bottom: 1px solid rgba(17,16,24,.08);
-    }
-
-    .topbar{
-      width: min(1000px, 92vw);
-      margin: 0 auto;
-      padding: 12px 0;
+      min-height:100vh;
+      font-family:Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,#0b1120,#111827);
       display:grid;
-      grid-template-columns: 1fr auto;
-      align-items:center;
-      gap: 14px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .brand img{
-      width:36px;
-      height:36px;
-      border-radius:10px;
-      border:1px solid rgba(17,16,24,.08);
-      background: rgba(255,255,255,.6);
-      object-fit: cover;
-    }
-
-    .brandText{
-      display:grid;
-      gap:2px;
-      min-width:0;
-    }
-
-    .brandText b{
-      font-size:14px;
-      letter-spacing:.2px;
-    }
-
-    .brandText span{
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .topActions{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .chip{
-      padding:8px 10px;
-      border-radius:999px;
-      border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.84);
-      font-size:12px;
-      font-weight:900;
-      color: rgba(17,16,24,.78);
-      box-shadow: 0 10px 24px rgba(17,16,24,.04);
-      max-width: min(320px, 70vw);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(17,16,24,.12);
-      background: rgba(255,255,255,.84);
-      cursor:pointer;
-      font-weight:950;
-      font-size:13px;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease, opacity .12s ease;
-      white-space:nowrap;
-    }
-
-    .btn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(176,11,85,.25);
-      box-shadow: 0 14px 38px rgba(176,11,85,.08);
-    }
-
-    .btn.primary{
-      border-color: rgba(176,11,85,.28);
-      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
-    }
-
-    .btn.danger{
-      border-color: rgba(176,11,85,.22);
-      background: rgba(176,11,85,.08);
-      color: var(--danger);
-    }
-
-    main{
-      width: min(1000px, 92vw);
-      margin: 22px auto 44px auto;
-      display:grid;
-      gap:18px;
-    }
-
-    .hero{
-      border-radius: var(--radius);
-      overflow:hidden;
-      border: 1px solid rgba(255,255,255,.48);
-      background:
-        radial-gradient(650px 260px at 10% 35%, rgba(139,211,255,.34), transparent 60%),
-        radial-gradient(700px 280px at 65% 10%, rgba(109,40,217,.14), transparent 55%),
-        radial-gradient(620px 240px at 95% 75%, rgba(176,11,85,.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));
-      box-shadow: 0 22px 70px rgba(17,16,24,.08);
-      padding:18px;
-      backdrop-filter: blur(12px);
-    }
-
-    .hero h1{
-      margin:0;
-      font-size:26px;
-      letter-spacing:.2px;
-    }
-
-    .hero p{
-      margin:10px 0 0 0;
-      color: rgba(17,16,24,.70);
-      font-size:14px;
-      line-height:1.5;
-      max-width: 72ch;
+      place-items:center;
+      padding:24px;
     }
 
     .card{
-      border:1px solid rgba(255,255,255,.45);
-      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      backdrop-filter: blur(10px);
+      width:100%;
+      max-width:520px;
+      background:linear-gradient(180deg,var(--card),var(--card2));
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:28px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
     }
 
-    .cardInner{
-      padding:18px;
-    }
-
-    .h1{
-      margin:0;
-      font-size:18px;
-      letter-spacing:.2px;
+    h1{
+      margin:0 0 8px 0;
+      font-size:28px;
     }
 
     .sub{
-      color: var(--muted);
-      font-size:13px;
-      line-height:1.35;
-      margin-top:6px;
+      margin:0 0 24px 0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
     }
 
-    .grid{
-      display:grid;
-      gap:14px;
-      grid-template-columns: 1fr 1fr;
-      margin-top:16px;
+    .user-box{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px 16px;
+      margin-bottom:18px;
+    }
+
+    .label{
+      display:block;
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    .value{
+      font-size:18px;
+      font-weight:700;
     }
 
     .field{
-      display:grid;
-      gap:8px;
+      margin-bottom:16px;
     }
 
-    .field label{
-      font-size:13px;
-      font-weight:800;
-      color: rgba(17,16,24,.78);
-    }
-
-    .input, .select{
+    select,
+    input{
       width:100%;
-      padding:13px 14px;
-      border-radius:14px;
-      border:1px solid rgba(17,16,24,.12);
-      background: rgba(255,255,255,.90);
-      color: var(--ink);
+      padding:14px 14px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
       outline:none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+      font-size:15px;
     }
 
-    .input:focus, .select:focus{
-      border-color: rgba(176,11,85,.40);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
+    select:focus,
+    input:focus{
+      border-color:var(--accent2);
+      box-shadow:0 0 0 3px rgba(167,139,250,.15);
     }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:16px;
-    }
-
-    .msg{
-      margin-top:14px;
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(17,16,24,.08);
-      background: rgba(255,255,255,.72);
-      color: rgba(17,16,24,.74);
-      font-size:13px;
-      line-height:1.45;
-      display:none;
-      white-space:pre-line;
-    }
-
-    .msg.ok{
-      background: rgba(88,201,154,.14);
-      border-color: rgba(88,201,154,.22);
-      color: rgba(17,16,24,.86);
-    }
-
-    .msg.error{
-      background: rgba(176,11,85,.08);
-      border-color: rgba(176,11,85,.18);
-      color: #8c184a;
-    }
-
-    .infoGrid{
-      display:grid;
-      gap:14px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      margin-top:14px;
-    }
-
-    .miniCard{
-      border:1px solid rgba(17,16,24,.08);
-      background: rgba(255,255,255,.76);
-      border-radius:16px;
+    button{
+      width:100%;
+      border:none;
+      border-radius:12px;
       padding:14px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:white;
+      font-weight:700;
+      font-size:15px;
+      cursor:pointer;
     }
 
-    .miniCard b{
-      display:block;
-      font-size:13px;
-      margin-bottom:6px;
+    button:hover{
+      opacity:.95;
     }
 
-    .miniCard span{
-      color: rgba(17,16,24,.68);
-      font-size:13px;
-      line-height:1.45;
-      word-break: break-word;
-    }
-
-    .authGate{
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      display: grid;
-      place-items: center;
-      padding: 20px;
-      background: rgba(248,247,255,.72);
-      backdrop-filter: blur(16px);
-    }
-
-    .authGate.hidden{
-      display:none;
-    }
-
-    .authCard{
-      width:min(440px, 92vw);
-      border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.94);
-      border-radius: 22px;
-      box-shadow: 0 30px 80px rgba(17,16,24,.14);
-      padding:18px;
-      display:grid;
-      gap:12px;
-    }
-
-    .authCard h2{
-      margin:0;
-      font-size:22px;
-      letter-spacing:.2px;
-    }
-
-    .authCard p{
-      margin:0;
-      color: rgba(17,16,24,.68);
-      font-size:13px;
-      line-height:1.45;
-    }
-
-    .authForm{
-      display:grid;
-      gap:12px;
-      margin-top:4px;
-    }
-
-    .authForm label{
-      display:grid;
-      gap:6px;
-      font-size:13px;
-      color: rgba(17,16,24,.78);
-    }
-
-    .authForm input{
-      width:100%;
-      padding:12px 12px;
-      border-radius:12px;
-      border:1px solid rgba(17,16,24,.12);
-      background: rgba(255,255,255,.90);
-      color: var(--ink);
-      outline:none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    .authForm input:focus{
-      border-color: rgba(176,11,85,.40);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.12);
-    }
-
-    .authBtn{
-      margin-top: 4px;
+    .status{
+      margin-top:16px;
       padding:12px 14px;
       border-radius:12px;
-      border:1px solid rgba(176,11,85,.28);
-      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
-      color: rgba(17,16,24,.92);
-      font-weight:1000;
-      letter-spacing:.2px;
-      cursor:pointer;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, opacity .12s ease;
-      box-shadow: 0 18px 50px rgba(17,16,24,.08);
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:14px;
+      min-height:46px;
     }
 
-    .authBtn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(176,11,85,.22);
-      box-shadow: 0 22px 64px rgba(17,16,24,.10);
+    .status.success{
+      color:#dcfce7;
+      border-color:rgba(34,197,94,.35);
+      background:rgba(34,197,94,.10);
     }
 
-    .authBtn:disabled{
-      opacity:.65;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .authMsg{
-      display:none;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.78);
-      color: rgba(17,16,24,.82);
-      white-space:pre-line;
-      font-size:13px;
-      line-height:1.4;
-    }
-
-    .authMsg.show{
-      display:block;
-    }
-
-    .authMsg.error{
-      border-color: rgba(176,11,85,.28);
-      background: rgba(176,11,85,.06);
-      color: #8c184a;
-    }
-
-    .authMsg.ok{
-      border-color: rgba(109,40,217,.22);
-      background: rgba(109,40,217,.06);
-    }
-
-    code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 12px;
-      background: rgba(17,16,24,.06);
-      padding: 2px 6px;
-      border-radius: 8px;
-      border: 1px solid rgba(17,16,24,.06);
-    }
-
-    @media (max-width: 760px){
-      .topbar{
-        grid-template-columns: 1fr;
-      }
-
-      .topActions{
-        justify-content:flex-start;
-      }
-
-      .chip{
-        max-width: 100%;
-      }
-
-      .grid{
-        grid-template-columns: 1fr;
-      }
+    .status.error{
+      color:#fee2e2;
+      border-color:rgba(239,68,68,.35);
+      background:rgba(239,68,68,.10);
     }
   </style>
 </head>
 <body>
-  <header>
-    <div class="topbar">
-      <div class="brand">
-        <img src="logo.png" alt="uZone logo" />
-        <div class="brandText">
-          <b>uZone</b>
-          <span id="subline">Checking sign-in…</span>
-        </div>
-      </div>
+  <div class="card">
+    <h1>Event Hub</h1>
+    <p class="sub">Pick a live event, enter your ticket code, and go straight to that event page.</p>
 
-      <div class="topActions">
-        <span class="chip" id="userChip">User: —</span>
-        <button class="btn" id="refreshBtn" type="button">Refresh</button>
-        <button class="btn danger" id="logoutBtn" type="button">Log out</button>
-      </div>
+    <div class="user-box">
+      <span class="label">Signed in as</span>
+      <div class="value" id="userName">Loading...</div>
     </div>
-  </header>
 
-  <main>
-    <section class="hero">
-      <h1>Join an event</h1>
-      <p>
-        Sign in with any uZone account, pick an event, enter your ticket code, and join.
-        There is no sign-in allowlist on this page. Event access is controlled by the code for each event.
-      </p>
-    </section>
-
-    <section class="card">
-      <div class="cardInner">
-        <h2 class="h1">Event access</h2>
-        <div class="sub">Choose a live event and enter the code you were given.</div>
-
-        <div class="grid">
-          <div class="field">
-            <label for="eventSelect">Live event</label>
-            <select id="eventSelect" class="select"></select>
-          </div>
-
-          <div class="field">
-            <label for="codeInput">Ticket code</label>
-            <input
-              id="codeInput"
-              class="input"
-              type="text"
-              placeholder="Enter your code"
-              autocomplete="off"
-              spellcheck="false"
-            />
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn primary" id="joinBtn" type="button">Join event</button>
-        </div>
-
-        <div class="msg" id="msgBox" aria-live="polite"></div>
-
-        <div class="infoGrid">
-          <div class="miniCard">
-            <b>Signed in as</b>
-            <span id="profileName">—</span>
-          </div>
-          <div class="miniCard">
-            <b>Email</b>
-            <span id="profileEmail">—</span>
-          </div>
-          <div class="miniCard">
-            <b>Selected event page</b>
-            <span id="selectedEventPage">—</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="cardInner">
-        <h2 class="h1">Edit your events</h2>
-        <div class="sub">
-          Change the <code>EVENTS</code> array in the script. Each event has a name, page, and valid codes.
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div class="authGate hidden" id="authGate" aria-hidden="true">
-    <div class="authCard" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <h2 id="authTitle">Sign in to continue</h2>
-      <p>Use the same account you use on uZone. Signing in here does not redirect to another page.</p>
-
-      <form class="authForm" id="authForm" novalidate>
-        <label>
-          Email
-          <input id="authEmail" type="email" autocomplete="email" placeholder="you@email.com" required />
-        </label>
-
-        <label>
-          Password
-          <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required />
-        </label>
-
-        <button class="authBtn" id="authSubmitBtn" type="submit">Sign in</button>
-        <div class="authMsg" id="authMsg" aria-live="polite"></div>
-      </form>
+    <div class="field">
+      <label class="label" for="eventSelect">Live event</label>
+      <select id="eventSelect">
+        <option value="">Loading events...</option>
+      </select>
     </div>
+
+    <div class="field">
+      <label class="label" for="ticketCode">Ticket code</label>
+      <input id="ticketCode" type="text" placeholder="Enter your code" maxlength="40" />
+    </div>
+
+    <button id="joinBtn" type="button">Join Event</button>
+
+    <div class="status" id="statusBox">Waiting for event list...</div>
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
       getAuth,
-      onAuthStateChanged,
-      signOut,
-      signInWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      where,
+      limit
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
-      authDomain: "uzone-6148d.firebaseapp.com",
-      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
-      projectId: "uzone-6148d",
-      storageBucket: "uzone-6148d.firebasestorage.app",
-      messagingSenderId: "88783701381",
-      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
-      measurementId: "G-HKL5246YMC"
+    const FIREBASE_CONFIG = {
+      apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
+      authDomain: "PASTE_YOUR_AUTH_DOMAIN",
+      projectId: "PASTE_YOUR_PROJECT_ID",
+      storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+      messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+      appId: "PASTE_YOUR_APP_ID"
     };
 
-    // EDIT THESE EVENTS / CODES
-    const EVENTS = [
-      {
-        id: "verifications",
-        name: "Verifications Event",
-        page: "verifications.html",
-        codes: ["VERIFY2026", "STAFFPASS1"]
-      },
-      {
-        id: "hideandseek",
-        name: "Hide and Seek",
-        page: "hosthideandseek.html",
-        codes: ["HIDE2026", "SEEK2026"]
-      }
-    ];
-
-    const app = initializeApp(firebaseConfig);
-
-    try {
-      if (await analyticsSupported()) getAnalytics(app);
-    } catch (_) {}
-
+    const app = initializeApp(FIREBASE_CONFIG);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    const subline = document.getElementById("subline");
-    const userChip = document.getElementById("userChip");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
+    const userNameEl = document.getElementById("userName");
     const eventSelect = document.getElementById("eventSelect");
-    const codeInput = document.getElementById("codeInput");
+    const ticketCodeInput = document.getElementById("ticketCode");
     const joinBtn = document.getElementById("joinBtn");
+    const statusBox = document.getElementById("statusBox");
 
-    const msgBox = document.getElementById("msgBox");
-    const profileName = document.getElementById("profileName");
-    const profileEmail = document.getElementById("profileEmail");
-    const selectedEventPage = document.getElementById("selectedEventPage");
+    let liveEvents = [];
 
-    const authGate = document.getElementById("authGate");
-    const authForm = document.getElementById("authForm");
-    const authEmail = document.getElementById("authEmail");
-    const authPassword = document.getElementById("authPassword");
-    const authSubmitBtn = document.getElementById("authSubmitBtn");
-    const authMsg = document.getElementById("authMsg");
-
-    function setMsg(text, kind = ""){
-      msgBox.style.display = text ? "block" : "none";
-      msgBox.textContent = text || "";
-      msgBox.className = "msg" + (kind ? " " + kind : "");
+    function setStatus(message, type = "") {
+      statusBox.textContent = message;
+      statusBox.className = "status" + (type ? " " + type : "");
     }
 
-    function setAuthMsg(text, kind = ""){
-      authMsg.textContent = text || "";
-      authMsg.className = "authMsg" + (text ? " show" : "") + (kind ? " " + kind : "");
+    function getDisplayName() {
+      let savedName = localStorage.getItem("event_display_name");
+
+      if (!savedName) {
+        savedName = "User-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+        localStorage.setItem("event_display_name", savedName);
+      }
+
+      return savedName;
     }
 
-    function showAuthGate(){
-      authGate.classList.remove("hidden");
-      authGate.setAttribute("aria-hidden", "false");
-      subline.textContent = "Sign in required";
-      userChip.textContent = "User: —";
-      profileName.textContent = "—";
-      profileEmail.textContent = "—";
-      setMsg("");
-      requestAnimationFrame(() => authEmail.focus());
-    }
+    async function ensureSignedIn() {
+      if (auth.currentUser) return auth.currentUser;
 
-    function hideAuthGate(){
-      authGate.classList.add("hidden");
-      authGate.setAttribute("aria-hidden", "true");
-      setAuthMsg("");
-      authPassword.value = "";
-    }
+      await signInAnonymously(auth);
 
-    function friendlyAuthError(err){
-      const code = String(err?.code || "");
-      if (code.includes("auth/invalid-credential")) return "Invalid email or password.";
-      if (code.includes("auth/invalid-email")) return "That email address doesn’t look valid.";
-      if (code.includes("auth/network-request-failed")) return "Network error. Check your connection and try again.";
-      if (code.includes("auth/too-many-requests")) return "Too many attempts. Try again in a moment.";
-      return err?.message || "Could not sign in. Please try again.";
-    }
-
-    function normalizeCode(value){
-      return String(value || "").trim().toUpperCase();
-    }
-
-    function populateEvents(){
-      eventSelect.innerHTML = "";
-
-      EVENTS.forEach((event) => {
-        const option = document.createElement("option");
-        option.value = event.id;
-        option.textContent = event.name;
-        eventSelect.appendChild(option);
+      return new Promise((resolve) => {
+        const unsub = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            unsub();
+            resolve(user);
+          }
+        });
       });
-
-      updateSelectedEventPage();
     }
 
-    function getSelectedEvent(){
-      return EVENTS.find(e => e.id === eventSelect.value) || EVENTS[0] || null;
-    }
-
-    function updateSelectedEventPage(){
-      const event = getSelectedEvent();
-      selectedEventPage.textContent = event?.page || "—";
-    }
-
-    function unlockPage(user){
-      hideAuthGate();
-
-      const displayName = user.displayName?.trim() || user.email || "Signed in user";
-
-      userChip.textContent = `User: ${displayName}`;
-      subline.textContent = "Signed in";
-      profileName.textContent = displayName;
-      profileEmail.textContent = user.email || "—";
-
-      populateEvents();
-      setMsg("Signed in. Enter your code to join an event.", "ok");
-    }
-
-    function tryJoinEvent(){
-      const user = auth.currentUser;
-      if (!user) {
-        showAuthGate();
-        setMsg("You need to sign in first.", "error");
-        return;
-      }
-
-      const event = getSelectedEvent();
-      if (!event) {
-        setMsg("No event is available.", "error");
-        return;
-      }
-
-      const entered = normalizeCode(codeInput.value);
-      if (!entered) {
-        setMsg("Enter a ticket code first.", "error");
-        codeInput.focus();
-        return;
-      }
-
-      const validCodes = (event.codes || []).map(normalizeCode);
-      if (!validCodes.includes(entered)) {
-        setMsg("That code is not valid for the selected event.", "error");
-        return;
-      }
-
-      setMsg(`Code accepted. Sending you to ${event.page}...`, "ok");
-      window.location.href = event.page;
-    }
-
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        showAuthGate();
-        return;
-      }
-
-      unlockPage(user);
-    });
-
-    authForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      setAuthMsg("");
-
-      if (!authForm.checkValidity()) {
-        authForm.reportValidity();
-        return;
-      }
-
-      authSubmitBtn.disabled = true;
+    async function loadLiveEvents() {
+      setStatus("Loading live events...");
 
       try {
-        await signInWithEmailAndPassword(
-          auth,
-          authEmail.value.trim(),
-          authPassword.value
-        );
-        setAuthMsg("Signed in.", "ok");
-      } catch (err) {
-        setAuthMsg(friendlyAuthError(err), "error");
-      } finally {
-        authSubmitBtn.disabled = false;
+        const eventsRef = collection(db, "events");
+
+        // Assumes each event doc has:
+        // name: string
+        // live: boolean
+        // pageUrl: string   (example: "verifications.html")
+        // validCodes: array (example: ["ABC123", "VIP777"])
+        const q = query(eventsRef, where("live", "==", true));
+        const snap = await getDocs(q);
+
+        liveEvents = [];
+        eventSelect.innerHTML = "";
+
+        if (snap.empty) {
+          eventSelect.innerHTML = '<option value="">No live events</option>';
+          setStatus("There are no live events right now.");
+          return;
+        }
+
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          liveEvents.push({
+            id: docSnap.id,
+            name: data.name || "Untitled Event",
+            pageUrl: data.pageUrl || "",
+            validCodes: Array.isArray(data.validCodes) ? data.validCodes : []
+          });
+        });
+
+        eventSelect.innerHTML = '<option value="">Select an event</option>';
+
+        for (const event of liveEvents) {
+          const option = document.createElement("option");
+          option.value = event.id;
+          option.textContent = event.name;
+          eventSelect.appendChild(option);
+        }
+
+        setStatus("Live events loaded.", "success");
+      } catch (error) {
+        console.error(error);
+        eventSelect.innerHTML = '<option value="">Could not load events</option>';
+        setStatus("Failed to load live events.", "error");
       }
-    });
+    }
 
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-      } catch (_) {
-      } finally {
-        authEmail.value = "";
-        authPassword.value = "";
-        codeInput.value = "";
-        showAuthGate();
+    function findSelectedEvent() {
+      return liveEvents.find((event) => event.id === eventSelect.value) || null;
+    }
+
+    function normalizeCode(code) {
+      return String(code || "").trim().toUpperCase();
+    }
+
+    async function joinEvent() {
+      const selectedEvent = findSelectedEvent();
+      const enteredCode = normalizeCode(ticketCodeInput.value);
+
+      if (!selectedEvent) {
+        setStatus("Please select an event.", "error");
+        return;
       }
-    });
 
-    refreshBtn.addEventListener("click", () => {
-      populateEvents();
-      setMsg("Event list refreshed.", "ok");
-    });
+      if (!enteredCode) {
+        setStatus("Please enter your ticket code.", "error");
+        return;
+      }
 
-    eventSelect.addEventListener("change", updateSelectedEventPage);
-    joinBtn.addEventListener("click", tryJoinEvent);
+      const validCodes = selectedEvent.validCodes.map(normalizeCode);
+      const isValid = validCodes.includes(enteredCode);
 
-    codeInput.addEventListener("keydown", (e) => {
+      if (!isValid) {
+        setStatus("That code is not valid for the selected event.", "error");
+        return;
+      }
+
+      if (!selectedEvent.pageUrl) {
+        setStatus("This event does not have a page set yet.", "error");
+        return;
+      }
+
+      setStatus("Code accepted. Redirecting...", "success");
+
+      // Optional: save last joined event/code locally
+      localStorage.setItem("last_event_id", selectedEvent.id);
+      localStorage.setItem("last_event_code", enteredCode);
+
+      // Sends user to the event page with event ID and code in the URL
+      window.location.href =
+        `${selectedEvent.pageUrl}?event=${encodeURIComponent(selectedEvent.id)}&code=${encodeURIComponent(enteredCode)}`;
+    }
+
+    joinBtn.addEventListener("click", joinEvent);
+
+    ticketCodeInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        e.preventDefault();
-        tryJoinEvent();
+        joinEvent();
       }
     });
 
-    populateEvents();
+    (async function init() {
+      try {
+        const displayName = getDisplayName();
+        userNameEl.textContent = displayName;
+
+        await ensureSignedIn();
+        await loadLiveEvents();
+      } catch (error) {
+        console.error(error);
+        setStatus("Could not start the page.", "error");
+      }
+    })();
   </script>
 </body>
 </html>
