@@ -4,349 +4,1247 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>uZone • Hider</title>
+
   <style>
     :root{
-      --bg:#f8f7ff; --bg2:#fcfbff; --ink:#111018; --muted:rgba(17,16,24,.62);
-      --pink:#b00b55; --purple:#6d28d9; --blue:#8bd3ff; --green:#58c99a;
-      --card:rgba(255,255,255,.88); --border:rgba(17,16,24,.10); --shadow:0 18px 60px rgba(17,16,24,.08);
-      --radius:20px; --radius2:16px; --danger:#c6285d; --success:#2f9e6f; --warn:#e89a1d;
+      --bg:#f8f7ff;
+      --bg2:#fcfbff;
+      --ink:#111018;
+      --muted:rgba(17,16,24,.62);
+
+      --pink:#b00b55;
+      --purple:#6d28d9;
+      --blue:#8bd3ff;
+      --green:#58c99a;
+
+      --card:rgba(255,255,255,.88);
+      --border:rgba(17,16,24,.10);
+      --shadow:0 18px 60px rgba(17,16,24,.08);
+
+      --radius:20px;
+      --radius2:16px;
+
+      --danger:#c6285d;
+      --success:#2f9e6f;
+      --warn:#e89a1d;
     }
-    *{box-sizing:border-box} html,body{height:100%} html{scroll-behavior:smooth}
-    body{margin:0;color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    html{ scroll-behavior:smooth; }
+
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background:
         radial-gradient(1200px 700px at 10% -10%, rgba(139,211,255,.20), transparent 60%),
         radial-gradient(1000px 600px at 100% 0%, rgba(176,11,85,.08), transparent 58%),
         radial-gradient(1100px 700px at 50% 100%, rgba(109,40,217,.10), transparent 62%),
         linear-gradient(180deg, #fbfaff 0%, #f8f7ff 45%, #fbfbff 100%);
-      background-attachment:fixed;}
-    a{color:inherit;text-decoration:none} button,input,textarea,select{font:inherit} img{max-width:100%;display:block}
-    header{position:sticky;top:0;z-index:60;backdrop-filter:blur(14px);background:rgba(255,255,255,.72);border-bottom:1px solid rgba(17,16,24,.08)}
-    .topbar{width:min(1120px,92vw);margin:0 auto;padding:12px 0;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px}
-    .brand{justify-self:start;display:flex;align-items:center;gap:10px;min-width:140px}
-    .brandMark{width:34px;height:34px;border-radius:10px;border:1px solid rgba(17,16,24,.08);background:linear-gradient(135deg, rgba(176,11,85,.18), rgba(109,40,217,.16), rgba(139,211,255,.22));display:grid;place-items:center;font-weight:1000}
-    .brand .btxt{line-height:1.05;display:grid;gap:2px} .brand .btxt b{font-size:14px;letter-spacing:.2px} .brand .btxt span{font-size:12px;color:var(--muted)}
-    .tabs{justify-self:center;display:flex;gap:8px;padding:6px;border-radius:999px;border:1px solid rgba(17,16,24,.10);background:rgba(255,255,255,.78);box-shadow:0 14px 40px rgba(17,16,24,.05);overflow:auto;max-width:min(700px,92vw)}
-    .tab{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:999px;border:1px solid transparent;color:rgba(17,16,24,.80);background:transparent;cursor:pointer;transition:.12s user-select:none;white-space:nowrap;font-weight:900;font-size:13px}
-    .tab:hover{transform:translateY(-1px);background:rgba(139,211,255,.18)} .tab.active{background:linear-gradient(135deg, rgba(176,11,85,.11), rgba(109,40,217,.08));border-color:rgba(176,11,85,.20);box-shadow:0 12px 30px rgba(176,11,85,.08)}
-    .tab .dot{width:8px;height:8px;border-radius:999px;background:rgba(17,16,24,.25)} .tab.active .dot{background:var(--pink);box-shadow:0 0 0 4px rgba(176,11,85,.14)}
-    .version{justify-self:end;text-align:right;display:grid;gap:2px;min-width:160px} .version b{font-size:12px;letter-spacing:.2px} .version span{font-size:12px;color:var(--muted);white-space:nowrap}
-    @media (max-width:760px){.topbar{grid-template-columns:1fr;gap:10px} .tabs{justify-self:stretch;max-width:100%} .version{justify-self:start;text-align:left;min-width:unset}}
-    main{width:min(1120px,92vw);margin:16px auto 44px auto;display:grid;gap:18px}
-    .banner,.card{border:1px solid rgba(255,255,255,.45);background:linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(10px)}
-    .banner{padding:16px;background:
+      background-attachment: fixed;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    button,input{ font:inherit; }
+    img{ max-width:100%; display:block; }
+
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      backdrop-filter: blur(14px);
+      background: rgba(255,255,255,.72);
+      border-bottom: 1px solid rgba(17,16,24,.08);
+    }
+
+    .topbar{
+      width: min(1120px, 92vw);
+      margin: 0 auto;
+      padding: 12px 0;
+      display:grid;
+      grid-template-columns: 1fr auto;
+      align-items:center;
+      gap: 14px;
+    }
+
+    .brand{
+      justify-self: start;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 140px;
+    }
+
+    .brand img{
+      width:34px;height:34px;
+      border-radius:10px;
+      border:1px solid rgba(17,16,24,.08);
+      background: rgba(255,255,255,.6);
+      object-fit: cover;
+    }
+
+    .brand .btxt{
+      line-height:1.05;
+      display:grid;
+      gap:2px;
+    }
+
+    .brand .btxt b{ font-size:14px; letter-spacing:.2px; }
+    .brand .btxt span{ font-size:12px; color:var(--muted); }
+
+    .version{
+      justify-self:end;
+      text-align:right;
+      display:grid;
+      gap:2px;
+      min-width: 160px;
+    }
+
+    .version b{
+      font-size: 12px;
+      letter-spacing:.2px;
+    }
+
+    .version span{
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 760px){
+      .topbar{
+        grid-template-columns: 1fr;
+        gap:10px;
+      }
+      .version{
+        justify-self: start;
+        text-align:left;
+        min-width: unset;
+      }
+      .brand .btxt span{
+        max-width: 70vw;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      }
+    }
+
+    main{
+      width: min(1120px, 92vw);
+      margin: 16px auto 44px auto;
+      display:grid;
+      gap: 18px;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1.3fr .9fr;
+      gap: 14px;
+      align-items:start;
+    }
+
+    @media (max-width: 980px){
+      .grid2{ grid-template-columns: 1fr; }
+    }
+
+    .stack{ display:grid; gap: 14px; }
+
+    .card{
+      border:1px solid rgba(255,255,255,.45);
+      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .cardInner{ padding: 16px; }
+
+    .hRow{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+
+    h1,h2,h3,h4,p{ margin:0; }
+
+    .h1{
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+
+    .sub{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      margin-top: 6px;
+    }
+
+    .banner{
+      position:relative;
+      border-radius: var(--radius);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.48);
+      background:
         radial-gradient(650px 260px at 10% 35%, rgba(139,211,255,.34), transparent 60%),
         radial-gradient(700px 280px at 65% 10%, rgba(109,40,217,.14), transparent 55%),
         radial-gradient(620px 240px at 95% 75%, rgba(176,11,85,.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));}
-    .bannerTop,.hRow,.statRow,.listRow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .cardInner{padding:16px} h1,h2,h3,h4,p{margin:0} .h1{font-size:18px;letter-spacing:.2px} .sub{color:var(--muted);font-size:13px;line-height:1.4;margin-top:6px}
-    .btn,.miniLink,.pillBtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:999px;border:1px solid rgba(17,16,24,.12);background:rgba(255,255,255,.84);cursor:pointer;font-weight:950;font-size:13px;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background .12s ease;user-select:none;white-space:nowrap}
-    .btn:hover,.miniLink:hover,.pillBtn:hover{transform:translateY(-1px);border-color:rgba(176,11,85,.25);box-shadow:0 14px 38px rgba(176,11,85,.08)}
-    .primary{border-color:rgba(176,11,85,.28)!important;background:linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10))!important}
-    .danger{border-color:rgba(176,11,85,.24)!important;color:var(--danger)!important;background:rgba(176,11,85,.08)!important}
-    .success{border-color:rgba(88,201,154,.24)!important;background:rgba(88,201,154,.14)!important;color:var(--success)!important}
-    .warn{border-color:rgba(232,154,29,.22)!important;background:rgba(232,154,29,.12)!important;color:#9b6200!important}
-    .grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:start} .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px} @media (max-width:980px){.grid2,.grid3{grid-template-columns:1fr}}
-    .stack{display:grid;gap:14px}
-    .statCard{padding:14px;border-radius:16px;border:1px solid rgba(17,16,24,.10);background:rgba(255,255,255,.72);display:grid;gap:5px;min-height:100px}
-    .statCard b{font-size:12px;color:rgba(17,16,24,.58);text-transform:uppercase;letter-spacing:.2px} .statCard .big{font-size:30px;font-weight:1000;line-height:1}
-    .mapBox{border-top:1px solid rgba(17,16,24,.08);background:rgba(255,255,255,.62);min-height:460px} #map{width:100%;height:460px} @media (max-width:520px){#map{height:360px} .mapBox{min-height:360px}}
-    .logBox,.chatBox{max-height:240px;overflow:auto;display:grid;gap:10px;padding-right:4px}
-    .logItem,.chatItem,.playerItem{padding:12px;border-radius:16px;border:1px solid rgba(17,16,24,.08);background:rgba(255,255,255,.74);font-size:13px;line-height:1.45}
-    .logItem b,.chatItem b,.playerItem b{display:block;font-size:12px;margin-bottom:4px;color:rgba(17,16,24,.6);text-transform:uppercase;letter-spacing:.2px}
-    .console{border-radius:16px;border:1px solid rgba(17,16,24,.10);background:rgba(17,16,24,.94);color:#ecedf7;padding:14px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;min-height:180px;max-height:260px;overflow:auto}
-    .formGrid,.field{display:grid;gap:8px} .input,.textarea,select{width:100%;border:1px solid rgba(17,16,24,.10);background:rgba(255,255,255,.84);border-radius:14px;padding:12px 13px;color:var(--ink);outline:none;transition:border-color .12s ease,box-shadow .12s ease} .textarea{resize:vertical;min-height:96px}
-    .input:focus,.textarea:focus,select:focus{border-color:rgba(176,11,85,.30);box-shadow:0 0 0 4px rgba(176,11,85,.08)}
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px} .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px} @media (max-width:720px){.row2,.row3{grid-template-columns:1fr}}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;font-size:12px;font-weight:900;background:rgba(17,16,24,.06);border:1px solid rgba(17,16,24,.10);color:rgba(17,16,24,.78)}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;border:1px solid rgba(17,16,24,.10);background:rgba(255,255,255,.72);font-size:12px;font-weight:900;color:rgba(17,16,24,.78)}
-    .dotSm{width:8px;height:8px;border-radius:999px;background:var(--pink);box-shadow:0 0 0 4px rgba(176,11,85,.14)}
-    .players{display:grid;gap:10px} .muted{color:var(--muted)} .small{font-size:12px} .center{text-align:center} .hidden{display:none!important}
-    .qrWrap{display:grid;place-items:center;padding:12px;border-radius:16px;border:1px solid rgba(17,16,24,.10);background:rgba(255,255,255,.84)}
-    .footerGap{height:8px}
+        linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));
+      box-shadow: 0 22px 70px rgba(17,16,24,.08);
+      padding: 16px;
+      backdrop-filter: blur(12px);
+    }
+
+    .bannerTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+    }
+
+    .banner h2{
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+
+    .banner p{
+      margin:6px 0 0 0;
+      color: rgba(17,16,24,.70);
+      font-size: 13px;
+      line-height:1.4;
+      max-width: 60ch;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,16,24,.12);
+      background: rgba(255,255,255,.84);
+      cursor:pointer;
+      font-weight: 950;
+      font-size: 13px;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .btn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(176,11,85,.25);
+      box-shadow: 0 14px 38px rgba(176,11,85,.08);
+    }
+
+    .btn.primary{
+      border-color: rgba(176,11,85,.28);
+      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+    }
+
+    .btn.warn{
+      border-color: rgba(232,154,29,.22);
+      background: rgba(232,154,29,.12);
+      color: #9b6200;
+    }
+
+    .btn.success{
+      border-color: rgba(88,201,154,.24);
+      background: rgba(88,201,154,.14);
+      color: var(--success);
+    }
+
+    .btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.30);
+      background: rgba(17,16,24,.46);
+      color: rgba(255,255,255,.95);
+      font-size: 12px;
+      font-weight: 900;
+      backdrop-filter: blur(8px);
+      max-width: 100%;
+    }
+
+    .badge .dot{
+      width:8px; height:8px; border-radius:999px;
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(139,211,255,.18);
+      flex: 0 0 auto;
+    }
+
+    .badge.pink .dot{
+      background: var(--pink);
+      box-shadow: 0 0 0 4px rgba(176,11,85,.18);
+    }
+
+    .mapBox{
+      border-top:1px solid rgba(17,16,24,.08);
+      background: rgba(255,255,255,.62);
+      min-height: 420px;
+    }
+
+    #map{
+      width:100%;
+      height:420px;
+    }
+
+    @media (max-width: 520px){
+      #map{ height: 360px; }
+      .mapBox{ min-height: 360px; }
+    }
+
+    .pinWrap{ position:relative; width:1px; height:1px; overflow: visible; }
+    .glow-pin{
+      position:absolute;
+      left:0; top:0;
+      width:16px; height:16px;
+      border-radius:999px;
+      background: var(--pink);
+      box-shadow:
+        0 0 10px var(--pink),
+        0 0 22px rgba(176,11,85,.55),
+        0 0 46px rgba(176,11,85,.30);
+      transform: translate(-50%, -50%);
+    }
+    .glow-pulse{
+      position:absolute;
+      left:0; top:0;
+      width:46px; height:46px;
+      border-radius:999px;
+      border:2px solid rgba(176,11,85,.30);
+      transform: translate(-50%, -50%);
+      animation: pulse 1.6s ease-out infinite;
+      pointer-events:none;
+    }
+
+    .glow-pin.me{
+      background: var(--green);
+      box-shadow:
+        0 0 10px var(--green),
+        0 0 22px rgba(88,201,154,.50),
+        0 0 46px rgba(88,201,154,.28);
+    }
+
+    .glow-pulse.me{
+      border-color: rgba(88,201,154,.30);
+    }
+
+    @keyframes pulse{
+      0%{opacity:.85; transform: translate(-50%,-50%) scale(.35);}
+      100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
+    }
+
+    .gm-style-iw{ padding:0 !important; }
+    .gm-style-iw-d{ overflow:hidden !important; }
+    .gm-style-iw-c{
+      max-width: 88vw !important;
+      border-radius: 16px !important;
+    }
+    .gm-ui-hover-effect{ display:none !important; }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3,1fr);
+      gap:12px;
+    }
+
+    @media (max-width: 980px){
+      .grid3{ grid-template-columns:1fr; }
+    }
+
+    .statCard{
+      padding:14px;
+      border-radius:16px;
+      border:1px solid rgba(17,16,24,.10);
+      background:rgba(255,255,255,.72);
+      display:grid;
+      gap:5px;
+      min-height:100px;
+    }
+
+    .statCard b{
+      font-size:12px;
+      color:rgba(17,16,24,.58);
+      text-transform:uppercase;
+      letter-spacing:.2px;
+    }
+
+    .statCard .big{
+      font-size:30px;
+      font-weight:1000;
+      line-height:1;
+    }
+
+    .console{
+      border-radius:16px;
+      border:1px solid rgba(17,16,24,.10);
+      background:rgba(17,16,24,.94);
+      color:#ecedf7;
+      padding:14px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;
+      line-height:1.5;
+      min-height:180px;
+      max-height:260px;
+      overflow:auto;
+      white-space:pre-wrap;
+    }
+
+    .playerList{
+      display:grid;
+      gap:10px;
+    }
+
+    .playerItem{
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(17,16,24,.08);
+      background:rgba(255,255,255,.74);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .playerItem b{
+      display:block;
+      font-size:12px;
+      margin-bottom:4px;
+      color:rgba(17,16,24,.6);
+      text-transform:uppercase;
+      letter-spacing:.2px;
+    }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    @media (max-width: 720px){
+      .row2{ grid-template-columns:1fr; }
+    }
+
+    .muted{ color:var(--muted); }
+    .small{ font-size:12px; }
+    .good{ color:var(--success); font-weight:900; }
+    .warnText{ color:#9b6200; font-weight:900; }
+    .bad{ color:var(--danger); font-weight:900; }
   </style>
 </head>
-<body>
 
+<body>
   <header>
     <div class="topbar">
-      <a class="brand" href="hub.html"><div class="brandMark">H</div><div class="btxt"><b>uZone Hide & Seek</b><span id="hello">Loading…</span></div></a>
-      <nav class="tabs"><button class="tab" type="button" onclick="location.href='hub.html'+location.search"><span class="dot"></span> Hub</button><button class="tab " type="button" onclick="location.href='seeker.html'+location.search"><span class="dot"></span> Seeker</button><button class="tab active" type="button" onclick="location.href='hider.html'+location.search"><span class="dot"></span> Hider</button></nav>
-      <div class="version"><b>v1.0.0</b><span id="gameCodeChip">code: —</span></div>
+      <a class="brand" href="hub.html" aria-label="uZone main">
+        <img src="logo.png" alt="uZone logo" />
+        <div class="btxt">
+          <b>uZone</b>
+          <span id="hello">Loading…</span>
+        </div>
+      </a>
+
+      <div class="version" aria-label="Version">
+        <b>hider map</b>
+        <span id="gameCodeChip">code: —</span>
+      </div>
     </div>
   </header>
 
   <main>
-    <section class="banner"><div class="bannerTop"><div><h2>Hider page</h2><p>Hit I’m here before each deadline. Your location only pings when you press the button. If you go out of bounds or miss a deadline, you become a seeker.</p></div><div class="badge"><span class="dotSm"></span> one tap check-in</div></div></section>
+    <section class="banner" aria-label="Banner">
+      <div class="bannerTop">
+        <div>
+          <h2>Hide &amp; Seek</h2>
+          <p>Press the still playing button before each deadline. That button is what pings your location. The map shows the latest pinged locations of the other players in the game.</p>
+        </div>
+        <div class="badge pink">
+          <span class="dot"></span>
+          live player map
+        </div>
+      </div>
+    </section>
+
     <section class="grid2">
       <div class="stack">
-        <section class="card" id="mapSection"><div class="cardInner"><div class="hRow"><div><h1 class="h1">Map</h1><div class="sub">You can see the game area, but not the other hiders.</div></div><div class="badge"><span class="dotSm"></span><span id="clockText">00:00</span></div></div></div><div class="mapBox"><div id="map"></div></div></section>
-        <section class="card"><div class="cardInner"><div class="hRow"><div><h1 class="h1">Announcements</h1><div class="sub">Host updates show here live.</div></div></div><div class="console" id="announceConsole" style="margin-top:14px;"></div></div></section>
+        <section class="card" aria-label="Map section" id="mapSection">
+          <div class="cardInner">
+            <div class="hRow">
+              <div>
+                <h1 class="h1">Map</h1>
+                <div class="sub">Using the same map style as events, but showing player pings instead of event markers.</div>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn" id="refreshBtn" type="button">Refresh</button>
+                <span class="badge"><span class="dot"></span><span id="clockText">00:00</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mapBox">
+            <div id="map" role="application" aria-label="Game map"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="cardInner">
+            <div class="hRow">
+              <div>
+                <h1 class="h1">Announcements</h1>
+                <div class="sub">Host updates show here live.</div>
+              </div>
+            </div>
+            <div class="console" id="announceConsole" style="margin-top:14px;">No announcements yet.</div>
+          </div>
+        </section>
       </div>
+
       <div class="stack">
-        <section class="card"><div class="cardInner"><div class="grid3"><div class="statCard"><b>Hiders</b><div class="big" id="hiderCount">0</div><div class="muted small">active</div></div><div class="statCard"><b>Seekers</b><div class="big" id="seekerCount">0</div><div class="muted small">active</div></div><div class="statCard"><b>Status</b><div class="big" id="statusBig" style="font-size:20px;">—</div><div class="muted small" id="statusSmall">waiting</div></div></div></div></section>
-        <section class="card"><div class="cardInner"><h1 class="h1">Check-in</h1><div class="sub">Every ping interval, press the button once to stay in.</div><div class="formGrid" style="margin-top:14px;"><button class="btn primary" id="hereBtn" type="button">I’m here</button><div class="playerItem" id="checkinStatus"><b>Check-in</b>Waiting for the game to start.</div></div></div></section>
-        <section class="card"><div class="cardInner"><h1 class="h1">Accusation response</h1><div class="sub">If a seeker accuses you, press this within one minute while they watch.</div><div class="formGrid" style="margin-top:14px;"><button class="btn warn" id="respondBtn" type="button">Respond to accusation</button><div class="playerItem" id="accuseStatus"><b>Accusation</b>No active accusation.</div></div></div></section>
-        <section class="card"><div class="cardInner"><h1 class="h1">Your QR code</h1><div class="sub">A seeker can scan this to confirm they caught you.</div><div class="qrWrap" style="margin-top:14px;"><canvas id="qrCanvas"></canvas><div class="small muted center" id="qrText" style="margin-top:8px;"></div></div></div></section>
-        <section class="card"><div class="cardInner"><h1 class="h1">Global chat</h1><div class="chatBox" id="chatList" style="margin-top:14px;"></div><div class="row2" style="margin-top:12px;"><input class="input" id="chatInput" placeholder="Type a message…" /><button class="btn primary" id="sendChatBtn" type="button">Send</button></div></div></section>
+        <section class="card">
+          <div class="cardInner">
+            <div class="grid3">
+              <div class="statCard">
+                <b>Players</b>
+                <div class="big" id="playerCount">0</div>
+                <div class="muted small">others visible</div>
+              </div>
+              <div class="statCard">
+                <b>Hiders</b>
+                <div class="big" id="hiderCount">0</div>
+                <div class="muted small">active</div>
+              </div>
+              <div class="statCard">
+                <b>Status</b>
+                <div class="big" id="statusBig" style="font-size:20px;">—</div>
+                <div class="muted small" id="statusSmall">waiting</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="cardInner">
+            <h1 class="h1">Still playing</h1>
+            <div class="sub">When you press this, your location is pinged and your timer resets.</div>
+
+            <div class="row2" style="margin-top:14px;">
+              <button class="btn primary" id="pingBtn" type="button">Still playing</button>
+              <button class="btn success" id="centerMeBtn" type="button">Center on me</button>
+            </div>
+
+            <div class="row2" style="margin-top:12px;">
+              <div class="playerItem" id="pingStatus">
+                <b>Ping</b>
+                Waiting for the game to load.
+              </div>
+              <div class="playerItem" id="deadlineStatus">
+                <b>Deadline</b>
+                Loading…
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="cardInner">
+            <div class="hRow">
+              <div>
+                <h1 class="h1">Other players</h1>
+                <div class="sub">Latest pinged locations from the current game.</div>
+              </div>
+            </div>
+            <div class="playerList" id="playerList" style="margin-top:14px;"></div>
+          </div>
+        </section>
       </div>
     </section>
   </main>
 
   <script type="module">
-    import {{ initializeApp }} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {{
-      getAuth, signInAnonymously, onAuthStateChanged
-    }} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {{
-      getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, serverTimestamp,
-      onSnapshot, query, where, orderBy, limit, getDocs, runTransaction, writeBatch
-    }} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      getDoc,
+      getDocs,
+      query,
+      where,
+      limit,
+      onSnapshot,
+      updateDoc,
+      setDoc,
+      serverTimestamp,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-    const FIREBASE_CONFIG = {{
-      apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
-      authDomain: "PASTE_YOUR_AUTH_DOMAIN",
-      projectId: "PASTE_YOUR_PROJECT_ID",
-      storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
-      messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
-      appId: "PASTE_YOUR_APP_ID"
-    }};
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
 
-    const MAPS_API_KEY = "PASTE_YOUR_GOOGLE_MAPS_API_KEY";
-    const MAP_ID = "PASTE_YOUR_MAP_ID";
+    const MAPS_API_KEY = "AIzaSyCt8UPeNwhR4mPoQgWUoYxUE2UrlKYL6UE";
+    const MAP_ID = "f4ab270f6c4fc6deeed4fa00";
 
-    const app = initializeApp(FIREBASE_CONFIG);
+    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const qs = new URLSearchParams(location.search);
+    const GAME_CODE = (qs.get("code") || localStorage.getItem("hz_last_code") || "").trim().toUpperCase();
+
+    const hello = document.getElementById("hello");
+    const gameCodeChip = document.getElementById("gameCodeChip");
+    const clockText = document.getElementById("clockText");
+    const playerCount = document.getElementById("playerCount");
+    const hiderCount = document.getElementById("hiderCount");
+    const statusBig = document.getElementById("statusBig");
+    const statusSmall = document.getElementById("statusSmall");
+    const pingStatus = document.getElementById("pingStatus");
+    const deadlineStatus = document.getElementById("deadlineStatus");
+    const announceConsole = document.getElementById("announceConsole");
+    const playerList = document.getElementById("playerList");
+    const pingBtn = document.getElementById("pingBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const centerMeBtn = document.getElementById("centerMeBtn");
+
     let currentUser = null;
+    let game = null;
+    let players = [];
+    let me = null;
+
     let gmap = null;
     let info = null;
+    let markers = [];
     let boundaryPolygon = null;
-    let participantMarkers = new Map();
-    let unsubscribeFns = [];
+    let myLatestLatLng = null;
+    let uiInterval = null;
 
-    const qs = new URLSearchParams(location.search);
-    const GAME_CODE = (qs.get("code") || "").trim().toUpperCase();
-    const DISPLAY_NAME = (localStorage.getItem("hz_display_name") || "").trim() || `Player-${Math.random().toString(36).slice(2,6).toUpperCase()}`;
-    localStorage.setItem("hz_display_name", DISPLAY_NAME);
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        "\"":"&quot;",
+        "'":"&#39;"
+      }[m]));
+    }
 
-    function byId(id) {{ return document.getElementById(id); }}
-    function esc(v) {{ return String(v ?? "").replace(/[&<>"']/g, m => ({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}}[m])); }}
-    function fmtMs(ms) {{
+    function tsToMs(v){
+      if (!v) return 0;
+      if (typeof v === "number") return v;
+      if (typeof v?.toMillis === "function") return v.toMillis();
+      if (typeof v?.seconds === "number") return v.seconds * 1000;
+      return 0;
+    }
+
+    function fmtMs(ms){
       const total = Math.max(0, Math.floor((ms || 0) / 1000));
       const h = Math.floor(total / 3600);
       const m = Math.floor((total % 3600) / 60);
       const s = total % 60;
-      return h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }}
-    function tsToMs(v) {{
-      if (!v) return 0;
-      if (typeof v === 'number') return v;
-      if (typeof v?.toMillis === 'function') return v.toMillis();
-      if (typeof v?.seconds === 'number') return v.seconds * 1000;
-      return 0;
-    }}
-    async function loadGoogleMaps() {{
-      return new Promise((resolve, reject) => {{
+      return h > 0
+        ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+        : `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    }
+
+    function getDisplayName(userLike){
+      return (
+        userLike?.displayName ||
+        userLike?.name ||
+        userLike?.email ||
+        localStorage.getItem("hz_display_name") ||
+        `Player-${Math.random().toString(36).slice(2,6).toUpperCase()}`
+      ).trim();
+    }
+
+    function getPingIntervalMs(){
+      if (!game) return 5 * 60 * 1000;
+
+      const candidates = [
+        Number(game.pingIntervalMs || 0),
+        Number(game.checkInIntervalMs || 0),
+        Number(game.pingEveryMs || 0),
+        Number(game.intervalMs || 0),
+      ].filter(v => Number.isFinite(v) && v > 0);
+
+      if (candidates.length) return candidates[0];
+
+      return 5 * 60 * 1000;
+    }
+
+    function getNextDeadlineAt(){
+      if (!game || !me) return 0;
+
+      if (Number(game.nextDeadlineAt || 0) > 0) return Number(game.nextDeadlineAt);
+
+      const lastPing = Number(me.lastPingAt || 0);
+      const joinedAt = Number(me.joinedAt || Date.now());
+      return (lastPing || joinedAt) + getPingIntervalMs();
+    }
+
+    function setPingMessage(html){
+      pingStatus.innerHTML = `<b>Ping</b>${html}`;
+    }
+
+    function setDeadlineMessage(html){
+      deadlineStatus.innerHTML = `<b>Deadline</b>${html}`;
+    }
+
+    async function loadGoogleMaps(){
+      return new Promise((resolve, reject) => {
         if (window.google?.maps?.Map && window.google?.maps?.marker?.AdvancedMarkerElement) return resolve();
-        const s = document.createElement('script');
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(MAPS_API_KEY)}&libraries=marker,geometry&v=weekly`;
-        s.async = true; s.defer = true;
+        const s = document.createElement("script");
+        s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(MAPS_API_KEY)}&libraries=marker,places,geometry&v=weekly`;
+        s.async = true;
+        s.defer = true;
         s.onload = () => resolve();
-        s.onerror = () => reject(new Error('Failed to load Google Maps script.'));
+        s.onerror = () => reject(new Error("Failed to load Google Maps script."));
         document.head.appendChild(s);
-      }});
-    }}
-    function makePin(color='var(--pink)') {{
-      const wrap = document.createElement('div');
-      wrap.style.position = 'relative'; wrap.style.width = '1px'; wrap.style.height='1px'; wrap.style.overflow='visible';
-      const pulse = document.createElement('div');
-      pulse.style.position='absolute'; pulse.style.left='0'; pulse.style.top='0'; pulse.style.width='46px'; pulse.style.height='46px'; pulse.style.borderRadius='999px'; pulse.style.border='2px solid rgba(176,11,85,.30)'; pulse.style.transform='translate(-50%,-50%)'; pulse.style.animation='pulse 1.6s ease-out infinite';
-      const pin = document.createElement('div');
-      pin.style.position='absolute'; pin.style.left='0'; pin.style.top='0'; pin.style.width='16px'; pin.style.height='16px'; pin.style.borderRadius='999px'; pin.style.background = color; pin.style.boxShadow='0 0 10px '+color+',0 0 22px rgba(176,11,85,.55),0 0 46px rgba(176,11,85,.30)'; pin.style.transform='translate(-50%,-50%)';
-      wrap.appendChild(pulse); wrap.appendChild(pin); return wrap;
-    }}
-    async function initMap(center={{lat:45.4231,lng:-75.6831}}) {{
+      });
+    }
+
+    function buildPingPinEl(isMe = false){
+      const wrap = document.createElement("div");
+      wrap.className = "pinWrap";
+
+      const pulse = document.createElement("div");
+      pulse.className = `glow-pulse${isMe ? " me" : ""}`;
+
+      const dot = document.createElement("div");
+      dot.className = `glow-pin${isMe ? " me" : ""}`;
+
+      wrap.appendChild(pulse);
+      wrap.appendChild(dot);
+      return wrap;
+    }
+
+    async function initMap(){
       await loadGoogleMaps();
-      gmap = new google.maps.Map(byId('map'), {{ center, zoom: 14, mapId: MAP_ID, streetViewControl:false, fullscreenControl:false, mapTypeControl:false }});
-      info = new google.maps.InfoWindow();
-      return gmap;
-    }}
-    function clearParticipantMarkers() {{ participantMarkers.forEach(m => m.map = null); participantMarkers.clear(); }}
-    function renderBoundary(game) {{
+
+      const defaultCenter = game?.center || { lat:45.4215, lng:-75.6972 };
+      gmap = new google.maps.Map(document.getElementById("map"), {
+        center: defaultCenter,
+        zoom: 12,
+        mapId: MAP_ID,
+        clickableIcons: false,
+        gestureHandling: "greedy",
+      });
+
+      info = new google.maps.InfoWindow({});
+    }
+
+    function clearMarkers(){
+      for (const m of markers){
+        try{ m.map = null; } catch(_){}
+      }
+      markers = [];
+    }
+
+    function renderBoundary(){
       if (!gmap) return;
-      if (boundaryPolygon) boundaryPolygon.setMap(null);
-      const pts = Array.isArray(game?.boundaryPoints) ? game.boundaryPoints.filter(p => typeof p?.lat === 'number' && typeof p?.lng === 'number') : [];
-      if (pts.length >= 3) {{
-        boundaryPolygon = new google.maps.Polygon({{
-          paths: pts,
-          strokeColor: '#b00b55', strokeOpacity: .95, strokeWeight: 2,
-          fillColor: '#b00b55', fillOpacity: .08,
-          map: gmap
-        }});
-        const bounds = new google.maps.LatLngBounds(); pts.forEach(p => bounds.extend(p)); gmap.fitBounds(bounds, 42);
-      }}
-    }}
-    function pointInsideBoundary(lat, lng, game) {{
-      const pts = Array.isArray(game?.boundaryPoints) ? game.boundaryPoints.filter(p => typeof p?.lat === 'number' && typeof p?.lng === 'number') : [];
-      if (!(pts.length >= 3) || !window.google?.maps?.geometry?.poly) return true;
-      const poly = new google.maps.Polygon({{ paths: pts }});
+
+      if (boundaryPolygon) {
+        try { boundaryPolygon.setMap(null); } catch(_) {}
+        boundaryPolygon = null;
+      }
+
+      const pts = Array.isArray(game?.boundaryPoints)
+        ? game.boundaryPoints.filter(p => typeof p?.lat === "number" && typeof p?.lng === "number")
+        : [];
+
+      if (pts.length < 3) return;
+
+      boundaryPolygon = new google.maps.Polygon({
+        paths: pts,
+        strokeColor: "#b00b55",
+        strokeOpacity: 0.95,
+        strokeWeight: 2,
+        fillColor: "#b00b55",
+        fillOpacity: 0.08,
+        map: gmap
+      });
+    }
+
+    function fitMapToGameAndPlayers(){
+      if (!gmap) return;
+
+      const bounds = new google.maps.LatLngBounds();
+      let hasAny = false;
+
+      const pts = Array.isArray(game?.boundaryPoints)
+        ? game.boundaryPoints.filter(p => typeof p?.lat === "number" && typeof p?.lng === "number")
+        : [];
+
+      pts.forEach(p => {
+        bounds.extend(p);
+        hasAny = true;
+      });
+
+      players.forEach(p => {
+        if (typeof p?.lat === "number" && typeof p?.lng === "number") {
+          bounds.extend({ lat:p.lat, lng:p.lng });
+          hasAny = true;
+        }
+      });
+
+      if (hasAny) gmap.fitBounds(bounds, 42);
+    }
+
+    function pointInsideBoundary(lat, lng){
+      const pts = Array.isArray(game?.boundaryPoints)
+        ? game.boundaryPoints.filter(p => typeof p?.lat === "number" && typeof p?.lng === "number")
+        : [];
+
+      if (!(pts.length >= 3)) return true;
+      if (!window.google?.maps?.geometry?.poly) return true;
+
+      const poly = new google.maps.Polygon({ paths: pts });
       return google.maps.geometry.poly.containsLocation(new google.maps.LatLng(lat, lng), poly);
-    }}
-    async function getGameByCode(code) {{
-      const q = query(collection(db, 'hideSeekGames'), where('code', '==', code), limit(1));
+    }
+
+    async function getGameByCode(code){
+      const q = query(collection(db, "hideSeekGames"), where("code", "==", code), limit(1));
       const snap = await getDocs(q);
       if (snap.empty) return null;
       const d = snap.docs[0];
-      return {{ id:d.id, ...d.data() }};
-    }}
-    async function ensureSignedIn() {{
+      return { id:d.id, ...d.data() };
+    }
+
+    async function ensureSignedIn(){
       if (auth.currentUser) return auth.currentUser;
-      await signInAnonymously(auth);
-      return new Promise(resolve => {{
-        const off = onAuthStateChanged(auth, u => {{ if (u) {{ off(); resolve(u); }} }});
-      }});
-    }}
-    function subscribeToGame(gameId, onData) {{
-      unsubscribeFns.forEach(fn => fn && fn());
-      unsubscribeFns = [];
-      unsubscribeFns.push(onSnapshot(doc(db,'hideSeekGames',gameId), snap => {{ if (snap.exists()) onData({{id:snap.id,...snap.data()}}); }}));
-    }}
-    function subscribeToPlayers(gameId, onData) {{
-      unsubscribeFns.push(onSnapshot(query(collection(db,'hideSeekGames',gameId,'players')), snap => {{
-        const arr = []; snap.forEach(d => arr.push({{id:d.id,...d.data()}})); onData(arr);
-      }}));
-    }}
-    function subscribeToAnnouncements(gameId, onData) {{
-      unsubscribeFns.push(onSnapshot(query(collection(db,'hideSeekGames',gameId,'announcements'), orderBy('createdAt','desc'), limit(25)), snap => {{
-        const arr=[]; snap.forEach(d=>arr.push({{id:d.id,...d.data()}})); onData(arr);
-      }}));
-    }}
-    function subscribeToChat(gameId, onData) {{
-      unsubscribeFns.push(onSnapshot(query(collection(db,'hideSeekGames',gameId,'chat'), orderBy('createdAt','desc'), limit(60)), snap => {{
-        const arr=[]; snap.forEach(d=>arr.push({{id:d.id,...d.data()}})); onData(arr);
-      }}));
-    }}
-    function subscribeToAccusations(gameId, onData) {{
-      unsubscribeFns.push(onSnapshot(query(collection(db,'hideSeekGames',gameId,'accusations'), orderBy('createdAt','desc'), limit(20)), snap => {{
-        const arr=[]; snap.forEach(d=>arr.push({{id:d.id,...d.data()}})); onData(arr);
-      }}));
-    }}
-    async function joinGame(gameId, role='hider') {{
-      const playerRef = doc(db,'hideSeekGames',gameId,'players', currentUser.uid);
-      const now = Date.now();
-      await setDoc(playerRef, {{
+
+      return new Promise((resolve, reject) => {
+        const off = onAuthStateChanged(auth, async user => {
+          if (user) {
+            off();
+            resolve(user);
+            return;
+          }
+          try {
+            const cred = await signInAnonymously(auth);
+            off();
+            resolve(cred.user);
+          } catch (err) {
+            off();
+            reject(err);
+          }
+        });
+      });
+    }
+
+    async function ensureJoinedAsHider(){
+      const ref = doc(db, "hideSeekGames", game.id, "players", currentUser.uid);
+
+      const existingSnap = await getDoc(ref);
+      const displayName = getDisplayName(currentUser);
+      localStorage.setItem("hz_display_name", displayName);
+
+      const base = {
         uid: currentUser.uid,
-        name: DISPLAY_NAME,
-        role,
-        status: 'active',
-        joinedAt: now,
-        lastPingAt: 0,
-        lat: null,
-        lng: null,
-        accusedAt: 0,
-        accusedBy: '',
-        accusationExpiresAt: 0,
-        qrToken: `${gameId}:${currentUser.uid}`
-      }}, {{merge:true}});
-    }}
-    async function sendChat(gameId, text) {{
-      if (!text.trim()) return;
-      await addDoc(collection(db,'hideSeekGames',gameId,'chat'), {{ text:text.trim(), uid:currentUser.uid, name:DISPLAY_NAME, createdAt: serverTimestamp() }});
-    }}
-    async function sendAnnouncement(gameId, text) {{
-      if (!text.trim()) return;
-      await addDoc(collection(db,'hideSeekGames',gameId,'announcements'), {{ text:text.trim(), uid:currentUser.uid, name:DISPLAY_NAME, createdAt: serverTimestamp() }});
-      await updateDoc(doc(db,'hideSeekGames',gameId), {{ latestAnnouncement:text.trim(), latestAnnouncementAt: Date.now() }});
-    }}
-    function renderLog(el, rows, empty='Nothing yet.') {{
-      el.innerHTML = rows.length ? rows.map(r => `<div class="logItem"><b>${esc(r.title)}</b>${r.body}</div>`).join('') : `<div class="muted small">${esc(empty)}</div>`;
-    }}
-    window.HZ = {{ db, auth, doc, getDoc, setDoc, updateDoc, addDoc, collection, serverTimestamp, getGameByCode, ensureSignedIn, initMap, joinGame, subscribeToGame, subscribeToPlayers, subscribeToAnnouncements, subscribeToChat, subscribeToAccusations, sendChat, sendAnnouncement, fmtMs, tsToMs, renderBoundary, pointInsideBoundary, clearParticipantMarkers, participantMarkers, makePin, DISPLAY_NAME, GAME_CODE, byId, esc, gmap:()=>gmap, info:()=>info, currentUser:()=>currentUser, setCurrentUser:(u)=>currentUser=u, runTransaction, writeBatch }};
+        name: displayName,
+        joinedAt: existingSnap.exists() ? (existingSnap.data()?.joinedAt || Date.now()) : Date.now(),
+        updatedAt: serverTimestamp()
+      };
 
-    ensureSignedIn().then(u => {{ currentUser = u; window.HZ.setCurrentUser(u); const hello = document.getElementById('hello'); if (hello) hello.textContent = `Hey, ${DISPLAY_NAME}`; }}).catch(err => console.error(err));
-  </script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" defer></script>
-  <script type="module">
-    const HZ = window.HZ;
-    const { byId, getGameByCode, joinGame, subscribeToGame, subscribeToPlayers, subscribeToAnnouncements, subscribeToChat, sendChat, initMap, renderBoundary, makePin, participantMarkers, clearParticipantMarkers, pointInsideBoundary, currentUser, doc, updateDoc, fmtMs, esc, GAME_CODE } = HZ;
-    let game = null, players = [], me = null, myMarker = null;
-
-    function setCheckin(html) { byId('checkinStatus').innerHTML = `<b>Check-in</b>${html}`; }
-    function setAccuse(html) { byId('accuseStatus').innerHTML = `<b>Accusation</b>${html}`; }
-    function renderAnnouncements(items) { byId('announceConsole').textContent = items.map(a => `[${new Date(HZ.tsToMs(a.createdAt) || Date.now()).toLocaleTimeString()}] ${a.name || 'Host'}: ${a.text || ''}`).reverse().join('\n') || 'No announcements yet.'; }
-    function renderChat(items) { byId('chatList').innerHTML = items.length ? items.map(c => `<div class="chatItem"><b>${esc(c.name || 'Player')}</b>${esc(c.text || '')}</div>`).join('') : `<div class="muted small">No chat yet.</div>`; }
-    function updateStatus() {
-      if (!game) return;
-      const ms = Number(game.nextDeadlineAt || 0) - Date.now();
-      byId('clockText').textContent = fmtMs(ms);
-      byId('statusBig').textContent = me?.status === 'out' ? 'Out' : (game.startedAt ? 'Live' : 'Lobby');
-      byId('statusSmall').textContent = me?.status === 'out' ? 'You were switched to seeker.' : (game.startedAt ? `Next deadline in ${fmtMs(ms)}` : 'Host has not started the game yet.');
-      const activeHiders = players.filter(p => p.role === 'hider' && p.status === 'active').length;
-      const activeSeekers = players.filter(p => p.role === 'seeker' && p.status === 'active').length;
-      byId('hiderCount').textContent = activeHiders; byId('seekerCount').textContent = activeSeekers;
-      if (me?.accusationExpiresAt && me.accusationExpiresAt > Date.now()) {
-        setAccuse(`A seeker accused you. Respond within <b>${fmtMs(me.accusationExpiresAt - Date.now())}</b>.`);
-      } else {
-        setAccuse('No active accusation.');
+      if (!existingSnap.exists()) {
+        await setDoc(ref, {
+          ...base,
+          role: "hider",
+          status: "active",
+          lat: null,
+          lng: null,
+          lastPingAt: 0
+        }, { merge:true });
+        return;
       }
-    }
-    async function sendCheckin() {
-      if (!game || !me || me.status === 'out') return setCheckin('You are out. Open seeker.html now.');
-      if (!navigator.geolocation) return setCheckin('Location is not supported on this device.');
-      setCheckin('Getting your location…');
-      navigator.geolocation.getCurrentPosition(async pos => {
-        const lat = pos.coords.latitude, lng = pos.coords.longitude;
-        const inside = pointInsideBoundary(lat, lng, game);
-        if (!inside) {
-          await updateDoc(doc(HZ.db,'hideSeekGames',game.id,'players',currentUser().uid), { status:'out', role:'seeker', eliminatedAt:Date.now(), eliminateReason:'left-boundary', lat, lng, lastPingAt:Date.now() });
-          setCheckin('You left the allowed border and are now a seeker.');
-          return;
-        }
-        await updateDoc(doc(HZ.db,'hideSeekGames',game.id,'players',currentUser().uid), { lat, lng, lastPingAt:Date.now(), pingRoundAt:Number(game.nextDeadlineAt || 0), status:'active' });
-        if (HZ.gmap()) {
-          if (myMarker) myMarker.map = null;
-          myMarker = new google.maps.marker.AdvancedMarkerElement({ map:HZ.gmap(), position:{lat,lng}, content:makePin('var(--green)') });
-          HZ.gmap().panTo({lat,lng});
-        }
-        setCheckin('Check-in saved.');
-      }, err => setCheckin(err.message || 'Could not get your location.'), { enableHighAccuracy:true, timeout:15000, maximumAge:0 });
-    }
-    async function respondToAccusation() {
-      if (!game || !me) return;
-      if (!(me.accusationExpiresAt > Date.now())) return setAccuse('There is no active accusation right now.');
-      await updateDoc(doc(HZ.db,'hideSeekGames',game.id,'players',currentUser().uid), { accusedAt:0, accusedBy:'', accusationExpiresAt:0, accusationRespondedAt:Date.now() });
-      setAccuse('Response recorded.');
-    }
-    function maybeMakeQr() {
-      if (!window.QRious || !game || !me) return setTimeout(maybeMakeQr, 300);
-      const payload = `${game.id}:${currentUser().uid}`;
-      new QRious({ element: byId('qrCanvas'), value: payload, size: 220, background: 'white', foreground: '#111018' });
-      byId('qrText').textContent = payload;
+
+      await setDoc(ref, base, { merge:true });
     }
 
-    byId('hereBtn').addEventListener('click', () => sendCheckin().catch(err => setCheckin(err.message || 'Could not check in.')));
-    byId('respondBtn').addEventListener('click', () => respondToAccusation().catch(err => setAccuse(err.message || 'Could not respond.')));
-    byId('sendChatBtn').addEventListener('click', async () => { await sendChat(game.id, byId('chatInput').value); byId('chatInput').value = ''; });
+    function subscribeToGame(){
+      return onSnapshot(doc(db, "hideSeekGames", game.id), snap => {
+        if (!snap.exists()) return;
+        game = { id:snap.id, ...snap.data() };
+        renderBoundary();
+        renderAllMarkers();
+        updateStatusUI();
+      });
+    }
+
+    function subscribeToPlayers(){
+      return onSnapshot(collection(db, "hideSeekGames", game.id, "players"), snap => {
+        const arr = [];
+        snap.forEach(d => arr.push({ id:d.id, ...d.data() }));
+        players = arr;
+        me = arr.find(p => p.uid === currentUser.uid) || null;
+
+        if (me && typeof me.lat === "number" && typeof me.lng === "number") {
+          myLatestLatLng = { lat:me.lat, lng:me.lng };
+        }
+
+        renderPlayerList();
+        renderAllMarkers();
+        updateStatusUI();
+      });
+    }
+
+    function subscribeToAnnouncements(){
+      const q = query(
+        collection(db, "hideSeekGames", game.id, "announcements"),
+        orderBy("createdAt", "desc"),
+        limit(25)
+      );
+
+      return onSnapshot(q, snap => {
+        const rows = [];
+        snap.forEach(d => {
+          const data = d.data() || {};
+          rows.push({
+            text: data.text || "",
+            name: data.name || "Host",
+            createdAt: tsToMs(data.createdAt)
+          });
+        });
+
+        rows.reverse();
+        announceConsole.textContent = rows.length
+          ? rows.map(r => `[${new Date(r.createdAt || Date.now()).toLocaleTimeString()}] ${r.name}: ${r.text}`).join("\n")
+          : "No announcements yet.";
+      });
+    }
+
+    function buildInfoHtml(player){
+      const isMe = player.uid === currentUser.uid;
+      const title = esc(isMe ? "You" : (player.name || "Player"));
+      const role = esc(player.role || "player");
+      const status = esc(player.status || "unknown");
+      const lastPing = Number(player.lastPingAt || 0);
+
+      return `
+        <div style="
+          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+          width:min(300px,86vw);
+          max-width:86vw;
+          padding:12px;
+          color: rgba(20,20,24,.92);
+          position:relative;
+          background:
+            radial-gradient(420px 200px at 10% 0%, rgba(139,211,255,.26), transparent 60%),
+            radial-gradient(420px 200px at 90% 20%, rgba(176,11,85,.14), transparent 60%),
+            rgba(255,255,255,.94);
+          border-radius: 16px;
+        ">
+          <button type="button" id="iwCloseBtn"
+            style="
+              position:absolute; top:10px; right:10px;
+              width:34px; height:34px;
+              border-radius:999px;
+              border:1px solid rgba(0,0,0,.12);
+              background: rgba(255,255,255,.92);
+              color: rgba(20,20,24,.92);
+              font-weight:1000;
+              cursor:pointer;
+              display:flex; align-items:center; justify-content:center;
+              line-height:1;
+              box-shadow: 0 10px 24px rgba(0,0,0,.12);
+            ">✕</button>
+
+          <div style="
+            display:flex; align-items:center; gap:8px;
+            padding:7px 10px;
+            border-radius:999px;
+            background: rgba(0,0,0,.06);
+            border:1px solid rgba(0,0,0,.08);
+            font-size:12px;
+            color: rgba(20,20,24,.80);
+            white-space:nowrap;
+            max-width: calc(100% - 44px);
+            overflow:hidden;
+            text-overflow:ellipsis;
+          ">
+            <span style="
+              width:7px;height:7px;border-radius:999px;
+              background: ${isMe ? "var(--green)" : "var(--pink)"};
+              box-shadow: 0 0 0 4px ${isMe ? "rgba(88,201,154,.16)" : "rgba(176,11,85,.16)"};
+              flex:0 0 auto;
+            "></span>
+            ${isMe ? "Your ping" : "Player ping"}
+          </div>
+
+          <h3 style="margin:10px 0 6px 0; font-size:15px; line-height:1.2; font-weight:1000; padding-right:40px;">
+            ${title}
+          </h3>
+
+          <div style="font-size:12px; color: rgba(20,20,24,.74); line-height:1.35; word-break: break-word;">
+            <b>Role:</b> ${role}<br>
+            <b>Status:</b> ${status}<br>
+            <b>Last ping:</b> ${lastPing ? new Date(lastPing).toLocaleTimeString() : "Never"}<br>
+            <b>Coords:</b> ${typeof player.lat === "number" && typeof player.lng === "number" ? `${player.lat.toFixed(5)}, ${player.lng.toFixed(5)}` : "No location"}
+          </div>
+        </div>
+      `;
+    }
+
+    function openPlayerInfo(marker, player){
+      info.setContent(buildInfoHtml(player));
+      info.open({ map: gmap, anchor: marker });
+
+      google.maps.event.addListenerOnce(info, "domready", () => {
+        const close = document.getElementById("iwCloseBtn");
+        if (close) close.onclick = () => info.close();
+      });
+    }
+
+    function renderAllMarkers(){
+      if (!gmap) return;
+
+      clearMarkers();
+      renderBoundary();
+
+      const activePlayers = players.filter(p =>
+        p &&
+        p.status === "active" &&
+        typeof p.lat === "number" &&
+        typeof p.lng === "number"
+      );
+
+      activePlayers.forEach(player => {
+        const isMe = player.uid === currentUser.uid;
+
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          map: gmap,
+          position: { lat:player.lat, lng:player.lng },
+          title: (isMe ? "You" : (player.name || "Player")).toString(),
+          content: buildPingPinEl(isMe),
+        });
+
+        marker.addListener("gmp-click", () => openPlayerInfo(marker, player));
+        markers.push(marker);
+      });
+    }
+
+    function renderPlayerList(){
+      const others = players
+        .filter(p => p.uid !== currentUser.uid)
+        .filter(p => p.status === "active")
+        .sort((a,b) => Number(b.lastPingAt || 0) - Number(a.lastPingAt || 0));
+
+      playerList.innerHTML = others.length
+        ? others.map(p => `
+            <div class="playerItem">
+              <b>${esc(p.name || "Player")}</b>
+              Role: ${esc(p.role || "player")}<br>
+              Last ping: ${Number(p.lastPingAt || 0) ? new Date(Number(p.lastPingAt)).toLocaleTimeString() : "Never"}<br>
+              Location: ${typeof p.lat === "number" && typeof p.lng === "number" ? `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}` : "No ping yet"}
+            </div>
+          `).join("")
+        : `<div class="playerItem"><b>Players</b>No other players with visible pings yet.</div>`;
+    }
+
+    function updateStatusUI(){
+      if (!game) return;
+
+      const nextDeadlineAt = getNextDeadlineAt();
+      const msLeft = nextDeadlineAt ? (nextDeadlineAt - Date.now()) : 0;
+
+      clockText.textContent = fmtMs(msLeft);
+
+      const activePlayers = players.filter(p => p.status === "active");
+      const activeHiders = activePlayers.filter(p => p.role === "hider").length;
+      const othersVisible = activePlayers.filter(p => p.uid !== currentUser?.uid && typeof p.lat === "number" && typeof p.lng === "number").length;
+
+      playerCount.textContent = String(othersVisible);
+      hiderCount.textContent = String(activeHiders);
+
+      statusBig.textContent = me?.status === "out" ? "Out" : (game.startedAt ? "Live" : "Lobby");
+
+      if (me?.status === "out") {
+        statusSmall.textContent = "You are out of hider mode.";
+      } else if (!game.startedAt) {
+        statusSmall.textContent = "Host has not started the game yet.";
+      } else {
+        statusSmall.textContent = `Next ping due in ${fmtMs(msLeft)}`;
+      }
+
+      if (me?.status === "out") {
+        setPingMessage(`<span class="bad">You are out.</span>`);
+      } else if (!game.startedAt) {
+        setPingMessage(`The game has not started yet.`);
+      } else if (msLeft <= 0) {
+        setPingMessage(`<span class="bad">Ping overdue.</span> Press the button now.`);
+      } else if (msLeft <= 30000) {
+        setPingMessage(`<span class="warnText">Ping due soon.</span> ${fmtMs(msLeft)} left.`);
+      } else if (Number(me?.lastPingAt || 0)) {
+        setPingMessage(`<span class="good">Last ping saved.</span> ${new Date(Number(me.lastPingAt)).toLocaleTimeString()}`);
+      } else {
+        setPingMessage(`No ping sent yet.`);
+      }
+
+      const intervalMin = Math.round(getPingIntervalMs() / 60000);
+      setDeadlineMessage(
+        nextDeadlineAt
+          ? `Every ~${intervalMin} min. Next due at ${new Date(nextDeadlineAt).toLocaleTimeString()}.`
+          : `Interval loading…`
+      );
+    }
+
+    async function sendStillPlayingPing(){
+      if (!game || !me) return;
+      if (me.status === "out") {
+        setPingMessage(`<span class="bad">You are out.</span>`);
+        return;
+      }
+      if (!navigator.geolocation) {
+        setPingMessage(`<span class="bad">Location is not supported on this device.</span>`);
+        return;
+      }
+
+      pingBtn.disabled = true;
+      setPingMessage(`Getting your location…`);
+
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const now = Date.now();
+
+        try {
+          const inside = pointInsideBoundary(lat, lng);
+
+          if (!inside) {
+            await updateDoc(doc(db, "hideSeekGames", game.id, "players", currentUser.uid), {
+              status: "out",
+              role: "seeker",
+              eliminatedAt: now,
+              eliminateReason: "left-boundary",
+              lat,
+              lng,
+              lastPingAt: now,
+              updatedAt: serverTimestamp()
+            });
+            setPingMessage(`<span class="bad">You left the boundary and were switched out.</span>`);
+            return;
+          }
+
+          await updateDoc(doc(db, "hideSeekGames", game.id, "players", currentUser.uid), {
+            lat,
+            lng,
+            lastPingAt: now,
+            pingRoundAt: Number(game.nextDeadlineAt || 0),
+            status: "active",
+            updatedAt: serverTimestamp()
+          });
+
+          myLatestLatLng = { lat, lng };
+          if (gmap) gmap.panTo(myLatestLatLng);
+
+          setPingMessage(`<span class="good">Ping saved.</span> ${new Date(now).toLocaleTimeString()}`);
+        } catch (err) {
+          console.error(err);
+          setPingMessage(`<span class="bad">${esc(err?.message || "Could not save ping.")}</span>`);
+        } finally {
+          pingBtn.disabled = false;
+        }
+      }, err => {
+        pingBtn.disabled = false;
+        setPingMessage(`<span class="bad">${esc(err?.message || "Could not get your location.")}</span>`);
+      }, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      });
+    }
+
+    refreshBtn.addEventListener("click", () => {
+      renderAllMarkers();
+      fitMapToGameAndPlayers();
+      updateStatusUI();
+    });
+
+    centerMeBtn.addEventListener("click", () => {
+      if (gmap && myLatestLatLng) {
+        gmap.panTo(myLatestLatLng);
+        gmap.setZoom(Math.max(gmap.getZoom() || 15, 15));
+      }
+    });
+
+    pingBtn.addEventListener("click", () => {
+      sendStillPlayingPing().catch(err => {
+        console.error(err);
+        setPingMessage(`<span class="bad">${esc(err?.message || "Could not send ping.")}</span>`);
+        pingBtn.disabled = false;
+      });
+    });
 
     (async () => {
-      const code = (GAME_CODE || localStorage.getItem('hz_last_code') || '').toUpperCase();
-      byId('gameCodeChip').textContent = `code: ${code || '—'}`;
-      if (!code) { byId('statusBig').textContent = 'No code'; return; }
-      game = await getGameByCode(code);
-      if (!game) { byId('statusBig').textContent = 'Missing'; byId('statusSmall').textContent = 'Game code not found.'; return; }
-      await joinGame(game.id, 'hider');
-      await initMap(game.center || {lat:45.4231,lng:-75.6831});
-      renderBoundary(game);
-      subscribeToGame(game.id, g => { game = g; renderBoundary(g); updateStatus(); });
-      subscribeToPlayers(game.id, arr => { players = arr; me = arr.find(p => p.uid === currentUser().uid) || null; updateStatus(); maybeMakeQr(); });
-      subscribeToAnnouncements(game.id, renderAnnouncements);
-      subscribeToChat(game.id, renderChat);
-      setInterval(updateStatus, 250);
-      updateStatus();
-    })();
+      gameCodeChip.textContent = `code: ${GAME_CODE || "—"}`;
+
+      if (!GAME_CODE) {
+        statusBig.textContent = "No code";
+        statusSmall.textContent = "Missing game code.";
+        setPingMessage(`<span class="bad">No game code found.</span>`);
+        return;
+      }
+
+      currentUser = await ensureSignedIn();
+      hello.textContent = `Hey, ${getDisplayName(currentUser)}`;
+
+      game = await getGameByCode(GAME_CODE);
+      if (!game) {
+        statusBig.textContent = "Missing";
+        statusSmall.textContent = "Game code not found.";
+        setPingMessage(`<span class="bad">Could not find that game.</span>`);
+        return;
+      }
+
+      localStorage.setItem("hz_last_code", GAME_CODE);
+
+      await ensureJoinedAsHider();
+      await initMap();
+      renderBoundary();
+
+      const unsubscribers = [
+        subscribeToGame(),
+        subscribeToPlayers(),
+        subscribeToAnnouncements()
+      ];
+
+      fitMapToGameAndPlayers();
+
+      if (uiInterval) clearInterval(uiInterval);
+      uiInterval = setInterval(updateStatusUI, 250);
+
+      window.addEventListener("beforeunload", () => {
+        try { unsubscribers.forEach(fn => typeof fn === "function" && fn()); } catch(_) {}
+        if (uiInterval) clearInterval(uiInterval);
+      });
+    })().catch(err => {
+      console.error(err);
+      statusBig.textContent = "Error";
+      statusSmall.textContent = err?.message || "Could not load page.";
+      setPingMessage(`<span class="bad">${esc(err?.message || "Could not load page.")}</span>`);
+    });
   </script>
 </body>
 </html>
