@@ -40,6 +40,7 @@
 
     a{ color:inherit; text-decoration:none; }
     button{ font:inherit; }
+    input{ font:inherit; }
     img{ max-width:100%; display:block; }
 
     header{
@@ -98,6 +99,18 @@
       font-size:12px;
       font-weight:900;
       white-space:nowrap;
+    }
+
+    .pill.good{
+      background: rgba(88,201,154,.12);
+      border-color: rgba(88,201,154,.25);
+      color: #1f6b50;
+    }
+
+    .pill.bad{
+      background: rgba(217,45,85,.08);
+      border-color: rgba(217,45,85,.22);
+      color: #8f1737;
     }
 
     .btn{
@@ -348,7 +361,7 @@
       height:56px;
       border-radius:999px;
       border:1px solid rgba(17,16,24,.10);
-      background: rgba(255,255,255,.90);
+      background: linear-gradient(135deg, var(--pink), var(--purple));
       object-fit:cover;
       box-shadow: 0 14px 30px rgba(17,16,24,.08);
       flex: 0 0 auto;
@@ -357,7 +370,6 @@
       justify-content:center;
       font-weight:1000;
       color:#fff;
-      background: linear-gradient(135deg, var(--pink), var(--purple));
     }
 
     .name{
@@ -417,6 +429,13 @@
       line-height:1.45;
     }
 
+    .statusRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
     footer{
       width:min(1120px, 92vw);
       margin:14px auto 30px auto;
@@ -454,6 +473,7 @@
 
       <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
         <span class="pill" id="authPill">Checking sign-in…</span>
+        <span class="pill" id="allowPill">Checking list…</span>
         <a class="btn" href="index.html">Home</a>
       </div>
     </div>
@@ -464,7 +484,7 @@
       <div class="heroTop">
         <div>
           <h1>Join an event</h1>
-          <p>Use the same email and password system as the main login page. Once you’re signed in, you can join the live Hide &amp; Seek event if your account is on the host list.</p>
+          <p>Sign in with the same email and password system as your main uZone account. Hide &amp; Seek access is checked directly from <b>gameLists/hideAndSeek</b>, the same Firestore doc used by the host page.</p>
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -480,7 +500,7 @@
       <section class="card">
         <div class="cardInner">
           <h2 class="h1">Account</h2>
-          <div class="sub">This page uses the same email/password login flow as your main site.</div>
+          <div class="sub">This uses email/password auth on this page, without sending you away first.</div>
 
           <div id="signedOutArea">
             <div class="tabs" role="tablist" aria-label="Login or sign up">
@@ -526,4 +546,565 @@
               <div class="name" id="accountName">Signed in</div>
               <div class="meta">
                 <span class="tag" id="accountEmail"></span>
-                <span class="tag" id="accountUid"></
+                <span class="tag" id="accountUid"></span>
+                <span class="tag" id="accountPublicId" style="display:none;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardInner">
+          <h2 class="h1">Events</h2>
+          <div class="sub">Available events you can join right now.</div>
+
+          <div class="eventList" id="eventList"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <div class="footerTitle">uZone</div>
+      <div class="footerSub">Join flow for Hide &amp; Seek.</div>
+    </div>
+    <div class="footerSub">© uZone</div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      updateProfile,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      runTransaction,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
+      authDomain: "uzone-6148d.firebaseapp.com",
+      databaseURL: "https://uzone-6148d-default-rtdb.firebaseio.com",
+      projectId: "uzone-6148d",
+      storageBucket: "uzone-6148d.firebasestorage.app",
+      messagingSenderId: "88783701381",
+      appId: "1:88783701381:web:4f6c4b1ad8b26d6fa6f0ec",
+      measurementId: "G-HKL5246YMC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    try {
+      if (await analyticsSupported()) getAnalytics(app);
+    } catch (_) {}
+
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const HNS_LIST_REF = doc(db, "gameLists", "hideAndSeek");
+
+    const els = {
+      hello: document.getElementById("hello"),
+      authPill: document.getElementById("authPill"),
+      allowPill: document.getElementById("allowPill"),
+      msgBox: document.getElementById("msgBox"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      signOutBtn: document.getElementById("signOutBtn"),
+
+      signedOutArea: document.getElementById("signedOutArea"),
+      accountCard: document.getElementById("accountCard"),
+      avatarBox: document.getElementById("avatarBox"),
+      accountName: document.getElementById("accountName"),
+      accountEmail: document.getElementById("accountEmail"),
+      accountUid: document.getElementById("accountUid"),
+      accountPublicId: document.getElementById("accountPublicId"),
+
+      tabLogin: document.getElementById("tabLogin"),
+      tabSignup: document.getElementById("tabSignup"),
+      authForm: document.getElementById("authForm"),
+      nameRow: document.getElementById("nameRow"),
+      firstName: document.getElementById("firstName"),
+      lastName: document.getElementById("lastName"),
+      email: document.getElementById("email"),
+      password: document.getElementById("password"),
+      confirmLabel: document.getElementById("confirmLabel"),
+      confirmPassword: document.getElementById("confirmPassword"),
+      submitBtn: document.getElementById("submitBtn"),
+      forgotPw: document.getElementById("forgotPw"),
+
+      eventList: document.getElementById("eventList")
+    };
+
+    let currentUser = null;
+    let currentUserDoc = null;
+    let authReady = false;
+    let mode = "login";
+    let isSubmitting = false;
+
+    function showMsg(text, kind = "info"){
+      els.msgBox.className = "msg " + kind;
+      els.msgBox.textContent = text;
+      els.msgBox.style.display = text ? "block" : "none";
+    }
+
+    function hideMsg(){
+      els.msgBox.textContent = "";
+      els.msgBox.className = "msg";
+      els.msgBox.style.display = "none";
+    }
+
+    function setAllowPill(text, kind = ""){
+      els.allowPill.textContent = text;
+      els.allowPill.className = "pill" + (kind ? ` ${kind}` : "");
+    }
+
+    function getDisplayName(userLike){
+      return (userLike?.name || userLike?.displayName || "").toString().trim() || "Unnamed User";
+    }
+
+    function getEmail(userLike){
+      return (userLike?.email || userLike?.schoolEmail || userLike?.studentEmail || "").toString().trim();
+    }
+
+    function getPublicId(userLike){
+      return (userLike?.publicId ?? userLike?.publicID ?? userLike?.uNumber ?? "").toString().trim();
+    }
+
+    function normalizeString(value){
+      return String(value ?? "").trim().toLowerCase();
+    }
+
+    function setMode(nextMode){
+      mode = nextMode;
+      const isLogin = mode === "login";
+
+      els.tabLogin.classList.toggle("active", isLogin);
+      els.tabSignup.classList.toggle("active", !isLogin);
+      els.tabLogin.setAttribute("aria-selected", String(isLogin));
+      els.tabSignup.setAttribute("aria-selected", String(!isLogin));
+
+      els.nameRow.style.display = isLogin ? "none" : "grid";
+      els.confirmLabel.style.display = isLogin ? "none" : "grid";
+      els.submitBtn.textContent = isLogin ? "Login" : "Create account";
+      els.password.autocomplete = isLogin ? "current-password" : "new-password";
+
+      els.firstName.required = !isLogin;
+      els.firstName.disabled = isLogin;
+      els.lastName.disabled = isLogin;
+      els.confirmPassword.required = !isLogin;
+    }
+
+    function friendlyAuthError(err){
+      const code = (err?.code || "").toString();
+      if (code.includes("auth/invalid-credential")) return "Invalid email or password.";
+      if (code.includes("auth/email-already-in-use")) return "That email is already in use. Try logging in instead.";
+      if (code.includes("auth/weak-password")) return "Password is too weak. Use at least 6 characters.";
+      if (code.includes("auth/invalid-email")) return "That email address doesn’t look valid.";
+      if (code.includes("auth/network-request-failed")) return "Network error. Check your connection and try again.";
+      return err?.message || "Something went wrong. Please try again.";
+    }
+
+    async function ensurePublicId(user, displayName = "") {
+      const userRef = doc(db, "users", user.uid);
+
+      const publicId = await runTransaction(db, async (transaction) => {
+        const snap = await transaction.get(userRef);
+        const existing = snap.exists() ? (snap.data() || {}) : {};
+
+        let pid = (existing.publicId || "").toString().trim();
+
+        if (!pid) {
+          const counterRef = doc(db, "meta", "counters");
+          const counterSnap = await transaction.get(counterRef);
+
+          let current = 0;
+          if (counterSnap.exists()) {
+            current = Number(counterSnap.data()?.userCounter || 0);
+          }
+
+          const next = current + 1;
+          transaction.set(counterRef, { userCounter: next }, { merge: true });
+          pid = "U" + next;
+        }
+
+        const hasVerificationMap = existing.verification && typeof existing.verification === "object";
+        const isVerified = !!existing.verified;
+
+        const payload = {
+          publicId: pid,
+          name: (displayName || existing.name || "").toString(),
+          email: (user.email || existing.email || "").toString(),
+
+          age: (existing.age ?? "").toString(),
+          bio: (existing.bio ?? "").toString(),
+          program: (existing.program ?? "").toString(),
+          university: (existing.university ?? "").toString(),
+          gender: (existing.gender ?? "").toString(),
+
+          credits: Number.isFinite(Number(existing.credits)) ? Number(existing.credits) : 0,
+          creditsUpdatedAt: existing.creditsUpdatedAt || serverTimestamp(),
+
+          verified: isVerified,
+          verification: hasVerificationMap
+            ? existing.verification
+            : { status: (isVerified ? "verified" : "none"), updatedAt: serverTimestamp() },
+
+          createdAt: existing.createdAt || serverTimestamp(),
+          updatedAt: serverTimestamp()
+        };
+
+        transaction.set(userRef, payload, { merge: true });
+        return pid;
+      });
+
+      return publicId;
+    }
+
+    async function loadCurrentUserDoc(uid){
+      try{
+        const snap = await getDoc(doc(db, "users", uid));
+        return snap.exists() ? (snap.data() || {}) : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function setSignedOutUI(){
+      els.authPill.textContent = "Signed out";
+      els.hello.textContent = "Join games";
+      els.signedOutArea.style.display = "block";
+      els.accountCard.style.display = "none";
+      els.signOutBtn.style.display = "none";
+      setAllowPill("Sign in first");
+    }
+
+    function setSignedInUI(user, userDoc){
+      const displayName = getDisplayName(userDoc || user);
+      const email = getEmail(userDoc || user) || user.email || "";
+      const publicId = getPublicId(userDoc || user);
+      const initial = (displayName || "U").trim().charAt(0).toUpperCase();
+
+      els.authPill.textContent = "Signed in";
+      els.hello.textContent = displayName ? `Hey, ${displayName}` : "Welcome";
+
+      els.signedOutArea.style.display = "none";
+      els.accountCard.style.display = "flex";
+      els.signOutBtn.style.display = "inline-flex";
+
+      els.avatarBox.textContent = initial || "U";
+      els.accountName.textContent = displayName;
+      els.accountEmail.textContent = email || "No email";
+      els.accountUid.textContent = `UID ${user.uid}`;
+
+      if (publicId){
+        els.accountPublicId.style.display = "inline-flex";
+        els.accountPublicId.textContent = `🆔 ${publicId}`;
+      } else {
+        els.accountPublicId.style.display = "none";
+        els.accountPublicId.textContent = "";
+      }
+    }
+
+    function normalizeAllowedUids(value){
+      if (!Array.isArray(value)) return [];
+      return [...new Set(
+        value.map(v => normalizeString(v)).filter(Boolean)
+      )];
+    }
+
+    function normalizeAllowedUsers(value){
+      if (!Array.isArray(value)) return [];
+      return value
+        .filter(v => v && typeof v === "object")
+        .map(v => ({
+          uid: normalizeString(v.uid),
+          publicId: normalizeString(v.publicId ?? v.publicID ?? v.uNumber),
+          email: normalizeString(v.email),
+          name: String(v.name ?? "").trim()
+        }));
+    }
+
+    async function getHideAndSeekListData(){
+      const snap = await getDoc(HNS_LIST_REF);
+      if (!snap.exists()) return null;
+      return snap.data() || null;
+    }
+
+    async function isAllowedForHideAndSeek(){
+      if (!currentUser) return false;
+
+      const data = await getHideAndSeekListData();
+      if (!data) return false;
+
+      const uid = normalizeString(currentUser.uid);
+      const publicId = normalizeString(getPublicId(currentUserDoc || currentUser));
+      const email = normalizeString(getEmail(currentUserDoc || currentUser) || currentUser.email || "");
+
+      const allowedUids = normalizeAllowedUids(data.allowedUids);
+      if (allowedUids.includes(uid)) return true;
+
+      const allowedUsers = normalizeAllowedUsers(data.allowedUsers);
+      return allowedUsers.some(entry =>
+        (entry.uid && entry.uid === uid) ||
+        (publicId && entry.publicId && entry.publicId === publicId) ||
+        (email && entry.email && entry.email === email)
+      );
+    }
+
+    async function refreshAllowedStatus(showMessage = false){
+      if (!authReady){
+        setAllowPill("Checking list…");
+        if (showMessage) showMsg("Still checking sign-in…", "info");
+        return false;
+      }
+
+      if (!currentUser){
+        setAllowPill("Sign in first");
+        if (showMessage) showMsg("Sign in first to check join access.", "info");
+        return false;
+      }
+
+      try{
+        setAllowPill("Checking list…");
+        const allowed = await isAllowedForHideAndSeek();
+
+        if (allowed){
+          setAllowPill("On list", "good");
+          if (showMessage) showMsg("Your account is on the Hide & Seek join list.", "ok");
+        } else {
+          setAllowPill("Not on list", "bad");
+          if (showMessage) showMsg("Your account is signed in, but it is not on the Hide & Seek join list.", "error");
+        }
+
+        return allowed;
+      } catch (err){
+        console.error(err);
+        setAllowPill("Check failed", "bad");
+        if (showMessage) showMsg("Could not check the Hide & Seek join list.", "error");
+        return false;
+      }
+    }
+
+    async function handleJoinHideAndSeek(){
+      if (!authReady){
+        showMsg("Still checking sign-in. Try again in a second.", "info");
+        return;
+      }
+
+      if (!currentUser){
+        showMsg("Sign in first to join this event.", "error");
+        return;
+      }
+
+      showMsg("Checking access…", "info");
+      const allowed = await refreshAllowedStatus(false);
+
+      if (!allowed){
+        showMsg("You are signed in, but you are not on the Hide & Seek join list yet.", "error");
+        return;
+      }
+
+      showMsg("Allowed. Sending you into the game…", "ok");
+      window.location.href = "hider.html";
+    }
+
+    function renderEvents(){
+      els.eventList.innerHTML = `
+        <article class="eventCard">
+          <div>
+            <h3 class="eventTitle">Hide &amp; Seek</h3>
+            <p class="eventDesc">Join the current Hide &amp; Seek game. This checks the exact same Firestore list the host page saves: gameLists/hideAndSeek.</p>
+          </div>
+
+          <div class="statusRow">
+            <span class="pill" id="eventAllowStatus">Checking…</span>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn primary" id="joinHnsBtn" type="button">Join</button>
+          </div>
+        </article>
+      `;
+
+      document.getElementById("joinHnsBtn").addEventListener("click", handleJoinHideAndSeek);
+    }
+
+    function setEventAllowStatus(text, good = false){
+      const el = document.getElementById("eventAllowStatus");
+      if (!el) return;
+      el.textContent = text;
+      el.className = "pill" + (good ? " good" : "");
+    }
+
+    async function syncVisualAllowedState(){
+      const allowed = await refreshAllowedStatus(false);
+      if (!currentUser){
+        setEventAllowStatus("Sign in first", false);
+      } else if (allowed){
+        setEventAllowStatus("Allowed to join", true);
+      } else {
+        setEventAllowStatus("Not on host list", false);
+      }
+    }
+
+    els.tabLogin.addEventListener("click", () => setMode("login"));
+    els.tabSignup.addEventListener("click", () => setMode("signup"));
+
+    els.forgotPw.addEventListener("click", async () => {
+      const email = els.email.value.trim();
+      if (!email) {
+        showMsg("Enter your email above first, then click Forgot password again.", "error");
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showMsg("Password reset email sent. Check your inbox.", "ok");
+      } catch (err) {
+        showMsg(friendlyAuthError(err), "error");
+      }
+    });
+
+    els.authForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hideMsg();
+
+      if (!els.authForm.checkValidity()) {
+        els.authForm.reportValidity();
+        return;
+      }
+
+      const email = els.email.value.trim();
+      const password = els.password.value;
+
+      els.submitBtn.disabled = true;
+      isSubmitting = true;
+
+      try {
+        if (mode === "signup") {
+          const fn = els.firstName.value.trim();
+          if (!fn) {
+            showMsg("First name is required.", "error");
+            return;
+          }
+
+          const confirm = els.confirmPassword.value;
+          if (password !== confirm) {
+            showMsg("Passwords do not match.", "error");
+            return;
+          }
+
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          const user = cred.user;
+          const ln = els.lastName.value.trim();
+          const displayName = [fn, ln].filter(Boolean).join(" ");
+
+          await updateProfile(user, { displayName });
+          await ensurePublicId(user, displayName);
+
+          showMsg("Account created. You’re signed in.", "ok");
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+
+          if (auth.currentUser) {
+            await ensurePublicId(auth.currentUser, auth.currentUser.displayName || "");
+          }
+
+          showMsg("Logged in successfully.", "ok");
+        }
+      } catch (err) {
+        showMsg(friendlyAuthError(err), "error");
+      } finally {
+        isSubmitting = false;
+        els.submitBtn.disabled = false;
+      }
+    });
+
+    els.signOutBtn.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        showMsg("Signed out.", "ok");
+      } catch (err) {
+        showMsg("Could not sign you out.", "error");
+      }
+    });
+
+    els.refreshBtn.addEventListener("click", async () => {
+      renderEvents();
+
+      if (!authReady){
+        showMsg("Still checking sign-in…", "info");
+        return;
+      }
+
+      if (currentUser){
+        currentUserDoc = await loadCurrentUserDoc(currentUser.uid);
+        setSignedInUI(currentUser, currentUserDoc);
+        await syncVisualAllowedState();
+
+        const allowed = await isAllowedForHideAndSeek();
+        showMsg(
+          allowed
+            ? "Refreshed. Your account is on the Hide & Seek join list."
+            : "Refreshed. Your account is not on the Hide & Seek join list.",
+          allowed ? "ok" : "info"
+        );
+      } else {
+        setSignedOutUI();
+        setEventAllowStatus("Sign in first", false);
+        showMsg("Refreshed.", "ok");
+      }
+    });
+
+    setMode("login");
+    renderEvents();
+    showMsg("Checking sign-in…", "info");
+
+    onAuthStateChanged(auth, async (user) => {
+      authReady = true;
+      currentUser = user || null;
+
+      if (!user){
+        currentUserDoc = null;
+        setSignedOutUI();
+        renderEvents();
+        setEventAllowStatus("Sign in first", false);
+        hideMsg();
+        return;
+      }
+
+      try {
+        await ensurePublicId(user, user.displayName || "");
+      } catch (_) {}
+
+      currentUserDoc = await loadCurrentUserDoc(user.uid);
+      setSignedInUI(user, currentUserDoc);
+      renderEvents();
+      await syncVisualAllowedState();
+
+      if (!isSubmitting){
+        const allowed = await isAllowedForHideAndSeek();
+        showMsg(
+          allowed
+            ? "You’re signed in and on the Hide & Seek join list."
+            : "You’re signed in, but not on the Hide & Seek join list yet.",
+          allowed ? "ok" : "info"
+        );
+      }
+    });
+  </script>
+</body>
+</html>
