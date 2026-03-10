@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>uZone • Hider</title>
-
+  <link rel="icon" type="image/png" href="logo.png" />
   <style>
     :root{
       --bg:#f8f7ff;
@@ -34,13 +34,13 @@
     body{
       margin:0;
       color:var(--ink);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       background:
         radial-gradient(1200px 700px at 10% -10%, rgba(139,211,255,.20), transparent 60%),
         radial-gradient(1000px 600px at 100% 0%, rgba(176,11,85,.08), transparent 58%),
         radial-gradient(1100px 700px at 50% 100%, rgba(109,40,217,.10), transparent 62%),
         linear-gradient(180deg, #fbfaff 0%, #f8f7ff 45%, #fbfbff 100%);
-      background-attachment: fixed;
+      background-attachment:fixed;
     }
 
     a{ color:inherit; text-decoration:none; }
@@ -48,38 +48,38 @@
     img{ max-width:100%; display:block; }
 
     header{
-      position: sticky;
-      top: 0;
-      z-index: 60;
-      backdrop-filter: blur(14px);
-      background: rgba(255,255,255,.72);
-      border-bottom: 1px solid rgba(17,16,24,.08);
+      position:sticky;
+      top:0;
+      z-index:60;
+      backdrop-filter:blur(14px);
+      background:rgba(255,255,255,.72);
+      border-bottom:1px solid rgba(17,16,24,.08);
     }
 
     .topbar{
-      width: min(1120px, 92vw);
-      margin: 0 auto;
-      padding: 12px 0;
+      width:min(1120px,92vw);
+      margin:0 auto;
+      padding:12px 0;
       display:grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns:1fr auto;
       align-items:center;
-      gap: 14px;
+      gap:14px;
     }
 
     .brand{
-      justify-self: start;
+      justify-self:start;
       display:flex;
       align-items:center;
       gap:10px;
-      min-width: 140px;
+      min-width:140px;
     }
 
     .brand img{
       width:34px;height:34px;
       border-radius:10px;
       border:1px solid rgba(17,16,24,.08);
-      background: rgba(255,255,255,.6);
-      object-fit: cover;
+      background:rgba(255,255,255,.6);
+      object-fit:cover;
     }
 
     .brand .btxt{
@@ -96,32 +96,32 @@
       text-align:right;
       display:grid;
       gap:2px;
-      min-width: 160px;
+      min-width:160px;
     }
 
     .version b{
-      font-size: 12px;
+      font-size:12px;
       letter-spacing:.2px;
     }
 
     .version span{
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
     }
 
     @media (max-width: 760px){
       .topbar{
-        grid-template-columns: 1fr;
+        grid-template-columns:1fr;
         gap:10px;
       }
       .version{
-        justify-self: start;
+        justify-self:start;
         text-align:left;
-        min-width: unset;
+        min-width:unset;
       }
       .brand .btxt span{
-        max-width: 70vw;
+        max-width:70vw;
         overflow:hidden;
         text-overflow:ellipsis;
         white-space:nowrap;
@@ -129,92 +129,91 @@
     }
 
     main{
-      width: min(1120px, 92vw);
-      margin: 16px auto 44px auto;
+      width:min(1120px,92vw);
+      margin:16px auto 44px auto;
       display:grid;
-      gap: 18px;
+      gap:18px;
     }
 
     .grid2{
       display:grid;
-      grid-template-columns: 1.3fr .9fr;
-      gap: 14px;
+      grid-template-columns:1.3fr .9fr;
+      gap:14px;
       align-items:start;
     }
 
     @media (max-width: 980px){
-      .grid2{ grid-template-columns: 1fr; }
+      .grid2{ grid-template-columns:1fr; }
     }
 
-    .stack{ display:grid; gap: 14px; }
+    .stack{ display:grid; gap:14px; }
 
     .card{
       border:1px solid rgba(255,255,255,.45);
-      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      background:linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.74));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
       overflow:hidden;
-      backdrop-filter: blur(10px);
+      backdrop-filter:blur(10px);
     }
 
-    .cardInner{ padding: 16px; }
+    .cardInner{ padding:16px; }
 
     .hRow{
       display:flex;
       align-items:flex-end;
       justify-content:space-between;
-      gap: 12px;
+      gap:12px;
       flex-wrap:wrap;
     }
 
     h1,h2,h3,h4,p{ margin:0; }
 
     .h1{
-      font-size: 18px;
-      letter-spacing: .2px;
+      font-size:18px;
+      letter-spacing:.2px;
     }
 
     .sub{
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
-      margin-top: 6px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.35;
+      margin-top:6px;
     }
 
     .banner{
-      position:relative;
-      border-radius: var(--radius);
+      border-radius:var(--radius);
       overflow:hidden;
-      border: 1px solid rgba(255,255,255,.48);
+      border:1px solid rgba(255,255,255,.48);
       background:
         radial-gradient(650px 260px at 10% 35%, rgba(139,211,255,.34), transparent 60%),
         radial-gradient(700px 280px at 65% 10%, rgba(109,40,217,.14), transparent 55%),
         radial-gradient(620px 240px at 95% 75%, rgba(176,11,85,.14), transparent 55%),
         linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.74));
-      box-shadow: 0 22px 70px rgba(17,16,24,.08);
-      padding: 16px;
-      backdrop-filter: blur(12px);
+      box-shadow:0 22px 70px rgba(17,16,24,.08);
+      padding:16px;
+      backdrop-filter:blur(12px);
     }
 
     .bannerTop{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap: 12px;
+      gap:12px;
       flex-wrap:wrap;
     }
 
     .banner h2{
-      font-size: 18px;
-      letter-spacing: .2px;
+      font-size:18px;
+      letter-spacing:.2px;
     }
 
     .banner p{
       margin:6px 0 0 0;
-      color: rgba(17,16,24,.70);
-      font-size: 13px;
+      color:rgba(17,16,24,.70);
+      font-size:13px;
       line-height:1.4;
-      max-width: 60ch;
+      max-width:60ch;
     }
 
     .btn{
@@ -223,32 +222,38 @@
       justify-content:center;
       gap:8px;
       padding:10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(17,16,24,.12);
-      background: rgba(255,255,255,.84);
+      border-radius:999px;
+      border:1px solid rgba(17,16,24,.12);
+      background:rgba(255,255,255,.84);
       cursor:pointer;
-      font-weight: 950;
-      font-size: 13px;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+      font-weight:950;
+      font-size:13px;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
       user-select:none;
       white-space:nowrap;
     }
 
     .btn:hover{
-      transform: translateY(-1px);
-      border-color: rgba(176,11,85,.25);
-      box-shadow: 0 14px 38px rgba(176,11,85,.08);
+      transform:translateY(-1px);
+      border-color:rgba(176,11,85,.25);
+      box-shadow:0 14px 38px rgba(176,11,85,.08);
     }
 
     .btn.primary{
-      border-color: rgba(176,11,85,.28);
-      background: linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
+      border-color:rgba(176,11,85,.28);
+      background:linear-gradient(135deg, rgba(176,11,85,.14), rgba(109,40,217,.10));
     }
 
     .btn.success{
-      border-color: rgba(88,201,154,.24);
-      background: rgba(88,201,154,.14);
-      color: var(--success);
+      border-color:rgba(88,201,154,.24);
+      background:rgba(88,201,154,.14);
+      color:var(--success);
+    }
+
+    .btn.warn{
+      border-color:rgba(232,154,29,.24);
+      background:rgba(232,154,29,.14);
+      color:#9b6200;
     }
 
     .btn:disabled{
@@ -262,34 +267,34 @@
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
+      padding:7px 10px;
+      border-radius:999px;
       border:1px solid rgba(255,255,255,.30);
-      background: rgba(17,16,24,.46);
-      color: rgba(255,255,255,.95);
-      font-size: 12px;
-      font-weight: 900;
-      backdrop-filter: blur(8px);
-      max-width: 100%;
+      background:rgba(17,16,24,.46);
+      color:rgba(255,255,255,.95);
+      font-size:12px;
+      font-weight:900;
+      backdrop-filter:blur(8px);
+      max-width:100%;
     }
 
     .badge .dot{
-      width:8px; height:8px; border-radius:999px;
-      background: var(--blue);
-      box-shadow: 0 0 0 4px rgba(139,211,255,.18);
-      flex: 0 0 auto;
+      width:8px;height:8px;border-radius:999px;
+      background:var(--blue);
+      box-shadow:0 0 0 4px rgba(139,211,255,.18);
+      flex:0 0 auto;
     }
 
     .badge.pink .dot{
-      background: var(--pink);
-      box-shadow: 0 0 0 4px rgba(176,11,85,.18);
+      background:var(--pink);
+      box-shadow:0 0 0 4px rgba(176,11,85,.18);
     }
 
     .mapBox{
       border-top:1px solid rgba(17,16,24,.08);
-      background: rgba(255,255,255,.62);
-      min-height: 420px;
-      position: relative;
+      background:rgba(255,255,255,.62);
+      min-height:420px;
+      position:relative;
     }
 
     #map{
@@ -310,23 +315,23 @@
     }
 
     @media (max-width: 520px){
-      #map{ height: 360px; }
-      .mapBox{ min-height: 360px; }
-      .mapFallback{ min-height: 360px; }
+      #map{ height:360px; }
+      .mapBox{ min-height:360px; }
+      .mapFallback{ min-height:360px; }
     }
 
-    .pinWrap{ position:relative; width:1px; height:1px; overflow: visible; }
+    .pinWrap{ position:relative; width:1px; height:1px; overflow:visible; }
     .glow-pin{
       position:absolute;
       left:0; top:0;
       width:16px; height:16px;
       border-radius:999px;
-      background: var(--pink);
+      background:var(--pink);
       box-shadow:
         0 0 10px var(--pink),
         0 0 22px rgba(176,11,85,.55),
         0 0 46px rgba(176,11,85,.30);
-      transform: translate(-50%, -50%);
+      transform:translate(-50%, -50%);
     }
     .glow-pulse{
       position:absolute;
@@ -334,13 +339,13 @@
       width:46px; height:46px;
       border-radius:999px;
       border:2px solid rgba(176,11,85,.30);
-      transform: translate(-50%, -50%);
-      animation: pulse 1.6s ease-out infinite;
+      transform:translate(-50%, -50%);
+      animation:pulse 1.6s ease-out infinite;
       pointer-events:none;
     }
 
     .glow-pin.me{
-      background: var(--green);
+      background:var(--green);
       box-shadow:
         0 0 10px var(--green),
         0 0 22px rgba(88,201,154,.50),
@@ -348,25 +353,25 @@
     }
 
     .glow-pulse.me{
-      border-color: rgba(88,201,154,.30);
+      border-color:rgba(88,201,154,.30);
     }
 
     @keyframes pulse{
-      0%{opacity:.85; transform: translate(-50%,-50%) scale(.35);}
-      100%{opacity:0; transform: translate(-50%,-50%) scale(1.15);}
+      0%{ opacity:.85; transform:translate(-50%,-50%) scale(.35); }
+      100%{ opacity:0; transform:translate(-50%,-50%) scale(1.15); }
     }
 
     .gm-style-iw{ padding:0 !important; }
     .gm-style-iw-d{ overflow:hidden !important; }
     .gm-style-iw-c{
-      max-width: 88vw !important;
-      border-radius: 16px !important;
+      max-width:88vw !important;
+      border-radius:16px !important;
     }
     .gm-ui-hover-effect{ display:none !important; }
 
     .grid3{
       display:grid;
-      grid-template-columns: repeat(3,1fr);
+      grid-template-columns:repeat(3,1fr);
       gap:12px;
     }
 
@@ -424,6 +429,7 @@
       background:rgba(255,255,255,.74);
       font-size:13px;
       line-height:1.45;
+      word-break:break-word;
     }
 
     .playerItem b{
@@ -437,7 +443,7 @@
 
     .row2{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
     }
 
@@ -450,9 +456,10 @@
     .good{ color:var(--success); font-weight:900; }
     .warnText{ color:#9b6200; font-weight:900; }
     .bad{ color:var(--danger); font-weight:900; }
+
+    .hidden{ display:none !important; }
   </style>
 </head>
-
 <body>
   <header>
     <div class="topbar">
@@ -460,7 +467,7 @@
         <img src="logo.png" alt="uZone logo" />
         <div class="btxt">
           <b>uZone</b>
-          <span id="hello">Loading…</span>
+          <span id="hello">Signing in…</span>
         </div>
       </a>
 
@@ -472,37 +479,38 @@
   </header>
 
   <main>
-    <section class="banner" aria-label="Banner">
+    <section class="banner">
       <div class="bannerTop">
         <div>
           <h2>Hide &amp; Seek</h2>
-          <p>This page shows the live game map. Your location is checked in automatically when the page opens if location is allowed, and you can press Check in any time to ping again.</p>
+          <p>This page is the live game. Sign in, wait for the round, then press CHECK IN before the timer ends to ping your location on the map.</p>
         </div>
         <div class="badge pink">
           <span class="dot"></span>
-          live player map
+          player map
         </div>
       </div>
     </section>
 
     <section class="grid2">
       <div class="stack">
-        <section class="card" aria-label="Map section" id="mapSection">
+        <section class="card" aria-label="Map section">
           <div class="cardInner">
             <div class="hRow">
               <div>
                 <h1 class="h1">Map</h1>
-                <div class="sub">Shows the game boundary, your ping, and the latest pinged locations of other active players.</div>
+                <div class="sub">Markers appear live for players who checked in for the current round.</div>
               </div>
               <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="btn" id="refreshBtn" type="button">Refresh</button>
-                <span class="badge"><span class="dot"></span><span id="clockText">00:00</span></span>
+                <button class="btn" id="refreshMapBtn" type="button">Refresh map</button>
+                <span class="badge"><span class="dot"></span><span id="countdownText">Time remaining: --</span></span>
               </div>
             </div>
           </div>
 
           <div class="mapBox">
-            <div id="map" role="application" aria-label="Game map"></div>
+            <div id="map"></div>
+            <div id="mapFallback" class="mapFallback hidden">Loading map…</div>
           </div>
         </section>
 
@@ -510,11 +518,11 @@
           <div class="cardInner">
             <div class="hRow">
               <div>
-                <h1 class="h1">Announcements</h1>
-                <div class="sub">Host updates show here live.</div>
+                <h1 class="h1">Live status</h1>
+                <div class="sub">Game state updates instantly from Firestore.</div>
               </div>
             </div>
-            <div class="console" id="announceConsole" style="margin-top:14px;">No announcements yet.</div>
+            <div class="console" id="consoleBox">Connecting…</div>
           </div>
         </section>
       </div>
@@ -524,19 +532,19 @@
           <div class="cardInner">
             <div class="grid3">
               <div class="statCard">
-                <b>Players</b>
-                <div class="big" id="playerCount">0</div>
-                <div class="muted small">others visible</div>
-              </div>
-              <div class="statCard">
-                <b>Hiders</b>
-                <div class="big" id="hiderCount">0</div>
-                <div class="muted small">active</div>
-              </div>
-              <div class="statCard">
                 <b>Status</b>
                 <div class="big" id="statusBig" style="font-size:20px;">—</div>
-                <div class="muted small" id="statusSmall">waiting</div>
+                <div class="muted small" id="statusSmall">Loading…</div>
+              </div>
+              <div class="statCard">
+                <b>Players shown</b>
+                <div class="big" id="playerCount">0</div>
+                <div class="muted small">checked in this round</div>
+              </div>
+              <div class="statCard">
+                <b>You</b>
+                <div class="big" id="meState" style="font-size:20px;">—</div>
+                <div class="muted small" id="meStateSub">Waiting…</div>
               </div>
             </div>
           </div>
@@ -545,22 +553,27 @@
         <section class="card">
           <div class="cardInner">
             <h1 class="h1">Check in</h1>
-            <div class="sub">Press this to confirm you are still playing and ping your latest location.</div>
+            <div class="sub">Click before the deadline. Your location is saved to <b>gameLists/hideAndSeek/players/{uid}</b>.</div>
 
             <div class="row2" style="margin-top:14px;">
-              <button class="btn primary" id="pingBtn" type="button">Check in</button>
+              <button class="btn primary" id="checkInBtn" type="button">CHECK IN</button>
               <button class="btn success" id="centerMeBtn" type="button">Center on me</button>
             </div>
 
             <div class="row2" style="margin-top:12px;">
-              <div class="playerItem" id="pingStatus">
-                <b>Check in</b>
-                Waiting for the game to load.
+              <div class="playerItem" id="authStatus">
+                <b>Player</b>
+                Waiting for sign-in…
               </div>
               <div class="playerItem" id="deadlineStatus">
                 <b>Deadline</b>
                 Loading…
               </div>
+            </div>
+
+            <div class="playerItem" id="checkInStatus" style="margin-top:12px;">
+              <b>Check in result</b>
+              Waiting for the game to load.
             </div>
           </div>
         </section>
@@ -569,8 +582,8 @@
           <div class="cardInner">
             <div class="hRow">
               <div>
-                <h1 class="h1">Other players</h1>
-                <div class="sub">Latest pinged locations from the live game.</div>
+                <h1 class="h1">Current round players</h1>
+                <div class="sub">Only players with <b>checkedInForRound = true</b> and <b>lastCheckInRoundId = currentRoundId</b> are shown.</div>
               </div>
             </div>
             <div class="playerList" id="playerList" style="margin-top:14px;"></div>
@@ -581,22 +594,20 @@
   </main>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import {
       getFirestore,
       collection,
       doc,
-      getDoc,
-      getDocs,
       onSnapshot,
-      updateDoc,
-      setDoc,
-      serverTimestamp,
-      orderBy,
-      query,
-      limit
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD_k18vbiBsLhQB7PzgEVT9PEI_30Mu0kg",
@@ -615,694 +626,494 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const gameRef = doc(db, "gameLists", "hideAndSeek");
+    const playersRef = collection(db, "gameLists", "hideAndSeek", "players");
 
     const hello = document.getElementById("hello");
-    const clockText = document.getElementById("clockText");
-    const playerCount = document.getElementById("playerCount");
-    const hiderCount = document.getElementById("hiderCount");
+    const liveChip = document.getElementById("liveChip");
+    const countdownText = document.getElementById("countdownText");
+    const consoleBox = document.getElementById("consoleBox");
     const statusBig = document.getElementById("statusBig");
     const statusSmall = document.getElementById("statusSmall");
-    const pingStatus = document.getElementById("pingStatus");
+    const playerCount = document.getElementById("playerCount");
+    const meState = document.getElementById("meState");
+    const meStateSub = document.getElementById("meStateSub");
+    const authStatus = document.getElementById("authStatus");
     const deadlineStatus = document.getElementById("deadlineStatus");
-    const announceConsole = document.getElementById("announceConsole");
-    const playerList = document.getElementById("playerList");
-    const pingBtn = document.getElementById("pingBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
+    const checkInStatus = document.getElementById("checkInStatus");
+    const checkInBtn = document.getElementById("checkInBtn");
     const centerMeBtn = document.getElementById("centerMeBtn");
-    const mapEl = document.getElementById("map");
+    const refreshMapBtn = document.getElementById("refreshMapBtn");
+    const playerList = document.getElementById("playerList");
+    const mapFallback = document.getElementById("mapFallback");
 
     let currentUser = null;
-    let game = null;
-    let players = [];
-    let me = null;
+    let gameData = {};
+    let allPlayers = [];
+    let visiblePlayers = [];
+    let countdownInterval = null;
 
-    let gmap = null;
-    let info = null;
+    let map = null;
+    let infoWindow = null;
     let markers = [];
-    let boundaryPolygon = null;
-    let myLatestLatLng = null;
-    let uiInterval = null;
-    let autoCheckInStarted = false;
+    let userMarker = null;
+    let lastMyLatLng = null;
 
-    function esc(s){
-      return String(s ?? "").replace(/[&<>"']/g, m => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        "\"":"&quot;",
-        "'":"&#39;"
-      }[m]));
+    function logLine(text) {
+      const now = new Date().toLocaleTimeString();
+      consoleBox.textContent = `[${now}] ${text}\n` + consoleBox.textContent;
     }
 
-    function tsToMs(v){
-      if (!v) return 0;
-      if (typeof v === "number") return v;
-      if (typeof v?.toMillis === "function") return v.toMillis();
-      if (typeof v?.seconds === "number") return v.seconds * 1000;
-      return 0;
+    function setCheckInStatus(title, text) {
+      checkInStatus.innerHTML = `<b>${title}</b>${text}`;
     }
 
-    function fmtMs(ms){
-      const total = Math.max(0, Math.floor((ms || 0) / 1000));
-      const h = Math.floor(total / 3600);
-      const m = Math.floor((total % 3600) / 60);
-      const s = total % 60;
-      return h > 0
-        ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
-        : `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    function setAuthStatus(text) {
+      authStatus.innerHTML = `<b>Player</b>${text}`;
     }
 
-    function getDisplayName(userLike){
-      return (
-        userLike?.displayName ||
-        userLike?.name ||
-        userLike?.email ||
-        localStorage.getItem("hz_display_name") ||
-        `Player-${Math.random().toString(36).slice(2,6).toUpperCase()}`
-      ).trim();
+    function setDeadlineStatus(text) {
+      deadlineStatus.innerHTML = `<b>Deadline</b>${text}`;
     }
 
-    function getPingIntervalMs(){
-      if (!game) return 5 * 60 * 1000;
-
-      const candidates = [
-        Number(game.pingIntervalMs || 0),
-        Number(game.checkInIntervalMs || 0),
-        Number(game.pingEveryMs || 0),
-        Number(game.intervalMs || 0),
-      ].filter(v => Number.isFinite(v) && v > 0);
-
-      if (candidates.length) return candidates[0];
-      return 5 * 60 * 1000;
+    function initials(name = "") {
+      return String(name)
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0]?.toUpperCase() || "")
+        .join("") || "?";
     }
 
-    function getNextDeadlineAt(){
-      if (!game || !me) return 0;
-
-      if (Number(game.nextDeadlineAt || 0) > 0) return Number(game.nextDeadlineAt);
-
-      const lastPing = Number(me.lastPingAt || 0);
-      const joinedAt = Number(me.joinedAt || Date.now());
-      return (lastPing || joinedAt) + getPingIntervalMs();
+    function safeDateText(ms) {
+      if (!ms || Number.isNaN(Number(ms))) return "—";
+      return new Date(Number(ms)).toLocaleString();
     }
 
-    function setPingMessage(html){
-      pingStatus.innerHTML = `<b>Check in</b>${html}`;
+    function isAllowedUser() {
+      const allowed = Array.isArray(gameData.allowedUids) ? gameData.allowedUids : [];
+      return !!currentUser && allowed.includes(currentUser.uid);
     }
 
-    function setDeadlineMessage(html){
-      deadlineStatus.innerHTML = `<b>Deadline</b>${html}`;
+    function currentRoundId() {
+      return gameData?.currentRoundId || null;
     }
 
-    function showMapFallback(message){
-      mapEl.innerHTML = `<div class="mapFallback">${esc(message)}</div>`;
+    function getVisiblePlayers() {
+      const roundId = currentRoundId();
+      return allPlayers.filter(player =>
+        !!player &&
+        player.checkedInForRound === true &&
+        player.lastCheckInRoundId === roundId &&
+        typeof player.lat === "number" &&
+        typeof player.lng === "number"
+      );
     }
 
-    async function loadGoogleMaps(){
+    function updateCountdown() {
+      clearInterval(countdownInterval);
+
+      const tick = () => {
+        const deadlineAt = Number(gameData?.deadlineAt || 0);
+        if (!deadlineAt) {
+          countdownText.textContent = "Time remaining: --";
+          statusBig.textContent = gameData?.status || "idle";
+          statusSmall.textContent = "No active deadline";
+          return;
+        }
+
+        const remainingMs = deadlineAt - Date.now();
+        const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+
+        countdownText.textContent = `Time remaining: ${remainingSeconds} seconds`;
+
+        if (remainingMs > 0) {
+          statusBig.textContent = gameData?.status || "running";
+          statusSmall.textContent = `Round ends at ${new Date(deadlineAt).toLocaleTimeString()}`;
+        } else {
+          statusBig.textContent = "ended";
+          statusSmall.textContent = "Deadline passed";
+        }
+      };
+
+      tick();
+      countdownInterval = setInterval(tick, 250);
+    }
+
+    function updateMeState() {
+      if (!currentUser) {
+        meState.textContent = "signed out";
+        meStateSub.textContent = "Waiting for login";
+        return;
+      }
+
+      if (!isAllowedUser()) {
+        meState.textContent = "blocked";
+        meStateSub.textContent = "You are not on the player list.";
+        return;
+      }
+
+      const me = allPlayers.find(p => p.uid === currentUser.uid);
+      const roundId = currentRoundId();
+
+      if (me && me.checkedInForRound === true && me.lastCheckInRoundId === roundId) {
+        meState.textContent = "checked in";
+        meStateSub.textContent = "Your location is on the map";
+      } else {
+        meState.textContent = "waiting";
+        meStateSub.textContent = "You have not checked in this round";
+      }
+    }
+
+    function renderPlayerList() {
+      playerList.innerHTML = "";
+      visiblePlayers = getVisiblePlayers();
+      playerCount.textContent = String(visiblePlayers.length);
+
+      if (!visiblePlayers.length) {
+        const empty = document.createElement("div");
+        empty.className = "playerItem";
+        empty.innerHTML = "<b>Players</b>No players have checked in for the current round yet.";
+        playerList.appendChild(empty);
+        return;
+      }
+
+      visiblePlayers.forEach(player => {
+        const item = document.createElement("div");
+        item.className = "playerItem";
+
+        const timeText = player.lastCheckInAt
+          ? new Date(Number(player.lastCheckInAt)).toLocaleTimeString()
+          : "Unknown time";
+
+        item.innerHTML = `
+          <b>${player.name || player.email || player.uid || "Player"}</b>
+          ${player.email || "No email"}<br>
+          Check-in: ${timeText}<br>
+          Lat: ${Number(player.lat).toFixed(5)} | Lng: ${Number(player.lng).toFixed(5)}
+        `;
+
+        playerList.appendChild(item);
+      });
+    }
+
+    function normalizePlayer(data, id) {
+      return {
+        uid: data.uid || id || "",
+        name: data.name || data.displayName || "Unnamed player",
+        email: data.email || "",
+        lat: typeof data.lat === "number" ? data.lat : Number(data.lat),
+        lng: typeof data.lng === "number" ? data.lng : Number(data.lng),
+        lastCheckInAt: typeof data.lastCheckInAt === "number" ? data.lastCheckInAt : Number(data.lastCheckInAt),
+        lastCheckInRoundId: data.lastCheckInRoundId || null,
+        checkedInForRound: data.checkedInForRound === true
+      };
+    }
+
+    function loadGoogleMapsScript() {
       return new Promise((resolve, reject) => {
-        if (window.google?.maps?.Map && window.google?.maps?.marker?.AdvancedMarkerElement) return resolve();
-        const s = document.createElement("script");
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(MAPS_API_KEY)}&libraries=marker,places,geometry&v=weekly`;
-        s.async = true;
-        s.defer = true;
-        s.onload = () => resolve();
-        s.onerror = () => reject(new Error("Failed to load Google Maps script."));
-        document.head.appendChild(s);
+        if (window.google?.maps) {
+          resolve(window.google.maps);
+          return;
+        }
+
+        const existing = document.querySelector('script[data-google-maps="true"]');
+        if (existing) {
+          existing.addEventListener("load", () => resolve(window.google.maps));
+          existing.addEventListener("error", reject);
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_API_KEY}&v=weekly`;
+        script.async = true;
+        script.defer = true;
+        script.dataset.googleMaps = "true";
+        script.onload = () => resolve(window.google.maps);
+        script.onerror = () => reject(new Error("Google Maps failed to load."));
+        document.head.appendChild(script);
       });
     }
 
-    function buildPingPinEl(isMe = false){
-      const wrap = document.createElement("div");
-      wrap.className = "pinWrap";
+    async function ensureMap() {
+      if (map) return map;
 
-      const pulse = document.createElement("div");
-      pulse.className = `glow-pulse${isMe ? " me" : ""}`;
-
-      const dot = document.createElement("div");
-      dot.className = `glow-pin${isMe ? " me" : ""}`;
-
-      wrap.appendChild(pulse);
-      wrap.appendChild(dot);
-      return wrap;
-    }
-
-    async function initMap(){
       try {
-        await loadGoogleMaps();
-      } catch (err) {
-        showMapFallback("Map unavailable. Google Maps could not load.");
-        throw err;
+        await loadGoogleMapsScript();
+
+        map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: 45.4215, lng: -75.6972 },
+          zoom: 12,
+          mapId: MAP_ID
+        });
+
+        infoWindow = new google.maps.InfoWindow();
+        mapFallback.classList.add("hidden");
+        logLine("Map ready.");
+        return map;
+      } catch (error) {
+        console.error(error);
+        mapFallback.classList.remove("hidden");
+        mapFallback.textContent = "Google Map could not load.";
+        logLine(`Map failed: ${error.message}`);
+        throw error;
       }
-
-      const defaultCenter = game?.center || { lat:45.4215, lng:-75.6972 };
-      gmap = new google.maps.Map(mapEl, {
-        center: defaultCenter,
-        zoom: 12,
-        mapId: MAP_ID,
-        clickableIcons: false,
-        gestureHandling: "greedy",
-      });
-
-      info = new google.maps.InfoWindow({});
     }
 
-    function clearMarkers(){
-      for (const m of markers){
-        try { m.map = null; } catch(_){}
-      }
+    function clearMarkers() {
+      markers.forEach(marker => marker.setMap(null));
       markers = [];
     }
 
-    function renderBoundary(){
-      if (!gmap) return;
-
-      if (boundaryPolygon) {
-        try { boundaryPolygon.setMap(null); } catch(_) {}
-        boundaryPolygon = null;
-      }
-
-      const pts = Array.isArray(game?.boundaryPoints)
-        ? game.boundaryPoints.filter(p => typeof p?.lat === "number" && typeof p?.lng === "number")
-        : [];
-
-      if (pts.length < 3) return;
-
-      boundaryPolygon = new google.maps.Polygon({
-        paths: pts,
-        strokeColor: "#b00b55",
-        strokeOpacity: 0.95,
-        strokeWeight: 2,
-        fillColor: "#b00b55",
-        fillOpacity: 0.08,
-        map: gmap
-      });
-    }
-
-    function fitMapToGameAndPlayers(){
-      if (!gmap) return;
-
-      const bounds = new google.maps.LatLngBounds();
-      let hasAny = false;
-
-      const pts = Array.isArray(game?.boundaryPoints)
-        ? game.boundaryPoints.filter(p => typeof p?.lat === "number" && typeof p?.lng === "number")
-        : [];
-
-      pts.forEach(p => {
-        bounds.extend(p);
-        hasAny = true;
-      });
-
-      players.forEach(p => {
-        if (typeof p?.lat === "number" && typeof p?.lng === "number") {
-          bounds.extend({ lat:p.lat, lng:p.lng });
-          hasAny = true;
-        }
-      });
-
-      if (!hasAny && game?.center?.lat && game?.center?.lng) {
-        bounds.extend(game.center);
-        hasAny = true;
-      }
-
-      if (hasAny) gmap.fitBounds(bounds, 42);
-    }
-
-    function pointInsideBoundary(lat, lng){
-      const pts = Array.isArray(game?.boundaryPoints)
-        ? game.boundaryPoints.filter(p => typeof p?.lat === "number" && typeof p?.lng === "number")
-        : [];
-
-      if (!(pts.length >= 3)) return true;
-      if (!window.google?.maps?.geometry?.poly) return true;
-
-      const poly = new google.maps.Polygon({ paths: pts });
-      return google.maps.geometry.poly.containsLocation(new google.maps.LatLng(lat, lng), poly);
-    }
-
-    async function getLiveGame(){
-      const snap = await getDocs(collection(db, "hideSeekGames"));
-      if (snap.empty) return null;
-
-      const docs = [];
-      snap.forEach(d => docs.push({ id:d.id, ...d.data() }));
-
-      docs.sort((a, b) => {
-        const aScore = Number(!!(a.active || a.isActive || a.startedAt));
-        const bScore = Number(!!(b.active || b.isActive || b.startedAt));
-        if (bScore !== aScore) return bScore - aScore;
-
-        const aTime = Math.max(
-          tsToMs(a.updatedAt),
-          tsToMs(a.startedAt),
-          tsToMs(a.createdAt),
-          Number(a.updatedAt || 0),
-          Number(a.startedAt || 0),
-          Number(a.createdAt || 0)
-        );
-        const bTime = Math.max(
-          tsToMs(b.updatedAt),
-          tsToMs(b.startedAt),
-          tsToMs(b.createdAt),
-          Number(b.updatedAt || 0),
-          Number(b.startedAt || 0),
-          Number(b.createdAt || 0)
-        );
-        return bTime - aTime;
-      });
-
-      return docs[0] || null;
-    }
-
-    async function ensureSignedIn(){
-      if (auth.currentUser) return auth.currentUser;
-
-      return new Promise((resolve, reject) => {
-        const off = onAuthStateChanged(auth, async user => {
-          if (user) {
-            off();
-            resolve(user);
-            return;
-          }
-          try {
-            const cred = await signInAnonymously(auth);
-            off();
-            resolve(cred.user);
-          } catch (err) {
-            off();
-            reject(err);
-          }
-        });
-      });
-    }
-
-    async function ensureJoinedAsHider(){
-      const ref = doc(db, "hideSeekGames", game.id, "players", currentUser.uid);
-
-      const existingSnap = await getDoc(ref);
-      const displayName = getDisplayName(currentUser);
-      localStorage.setItem("hz_display_name", displayName);
-
-      const base = {
-        uid: currentUser.uid,
-        name: displayName,
-        joinedAt: existingSnap.exists() ? (existingSnap.data()?.joinedAt || Date.now()) : Date.now(),
-        updatedAt: serverTimestamp()
-      };
-
-      if (!existingSnap.exists()) {
-        await setDoc(ref, {
-          ...base,
-          role: "hider",
-          status: "active",
-          lat: null,
-          lng: null,
-          lastPingAt: 0
-        }, { merge:true });
-        return;
-      }
-
-      await setDoc(ref, {
-        ...base,
-        role: existingSnap.data()?.role || "hider",
-        status: existingSnap.data()?.status || "active"
-      }, { merge:true });
-    }
-
-    function subscribeToGame(){
-      return onSnapshot(doc(db, "hideSeekGames", game.id), snap => {
-        if (!snap.exists()) return;
-        game = { id:snap.id, ...snap.data() };
-        renderBoundary();
-        renderAllMarkers();
-        updateStatusUI();
-      });
-    }
-
-    function subscribeToPlayers(){
-      return onSnapshot(collection(db, "hideSeekGames", game.id, "players"), snap => {
-        const arr = [];
-        snap.forEach(d => arr.push({ id:d.id, ...d.data() }));
-        players = arr;
-        me = arr.find(p => p.uid === currentUser.uid) || null;
-
-        if (me && typeof me.lat === "number" && typeof me.lng === "number") {
-          myLatestLatLng = { lat:me.lat, lng:me.lng };
-        }
-
-        renderPlayerList();
-        renderAllMarkers();
-        updateStatusUI();
-
-        if (!autoCheckInStarted && me) {
-          autoCheckInStarted = true;
-          setTimeout(() => {
-            sendCheckIn(true).catch(err => {
-              console.error(err);
-            });
-          }, 800);
-        }
-      });
-    }
-
-    function subscribeToAnnouncements(){
-      const q = query(
-        collection(db, "hideSeekGames", game.id, "announcements"),
-        orderBy("createdAt", "desc"),
-        limit(25)
-      );
-
-      return onSnapshot(q, snap => {
-        const rows = [];
-        snap.forEach(d => {
-          const data = d.data() || {};
-          rows.push({
-            text: data.text || "",
-            name: data.name || "Host",
-            createdAt: tsToMs(data.createdAt)
-          });
-        });
-
-        rows.reverse();
-        announceConsole.textContent = rows.length
-          ? rows.map(r => `[${new Date(r.createdAt || Date.now()).toLocaleTimeString()}] ${r.name}: ${r.text}`).join("\n")
-          : "No announcements yet.";
-      });
-    }
-
-    function buildInfoHtml(player){
-      const isMe = player.uid === currentUser.uid;
-      const title = esc(isMe ? "You" : (player.name || "Player"));
-      const role = esc(player.role || "player");
-      const status = esc(player.status || "unknown");
-      const lastPing = Number(player.lastPingAt || 0);
-
-      return `
-        <div style="
-          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-          width:min(300px,86vw);
-          max-width:86vw;
-          padding:12px;
-          color: rgba(20,20,24,.92);
-          position:relative;
-          background:
-            radial-gradient(420px 200px at 10% 0%, rgba(139,211,255,.26), transparent 60%),
-            radial-gradient(420px 200px at 90% 20%, rgba(176,11,85,.14), transparent 60%),
-            rgba(255,255,255,.94);
-          border-radius: 16px;
-        ">
-          <button type="button" id="iwCloseBtn"
-            style="
-              position:absolute; top:10px; right:10px;
-              width:34px; height:34px;
-              border-radius:999px;
-              border:1px solid rgba(0,0,0,.12);
-              background: rgba(255,255,255,.92);
-              color: rgba(20,20,24,.92);
-              font-weight:1000;
-              cursor:pointer;
-              display:flex; align-items:center; justify-content:center;
-              line-height:1;
-              box-shadow: 0 10px 24px rgba(0,0,0,.12);
-            ">✕</button>
-
-          <div style="
-            display:flex; align-items:center; gap:8px;
-            padding:7px 10px;
-            border-radius:999px;
-            background: rgba(0,0,0,.06);
-            border:1px solid rgba(0,0,0,.08);
-            font-size:12px;
-            color: rgba(20,20,24,.80);
-            white-space:nowrap;
-            max-width: calc(100% - 44px);
-            overflow:hidden;
-            text-overflow:ellipsis;
-          ">
-            <span style="
-              width:7px;height:7px;border-radius:999px;
-              background: ${isMe ? "var(--green)" : "var(--pink)"};
-              box-shadow: 0 0 0 4px ${isMe ? "rgba(88,201,154,.16)" : "rgba(176,11,85,.16)"};
-              flex:0 0 auto;
-            "></span>
-            ${isMe ? "Your check in" : "Player check in"}
-          </div>
-
-          <h3 style="margin:10px 0 6px 0; font-size:15px; line-height:1.2; font-weight:1000; padding-right:40px;">
-            ${title}
-          </h3>
-
-          <div style="font-size:12px; color: rgba(20,20,24,.74); line-height:1.35; word-break: break-word;">
-            <b>Role:</b> ${role}<br>
-            <b>Status:</b> ${status}<br>
-            <b>Last check in:</b> ${lastPing ? new Date(lastPing).toLocaleTimeString() : "Never"}<br>
-            <b>Coords:</b> ${typeof player.lat === "number" && typeof player.lng === "number" ? `${player.lat.toFixed(5)}, ${player.lng.toFixed(5)}` : "No location"}
-          </div>
-        </div>
-      `;
-    }
-
-    function openPlayerInfo(marker, player){
-      info.setContent(buildInfoHtml(player));
-      info.open({ map: gmap, anchor: marker });
-
-      google.maps.event.addListenerOnce(info, "domready", () => {
-        const close = document.getElementById("iwCloseBtn");
-        if (close) close.onclick = () => info.close();
-      });
-    }
-
-    function renderAllMarkers(){
-      if (!gmap) return;
+    async function renderMap() {
+      await ensureMap();
 
       clearMarkers();
-      renderBoundary();
 
-      const activePlayers = players.filter(p =>
-        p &&
-        p.status === "active" &&
-        typeof p.lat === "number" &&
-        typeof p.lng === "number"
-      );
+      const bounds = new google.maps.LatLngBounds();
+      let hasBounds = false;
 
-      activePlayers.forEach(player => {
-        const isMe = player.uid === currentUser.uid;
+      visiblePlayers.forEach(player => {
+        const isMe = currentUser && player.uid === currentUser.uid;
 
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          map: gmap,
-          position: { lat:player.lat, lng:player.lng },
-          title: (isMe ? "You" : (player.name || "Player")).toString(),
-          content: buildPingPinEl(isMe),
+        const marker = new google.maps.Marker({
+          map,
+          position: { lat: player.lat, lng: player.lng },
+          title: player.name || player.email || "Player",
+          icon: {
+            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46">
+                <circle cx="23" cy="23" r="18" fill="${isMe ? "#58c99a" : "#b00b55"}" fill-opacity="0.22"/>
+                <circle cx="23" cy="23" r="9" fill="${isMe ? "#58c99a" : "#b00b55"}"/>
+                <circle cx="23" cy="23" r="4" fill="#ffffff"/>
+              </svg>
+            `)}`,
+            scaledSize: new google.maps.Size(46, 46),
+            anchor: new google.maps.Point(23, 23)
+          }
         });
 
-        marker.addListener("gmp-click", () => openPlayerInfo(marker, player));
-        markers.push(marker);
-      });
-    }
-
-    function renderPlayerList(){
-      const others = players
-        .filter(p => p.uid !== currentUser.uid)
-        .filter(p => p.status === "active")
-        .sort((a,b) => Number(b.lastPingAt || 0) - Number(a.lastPingAt || 0));
-
-      playerList.innerHTML = others.length
-        ? others.map(p => `
-            <div class="playerItem">
-              <b>${esc(p.name || "Player")}</b>
-              Role: ${esc(p.role || "player")}<br>
-              Last check in: ${Number(p.lastPingAt || 0) ? new Date(Number(p.lastPingAt)).toLocaleTimeString() : "Never"}<br>
-              Location: ${typeof p.lat === "number" && typeof p.lng === "number" ? `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}` : "No ping yet"}
+        marker.addListener("click", () => {
+          infoWindow.setContent(`
+            <div style="padding:10px 12px; min-width:180px;">
+              <div style="font-weight:900; font-size:14px;">${escapeHtml(player.name || "Player")}</div>
+              <div style="font-size:12px; color:#555; margin-top:4px;">${escapeHtml(player.email || "")}</div>
+              <div style="font-size:12px; color:#555; margin-top:6px;">Checked in: ${escapeHtml(player.lastCheckInAt ? new Date(Number(player.lastCheckInAt)).toLocaleString() : "Unknown")}</div>
             </div>
-          `).join("")
-        : `<div class="playerItem"><b>Players</b>No other players with visible check ins yet.</div>`;
-    }
+          `);
+          infoWindow.open({ map, anchor: marker });
+        });
 
-    function updateStatusUI(){
-      if (!game) return;
+        markers.push(marker);
+        bounds.extend({ lat: player.lat, lng: player.lng });
+        hasBounds = true;
 
-      const nextDeadlineAt = getNextDeadlineAt();
-      const msLeft = nextDeadlineAt ? (nextDeadlineAt - Date.now()) : 0;
-
-      clockText.textContent = fmtMs(msLeft);
-
-      const activePlayers = players.filter(p => p.status === "active");
-      const activeHiders = activePlayers.filter(p => p.role === "hider").length;
-      const othersVisible = activePlayers.filter(p => p.uid !== currentUser?.uid && typeof p.lat === "number" && typeof p.lng === "number").length;
-
-      playerCount.textContent = String(othersVisible);
-      hiderCount.textContent = String(activeHiders);
-
-      statusBig.textContent = me?.status === "out" ? "Out" : (game.startedAt ? "Live" : "Lobby");
-
-      if (me?.status === "out") {
-        statusSmall.textContent = "You are out of hider mode.";
-      } else if (!game.startedAt) {
-        statusSmall.textContent = "Host has not started the game yet.";
-      } else {
-        statusSmall.textContent = `Next check in due in ${fmtMs(msLeft)}`;
-      }
-
-      if (me?.status === "out") {
-        setPingMessage(`<span class="bad">You are out.</span>`);
-      } else if (!game.startedAt) {
-        setPingMessage(`The game has not started yet.`);
-      } else if (msLeft <= 0) {
-        setPingMessage(`<span class="bad">Check in overdue.</span> Press the button now.`);
-      } else if (msLeft <= 30000) {
-        setPingMessage(`<span class="warnText">Check in due soon.</span> ${fmtMs(msLeft)} left.`);
-      } else if (Number(me?.lastPingAt || 0)) {
-        setPingMessage(`<span class="good">Last check in saved.</span> ${new Date(Number(me.lastPingAt)).toLocaleTimeString()}`);
-      } else {
-        setPingMessage(`No check in sent yet.`);
-      }
-
-      const intervalMin = Math.round(getPingIntervalMs() / 60000);
-      setDeadlineMessage(
-        nextDeadlineAt
-          ? `Every ~${intervalMin} min. Next due at ${new Date(nextDeadlineAt).toLocaleTimeString()}.`
-          : `Interval loading…`
-      );
-    }
-
-    async function sendCheckIn(isAutomatic = false){
-      if (!game || !me) return;
-      if (me.status === "out") {
-        setPingMessage(`<span class="bad">You are out.</span>`);
-        return;
-      }
-      if (!navigator.geolocation) {
-        setPingMessage(`<span class="bad">Location is not supported on this device.</span>`);
-        return;
-      }
-
-      pingBtn.disabled = true;
-      setPingMessage(isAutomatic ? `Getting your location for automatic check in…` : `Getting your location…`);
-
-      navigator.geolocation.getCurrentPosition(async pos => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const now = Date.now();
-
-        try {
-          const inside = pointInsideBoundary(lat, lng);
-
-          if (!inside) {
-            await updateDoc(doc(db, "hideSeekGames", game.id, "players", currentUser.uid), {
-              status: "out",
-              role: "seeker",
-              eliminatedAt: now,
-              eliminateReason: "left-boundary",
-              lat,
-              lng,
-              lastPingAt: now,
-              updatedAt: serverTimestamp()
-            });
-            setPingMessage(`<span class="bad">You left the boundary and were switched out.</span>`);
-            return;
-          }
-
-          await updateDoc(doc(db, "hideSeekGames", game.id, "players", currentUser.uid), {
-            lat,
-            lng,
-            lastPingAt: now,
-            pingRoundAt: Number(game.nextDeadlineAt || 0),
-            status: "active",
-            updatedAt: serverTimestamp()
-          });
-
-          myLatestLatLng = { lat, lng };
-
-          if (gmap) {
-            gmap.panTo(myLatestLatLng);
-            if ((gmap.getZoom() || 0) < 15) gmap.setZoom(15);
-          }
-
-          setPingMessage(
-            isAutomatic
-              ? `<span class="good">Automatic check in saved.</span> ${new Date(now).toLocaleTimeString()}`
-              : `<span class="good">Check in saved.</span> ${new Date(now).toLocaleTimeString()}`
-          );
-        } catch (err) {
-          console.error(err);
-          setPingMessage(`<span class="bad">${esc(err?.message || "Could not save check in.")}</span>`);
-        } finally {
-          pingBtn.disabled = false;
+        if (isMe) {
+          lastMyLatLng = { lat: player.lat, lng: player.lng };
         }
-      }, err => {
-        pingBtn.disabled = false;
-        setPingMessage(
-          isAutomatic
-            ? `<span class="warnText">Automatic check in did not run.</span> You can still press Check in manually.`
-            : `<span class="bad">${esc(err?.message || "Could not get your location.")}</span>`
+      });
+
+      if (hasBounds) {
+        map.fitBounds(bounds, 80);
+      } else if (lastMyLatLng) {
+        map.setCenter(lastMyLatLng);
+        map.setZoom(15);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function requestLocation() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error("Geolocation is not supported in this browser."));
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            });
+          },
+          (error) => {
+            reject(error);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+          }
         );
-      }, {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
       });
     }
 
-    refreshBtn.addEventListener("click", () => {
-      renderAllMarkers();
-      fitMapToGameAndPlayers();
-      updateStatusUI();
-    });
-
-    centerMeBtn.addEventListener("click", () => {
-      if (gmap && myLatestLatLng) {
-        gmap.panTo(myLatestLatLng);
-        gmap.setZoom(Math.max(gmap.getZoom() || 15, 15));
+    async function checkIn() {
+      if (!currentUser) {
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (error) {
+          console.error(error);
+          setCheckInStatus("Check in result", `Sign-in failed: ${error.message}`);
+          return;
+        }
       }
-    });
 
-    pingBtn.addEventListener("click", () => {
-      sendCheckIn(false).catch(err => {
-        console.error(err);
-        setPingMessage(`<span class="bad">${esc(err?.message || "Could not send check in.")}</span>`);
-        pingBtn.disabled = false;
-      });
-    });
-
-    (async () => {
-      currentUser = await ensureSignedIn();
-      hello.textContent = `Hey, ${getDisplayName(currentUser)}`;
-
-      game = await getLiveGame();
-      if (!game) {
-        statusBig.textContent = "Missing";
-        statusSmall.textContent = "No live game found.";
-        setPingMessage(`<span class="bad">Could not find a hide and seek game.</span>`);
-        showMapFallback("No live Hide & Seek game was found.");
+      if (!isAllowedUser()) {
+        setCheckInStatus("Check in result", "You are not on the player list.");
         return;
       }
 
-      await ensureJoinedAsHider();
-      await initMap();
-      renderBoundary();
+      const deadlineAt = Number(gameData?.deadlineAt || 0);
+      const roundId = currentRoundId();
 
-      const unsubscribers = [
-        subscribeToGame(),
-        subscribeToPlayers(),
-        subscribeToAnnouncements()
-      ];
+      if (!deadlineAt || !roundId) {
+        setCheckInStatus("Check in result", "No active round right now.");
+        return;
+      }
 
-      fitMapToGameAndPlayers();
+      if (Date.now() > deadlineAt) {
+        setCheckInStatus("Check in result", "Too late");
+        return;
+      }
 
-      if (uiInterval) clearInterval(uiInterval);
-      uiInterval = setInterval(updateStatusUI, 250);
+      checkInBtn.disabled = true;
+      setCheckInStatus("Check in result", "Getting your location…");
 
-      window.addEventListener("beforeunload", () => {
-        try { unsubscribers.forEach(fn => typeof fn === "function" && fn()); } catch(_) {}
-        if (uiInterval) clearInterval(uiInterval);
-      });
-    })().catch(err => {
-      console.error(err);
-      statusBig.textContent = "Error";
-      statusSmall.textContent = err?.message || "Could not load page.";
-      setPingMessage(`<span class="bad">${esc(err?.message || "Could not load page.")}</span>`);
-      if (!gmap) showMapFallback(err?.message || "Could not load map.");
+      try {
+        const coords = await requestLocation();
+
+        if (Date.now() > deadlineAt) {
+          setCheckInStatus("Check in result", "Too late");
+          return;
+        }
+
+        await setDoc(doc(db, "gameLists", "hideAndSeek", "players", currentUser.uid), {
+          uid: currentUser.uid,
+          name: currentUser.displayName || currentUser.email || "Player",
+          email: currentUser.email || "",
+          lat: coords.lat,
+          lng: coords.lng,
+          lastCheckInAt: Date.now(),
+          lastCheckInRoundId: roundId,
+          checkedInForRound: true
+        }, { merge: true });
+
+        lastMyLatLng = { lat: coords.lat, lng: coords.lng };
+        setCheckInStatus("Check in result", "Check-in saved.");
+        logLine(`Check-in saved for round ${roundId}.`);
+      } catch (error) {
+        console.error(error);
+        setCheckInStatus("Check in result", `Check-in failed: ${error.message || error}`);
+      } finally {
+        checkInBtn.disabled = false;
+      }
+    }
+
+    function updateAllowedUi() {
+      if (!currentUser) {
+        hello.textContent = "Signing in…";
+        setAuthStatus("Waiting for sign-in…");
+        checkInBtn.disabled = true;
+        return;
+      }
+
+      hello.textContent = currentUser.displayName || currentUser.email || "Signed in";
+
+      if (!isAllowedUser()) {
+        setAuthStatus(`${currentUser.displayName || currentUser.email || "Player"}<br><span class="bad">You are not on the player list.</span>`);
+        setCheckInStatus("Check in result", "You are not on the player list.");
+        checkInBtn.disabled = true;
+      } else {
+        setAuthStatus(`${currentUser.displayName || currentUser.email || "Player"}<br><span class="good">You are on the player list.</span>`);
+        checkInBtn.disabled = false;
+      }
+    }
+
+    function refreshGameUi() {
+      liveChip.textContent = gameData?.status || "live game";
+      setDeadlineStatus(
+        gameData?.deadlineAt
+          ? `${safeDateText(gameData.deadlineAt)}`
+          : "No active deadline"
+      );
+      updateCountdown();
+      updateAllowedUi();
+      updateMeState();
+      renderPlayerList();
+      renderMap().catch(() => {});
+    }
+
+    checkInBtn.addEventListener("click", checkIn);
+
+    centerMeBtn.addEventListener("click", async () => {
+      if (!lastMyLatLng) {
+        logLine("No personal location available yet.");
+        return;
+      }
+      await ensureMap();
+      map.setCenter(lastMyLatLng);
+      map.setZoom(16);
     });
+
+    refreshMapBtn.addEventListener("click", async () => {
+      await renderMap();
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user || null;
+
+      if (!currentUser) {
+        try {
+          await signInWithPopup(auth, provider);
+          return;
+        } catch (error) {
+          console.error(error);
+          hello.textContent = "Sign-in failed";
+          setAuthStatus(`Sign-in failed.<br>${error.message}`);
+          setCheckInStatus("Check in result", "Sign in with Google to play.");
+          logLine(`Sign-in failed: ${error.message}`);
+          return;
+        }
+      }
+
+      hello.textContent = currentUser.displayName || currentUser.email || "Signed in";
+      setAuthStatus(`${currentUser.displayName || currentUser.email || "Player"}<br>Signed in`);
+      logLine(`Signed in as ${currentUser.displayName || currentUser.email || currentUser.uid}.`);
+      updateAllowedUi();
+      refreshGameUi();
+    });
+
+    onSnapshot(gameRef, (snap) => {
+      gameData = snap.exists() ? snap.data() : {};
+      logLine("Game doc updated.");
+      refreshGameUi();
+    }, (error) => {
+      console.error(error);
+      logLine(`Game listener failed: ${error.message}`);
+    });
+
+    onSnapshot(playersRef, (snap) => {
+      allPlayers = snap.docs.map(d => normalizePlayer(d.data(), d.id)).filter(p => p.uid);
+      logLine(`Players updated (${allPlayers.length} total docs).`);
+      refreshGameUi();
+    }, (error) => {
+      console.error(error);
+      logLine(`Players listener failed: ${error.message}`);
+    });
+
+    ensureMap().catch(() => {});
   </script>
 </body>
 </html>
