@@ -467,7 +467,7 @@
         <div class="hRow">
           <div>
             <h1 class="h1">Map</h1>
-            <div class="sub">Markers appear live for players who checked in for the current round.</div>
+            <div class="sub">Markers stay until a player makes a new ping or is eliminated for missing check in.</div>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
             <button class="btn" id="refreshMapBtn" type="button">Refresh map</button>
@@ -537,13 +537,15 @@
     let currentUser = null;
     let gameData = {};
     let allPlayers = [];
-    let visiblePlayers = [];
     let countdownInterval = null;
 
     let map = null;
     let infoWindow = null;
     let markers = [];
     let lastMyLatLng = null;
+
+    let handledMissForRoundId = null;
+    let redirectedToEliminated = false;
 
     function setCheckInStatus(title, text) {
       checkInStatus.innerHTML = `<b>${title}</b>${text}`;
@@ -576,46 +578,121 @@
         lng: typeof data.lng === "number" ? data.lng : Number(data.lng),
         lastCheckInAt: typeof data.lastCheckInAt === "number" ? data.lastCheckInAt : Number(data.lastCheckInAt),
         lastCheckInRoundId: data.lastCheckInRoundId || null,
-        checkedInForRound: data.checkedInForRound === true
+        checkedInForRound: data.checkedInForRound === true,
+        eliminated: data.eliminated === true,
+        eliminatedAt: typeof data.eliminatedAt === "number" ? data.eliminatedAt : Number(data.eliminatedAt),
+        eliminatedRoundId: data.eliminatedRoundId || null,
+        role: data.role || "hider"
       };
     }
 
-    function getVisiblePlayers() {
-      const roundId = currentRoundId();
-      return allPlayers.filter(player =>
-        !!player &&
-        player.checkedInForRound === true &&
-        player.lastCheckInRoundId === roundId &&
+    function getPlayer(uid) {
+      return allPlayers.find(p => p.uid === uid) || null;
+    }
+
+    function isPlayerEliminated(player) {
+      return !!(player && player.eliminated === true);
+    }
+
+    function hasValidCoords(player) {
+      return !!player &&
         typeof player.lat === "number" &&
         !Number.isNaN(player.lat) &&
         typeof player.lng === "number" &&
-        !Number.isNaN(player.lng)
-      );
+        !Number.isNaN(player.lng);
     }
 
-    function getCheckedInCount() {
-      return getVisiblePlayers().length;
+    function hasCheckedInThisRound(player) {
+      const roundId = currentRoundId();
+      return !!player &&
+        player.checkedInForRound === true &&
+        player.lastCheckInRoundId === roundId;
     }
 
-    function getAllowedCount() {
-      return Array.isArray(gameData.allowedUids) ? gameData.allowedUids.length : 0;
+    function getMapPlayers() {
+      return allPlayers.filter(player => !isPlayerEliminated(player) && hasValidCoords(player));
+    }
+
+    function getActiveAllowedPlayers() {
+      const allowed = Array.isArray(gameData.allowedUids) ? gameData.allowedUids : [];
+      return allPlayers.filter(player => allowed.includes(player.uid) && !isPlayerEliminated(player));
     }
 
     function getPlayersRemainingCount() {
-      const allowedCount = getAllowedCount();
-      const checkedInCount = getCheckedInCount();
-      return Math.max(0, allowedCount - checkedInCount);
+      const activeAllowedPlayers = getActiveAllowedPlayers();
+      const checkedInCount = activeAllowedPlayers.filter(hasCheckedInThisRound).length;
+      return Math.max(0, activeAllowedPlayers.length - checkedInCount);
+    }
+
+    function getRoundCheckedInCount() {
+      return getActiveAllowedPlayers().filter(hasCheckedInThisRound).length;
+    }
+
+    function getActiveAllowedCount() {
+      return getActiveAllowedPlayers().length;
+    }
+
+    async function eliminateCurrentUserForMissedCheckIn() {
+      if (!currentUser || !isAllowedUser()) return;
+      const roundId = currentRoundId();
+      const deadlineAt = Number(gameData?.deadlineAt || 0);
+      if (!roundId || !deadlineAt) return;
+
+      const me = getPlayer(currentUser.uid);
+      if (isPlayerEliminated(me)) {
+        redirectToEliminated();
+        return;
+      }
+
+      if (Date.now() <= deadlineAt) return;
+      if (hasCheckedInThisRound(me)) return;
+      if (handledMissForRoundId === roundId) return;
+
+      handledMissForRoundId = roundId;
+
+      try {
+        await setDoc(doc(db, "gameLists", "hideAndSeek", "players", currentUser.uid), {
+          uid: currentUser.uid,
+          name: currentUser.displayName || currentUser.email || "Player",
+          email: currentUser.email || "",
+          checkedInForRound: false,
+          eliminated: true,
+          eliminatedAt: Date.now(),
+          eliminatedRoundId: roundId,
+          role: "eliminated"
+        }, { merge: true });
+
+        redirectToEliminated();
+      } catch (error) {
+        console.error("Failed to eliminate player:", error);
+      }
+    }
+
+    function redirectToEliminated() {
+      if (redirectedToEliminated) return;
+      redirectedToEliminated = true;
+      window.location.href = "eliminated.html";
     }
 
     function updateCountdown() {
       clearInterval(countdownInterval);
 
-      const tick = () => {
+      const tick = async () => {
         const deadlineAt = Number(gameData?.deadlineAt || 0);
         const roundId = currentRoundId();
-        const me = currentUser ? allPlayers.find(p => p.uid === currentUser.uid) : null;
-        const meSafe = !!(me && me.checkedInForRound === true && me.lastCheckInRoundId === roundId);
+        const me = currentUser ? getPlayer(currentUser.uid) : null;
+        const meSafe = hasCheckedInThisRound(me);
+        const meEliminated = isPlayerEliminated(me);
         const now = Date.now();
+
+        if (meEliminated) {
+          countdownBig.textContent = "0s";
+          countdownSub.textContent = "Eliminated";
+          statusBig.textContent = "OUT";
+          statusSmall.textContent = "You missed a check in";
+          redirectToEliminated();
+          return;
+        }
 
         if (!deadlineAt || !roundId) {
           countdownBig.textContent = "--";
@@ -645,38 +722,49 @@
 
           if (meSafe) {
             statusBig.textContent = "YOU'RE SAFE";
-            statusSmall.textContent = "You checked in before the deadline";
+            statusSmall.textContent = "Your last ping stays until a new ping or elimination";
           } else {
             statusBig.textContent = "MISSED";
-            statusSmall.textContent = "You did not check in in time";
+            statusSmall.textContent = "You missed the check in and are being eliminated";
+            await eliminateCurrentUserForMissedCheckIn();
           }
         }
       };
 
       tick();
-      countdownInterval = setInterval(tick, 250);
+      countdownInterval = setInterval(() => {
+        tick().catch(console.error);
+      }, 250);
     }
 
     function updateStatsAndInfo() {
-      visiblePlayers = getVisiblePlayers();
       const remaining = getPlayersRemainingCount();
-      const allowedCount = getAllowedCount();
-      const checkedInCount = visiblePlayers.length;
+      const activeAllowedCount = getActiveAllowedCount();
+      const checkedInCount = getRoundCheckedInCount();
 
       playerRemainingCount.textContent = String(remaining);
 
-      if (allowedCount > 0) {
-        playerRemainingSub.textContent = `${checkedInCount}/${allowedCount} checked in`;
+      if (activeAllowedCount > 0) {
+        playerRemainingSub.textContent = `${checkedInCount}/${activeAllowedCount} checked in`;
       } else {
-        playerRemainingSub.textContent = "no player list loaded";
+        playerRemainingSub.textContent = "no active players loaded";
       }
 
-      const statusText = gameData?.status || "live game";
-      liveChip.textContent = statusText;
+      liveChip.textContent = gameData?.status || "live game";
 
       if (!currentUser) {
         setCheckInStatus("Check in result", "Sign in required.");
-      } else if (!isAllowedUser()) {
+        return;
+      }
+
+      const me = getPlayer(currentUser.uid);
+
+      if (isPlayerEliminated(me)) {
+        setCheckInStatus("Check in result", "You have been eliminated.");
+        return;
+      }
+
+      if (!isAllowedUser()) {
         setCheckInStatus("Check in result", "You are not on the player list.");
       }
     }
@@ -689,6 +777,13 @@
       }
 
       hello.textContent = currentUser.displayName || currentUser.email || "Signed in";
+
+      const me = getPlayer(currentUser.uid);
+
+      if (isPlayerEliminated(me)) {
+        checkInBtn.disabled = true;
+        return;
+      }
 
       if (!isAllowedUser()) {
         checkInBtn.disabled = true;
@@ -752,15 +847,13 @@
 
     async function renderMap() {
       await ensureMap();
-
       clearMarkers();
 
-      visiblePlayers = getVisiblePlayers();
-
+      const mapPlayers = getMapPlayers();
       const bounds = new google.maps.LatLngBounds();
       let hasBounds = false;
 
-      visiblePlayers.forEach(player => {
+      mapPlayers.forEach(player => {
         const isMe = currentUser && player.uid === currentUser.uid;
 
         const marker = new google.maps.Marker({
@@ -785,7 +878,7 @@
             <div style="padding:10px 12px; min-width:180px;">
               <div style="font-weight:900; font-size:14px;">${escapeHtml(player.name || "Player")}</div>
               <div style="font-size:12px; color:#555; margin-top:4px;">${escapeHtml(player.email || "")}</div>
-              <div style="font-size:12px; color:#555; margin-top:6px;">Checked in: ${escapeHtml(player.lastCheckInAt ? new Date(Number(player.lastCheckInAt)).toLocaleString() : "Unknown")}</div>
+              <div style="font-size:12px; color:#555; margin-top:6px;">Last ping: ${escapeHtml(player.lastCheckInAt ? new Date(Number(player.lastCheckInAt)).toLocaleString() : "Unknown")}</div>
             </div>
           `);
           infoWindow.open({ map, anchor: marker });
@@ -845,6 +938,13 @@
         }
       }
 
+      const me = currentUser ? getPlayer(currentUser.uid) : null;
+
+      if (isPlayerEliminated(me)) {
+        redirectToEliminated();
+        return;
+      }
+
       if (!isAllowedUser()) {
         setCheckInStatus("Check in result", "You are not on the player list.");
         return;
@@ -860,6 +960,7 @@
 
       if (Date.now() > deadlineAt) {
         setCheckInStatus("Check in result", "Too late.");
+        await eliminateCurrentUserForMissedCheckIn();
         return;
       }
 
@@ -871,6 +972,7 @@
 
         if (Date.now() > deadlineAt) {
           setCheckInStatus("Check in result", "Too late.");
+          await eliminateCurrentUserForMissedCheckIn();
           return;
         }
 
@@ -882,10 +984,15 @@
           lng: coords.lng,
           lastCheckInAt: Date.now(),
           lastCheckInRoundId: roundId,
-          checkedInForRound: true
+          checkedInForRound: true,
+          eliminated: false,
+          eliminatedAt: null,
+          eliminatedRoundId: null,
+          role: "hider"
         }, { merge: true });
 
         lastMyLatLng = { lat: coords.lat, lng: coords.lng };
+        handledMissForRoundId = null;
         setCheckInStatus("Check in result", "Check-in saved.");
       } catch (error) {
         console.error(error);
@@ -894,6 +1001,7 @@
         updateAllowedUi();
         updateStatsAndInfo();
         updateCountdown();
+        renderMap().catch(() => {});
         checkInBtn.disabled = !currentUser || !isAllowedUser();
       }
     }
@@ -947,6 +1055,13 @@
 
     onSnapshot(playersRef, (snap) => {
       allPlayers = snap.docs.map(d => normalizePlayer(d.data(), d.id)).filter(p => p.uid);
+
+      const me = currentUser ? getPlayer(currentUser.uid) : null;
+      if (isPlayerEliminated(me)) {
+        redirectToEliminated();
+        return;
+      }
+
       refreshGameUi();
     }, (error) => {
       console.error(error);
