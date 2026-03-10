@@ -616,7 +616,7 @@
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn" id="refreshUsersBtn" type="button">Refresh users</button>
-          <button class="btn danger" id="clearListBtn" type="button">Remove all</button>
+          <button class="btn danger" id="resetAllBtn" type="button">Reset all</button>
         </div>
       </div>
     </section>
@@ -744,7 +744,8 @@
       getDocs,
       onSnapshot,
       runTransaction,
-      setDoc
+      setDoc,
+      writeBatch
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -763,8 +764,10 @@
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
 
-    const gameRef = doc(db, "gameLists", "hideAndSeek");
+    const GAME_ID = "hideAndSeek";
+    const gameRef = doc(db, "gameLists", GAME_ID);
     const usersRef = collection(db, "users");
+    const playersRef = collection(db, "gameLists", GAME_ID, "players");
 
     const hello = document.getElementById("hello");
     const signInBtn = document.getElementById("signInBtn");
@@ -782,7 +785,7 @@
     const availablePill = document.getElementById("availablePill");
 
     const refreshUsersBtn = document.getElementById("refreshUsersBtn");
-    const clearListBtn = document.getElementById("clearListBtn");
+    const resetAllBtn = document.getElementById("resetAllBtn");
     const allowedList = document.getElementById("allowedList");
 
     const startGameBtn = document.getElementById("startGameBtn");
@@ -1243,16 +1246,36 @@
       }
     }
 
-    async function clearAllowedUsers() {
+    async function resetAllPlayersAndAllowedList() {
       try {
+        const playersSnap = await getDocs(playersRef);
+        const playerDocs = playersSnap.docs;
+
+        const chunkSize = 450;
+        for (let i = 0; i < playerDocs.length; i += chunkSize) {
+          const chunk = playerDocs.slice(i, i + chunkSize);
+          const batch = writeBatch(db);
+
+          for (const playerDoc of chunk) {
+            batch.set(playerDoc.ref, {
+              eliminated: false,
+              eliminatedAt: null,
+              eliminatedRoundId: null
+            }, { merge: true });
+          }
+
+          await batch.commit();
+        }
+
         await setDoc(gameRef, {
           allowedUsers: [],
           allowedUids: []
         }, { merge: true });
-        showMsg("Allowed list cleared.", "ok");
+
+        showMsg("Reset complete. All players were marked uneliminated and the allowed list was cleared.", "ok");
       } catch (error) {
         console.error(error);
-        showMsg(`Could not clear allowed list.\n${error.message}`, "error");
+        showMsg(`Could not reset all.\n${error.message}`, "error");
       }
     }
 
@@ -1380,8 +1403,8 @@
       }
     });
 
-    clearListBtn.addEventListener("click", async () => {
-      await clearAllowedUsers();
+    resetAllBtn.addEventListener("click", async () => {
+      await resetAllPlayersAndAllowedList();
     });
 
     closeRecBtn.addEventListener("click", () => {
