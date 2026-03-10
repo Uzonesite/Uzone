@@ -235,6 +235,8 @@
       box-shadow:var(--shadow);
       overflow:visible;
       backdrop-filter:blur(10px);
+      position:relative;
+      z-index:1;
     }
 
     .cardInner{ padding:16px; }
@@ -291,6 +293,7 @@
 
     .searchShell{
       position:relative;
+      z-index:2;
     }
 
     .search{
@@ -320,19 +323,19 @@
     }
 
     .recBox{
-      position:absolute;
-      top:calc(100% + 10px);
+      position:fixed;
       left:0;
-      right:0;
-      z-index:40;
+      top:0;
+      width:320px;
+      z-index:99999;
       display:none;
       padding:10px;
       border-radius:18px;
       border:1px solid rgba(255,255,255,.45);
-      background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88));
-      box-shadow:0 24px 60px rgba(17,16,24,.12);
+      background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.93));
+      box-shadow:0 28px 80px rgba(17,16,24,.18);
       backdrop-filter:blur(12px);
-      max-height:380px;
+      max-height:min(420px, 60vh);
       overflow:auto;
     }
 
@@ -502,17 +505,6 @@
       line-height:1.4;
     }
 
-    .roundBtns{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:14px;
-    }
-
-    @media (max-width: 740px){
-      .roundBtns{ grid-template-columns:1fr; }
-    }
-
     .kv{
       display:grid;
       gap:8px;
@@ -521,7 +513,7 @@
 
     .kvRow{
       display:grid;
-      grid-template-columns:160px 1fr;
+      grid-template-columns:180px 1fr;
       gap:10px;
       align-items:start;
       font-size:13px;
@@ -534,9 +526,63 @@
     }
 
     .kvRow b{ color:rgba(17,16,24,.90); }
+
     .mono{
       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
       word-break:break-all;
+    }
+
+    .controlGrid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:14px;
+    }
+
+    @media (max-width: 720px){
+      .controlGrid{ grid-template-columns:1fr; }
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    .field label{
+      font-size:13px;
+      font-weight:900;
+      color:rgba(17,16,24,.82);
+    }
+
+    .field input{
+      width:100%;
+      border:none;
+      outline:none;
+      padding:13px 14px;
+      border-radius:16px;
+      border:1px solid rgba(17,16,24,.10);
+      background:rgba(255,255,255,.92);
+      box-shadow:0 10px 26px rgba(17,16,24,.04);
+      font-size:15px;
+    }
+
+    .field input:focus{
+      border-color:rgba(176,11,85,.25);
+      box-shadow:0 14px 36px rgba(176,11,85,.08);
+    }
+
+    .gameButtons{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .smallNote{
+      margin-top:12px;
+      font-size:12px;
+      color:rgba(17,16,24,.62);
+      line-height:1.45;
     }
   </style>
 </head>
@@ -565,7 +611,7 @@
       <div class="heroTop">
         <div>
           <h1>Host Hide &amp; Seek</h1>
-          <p>Search users by name, email, or uid, click a suggestion to add them to the allowed list, remove them any time, and start a live round that all hiders see instantly.</p>
+          <p>Search users by name, email, or uid, click a suggestion to add them to the allowed list, and control a looping round timer that keeps starting the next round automatically until you end the game.</p>
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -589,12 +635,11 @@
         </div>
 
         <div class="cardInner" style="padding-top:0;">
-          <div class="searchShell">
+          <div class="searchShell" id="searchShell">
             <div class="search" role="search">
               <span style="opacity:.6; font-weight:1000;">⌕</span>
               <input id="searchInput" type="search" placeholder="Search name, email, or uid…" autocomplete="off" />
             </div>
-            <div id="recBox" class="recBox"></div>
           </div>
 
           <div class="toolbar">
@@ -615,15 +660,30 @@
         <div class="cardInner">
           <div class="hRow">
             <div>
-              <h2 class="h1">Round controls</h2>
-              <div class="sub">Starting a round writes <b>currentRoundId</b>, <b>deadlineAt</b>, <b>countdownDurationMs</b>, and <b>status</b> to the game doc.</div>
+              <h2 class="h1">Game controls</h2>
+              <div class="sub">Choose the first round time, choose the looping next-round time, start the game once, and the host page will keep starting the next round forever until you hit end game.</div>
             </div>
           </div>
 
-          <div class="roundBtns">
-            <button class="btn primary" data-round="30000" type="button">Start 30 second round</button>
-            <button class="btn primary" data-round="60000" type="button">Start 60 second round</button>
-            <button class="btn primary" data-round="120000" type="button">Start 120 second round</button>
+          <div class="controlGrid">
+            <div class="field">
+              <label for="firstRoundSeconds">First round time (seconds)</label>
+              <input id="firstRoundSeconds" type="number" min="1" step="1" value="30" />
+            </div>
+
+            <div class="field">
+              <label for="loopRoundSeconds">Next round time (seconds)</label>
+              <input id="loopRoundSeconds" type="number" min="1" step="1" value="60" />
+            </div>
+          </div>
+
+          <div class="gameButtons">
+            <button class="btn primary" id="startGameBtn" type="button">Start game</button>
+            <button class="btn danger" id="endGameBtn" type="button">End game</button>
+          </div>
+
+          <div class="smallNote">
+            The first round uses the first input once. After that, every new round uses the next-round time and auto-loops forever while the host page stays open.
           </div>
 
           <div class="kv">
@@ -640,8 +700,12 @@
               <span id="deadlineText">—</span>
             </div>
             <div class="kvRow">
-              <b>Duration</b>
+              <b>Current round length</b>
               <span id="durationText">—</span>
+            </div>
+            <div class="kvRow">
+              <b>Next round loop</b>
+              <span id="loopInfoText">Not armed</span>
             </div>
           </div>
         </div>
@@ -661,6 +725,8 @@
       </div>
     </section>
   </main>
+
+  <div id="recBox" class="recBox"></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -707,6 +773,7 @@
     const allowedCountPill = document.getElementById("allowedCountPill");
     const statusPill = document.getElementById("statusPill");
 
+    const searchShell = document.getElementById("searchShell");
     const searchInput = document.getElementById("searchInput");
     const recBox = document.getElementById("recBox");
     const closeRecBtn = document.getElementById("closeRecBtn");
@@ -717,16 +784,30 @@
     const clearListBtn = document.getElementById("clearListBtn");
     const allowedList = document.getElementById("allowedList");
 
+    const startGameBtn = document.getElementById("startGameBtn");
+    const endGameBtn = document.getElementById("endGameBtn");
+    const firstRoundSecondsInput = document.getElementById("firstRoundSeconds");
+    const loopRoundSecondsInput = document.getElementById("loopRoundSeconds");
+
     const gameStatusText = document.getElementById("gameStatusText");
     const roundIdText = document.getElementById("roundIdText");
     const deadlineText = document.getElementById("deadlineText");
     const durationText = document.getElementById("durationText");
+    const loopInfoText = document.getElementById("loopInfoText");
 
     let currentUser = null;
     let allUsers = [];
     let allowedUsers = [];
     let allowedUids = [];
     let gameData = null;
+
+    let loopArmed = false;
+    let loopNextDurationMs = 60000;
+    let loopTimer = null;
+    let startingNextRound = false;
+    let lastHandledDeadlineAt = null;
+
+    const LOOP_STORAGE_KEY = "hosthns_loop_config_v1";
 
     function showMsg(text, type = "info") {
       msgBox.className = `msg show ${type}`;
@@ -786,6 +867,56 @@
       return Array.from(map.values());
     }
 
+    function parseSecondsInput(inputEl, fallbackSeconds = 60) {
+      const raw = Number(inputEl.value);
+      if (!Number.isFinite(raw) || raw <= 0) return fallbackSeconds * 1000;
+      return Math.max(1000, Math.round(raw * 1000));
+    }
+
+    function saveLoopConfig() {
+      localStorage.setItem(LOOP_STORAGE_KEY, JSON.stringify({
+        loopArmed,
+        loopNextDurationMs,
+        firstRoundSeconds: firstRoundSecondsInput.value,
+        loopRoundSeconds: loopRoundSecondsInput.value
+      }));
+    }
+
+    function loadLoopConfig() {
+      try {
+        const raw = localStorage.getItem(LOOP_STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+
+        if (parsed && typeof parsed.firstRoundSeconds !== "undefined") {
+          firstRoundSecondsInput.value = parsed.firstRoundSeconds;
+        }
+        if (parsed && typeof parsed.loopRoundSeconds !== "undefined") {
+          loopRoundSecondsInput.value = parsed.loopRoundSeconds;
+        }
+        if (parsed && typeof parsed.loopArmed === "boolean") {
+          loopArmed = parsed.loopArmed;
+        }
+        if (parsed && Number.isFinite(Number(parsed.loopNextDurationMs))) {
+          loopNextDurationMs = Number(parsed.loopNextDurationMs);
+        }
+      } catch (error) {
+        console.error("Could not load loop config", error);
+      }
+    }
+
+    function clearLoopConfig() {
+      loopArmed = false;
+      loopNextDurationMs = parseSecondsInput(loopRoundSecondsInput, 60);
+      localStorage.removeItem(LOOP_STORAGE_KEY);
+    }
+
+    function updateLoopInfo() {
+      loopInfoText.textContent = loopArmed
+        ? `Armed • next rounds will auto-start every ${Math.round(loopNextDurationMs / 1000)} seconds`
+        : "Not armed";
+    }
+
     function renderGameInfo() {
       const status = gameData?.status || "idle";
       const roundId = gameData?.currentRoundId || "—";
@@ -797,8 +928,13 @@
       roundIdText.textContent = roundId;
       deadlineText.textContent = safeDateText(deadlineAt);
       durationText.textContent = durationTextFromMs(durationMs);
-
       allowedCountPill.textContent = `${allowedUsers.length} allowed`;
+
+      const gameRunning = status === "running";
+      startGameBtn.disabled = gameRunning;
+      endGameBtn.disabled = !gameRunning && !loopArmed;
+
+      updateLoopInfo();
     }
 
     function renderAllowedList() {
@@ -883,6 +1019,27 @@
       return [...starts, ...contains].slice(0, 12);
     }
 
+    function positionRecBox() {
+      if (!recBox.classList.contains("show")) return;
+
+      const rect = searchShell.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const desiredWidth = rect.width;
+      const maxWidth = Math.min(desiredWidth, viewportWidth - 16);
+      const left = Math.min(
+        Math.max(8, rect.left),
+        Math.max(8, viewportWidth - maxWidth - 8)
+      );
+
+      recBox.style.width = `${maxWidth}px`;
+      recBox.style.left = `${left}px`;
+      recBox.style.top = `${rect.bottom + 10}px`;
+    }
+
+    function hideSuggestions() {
+      recBox.classList.remove("show");
+    }
+
     function renderSuggestions() {
       const filtered = getFilteredUsers(searchInput.value);
       recBox.innerHTML = "";
@@ -890,7 +1047,7 @@
       availablePill.textContent = `${allUsers.filter(u => !allowedUids.includes(u.uid)).length} not already added`;
 
       if (!searchInput.value.trim()) {
-        recBox.classList.remove("show");
+        hideSuggestions();
         return;
       }
 
@@ -900,6 +1057,7 @@
         empty.textContent = "No matching users found.";
         recBox.appendChild(empty);
         recBox.classList.add("show");
+        positionRecBox();
         return;
       }
 
@@ -954,6 +1112,7 @@
       });
 
       recBox.classList.add("show");
+      positionRecBox();
     }
 
     async function ensureGameDoc() {
@@ -1007,6 +1166,7 @@
         });
 
         searchInput.value = "";
+        hideSuggestions();
         renderSuggestions();
         showMsg(`${user.name || user.email || user.uid} was added to the allowed list.`, "ok");
       } catch (error) {
@@ -1056,24 +1216,106 @@
       return `round_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     }
 
-    async function startRound(durationMs) {
+    async function writeRound(durationMs) {
+      const now = Date.now();
+      const deadlineAt = now + Number(durationMs);
+      const currentRoundId = makeRoundId();
+
+      await setDoc(gameRef, {
+        currentRoundId,
+        deadlineAt,
+        countdownDurationMs: Number(durationMs),
+        status: "running"
+      }, { merge: true });
+
+      return { currentRoundId, deadlineAt };
+    }
+
+    async function startGame() {
+      const firstDurationMs = parseSecondsInput(firstRoundSecondsInput, 30);
+      const nextDurationMs = parseSecondsInput(loopRoundSecondsInput, 60);
+
       try {
-        const now = Date.now();
-        const deadlineAt = now + Number(durationMs);
-        const currentRoundId = makeRoundId();
+        loopNextDurationMs = nextDurationMs;
+        loopArmed = true;
+        lastHandledDeadlineAt = null;
+        saveLoopConfig();
+        updateLoopInfo();
 
-        await setDoc(gameRef, {
-          currentRoundId,
-          deadlineAt,
-          countdownDurationMs: Number(durationMs),
-          status: "running"
-        }, { merge: true });
-
-        showMsg(`Round started for ${Math.round(Number(durationMs) / 1000)} seconds.`, "ok");
+        await writeRound(firstDurationMs);
+        showMsg(
+          `Game started. First round: ${Math.round(firstDurationMs / 1000)} seconds. Future rounds will auto-loop at ${Math.round(nextDurationMs / 1000)} seconds until you end the game.`,
+          "ok"
+        );
       } catch (error) {
         console.error(error);
-        showMsg(`Could not start round.\n${error.message}`, "error");
+        showMsg(`Could not start game.\n${error.message}`, "error");
       }
+    }
+
+    async function endGame() {
+      try {
+        if (loopTimer) {
+          clearInterval(loopTimer);
+          loopTimer = null;
+        }
+
+        startingNextRound = false;
+        lastHandledDeadlineAt = null;
+        clearLoopConfig();
+        updateLoopInfo();
+
+        await setDoc(gameRef, {
+          currentRoundId: null,
+          deadlineAt: null,
+          countdownDurationMs: null,
+          status: "idle"
+        }, { merge: true });
+
+        showMsg("Game ended. Auto-loop stopped.", "ok");
+      } catch (error) {
+        console.error(error);
+        showMsg(`Could not end game.\n${error.message}`, "error");
+      }
+    }
+
+    async function maybeStartNextRound() {
+      if (!loopArmed) return;
+      if (!gameData) return;
+      if (startingNextRound) return;
+
+      const status = gameData.status || "idle";
+      const deadlineAt = Number(gameData.deadlineAt || 0);
+
+      if (status !== "running") return;
+      if (!deadlineAt) return;
+      if (Date.now() < deadlineAt) return;
+      if (lastHandledDeadlineAt === deadlineAt) return;
+
+      startingNextRound = true;
+
+      try {
+        lastHandledDeadlineAt = deadlineAt;
+        const durationToUse = parseSecondsInput(loopRoundSecondsInput, Math.round(loopNextDurationMs / 1000));
+        loopNextDurationMs = durationToUse;
+        saveLoopConfig();
+        updateLoopInfo();
+
+        await writeRound(durationToUse);
+        showMsg(`Next round started automatically for ${Math.round(durationToUse / 1000)} seconds.`, "ok");
+      } catch (error) {
+        console.error(error);
+        showMsg(`Could not auto-start next round.\n${error.message}`, "error");
+      } finally {
+        startingNextRound = false;
+      }
+    }
+
+    function startLoopWatcher() {
+      if (loopTimer) clearInterval(loopTimer);
+      loopTimer = setInterval(() => {
+        maybeStartNextRound();
+      }, 500);
     }
 
     signInBtn.addEventListener("click", async () => {
@@ -1099,20 +1341,32 @@
     });
 
     closeRecBtn.addEventListener("click", () => {
-      recBox.classList.remove("show");
+      hideSuggestions();
     });
 
     searchInput.addEventListener("input", renderSuggestions);
     searchInput.addEventListener("focus", renderSuggestions);
 
-    document.addEventListener("click", (event) => {
-      const inside = recBox.contains(event.target) || searchInput.contains(event.target);
-      if (!inside) recBox.classList.remove("show");
+    firstRoundSecondsInput.addEventListener("input", saveLoopConfig);
+    loopRoundSecondsInput.addEventListener("input", () => {
+      loopNextDurationMs = parseSecondsInput(loopRoundSecondsInput, 60);
+      saveLoopConfig();
+      updateLoopInfo();
     });
 
-    document.querySelectorAll("[data-round]").forEach(btn => {
-      btn.addEventListener("click", () => startRound(Number(btn.dataset.round)));
+    startGameBtn.addEventListener("click", startGame);
+    endGameBtn.addEventListener("click", endGame);
+
+    document.addEventListener("click", (event) => {
+      const insideSearch = searchShell.contains(event.target);
+      const insideRecBox = recBox.contains(event.target);
+      if (!insideSearch && !insideRecBox) {
+        hideSuggestions();
+      }
     });
+
+    window.addEventListener("resize", positionRecBox);
+    window.addEventListener("scroll", positionRecBox, true);
 
     onAuthStateChanged(auth, async (user) => {
       currentUser = user || null;
@@ -1128,8 +1382,12 @@
       signInBtn.disabled = true;
 
       try {
+        loadLoopConfig();
+        updateLoopInfo();
+
         await ensureGameDoc();
         await loadUsers();
+        startLoopWatcher();
 
         onSnapshot(gameRef, (snap) => {
           const data = snap.exists() ? snap.data() : {};
@@ -1137,9 +1395,15 @@
           allowedUsers = Array.isArray(data.allowedUsers) ? uniqueByUid(data.allowedUsers) : [];
           allowedUids = Array.isArray(data.allowedUids) ? [...new Set(data.allowedUids)] : [];
 
+          const status = data?.status || "idle";
+          if (status !== "running") {
+            lastHandledDeadlineAt = null;
+          }
+
           renderGameInfo();
           renderAllowedList();
           renderSuggestions();
+          maybeStartNextRound();
         }, (error) => {
           console.error(error);
           showMsg(`Live game listener failed.\n${error.message}`, "error");
