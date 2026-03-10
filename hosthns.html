@@ -1,3 +1,4 @@
+<!-- hosthns.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -611,7 +612,7 @@
       <div class="heroTop">
         <div>
           <h1>Host Hide &amp; Seek</h1>
-          <p>Search users by name, email, or uid, click a suggestion to add them to the allowed list, and control a looping round timer that keeps starting the next round automatically until you end the game.</p>
+          <p>Search users by name, email, or uid, click a suggestion to add them to the allowed list, and control rounds that automatically eliminate missed check-ins and start the next round forever until you end the game.</p>
         </div>
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -661,7 +662,7 @@
           <div class="hRow">
             <div>
               <h2 class="h1">Game controls</h2>
-              <div class="sub">Choose the first round time, choose the looping next-round time, start the game once, and the host page will keep starting the next round forever until you hit end game.</div>
+              <div class="sub">Start one round, then keep auto-looping forever. At every deadline, players who did not check in for that exact round are eliminated, survivors are reset, and the next round starts automatically.</div>
             </div>
           </div>
 
@@ -683,7 +684,7 @@
           </div>
 
           <div class="smallNote">
-            The first round uses the first input once. After that, every new round uses the next-round time and auto-loops forever while the host page stays open.
+            The host page is the round authority. Keep this page open while the game runs.
           </div>
 
           <div class="kv">
@@ -706,6 +707,10 @@
             <div class="kvRow">
               <b>Next round loop</b>
               <span id="loopInfoText">Not armed</span>
+            </div>
+            <div class="kvRow">
+              <b>Round timer</b>
+              <span id="countdownText">—</span>
             </div>
           </div>
         </div>
@@ -798,20 +803,24 @@
     const deadlineText = document.getElementById("deadlineText");
     const durationText = document.getElementById("durationText");
     const loopInfoText = document.getElementById("loopInfoText");
+    const countdownText = document.getElementById("countdownText");
 
     let currentUser = null;
     let allUsers = [];
     let allowedUsers = [];
     let allowedUids = [];
     let gameData = null;
+    let playersMap = new Map();
 
     let loopArmed = false;
     let loopNextDurationMs = 60000;
-    let loopTimer = null;
-    let startingNextRound = false;
-    let lastHandledDeadlineAt = null;
+    let countdownInterval = null;
 
-    const LOOP_STORAGE_KEY = "hosthns_loop_config_v1";
+    let roundWorkerInterval = null;
+    let isProcessingRound = false;
+    let lastProcessedRoundKey = null;
+
+    const LOOP_STORAGE_KEY = "hosthns_loop_config_v2";
 
     function showMsg(text, type = "info") {
       msgBox.className = `msg show ${type}`;
@@ -829,8 +838,7 @@
     }
 
     function avatarNode(user, small = false) {
-      const hasPhoto = !!user?.photoURL;
-      if (hasPhoto) {
+      if (user?.photoURL) {
         const img = document.createElement("img");
         img.src = user.photoURL;
         img.alt = user.name || "user";
@@ -845,19 +853,36 @@
 
     function normalizeUserDoc(data, id) {
       return {
-        uid: data.uid || id || "",
-        name: data.name || data.displayName || data.fullName || "Unnamed user",
-        email: data.email || "",
-        photoURL: data.photoURL || data.photoUrl || ""
+        uid: String(data?.uid || id || "").trim(),
+        name: data?.name || data?.displayName || data?.fullName || "Unnamed user",
+        email: data?.email || "",
+        photoURL: data?.photoURL || data?.photoUrl || ""
       };
     }
 
     function normalizeAllowedUser(data) {
       return {
-        uid: data?.uid || "",
+        uid: String(data?.uid || "").trim(),
         name: data?.name || data?.displayName || data?.fullName || "Unnamed user",
         email: data?.email || "",
         photoURL: data?.photoURL || data?.photoUrl || ""
+      };
+    }
+
+    function normalizePlayerDoc(data, id) {
+      return {
+        uid: String(data?.uid || id || "").trim(),
+        name: data?.name || data?.displayName || "Unnamed player",
+        email: data?.email || "",
+        lat: typeof data?.lat === "number" ? data.lat : Number(data?.lat),
+        lng: typeof data?.lng === "number" ? data.lng : Number(data?.lng),
+        lastCheckInAt: typeof data?.lastCheckInAt === "number" ? data.lastCheckInAt : Number(data?.lastCheckInAt),
+        lastCheckInRoundId: data?.lastCheckInRoundId || null,
+        checkedInForRound: data?.checkedInForRound === true,
+        eliminated: data?.eliminated === true,
+        eliminatedAt: typeof data?.eliminatedAt === "number" ? data.eliminatedAt : Number(data?.eliminatedAt),
+        eliminatedRoundId: data?.eliminatedRoundId || null,
+        role: data?.role || "hider"
       };
     }
 
@@ -926,8 +951,35 @@
 
     function updateLoopInfo() {
       loopInfoText.textContent = loopArmed
-        ? `Armed • next rounds will auto-start every ${Math.round(loopNextDurationMs / 1000)} seconds`
+        ? `Armed • next rounds auto-start every ${Math.round(loopNextDurationMs / 1000)} seconds`
         : "Not armed";
+    }
+
+    function formatCountdown(ms) {
+      const total = Math.max(0, Math.ceil(ms / 1000));
+      const minutes = Math.floor(total / 60);
+      const seconds = total % 60;
+      return `${minutes}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function updateCountdownDisplay() {
+      clearInterval(countdownInterval);
+
+      const status = gameData?.status || "idle";
+      const deadlineAt = Number(gameData?.deadlineAt || 0);
+
+      if (status !== "running" || !deadlineAt) {
+        countdownText.textContent = "—";
+        return;
+      }
+
+      const tick = () => {
+        const remaining = deadlineAt - Date.now();
+        countdownText.textContent = remaining <= 0 ? "0:00" : formatCountdown(remaining);
+      };
+
+      tick();
+      countdownInterval = setInterval(tick, 1000);
     }
 
     function renderGameInfo() {
@@ -948,6 +1000,7 @@
       endGameBtn.disabled = !gameRunning && !loopArmed;
 
       updateLoopInfo();
+      updateCountdownDisplay();
     }
 
     function renderAllowedList() {
@@ -962,6 +1015,10 @@
       }
 
       allowedUsers.forEach(user => {
+        const player = playersMap.get(user.uid);
+        const statusText = player?.eliminated ? "Eliminated" : "Active";
+        const statusTagClass = player?.eliminated ? "warn" : "good";
+
         const row = document.createElement("div");
         row.className = "rowCard";
 
@@ -985,8 +1042,13 @@
         uidTag.className = "tag";
         uidTag.textContent = user.uid || "No uid";
 
+        const statusTag = document.createElement("span");
+        statusTag.className = `tag ${statusTagClass}`;
+        statusTag.textContent = statusText;
+
         meta.appendChild(emailTag);
         meta.appendChild(uidTag);
+        meta.appendChild(statusTag);
 
         main.appendChild(name);
         main.appendChild(meta);
@@ -1196,11 +1258,8 @@
             photoURL: user.photoURL || ""
           };
 
-          if (existingIndex >= 0) {
-            nextAllowedUsers[existingIndex] = normalizedUser;
-          } else {
-            nextAllowedUsers.push(normalizedUser);
-          }
+          if (existingIndex >= 0) nextAllowedUsers[existingIndex] = normalizedUser;
+          else nextAllowedUsers.push(normalizedUser);
 
           tx.set(gameRef, {
             allowedUsers: uniqueByUid(nextAllowedUsers),
@@ -1211,16 +1270,14 @@
         searchInput.value = "";
         hideSuggestions();
         renderSuggestions();
-        showMsg(`${user.name || user.email || user.uid} was added to the allowed list.`, "ok");
+        showMsg("Player added to the allowed list.", "ok");
       } catch (error) {
         console.error(error);
-        showMsg(`Could not add user.\n${error.message}`, "error");
+        showMsg(`Could not add user.\n${error.message || error}`, "error");
       }
     }
 
     async function removeAllowedUser(uid) {
-      if (!uid) return;
-
       try {
         await runTransaction(db, async (tx) => {
           const snap = await tx.get(gameRef);
@@ -1228,7 +1285,7 @@
 
           const nextAllowedUsers = (Array.isArray(data.allowedUsers) ? data.allowedUsers : [])
             .map(normalizeAllowedUser)
-            .filter(u => u?.uid !== uid);
+            .filter(user => user.uid !== uid);
 
           const nextAllowedUids = (Array.isArray(data.allowedUids) ? data.allowedUids : [])
             .filter(id => id !== uid);
@@ -1242,7 +1299,7 @@
         showMsg("Player removed from the allowed list.", "ok");
       } catch (error) {
         console.error(error);
-        showMsg(`Could not remove user.\n${error.message}`, "error");
+        showMsg(`Could not remove user.\n${error.message || error}`, "error");
       }
     }
 
@@ -1251,7 +1308,7 @@
         const playersSnap = await getDocs(playersRef);
         const playerDocs = playersSnap.docs;
 
-        const chunkSize = 450;
+        const chunkSize = 400;
         for (let i = 0; i < playerDocs.length; i += chunkSize) {
           const chunk = playerDocs.slice(i, i + chunkSize);
           const batch = writeBatch(db);
@@ -1260,7 +1317,9 @@
             batch.set(playerDoc.ref, {
               eliminated: false,
               eliminatedAt: null,
-              eliminatedRoundId: null
+              eliminatedRoundId: null,
+              checkedInForRound: false,
+              lastCheckInRoundId: null
             }, { merge: true });
           }
 
@@ -1269,13 +1328,18 @@
 
         await setDoc(gameRef, {
           allowedUsers: [],
-          allowedUids: []
+          allowedUids: [],
+          currentRoundId: null,
+          deadlineAt: null,
+          countdownDurationMs: null,
+          status: "idle"
         }, { merge: true });
 
+        clearLoopConfig();
         showMsg("Reset complete. All players were marked uneliminated and the allowed list was cleared.", "ok");
       } catch (error) {
         console.error(error);
-        showMsg(`Could not reset all.\n${error.message}`, "error");
+        showMsg(`Could not reset all.\n${error.message || error}`, "error");
       }
     }
 
@@ -1298,6 +1362,118 @@
       return { currentRoundId, deadlineAt };
     }
 
+    async function resetSurvivorsForNewRound() {
+      const activeAllowedUsers = allowedUsers.filter(user => {
+        const player = playersMap.get(user.uid);
+        return !player?.eliminated;
+      });
+
+      if (!activeAllowedUsers.length) return;
+
+      const chunkSize = 400;
+      for (let i = 0; i < activeAllowedUsers.length; i += chunkSize) {
+        const chunk = activeAllowedUsers.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+
+        for (const user of chunk) {
+          const playerRef = doc(db, "gameLists", GAME_ID, "players", user.uid);
+          batch.set(playerRef, {
+            uid: user.uid,
+            name: user.name || "Unnamed user",
+            email: user.email || "",
+            checkedInForRound: false,
+            role: "hider"
+          }, { merge: true });
+        }
+
+        await batch.commit();
+      }
+    }
+
+    async function eliminateMissedPlayersForRound(roundId) {
+      const now = Date.now();
+
+      const missedAllowedUsers = allowedUsers.filter(user => {
+        const player = playersMap.get(user.uid);
+        if (player?.eliminated) return false;
+        return !(player?.checkedInForRound === true && player?.lastCheckInRoundId === roundId);
+      });
+
+      if (!missedAllowedUsers.length) return 0;
+
+      const chunkSize = 400;
+      for (let i = 0; i < missedAllowedUsers.length; i += chunkSize) {
+        const chunk = missedAllowedUsers.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+
+        for (const user of chunk) {
+          const existing = playersMap.get(user.uid);
+          const playerRef = doc(db, "gameLists", GAME_ID, "players", user.uid);
+
+          batch.set(playerRef, {
+            uid: user.uid,
+            name: existing?.name || user.name || "Player",
+            email: existing?.email || user.email || "",
+            eliminated: true,
+            eliminatedAt: now,
+            eliminatedRoundId: roundId,
+            checkedInForRound: false,
+            role: "hider"
+          }, { merge: true });
+        }
+
+        await batch.commit();
+      }
+
+      return missedAllowedUsers.length;
+    }
+
+    async function processExpiredRoundIfNeeded() {
+      if (isProcessingRound) return;
+      if (!loopArmed) return;
+      if (!gameData) return;
+
+      const status = gameData.status || "idle";
+      const currentRoundId = gameData.currentRoundId || null;
+      const deadlineAt = Number(gameData.deadlineAt || 0);
+
+      if (status !== "running" || !currentRoundId || !deadlineAt) return;
+      if (Date.now() < deadlineAt) return;
+
+      const roundKey = `${currentRoundId}_${deadlineAt}`;
+      if (lastProcessedRoundKey === roundKey) return;
+
+      isProcessingRound = true;
+
+      try {
+        lastProcessedRoundKey = roundKey;
+
+        const eliminatedCount = await eliminateMissedPlayersForRound(currentRoundId);
+
+        await resetSurvivorsForNewRound();
+
+        await writeRound(loopNextDurationMs);
+
+        showMsg(
+          `Round ended. Eliminated ${eliminatedCount} player${eliminatedCount === 1 ? "" : "s"}. Next round started automatically.`,
+          "ok"
+        );
+      } catch (error) {
+        console.error(error);
+        lastProcessedRoundKey = null;
+        showMsg(`Could not process round deadline.\n${error.message || error}`, "error");
+      } finally {
+        isProcessingRound = false;
+      }
+    }
+
+    function startRoundWorker() {
+      if (roundWorkerInterval) clearInterval(roundWorkerInterval);
+      roundWorkerInterval = setInterval(() => {
+        processExpiredRoundIfNeeded().catch(console.error);
+      }, 500);
+    }
+
     async function startGame() {
       const firstDurationMs = parseSecondsInput(firstRoundSecondsInput, 30);
       const nextDurationMs = parseSecondsInput(loopRoundSecondsInput, 60);
@@ -1305,30 +1481,27 @@
       try {
         loopNextDurationMs = nextDurationMs;
         loopArmed = true;
-        lastHandledDeadlineAt = null;
+        lastProcessedRoundKey = null;
         saveLoopConfig();
         updateLoopInfo();
 
+        await resetSurvivorsForNewRound();
         await writeRound(firstDurationMs);
+
         showMsg(
           `Game started. First round: ${Math.round(firstDurationMs / 1000)} seconds. Future rounds will auto-loop at ${Math.round(nextDurationMs / 1000)} seconds until you end the game.`,
           "ok"
         );
       } catch (error) {
         console.error(error);
-        showMsg(`Could not start game.\n${error.message}`, "error");
+        showMsg(`Could not start game.\n${error.message || error}`, "error");
       }
     }
 
     async function endGame() {
       try {
-        if (loopTimer) {
-          clearInterval(loopTimer);
-          loopTimer = null;
-        }
-
-        startingNextRound = false;
-        lastHandledDeadlineAt = null;
+        lastProcessedRoundKey = null;
+        isProcessingRound = false;
         clearLoopConfig();
         updateLoopInfo();
 
@@ -1342,77 +1515,43 @@
         showMsg("Game ended. Auto-loop stopped.", "ok");
       } catch (error) {
         console.error(error);
-        showMsg(`Could not end game.\n${error.message}`, "error");
+        showMsg(`Could not end game.\n${error.message || error}`, "error");
       }
     }
 
-    async function maybeStartNextRound() {
-      if (!loopArmed) return;
-      if (!gameData) return;
-      if (startingNextRound) return;
-
-      const status = gameData.status || "idle";
-      const deadlineAt = Number(gameData.deadlineAt || 0);
-
-      if (status !== "running") return;
-      if (!deadlineAt) return;
-      if (Date.now() < deadlineAt) return;
-      if (lastHandledDeadlineAt === deadlineAt) return;
-
-      startingNextRound = true;
-
-      try {
-        lastHandledDeadlineAt = deadlineAt;
-        const durationToUse = parseSecondsInput(loopRoundSecondsInput, Math.round(loopNextDurationMs / 1000));
-        loopNextDurationMs = durationToUse;
-        saveLoopConfig();
-        updateLoopInfo();
-
-        await writeRound(durationToUse);
-        showMsg(`Next round started automatically for ${Math.round(durationToUse / 1000)} seconds.`, "ok");
-      } catch (error) {
-        console.error(error);
-        showMsg(`Could not auto-start next round.\n${error.message}`, "error");
-      } finally {
-        startingNextRound = false;
-      }
-    }
-
-    function startLoopWatcher() {
-      if (loopTimer) clearInterval(loopTimer);
-      loopTimer = setInterval(() => {
-        maybeStartNextRound();
-      }, 500);
-    }
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user || null;
+      hello.textContent = currentUser
+        ? (currentUser.displayName || currentUser.email || "Signed in")
+        : "Not signed in";
+      signInBtn.textContent = currentUser ? "Signed in" : "Sign in";
+    });
 
     signInBtn.addEventListener("click", async () => {
+      if (currentUser) return;
       try {
         await signInWithPopup(auth, provider);
       } catch (error) {
         console.error(error);
-        showMsg(`Sign-in failed.\n${error.message}`, "error");
+        showMsg(`Sign-in failed.\n${error.message || error}`, "error");
       }
-    });
-
-    refreshUsersBtn.addEventListener("click", async () => {
-      try {
-        await loadUsers();
-      } catch (error) {
-        console.error(error);
-        showMsg(`Could not refresh users.\n${error.message}`, "error");
-      }
-    });
-
-    resetAllBtn.addEventListener("click", async () => {
-      await resetAllPlayersAndAllowedList();
-    });
-
-    closeRecBtn.addEventListener("click", () => {
-      hideSuggestions();
     });
 
     searchInput.addEventListener("input", renderSuggestions);
     searchInput.addEventListener("focus", renderSuggestions);
+    closeRecBtn.addEventListener("click", hideSuggestions);
+    refreshUsersBtn.addEventListener("click", () => loadUsers().catch(console.error));
+    resetAllBtn.addEventListener("click", () => resetAllPlayersAndAllowedList().catch(console.error));
+    startGameBtn.addEventListener("click", () => startGame().catch(console.error));
+    endGameBtn.addEventListener("click", () => endGame().catch(console.error));
+
+    window.addEventListener("resize", positionRecBox);
+    window.addEventListener("scroll", positionRecBox, true);
+    document.addEventListener("click", (event) => {
+      if (!searchShell.contains(event.target) && !recBox.contains(event.target)) {
+        hideSuggestions();
+      }
+    });
 
     firstRoundSecondsInput.addEventListener("input", saveLoopConfig);
     loopRoundSecondsInput.addEventListener("input", () => {
@@ -1421,81 +1560,39 @@
       updateLoopInfo();
     });
 
-    startGameBtn.addEventListener("click", startGame);
-    endGameBtn.addEventListener("click", endGame);
+    async function init() {
+      loadLoopConfig();
+      updateLoopInfo();
+      await ensureGameDoc();
+      await loadUsers();
 
-    document.addEventListener("click", (event) => {
-      const insideSearch = searchShell.contains(event.target);
-      const insideRecBox = recBox.contains(event.target);
-      if (!insideSearch && !insideRecBox) {
-        hideSuggestions();
-      }
-    });
+      onSnapshot(gameRef, (snap) => {
+        const data = snap.exists() ? snap.data() : {};
+        gameData = data || {};
+        allowedUsers = uniqueByUid((Array.isArray(data?.allowedUsers) ? data.allowedUsers : []).map(normalizeAllowedUser));
+        allowedUids = [...new Set((Array.isArray(data?.allowedUids) ? data.allowedUids : []).filter(Boolean).map(v => String(v).trim()))];
+        renderSuggestions();
+        renderAllowedList();
+        renderGameInfo();
+      });
 
-    window.addEventListener("resize", positionRecBox);
-    window.addEventListener("scroll", positionRecBox, true);
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user || null;
-
-      if (!currentUser) {
-        hello.textContent = "Not signed in";
-        signInBtn.textContent = "Sign in";
-        signInBtn.disabled = false;
-        showMsg("Sign in with Google to use the host panel.", "info");
-        return;
-      }
-
-      hello.textContent = currentUser.displayName || currentUser.email || "Signed in";
-      signInBtn.textContent = "Signed in";
-      signInBtn.disabled = true;
-
-      try {
-        loadLoopConfig();
-        updateLoopInfo();
-
-        await ensureGameDoc();
-        await loadUsers();
-        startLoopWatcher();
-
-        onSnapshot(gameRef, (snap) => {
-          const data = snap.exists() ? snap.data() : {};
-          gameData = data;
-
-          allowedUsers = Array.isArray(data.allowedUsers)
-            ? uniqueByUid(data.allowedUsers.map(normalizeAllowedUser).filter(u => u.uid))
-            : [];
-
-          allowedUids = Array.isArray(data.allowedUids)
-            ? [...new Set(data.allowedUids.filter(Boolean))]
-            : [];
-
-          const missingFromUidArray = allowedUsers
-            .map(u => u.uid)
-            .filter(uid => !allowedUids.includes(uid));
-
-          if (missingFromUidArray.length) {
-            allowedUids = [...new Set([...allowedUids, ...missingFromUidArray])];
-          }
-
-          const status = data?.status || "idle";
-          if (status !== "running") {
-            lastHandledDeadlineAt = null;
-          }
-
-          renderGameInfo();
-          renderAllowedList();
-          renderSuggestions();
-          maybeStartNextRound();
-        }, (error) => {
-          console.error(error);
-          showMsg(`Live game listener failed.\n${error.message}`, "error");
+      onSnapshot(playersRef, (snap) => {
+        const nextMap = new Map();
+        snap.docs.forEach(d => {
+          const player = normalizePlayerDoc(d.data(), d.id);
+          if (player.uid) nextMap.set(player.uid, player);
         });
+        playersMap = nextMap;
+        renderAllowedList();
+      });
 
-      } catch (error) {
-        console.error(error);
-        showMsg(`Setup failed.\n${error.message}`, "error");
-      }
+      startRoundWorker();
+      showMsg("Host page ready.", "ok");
+    }
+
+    init().catch((error) => {
+      console.error(error);
+      showMsg(`Could not initialize host page.\n${error.message || error}`, "error");
     });
   </script>
 </body>
